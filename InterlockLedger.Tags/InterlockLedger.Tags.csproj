@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+      <LangVersion>preview</LangVersion>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <Authors>Rafael Teixeira</Authors>
+      <Company>InterlockLedger Network</Company>
+      <Copyright>Copyright (c) 2017-2019 InterlockLedger Network</Copyright>
+      <Description>This library implements the basic TLV encoding/decoding for core types.</Description>
+      <PackageLicenseFile>LICENSE</PackageLicenseFile>
+      <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
+      <PackageReleaseNotes>Initial migration from InterlockLedger.Common </PackageReleaseNotes>
+      <Product>InterlockLedger</Product>
+      <RepositoryType>git</RepositoryType>
+      <RepositoryUrl>https://github.com/interlockledger/il2tags.git</RepositoryUrl>
+      <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+      <None Include="..\LICENSE">
+          <Pack>True</Pack>
+          <PackagePath></PackagePath>
+      </None>
+  </ItemGroup>
+  <Target Name="PublishLocally" AfterTargets="Pack" Condition="Exists('$(INTERLOCK_LOCAL_NUGETS_FOLDER)')">
+      <ItemGroup>
+          <NugetPackages Include="$(PackageOutputAbsolutePath)\*.nupkg" />
+      </ItemGroup>
+      <Message Importance="high" Text="Publish to Local Nugets Folder '$(INTERLOCK_LOCAL_NUGETS_FOLDER)'"/>
+      <Copy DestinationFolder="$(INTERLOCK_LOCAL_NUGETS_FOLDER)" SourceFiles="@(NugetPackages)" ContinueOnError="true" SkipUnchangedFiles="false" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="InterlockLedger.ILInt" Version="1.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+
+</Project>
