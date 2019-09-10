@@ -84,10 +84,10 @@ namespace InterlockLedger.Tags
 
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
-        public void RegisterDeserializersFrom(params ITagDeserializersProvider[] providers) {
+        public static void RegisterDeserializersFrom(params ITagDeserializersProvider[] providers) {
             foreach (var provider in providers)
-                foreach (var item in provider.Deserializers)
-                    RegisterDeserializer(item.id, item.deserializer, item.jsonDeserializer);
+                foreach (var (id, deserializer, jsonDeserializer) in provider.Deserializers)
+                    RegisterDeserializer(id, deserializer, jsonDeserializer);
         }
 
         public Stream SerializeInto(Stream s) {
