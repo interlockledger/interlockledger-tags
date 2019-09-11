@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -38,7 +38,6 @@ using Newtonsoft.Json;
 
 namespace InterlockLedger.Tags
 {
-
     public abstract class ILTag : ITag
     {
         [JsonIgnore]
@@ -78,17 +77,28 @@ namespace InterlockLedger.Tags
             return _deserializers[tagId].fromJson(payload);
         }
 
+        public static bool HasDeserializer(ulong id) => _deserializers.ContainsKey(id);
+
         public static ILTag NoJson(object json) => throw new InvalidOperationException($"Can't deserialize from json");
 
-        public T As<T>() where T : ILTag => this as T ?? throw new InvalidDataException($"Not an {typeof(T).Name}");
-
-        public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
+        public static void RegisterDeserializer(ulong id, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer = null) {
+            if (HasDeserializer(id))
+                throw new ArgumentException($"Can't redefine deserializer for id: {id}", nameof(id));
+            _deserializers[id] = (
+                deserializer ?? throw new ArgumentNullException(nameof(deserializer)),
+                jsonDeserializer ?? NoJson
+            );
+        }
 
         public static void RegisterDeserializersFrom(params ITagDeserializersProvider[] providers) {
             foreach (var provider in providers)
                 foreach (var (id, deserializer, jsonDeserializer) in provider.Deserializers)
                     RegisterDeserializer(id, deserializer, jsonDeserializer);
         }
+
+        public T As<T>() where T : ILTag => this as T ?? throw new InvalidDataException($"Not an {typeof(T).Name}");
+
+        public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
         public Stream SerializeInto(Stream s) {
             try {
@@ -134,17 +144,6 @@ namespace InterlockLedger.Tags
                 [ILTagId.Dictionary] = (s => new ILTagDictionary<ILTag>(s), o => new ILTagDictionary<ILTag>(o)),
                 [ILTagId.StringDictionary] = (s => new ILTagStringDictionary(s), o => new ILTagStringDictionary(o)),
             };
-
-        private static bool HasDeserializer(ulong id) => _deserializers.ContainsKey(id);
-
-        private static void RegisterDeserializer(ulong id, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer = null) {
-            if (HasDeserializer(id))
-                throw new ArgumentException($"Can't redefine deserializer for id: {id}", nameof(id));
-            _deserializers[id] = (
-                deserializer ?? throw new ArgumentNullException(nameof(deserializer)),
-                jsonDeserializer ?? NoJson
-            );
-        }
 
         private byte[] SerializeToByteArray() {
             using var stream = new MemoryStream();
