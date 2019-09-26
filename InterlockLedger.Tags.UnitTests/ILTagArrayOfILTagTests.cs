@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags
@@ -14,6 +15,16 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class ILTagArrayOfILTagTests
     {
+        [TestCase(null, new byte[] { 21, 0 }, TestName = "DecodeArray a Null Array")]
+        [TestCase(new byte[0], new byte[] { 21, 1, 0 }, TestName = "DecodeArray an Empty Array")]
+        [TestCase(new byte[] { 1, 2, 3 }, new byte[] { 21, 10, 3, 0, 1, 1, 0, 1, 2, 0, 1, 3 }, TestName = "DecodeArray One Array with Four Explicitly Tagged Bytes")]
+        public void DecodeArray(byte[] bytes, byte[] encodedBytes) {
+            using (var ms = new MemoryStream(encodedBytes)) {
+                var value = ms.DecodeArray<byte, TestTagOfOneByte>(s => new TestTagOfOneByte(s.DecodeTagId(), s));
+                Assert.AreEqual(bytes, value);
+            }
+        }
+
         [TestCase(null, new byte[0], new byte[] { 21, 0 }, TestName = "Deserialize a Null Array")]
         [TestCase(new byte[0], new byte[0], new byte[] { 21, 1, 0 }, TestName = "Deserialize an Empty Array")]
         [TestCase(new byte[0], new byte[] { 0 }, new byte[] { 21, 3, 1, 16, 0 }, TestName = "Deserialize One Array with Zero Bytes")]
@@ -108,6 +119,16 @@ namespace InterlockLedger.Tags
                 var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes;
                 Assert.AreEqual(encodedBytes, newEncodedBytes);
             }
+        }
+
+        private class TestTagOfOneByte : ILTagExplicit<byte>
+        {
+            public TestTagOfOneByte(ulong tagId, Stream s) : base(tagId, s) {
+            }
+
+            protected override byte FromBytes(byte[] bytes) => bytes?.FirstOrDefault() ?? (byte)0;
+
+            protected override byte[] ToBytes() => new byte[] { Value };
         }
     }
 }

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
         public static T[] DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where TT : ILTagExplicit<T> {
             var tagId = s.DecodeTagId();
             if (tagId == ILTagId.ILTagArray)
-                return new ILTagArrayOfILTag<TT>(s, decoder).Value.Select(element => element.Value).ToArray();
+                return new ILTagArrayOfILTag<TT>(s, decoder).Value?.Select(element => element.Value).ToArray();
             throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<TT>).Name}");
         }
 

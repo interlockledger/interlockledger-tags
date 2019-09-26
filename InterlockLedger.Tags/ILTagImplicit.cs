@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
 using System.IO;
 using InterlockLedger.ILInt;
 using Newtonsoft.Json;
@@ -46,7 +47,10 @@ namespace InterlockLedger.Tags
         protected ILTagImplicit(ulong tagId, T value) : base(tagId)
             => Value = value;
 
-        protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId) : base(alreadyDeserializedTagId) => Value = DeserializeInner(s);
+        protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup = null) : base(alreadyDeserializedTagId) {
+            setup?.Invoke(this);
+            Value = DeserializeInner(s);
+        }
 
         protected ILTagImplicit(ulong tagId, Stream s) : base(tagId) {
             ValidateTagId(s.ILIntDecode());

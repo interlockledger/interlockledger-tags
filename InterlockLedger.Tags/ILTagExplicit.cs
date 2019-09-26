@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
-        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s) : base(s, alreadyDeserializedTagId) {
+        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null) : base(s, alreadyDeserializedTagId, setup) {
         }
 
         protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {

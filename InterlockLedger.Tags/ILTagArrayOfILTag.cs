@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -53,7 +53,8 @@ namespace InterlockLedger.Tags
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
         }
 
-        internal ILTagArrayOfILTag(Stream s, Func<Stream, T> decoder) : base(ILTagId.ILTagArray, s) => _decoder = decoder;
+        internal ILTagArrayOfILTag(Stream s, Func<Stream, T> decoder) : base(ILTagId.ILTagArray, s, (it) => SetDecoder(it, decoder)) {
+        }
 
         protected ILTagArrayOfILTag(ulong tagId, T[] Value) : base(tagId, Value) {
         }
@@ -80,7 +81,7 @@ namespace InterlockLedger.Tags
                 }
             });
 
-        private readonly Func<Stream, T> _decoder = s => (T)s.DecodeTag();
+        private Func<Stream, T> _decoder = s => (T)s.DecodeTag();
 
         private static T[] Elicit(object o) {
             if (o is Dictionary<string, object> dictionary) {
@@ -95,6 +96,8 @@ namespace InterlockLedger.Tags
             }
             return Array.Empty<T>();
         }
+
+        private static void SetDecoder(ILTag it, Func<Stream, T> decoder) => ((ILTagArrayOfILTag<T>)it)._decoder = decoder;
 
         private class JsonRepresentation
         {
