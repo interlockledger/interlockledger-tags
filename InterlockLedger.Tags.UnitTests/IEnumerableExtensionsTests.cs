@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(expected, doneSomething, message);
             }
             IfAnyDoTest(null, false, "Shouldn't have done anything for null enumerable");
-            IfAnyDoTest(new object[0], false, "Shouldn't have done anything for empty enumerable");
+            IfAnyDoTest(Array.Empty<object>(), false, "Shouldn't have done anything for empty enumerable");
             IfAnyDoTest(new object[] { "something" }, true, "Should have done something for non empty enumerable");
         }
 
@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(expected, values.SafeAny(), message);
             }
             SafeAnyTest(null, false, "Shouldn't have returned true for null enumerable");
-            SafeAnyTest(new object[0], false, "Shouldn't have returned true for empty enumerable");
+            SafeAnyTest(Array.Empty<object>(), false, "Shouldn't have returned true for empty enumerable");
             SafeAnyTest(new object[] { "something" }, true, "Should have returned true for non empty enumerable");
         }
 
@@ -54,7 +54,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(expected, values.SafeCount(), message);
             }
             SafeCountTest(null, -1, "Should have returned -1 for null enumerable");
-            SafeCountTest(new object[0], 0, "Should have returned 0 for empty enumerable");
+            SafeCountTest(Array.Empty<object>(), 0, "Should have returned 0 for empty enumerable");
             SafeCountTest(new object[] { "something" }, 1, "Should have returned 1 for single member enumerable");
         }
 
@@ -64,7 +64,7 @@ namespace InterlockLedger.Tags
                 Assert.IsTrue(expected.EqualTo(values.SelectSkippingNulls(selector)), message);
             }
             SelectSkippingNullsTest(null, (o) => o, "Should have returned empty enumerable for null enumerable");
-            SelectSkippingNullsTest(new string[0], (o) => o, "Should have returned empty enumerable for empty enumerable");
+            SelectSkippingNullsTest(Array.Empty<string>(), (o) => o, "Should have returned empty enumerable for empty enumerable");
             SelectSkippingNullsTest(new string[] { "something" }, (o) => o, "Should have returned single member enumerable for single member enumerable", "something");
             SelectSkippingNullsTest(new string[] { null, "something" }, (o) => o, "Should have returned single member enumerable for dual member enumerable with one null member", "something");
             SelectSkippingNullsTest(new string[] { "something", "nothing" }, (o) => o == "nothing" ? null : o, "Should have returned single member enumerable for dual member enumerable with one filtered out value", "something");
@@ -76,7 +76,7 @@ namespace InterlockLedger.Tags
                 Assert.IsTrue(expected.EqualTo(values.SkipNulls()), message);
             }
             SkipNullsTest(null, "Should have returned empty enumerable for null enumerable");
-            SkipNullsTest(new string[0], "Should have returned empty enumerable for empty enumerable");
+            SkipNullsTest(Array.Empty<string>(), "Should have returned empty enumerable for empty enumerable");
             SkipNullsTest(new string[] { "something" }, "Should have returned single member enumerable for single member enumerable", "something");
             SkipNullsTest(new string[] { null, "something" }, "Should have returned single member enumerable for dual member enumerable with one null member", "something");
         }
@@ -106,12 +106,12 @@ namespace InterlockLedger.Tags
             WithDefaultTestWithNonEmptyInput(new string[] { "something" }, "Should have returned the same non empty enumerable");
             WithDefaultTestWithEmptyInputAndSomeDefault(null, "Should have returned empty enumerable for null enumerable");
             WithDefaultTestWithEmptyInputAndSomeDefault(null, "Should have returned dual member default enumerable enumerable for null enumerable", "anything", "something else");
-            WithDefaultTestWithEmptyInputAndSomeDefault(new string[0], "Should have returned empty enumerable for empty enumerable");
-            WithDefaultTestWithEmptyInputAndSomeDefault(new string[0], "Should have returned dual member default enumerable for empty enumerable", "anything", "something else");
+            WithDefaultTestWithEmptyInputAndSomeDefault(Array.Empty<string>(), "Should have returned empty enumerable for empty enumerable");
+            WithDefaultTestWithEmptyInputAndSomeDefault(Array.Empty<string>(), "Should have returned dual member default enumerable for empty enumerable", "anything", "something else");
             WithDefaultTestWithEmptyInputAndNoDefault(null, "Should have returned empty enumerable for null enumerable");
-            WithDefaultTestWithEmptyInputAndNoDefault(new string[0], "Should have returned empty enumerable for empty enumerable");
+            WithDefaultTestWithEmptyInputAndNoDefault(Array.Empty<string>(), "Should have returned empty enumerable for empty enumerable");
             WithDefaultTestWithEmptyInputAndNullDefault(null, "Should have returned empty enumerable for null enumerable");
-            WithDefaultTestWithEmptyInputAndNullDefault(new string[0], "Should have returned empty enumerable for empty enumerable");
+            WithDefaultTestWithEmptyInputAndNullDefault(Array.Empty<string>(), "Should have returned empty enumerable for empty enumerable");
         }
 
         private static readonly IEnumerable<string> _emptyList = Enumerable.Empty<string>();

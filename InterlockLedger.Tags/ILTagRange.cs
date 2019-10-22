@@ -35,9 +35,9 @@ using InterlockLedger.ILInt;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagRange : ILTagExplicit<Range>
+    public class ILTagRange : ILTagExplicit<LimitedRange>
     {
-        public ILTagRange(Range range) : base(ILTagId.Range, range) {
+        public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) {
         }
 
         public override object AsJson => Value.ToString();
@@ -45,8 +45,8 @@ namespace InterlockLedger.Tags
         internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
         }
 
-        protected override Range FromBytes(byte[] bytes)
-            => FromBytesHelper(bytes, s => new Range(s.ILIntDecode(), s.BigEndianReadUShort()));
+        protected override LimitedRange FromBytes(byte[] bytes)
+            => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
 
         protected override byte[] ToBytes()
             => ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));

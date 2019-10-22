@@ -57,7 +57,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void GuaranteeBijectiveBehaviorEmptyArray()
-            => GuaranteeBijectiveBehavior(new ILTagBool[0]);
+            => GuaranteeBijectiveBehavior(Array.Empty<ILTagBool>());
 
         [Test]
         public void GuaranteeBijectiveBehaviorFourElementsArray()
