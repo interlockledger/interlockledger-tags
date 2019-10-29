@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -121,8 +121,18 @@ namespace InterlockLedger.Tags
             file.Flush();
         }
 
-        public static byte[] FromSafeBase64(this string base64)
-            => (string.IsNullOrWhiteSpace(base64)) ? Array.Empty<byte>() : Convert.FromBase64String(PadBase64(base64).Replace('-', '+').Replace('_', '/'));
+        public static byte[] FromSafeBase64(this string base64) {
+            if (!string.IsNullOrWhiteSpace(base64)) {
+                string normalized = PadBase64(base64.Trim()).Replace('-', '+').Replace('_', '/');
+                try {
+                    return Convert.FromBase64String(normalized);
+                } catch (Exception e) {
+                    Console.WriteLine($"Error converting {normalized}");
+                    Console.WriteLine(e);
+                }
+            }
+            return Array.Empty<byte>();
+        }
 
         public static bool HasSameBytesAs(this byte[] bytes1, params byte[] bytes2) {
             if (bytes1 == null || bytes2 == null)
