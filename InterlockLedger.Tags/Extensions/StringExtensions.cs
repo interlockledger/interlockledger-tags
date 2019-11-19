@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -45,6 +45,8 @@ namespace InterlockLedger.Tags
 
         public static object DeserializeJson(this string json) => JsonTokenToObject(JToken.Parse(json));
 
+        public static TagHash HashOf(this string s) => TagHash.HashSha256Of(s.UTF8Bytes());
+
         public static bool IsEmptyOrMatches(this string s, params string[] matches) => string.IsNullOrWhiteSpace(s) || matches.Any(m => s.Trim().Equals(m, StringComparison.InvariantCultureIgnoreCase));
 
         public static string JoinedBy<T>(this IEnumerable<T> list, string joiner) => list == null ? string.Empty : string.Join(joiner, list);
@@ -78,6 +80,8 @@ namespace InterlockLedger.Tags
         public static string Reversed(this string s) => string.IsNullOrWhiteSpace(s) ? string.Empty : new string(s.ToCharArray().Reverse().ToArray());
 
         public static string Safe(this string s) => s.WithDefault(string.Empty);
+
+        public static bool SafeEqualsTo(this string s, string other) => s is null ? other is null : s.Equals(other, StringComparison.InvariantCulture);
 
         public static string SimplifyAsFileName(this string name) {
             if (string.IsNullOrWhiteSpace(name))

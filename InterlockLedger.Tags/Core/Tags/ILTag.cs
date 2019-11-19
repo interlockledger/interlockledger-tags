@@ -143,6 +143,28 @@ namespace InterlockLedger.Tags
                 [ILTagId.Range] = (s => new ILTagRange(s), o => new ILTagRange(LimitedRange.Resolve((string)o))),
                 [ILTagId.Dictionary] = (s => new ILTagDictionary<ILTag>(s), o => new ILTagDictionary<ILTag>(o)),
                 [ILTagId.StringDictionary] = (s => new ILTagStringDictionary(s), o => new ILTagStringDictionary(o)),
+                [ILTagId.PubKey] = (s => TagPubKey.Resolve(s), NoJson),
+                [ILTagId.Signature] = (s => new TagSignature(s), NoJson),
+                [ILTagId.Hash] = (s => new TagHash(s), o => TagHash.From((string)o)),
+                [ILTagId.PublicRSAParameters] = (s => new TagPublicRSAParameters(s), NoJson),
+                [ILTagId.RSAParameters] = (s => new TagRSAParameters(s), NoJson),
+                [ILTagId.Encrypted] = (s => new TagEncrypted(s), NoJson),
+                [ILTagId.InterlockId] = (s => InterlockId.DeserializeAndResolve(s), o => InterlockId.Resolve((string)o)),
+                [ILTagId.InterlockKey] = (s => new InterlockKey(s), NoJson),
+                [ILTagId.InterlockSigningKey] = (s => new InterlockSigningKeyData(s), NoJson),
+                [ILTagId.InterlockUpdatableSigningKey] = (s => new InterlockUpdatableSigningKeyData(s), NoJson),
+                [ILTagId.Hmac] = (s => new TagHmac(s), NoJson),
+                [ILTagId.Certificate] = (s => new TagCertificate(s), NoJson),
+                [ILTagId.SignedValue] = (s => new SignedValue<ILTag>.Payload(ILTagId.SignedValue, s), NoJson),
+                [ILTagId.IdentifiedSignature] = (s => new TagIdentifiedSignature(s), NoJson),
+                [ILTagId.Reader] = (s => new TagReader(s), NoJson),
+                [ILTagId.ReadingKey] = (s => new TagReadingKey(s), NoJson),
+                [ILTagId.EncryptedTag] = (s => new EncryptedValue<ILTag>.Payload(ILTagId.EncryptedTag, s), NoJson),
+                [ILTagId.EncryptedBlob] = (s => new EncryptedBlob.Payload(ILTagId.EncryptedBlob, s), NoJson),
+                [ILTagId.DataModel] = (s => new ILTagDataModel(s), NoJson),
+                [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),
+                [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),
+
             };
 
         private byte[] SerializeToByteArray() {

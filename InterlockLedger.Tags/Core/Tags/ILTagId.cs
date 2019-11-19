@@ -65,5 +65,30 @@ namespace InterlockLedger.Tags
         public const ulong StringDictionary = 31;   //                  Dictionary<string,string>
 
         // Reserved for Core App up to 247 (ILInt of just one byte)
+
+        // Core record parts
+        public const ulong PubKey = 37;     //                          Public Key to verify the signature
+        public const ulong Signature = 38;  //                          The signature data
+        public const ulong Hash = 39;       //                          The hash data
+        public const ulong PublicRSAParameters = 40;
+        public const ulong RSAParameters = 41;
+        public const ulong Encrypted = 42;
+        public const ulong InterlockId = 43; //                         The interlock id
+        public const ulong InterlockKey = 44; //                        Per Usage Verifiying Key
+        public const ulong InterlockSigningKey = 45; //                 Per Usage Signing Key
+        public const ulong InterlockUpdatableSigningKey = 46; //        Per Usage Evolving Signing Key
+        public const ulong Hmac = 47;        //                         The hmac data
+        public const ulong Certificate = 49;//                          X509 Certificate
+        public const ulong SignedValue = 50; //                         SignedData+Signatures
+        public const ulong IdentifiedSignature = 51;   //               The signature with signer identification
+        public const ulong Reader = 52;  //                             Encrypted data reader
+        public const ulong ReadingKey = 53;  //                         Encrypted data reader encrypted key
+        public const ulong EncryptedTag = 54;
+        public const ulong EncryptedBlob = 55;
+
+        // Metadata
+        public const ulong DataField = 225;         //  DataField for Published Apps Records
+        public const ulong DataIndex = 226;         //  DataIndex for Published Apps Records
+        public const ulong DataModel = 224;         //  DataModel for Published Apps Records
     }
 }

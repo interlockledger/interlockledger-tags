@@ -1,0 +1,262 @@
+/******************************************************************************************************************************
+ *
+ *      Copyright (c) 2017-2019 InterlockLedger Network
+ *
+ ******************************************************************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using InterlockLedger.Tags;
+using Newtonsoft.Json;
+
+namespace InterlockLedger.Tags
+{
+    public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
+    {
+        public const ushort CurrentVersion = 2;
+
+        [JsonProperty(Order = 3)]
+        public IEnumerable<DataField> DataFields { get; set; }
+
+        [JsonProperty(Order = 5)]
+        public string Description { get; set; }
+
+        [JsonProperty(Order = 4)]
+        public IEnumerable<DataIndex> Indexes { get; set; }
+
+        [JsonProperty(Order = 2)]
+        public string PayloadName { get; set; }
+
+        [JsonProperty(Order = 1)]
+        public ulong PayloadTagId { get; set; }
+
+        [JsonProperty(Order = 0)]
+        public ushort Version { get; set; } = CurrentVersion;
+
+        public override bool Equals(object obj) => Equals(obj as DataModel);
+
+        public bool Equals(DataModel other) =>
+            other != null &&
+            PayloadName.SafeEqualsTo(other.PayloadName) &&
+            PayloadTagId == other.PayloadTagId &&
+            DataFields.EqualTo(other.DataFields) &&
+            Indexes.EqualTo(other.Indexes) &&
+            Version.Equals(other.Version) &&
+            Description.SafeEqualsTo(other.Description);
+
+        public ILTag FromJson(object o) => FromNavigable(o.AsNavigable() as Dictionary<string, object>);
+
+        public ILTag FromNavigable(Dictionary<string, object> json) => FromPartialNavigable(json, PayloadTagId, DataFields, this);
+
+        public override int GetHashCode() {
+            var hashCode = -874208485;
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(DataFields);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<DataIndex>>.Default.GetHashCode(Indexes);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PayloadName);
+            hashCode = hashCode * -1521134295 + PayloadTagId.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
+            hashCode = hashCode * -1521134295 + Version.GetHashCode();
+            return hashCode;
+        }
+
+        public bool HasField(string fieldName) {
+            if (fieldName is null)
+                throw new ArgumentNullException(nameof(fieldName));
+            return FindFieldInPath(fieldName.Split('.'), 0, DataFields);
+        }
+
+        public bool IsCompatible(DataModel other) => other != null && other.PayloadName == PayloadName && other.PayloadTagId == PayloadTagId && ExpandsOver(other);
+
+        public Dictionary<string, object> ToJson(byte[] bytes) {
+            ulong offset = 0;
+            return ToJson(bytes, PayloadTagId, DataFields, ref offset);
+        }
+
+        public override string ToString() => $"{PayloadName ?? "Unnamed"} #{PayloadTagId}";
+
+        private static bool CompareFields(IEnumerable<DataField> oldFields, IEnumerable<DataField> newFields) {
+            if (newFields == null)
+                return false;
+            if (!oldFields.SafeAny())
+                return true;
+            var fields = newFields.ToArray();
+            if (fields.Length < oldFields.Count())
+                return false; // too few
+            var i = 0;
+            foreach (var oldField in oldFields) {
+                var newField = fields[i++];
+                if (oldField.Name != newField.Name)
+                    return false; // Names diverge
+                if (oldField.Version > newField.Version)
+                    return false; // Misversioning
+                if (oldField.TagId != newField.TagId && !oldField.IsOpaque)
+                    return false; // Changing type is only allowed if previously it was an opaque type
+                if (oldField.ElementTagId != newField.ElementTagId)
+                    return false; // Changing type of array elements is bad
+                if (newField.IsOpaque && !oldField.IsOpaque)
+                    return false; // Can't make field opaque afterwards
+                if (oldField.HasSubFields && !CompareFields(oldField.SubDataFields, newField.SubDataFields))
+                    return false; // Incompatible subfields
+                if (!ExpandEnumeration(oldField.Enumeration, newField.Enumeration))
+                    return false; // Incompatible enumerations
+            }
+            return true;
+        }
+
+        private static bool CompareIndexes(IEnumerable<DataIndex> oldIndexes, IEnumerable<DataIndex> newIndexes) {
+            if (newIndexes == null)
+                return false;
+            if (!oldIndexes.SafeAny())
+                return true;
+            var indexes = newIndexes.ToArray();
+            if (indexes.Length < oldIndexes.Count())
+                return false; // too few
+            var i = 0;
+            foreach (var oldIndex in oldIndexes) {
+                var newIndex = indexes[i++];
+                if (oldIndex.Name != newIndex.Name)
+                    return false; // Names diverge
+                if (oldIndex.IsUnique != newIndex.IsUnique)
+                    return false; // Uniquenesses diverge
+                if (oldIndex.ElementsAsString != newIndex.ElementsAsString)
+                    return false; // Can't change composition
+            }
+            return true;
+        }
+
+        private static ILTag DecodePartial(ulong tagId, Span<byte> bytes, ref ulong offset) {
+            using var ms = new MemoryStream(bytes.ToArray(), (int)offset, bytes.Length - (int)offset);
+            var tag = ILTag.DeserializeFrom(ms);
+            if (tag.TagId != tagId && !tag.IsNull)
+                throw new InvalidOperationException($"Expecting tagId {tagId} but came {tag.TagId}");
+            offset += (ulong)ms.Position;
+            return tag;
+        }
+
+        private static ulong DecodePartialILInt(Span<byte> bytes, ref ulong offset) {
+            using var ms = new MemoryStream(bytes.ToArray(), (int)offset, bytes.Length - (int)offset);
+            var ilint = ms.DecodeTagId();
+            offset += (ulong)ms.Position;
+            return ilint;
+        }
+
+        private static ILTag DeserializePartialFromJson(DataField field, object fieldValue) => field.HasSubFields
+            ? FromPartialNavigable(fieldValue as Dictionary<string, object>, field.TagId, field.SubDataFields, null)
+            : throw new InvalidDataException($"Unknown tagId {field.TagId}");
+
+        private static bool ExpandEnumeration(Dictionary<ulong, DataField.Pair> oldEnumeration, Dictionary<ulong, DataField.Pair> newEnumeration)
+            => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration != null && newEnumeration.Take(oldEnumeration.Count).SequenceEqual(oldEnumeration));
+
+        private static bool FindFieldInPath(string[] parts, int part, IEnumerable<DataField> fields) {
+            var name = parts[part];
+            var field = fields?.FirstOrDefault(df => df.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !df.IsOpaque);
+            if (field is null)
+                return false;
+            if (part + 1 >= parts.Length)
+                return true;
+            if (!field.HasSubFields)
+                return false;
+            return FindFieldInPath(parts, part + 1, field.SubDataFields);
+        }
+
+        private static ILTag FromPartialNavigable(Dictionary<string, object> json, ulong tagId, IEnumerable<DataField> dataFields, DataModel dataModel) {
+            if (json is null || !json.Any())
+                return ILTagNull.Instance;
+            ushort version = 0;
+            var isVersioned = IsVersioned(dataFields);
+            var firstField = true;
+            var tags = new List<ILTag>();
+            foreach (var field in dataFields) {
+                if (isVersioned && field.Version > version)
+                    break;
+                var fieldValue = json[field.Name];
+                if (isVersioned && firstField)
+                    version = Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
+                firstField = false;
+                var item = ILTag.HasDeserializer(field.TagId)
+                    ? ILTag.DeserializeFromJson(field.TagId, fieldValue)
+                    : DeserializePartialFromJson(field, fieldValue);
+                tags.Add(item);
+            }
+            var tagsAsBytes = tags.Select(t => t.EncodedBytes).SelectMany(b => b).ToArray();
+            if (json.ContainsKey("_RemainingBytes_")) {
+                var bytesValues = json["_RemainingBytes_"];
+                var remainingBytes = bytesValues is string ? Convert.FromBase64String(bytesValues as string) : (byte[])bytesValues;
+                tagsAsBytes = tagsAsBytes.SafeConcat(remainingBytes).ToArray();
+            }
+            return dataModel is null ? new ILTagUnknown(tagId, tagsAsBytes) : new ILTagUnknown(dataModel, tagsAsBytes);
+        }
+
+        private static bool IsVersioned(IEnumerable<DataField> dataFields) => dataFields?.FirstOrDefault()?.IsVersion ?? false;
+
+        private static Dictionary<string, object> ToJson(Span<byte> bytes, ulong expectedTagId, IEnumerable<DataField> dataFields, ref ulong offset) {
+            var json = new Dictionary<string, object>();
+            ulong tagId = DecodePartialILInt(bytes, ref offset);
+            if (tagId != expectedTagId)
+                throw new InvalidOperationException($"Expecting tagId {expectedTagId} but came {tagId}");
+            ulong length = DecodePartialILInt(bytes, ref offset);
+            if (length > (((ulong)bytes.Length) - offset))
+                throw new InvalidOperationException($"Invalid number of bytes, expected {length + offset} but came {bytes.Length} ");
+            ushort version = 0;
+            var isVersioned = IsVersioned(dataFields);
+            var firstField = true;
+            foreach (var field in dataFields) {
+                if (isVersioned && field.Version > version)
+                    break;
+                if (field.HasSubFields) {
+                    json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
+                } else {
+                    ILTag value = DecodePartial(field.TagId, bytes, ref offset);
+                    json[field.Name] = value.AsJson;
+                    if (field.IsEnumeration && !value.IsNull)
+                        json[$"__{field.Name}__"] = field.Enumerated(value);
+                    if (isVersioned && firstField && field.IsVersion)
+                        version = (ushort)value.AsJson;
+                }
+                firstField = false;
+            }
+            if (offset < length)
+                json["_RemainingBytes_"] = bytes.Slice((int)offset, (int)((ulong)bytes.Length - offset)).ToArray();
+            return json;
+        }
+
+        private bool ExpandsOver(DataModel dm) => CompareFields(dm.DataFields, DataFields) && CompareIndexes(dm.Indexes, Indexes);
+    }
+
+    public class ILTagDataModel : ILTagExplicit<DataModel>
+    {
+        public ILTagDataModel(DataModel model) : base(ILTagId.DataModel, model) {
+        }
+
+        public ILTagDataModel(Stream s) : base(ILTagId.DataModel, s) {
+        }
+
+        protected override DataModel FromBytes(byte[] bytes)
+            => FromBytesHelper(bytes, s => {
+                var payloadTagId = s.DecodeILInt();
+                s.DecodeILInt(); // drop deprecated field
+                return new DataModel {
+                    PayloadTagId = payloadTagId,
+                    DataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
+                    Indexes = s.DecodeTagArray<ILTagDataIndex>()?.Select(t => t.Value),
+                    PayloadName = s.DecodeString(),
+                    Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
+                    Description = s.HasBytes() ? s.DecodeString() : null
+                };
+            });
+
+        protected override byte[] ToBytes()
+            => ToBytesHelper(s => {
+                s.EncodeILInt(Value.PayloadTagId);
+                s.EncodeILInt(0); // deprecated field
+                s.EncodeTagArray(Value.DataFields?.Select(df => new ILTagDataField(df)));
+                s.EncodeTagArray(Value.Indexes?.Select(index => new ILTagDataIndex(index)));
+                s.EncodeString(Value.PayloadName);
+                s.EncodeUShort(Value.Version);
+                s.EncodeString(Value.Description);
+            });
+    }
+}

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -49,6 +49,15 @@ namespace InterlockLedger.Tags
             return ms.ReadAllBytes();
         }
 
+        public static BaseKeyId DecodeBaseKeyId(this Stream s)
+            => s.Decode<BaseKeyId>();
+
+        public static OwnerId DecodeOwnerId(this Stream s)
+            => s.Decode<OwnerId>();
+
+        public static Stream EncodeInterlockId(this Stream s, InterlockId value)
+            => s.EncodeTag(value);
+
         public static bool HasBytes(this Stream s) => s.CanSeek && (s.Position < s.Length);
 
         public static byte[] ReadAllBytes(this Stream s) {
@@ -79,6 +88,17 @@ namespace InterlockLedger.Tags
                 offset += count;
             }
             return bytes;
+        }
+
+        public static byte[] ReadExactly(this Stream s, int length) {
+            if (s is null)
+                throw new ArgumentNullException(nameof(s));
+            var offset = 0;
+            var buffer = new byte[length];
+            while (offset < length) {
+                offset += s.Read(buffer, offset, length - offset);
+            }
+            return buffer;
         }
 
         public static byte ReadSingleByte(this Stream s) {
