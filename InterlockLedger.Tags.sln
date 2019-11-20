@@ -9,13 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		copyright.template = copyright.template
+		.github\workflows\dotnetcore.yml = .github\workflows\dotnetcore.yml
+		InterlockLedger.ILInt.1.1.1.nupkg = InterlockLedger.ILInt.1.1.1.nupkg
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InterlockLedger.Tags", "InterlockLedger.Tags\InterlockLedger.Tags.csproj", "{71F52019-1EE6-4A5D-A8BC-D6774ED3B528}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterlockLedger.Tags.UnitTests", "InterlockLedger.Tags.UnitTests\InterlockLedger.Tags.UnitTests.csproj", "{B00000EA-3141-4B18-A736-A9358F80EB49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InterlockLedger.Tags.UnitTests", "InterlockLedger.Tags.UnitTests\InterlockLedger.Tags.UnitTests.csproj", "{B00000EA-3141-4B18-A736-A9358F80EB49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
