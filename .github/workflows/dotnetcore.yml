@@ -14,8 +14,8 @@ jobs:
       with:
         dotnet-version: 3.0.101
     - name: Restore local copy of ILInt nuget
-      run: dotnet restore -s .
+      run: dotnet restore -s . -s https://api.nuget.org/v3/index.json --ignore-failed-sources
     - name: Build with dotnet
-      run: dotnet build --configuration Release --verbosity detailed --no-restore
+      run: dotnet build --configuration Release --no-restore
     - name: Test with dotnet
-      run: dotnet test --configuration Release
+      run: dotnet test --configuration Release --no-restore
