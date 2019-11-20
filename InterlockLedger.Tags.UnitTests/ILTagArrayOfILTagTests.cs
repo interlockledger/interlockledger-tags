@@ -19,10 +19,9 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[0], new byte[] { 21, 1, 0 }, TestName = "DecodeArray an Empty Array")]
         [TestCase(new byte[] { 1, 2, 3 }, new byte[] { 21, 10, 3, 0, 1, 1, 0, 1, 2, 0, 1, 3 }, TestName = "DecodeArray One Array with Four Explicitly Tagged Bytes")]
         public void DecodeArray(byte[] bytes, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeArray<byte, TestTagOfOneByte>(s => new TestTagOfOneByte(s.DecodeTagId(), s));
-                Assert.AreEqual(bytes, value);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeArray<byte, TestTagOfOneByte>(s => new TestTagOfOneByte(s.DecodeTagId(), s));
+            Assert.AreEqual(bytes, value);
         }
 
         [TestCase(null, new byte[0], new byte[] { 21, 0 }, TestName = "Deserialize a Null Array")]
@@ -32,11 +31,10 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Deserialize Two Arrays with Two Bytes")]
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 21, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Deserialize Two Arrays with one and Three Bytes")]
         public void DeserializeILTagILTagArray(byte[] bytes, byte[] splits, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeTagArray<ILTagByteArray>();
-                var array = BuildArrayOfArrays(bytes, splits);
-                CompareArrays<ILTagByteArray, byte[]>(array, value);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeTagArray<ILTagByteArray>();
+            var array = BuildArrayOfArrays(bytes, splits);
+            CompareArrays<ILTagByteArray, byte[]>(array, value);
         }
 
         [TestCase(null, new byte[0], new byte[] { 21, 0 }, TestName = "Deserialize a Null Array Generic")]
@@ -46,13 +44,12 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Deserialize Two Arrays with Two Bytes Generic")]
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 21, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Deserialize Two Arrays with one and Three Bytes Generic")]
         public void DeserializeILTagILTagArrayGeneric(byte[] bytes, byte[] splits, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var tagValue = ms.DecodeTag();
-                Assert.IsInstanceOf<ILTagArrayOfILTag<ILTag>>(tagValue);
-                var value = ((ILTagArrayOfILTag<ILTag>)tagValue).Value;
-                var array = BuildArrayOfArrays(bytes, splits);
-                CompareArrays<ILTagByteArray, byte[]>(array, value);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var tagValue = ms.DecodeTag();
+            Assert.IsInstanceOf<ILTagArrayOfILTag<ILTag>>(tagValue);
+            var value = ((ILTagArrayOfILTag<ILTag>)tagValue).Value;
+            var array = BuildArrayOfArrays(bytes, splits);
+            CompareArrays<ILTagByteArray, byte[]>(array, value);
         }
 
         [Test]
@@ -113,12 +110,11 @@ namespace InterlockLedger.Tags
         private static void GuaranteeBijectiveBehavior(ILTagBool[] array) {
             var ilarray = new ILTagArrayOfILTag<ILTagBool>(array);
             var encodedBytes = ilarray.EncodedBytes;
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeTagArray<ILTagBool>();
-                CompareArrays<ILTagBool, bool>(array, value);
-                var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes;
-                Assert.AreEqual(encodedBytes, newEncodedBytes);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeTagArray<ILTagBool>();
+            CompareArrays<ILTagBool, bool>(array, value);
+            var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes;
+            Assert.AreEqual(encodedBytes, newEncodedBytes);
         }
 
         private class TestTagOfOneByte : ILTagExplicit<byte>
@@ -126,7 +122,7 @@ namespace InterlockLedger.Tags
             public TestTagOfOneByte(ulong tagId, Stream s) : base(tagId, s) {
             }
 
-            protected override byte FromBytes(byte[] bytes) => bytes?.FirstOrDefault() ?? (byte)0;
+            protected override byte FromBytes(byte[] bytes) => bytes?.FirstOrDefault() ?? 0;
 
             protected override byte[] ToBytes() => new byte[] { Value };
         }

@@ -5,7 +5,6 @@
  ******************************************************************************************************************************/
 
 using System.IO;
-using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags
@@ -116,8 +115,8 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 20, 0 }, ExpectedResult = ILTagId.ILIntArray, TestName = "DeserializeFrom(ILIntArray) Null")]
         [TestCase(new byte[] { 20, 1, 0 }, ExpectedResult = ILTagId.ILIntArray, TestName = "DeserializeFrom(ILIntArray) Empty")]
         public ulong DeserializeFrom(byte[] bytes) {
-            using (var ms = new MemoryStream(bytes))
-                return ILTag.DeserializeFrom(ms).TagId;
+            using var ms = new MemoryStream(bytes);
+            return ILTag.DeserializeFrom(ms).TagId;
         }
 
         [Test]

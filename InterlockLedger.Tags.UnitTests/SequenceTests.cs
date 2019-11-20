@@ -17,15 +17,14 @@ namespace InterlockLedger.Tags
     {
         [TestCase("Test", 1024ul, new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Deserialize One Sequence with a string and one ilint")]
         public void DeserializeHeterogenousILTagSequence(string firstElement, ulong secondElement, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var tagValue = ms.DecodeTag();
-                Assert.IsInstanceOf<ILTagSequence>(tagValue);
-                var value = ((ILTagSequence)tagValue).Value;
+            using var ms = new MemoryStream(encodedBytes);
+            var tagValue = ms.DecodeTag();
+            Assert.IsInstanceOf<ILTagSequence>(tagValue);
+            var value = ((ILTagSequence)tagValue).Value;
 
-                Assert.AreEqual(2, value.Length);
-                Assert.AreEqual(firstElement, value[0].AsString());
-                Assert.AreEqual(secondElement, (value[1] as ILTagILInt).Value);
-            }
+            Assert.AreEqual(2, value.Length);
+            Assert.AreEqual(firstElement, value[0].AsString());
+            Assert.AreEqual(secondElement, (value[1] as ILTagILInt).Value);
         }
 
         [TestCase(null, new byte[0], new byte[] { 22, 0 }, TestName = "Deserialize a Null Sequence")]
@@ -35,23 +34,22 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Deserialize Two Sequences with Two Bytes Generic")]
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 22, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Deserialize Two Sequences with one and Three Bytes Generic")]
         public void DeserializeILTagSequence(byte[] bytes, byte[] splits, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var tagValue = ms.DecodeTag();
-                Assert.IsInstanceOf<ILTagSequence>(tagValue);
-                var value = ((ILTagSequence)tagValue).Value;
+            using var ms = new MemoryStream(encodedBytes);
+            var tagValue = ms.DecodeTag();
+            Assert.IsInstanceOf<ILTagSequence>(tagValue);
+            var value = ((ILTagSequence)tagValue).Value;
 
-                var array = BuildArrayOfArrays(bytes, splits);
-                if (array == null) {
-                    Assert.IsTrue(value == null);
-                } else {
-                    Assert.AreEqual(array.Length, value.Length);
-                    for (var i = 0; i < array.Length; i++) {
-                        var arrayValue = array[i].Value;
-                        var valueValue = (value[i] as ILTagByteArray)?.Value;
-                        if (arrayValue.Length == 0 && valueValue == null)
-                            Assert.Pass();
-                        Assert.AreEqual(arrayValue, valueValue);
-                    }
+            var array = BuildArrayOfArrays(bytes, splits);
+            if (array == null) {
+                Assert.IsTrue(value == null);
+            } else {
+                Assert.AreEqual(array.Length, value.Length);
+                for (var i = 0; i < array.Length; i++) {
+                    var arrayValue = array[i].Value;
+                    var valueValue = (value[i] as ILTagByteArray)?.Value;
+                    if (arrayValue.Length == 0 && valueValue == null)
+                        Assert.Pass();
+                    Assert.AreEqual(arrayValue, valueValue);
                 }
             }
         }

@@ -22,11 +22,10 @@ namespace InterlockLedger.Tags
         [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Deserialize One Dictionary with Two Bytes")]
         [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Deserialize One Dictionary with one and Three Bytes")]
         public void DeserializeILTagDictionaryOfILTagArray(string[] keys, byte[] bytes, byte[] splits, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeDictionary<ILTagByteArray>();
-                var dict = BuildDictionary(keys, bytes, splits);
-                CompareDicts<ILTagByteArray, byte[]>(dict, value);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeDictionary<ILTagByteArray>();
+            var dict = BuildDictionary(keys, bytes, splits);
+            CompareDicts<ILTagByteArray, byte[]>(dict, value);
         }
 
         [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize a Null Dictionary Generic")]
@@ -36,24 +35,22 @@ namespace InterlockLedger.Tags
         [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Deserialize One Dictionary with Two Bytes Generic")]
         [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Deserialize One Dictionary with one and Three Bytes Generic")]
         public void DeserializeILTagDictionaryOfILTagArrayGeneric(string[] keys, byte[] bytes, byte[] splits, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var tagValue = ms.DecodeTag();
-                Assert.IsInstanceOf<ILTagDictionary<ILTag>>(tagValue);
-                var value = ((ILTagDictionary<ILTag>)tagValue).Value;
-                var dict = BuildDictionary(keys, bytes, splits);
-                CompareSimilarDicts<ILTagByteArray, ILTag>(dict, value);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var tagValue = ms.DecodeTag();
+            Assert.IsInstanceOf<ILTagDictionary<ILTag>>(tagValue);
+            var value = ((ILTagDictionary<ILTag>)tagValue).Value;
+            var dict = BuildDictionary(keys, bytes, splits);
+            CompareSimilarDicts<ILTagByteArray, ILTag>(dict, value);
         }
 
         [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Deserialize One String Dictionary with two strings")]
         [TestCase(new string[] { "D", "E" }, new string[] { "Demo", "" }, new byte[] { 31, 15, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 17, 0 }, TestName = "Deserialize One String Dictionary with one string and one empty string")]
         [TestCase(new string[] { "F", "G" }, new string[] { "Demo", null }, new byte[] { 31, 14, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 0 }, TestName = "Deserialize One String Dictionary with one string and a null")]
         public void DeserializeILTagStringDictionary(string[] keys, string[] values, byte[] encodedBytes) {
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeStringDictionary();
-                var dict = BuildStringDictionary(keys, values);
-                CompareStringDicts(dict, value);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeStringDictionary();
+            var dict = BuildStringDictionary(keys, values);
+            CompareStringDicts(dict, value);
         }
 
         [Test]
@@ -187,23 +184,21 @@ namespace InterlockLedger.Tags
         private static void GuaranteeBijectiveBehavior(Dictionary<string, ILTagBool> dict) {
             var ilarray = new ILTagDictionary<ILTagBool>(dict);
             var encodedBytes = ilarray.EncodedBytes;
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeDictionary<ILTagBool>();
-                CompareDicts<ILTagBool, bool>(dict, value);
-                var newEncodedBytes = new ILTagDictionary<ILTagBool>(value).EncodedBytes;
-                Assert.AreEqual(encodedBytes, newEncodedBytes);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeDictionary<ILTagBool>();
+            CompareDicts<ILTagBool, bool>(dict, value);
+            var newEncodedBytes = new ILTagDictionary<ILTagBool>(value).EncodedBytes;
+            Assert.AreEqual(encodedBytes, newEncodedBytes);
         }
 
         private static void GuaranteeBijectiveBehaviorForString(Dictionary<string, string> dict) {
             var ilarray = new ILTagStringDictionary(dict);
             var encodedBytes = ilarray.EncodedBytes;
-            using (var ms = new MemoryStream(encodedBytes)) {
-                var value = ms.DecodeStringDictionary();
-                CompareStringDicts(dict, value);
-                var newEncodedBytes = new ILTagStringDictionary(value).EncodedBytes;
-                Assert.AreEqual(encodedBytes, newEncodedBytes);
-            }
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeStringDictionary();
+            CompareStringDicts(dict, value);
+            var newEncodedBytes = new ILTagStringDictionary(value).EncodedBytes;
+            Assert.AreEqual(encodedBytes, newEncodedBytes);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SafeAny() {
-            void SafeAnyTest(IEnumerable<object> values, bool expected, string message) {
+            static void SafeAnyTest(IEnumerable<object> values, bool expected, string message) {
                 Assert.AreEqual(expected, values.SafeAny(), message);
             }
             SafeAnyTest(null, false, "Shouldn't have returned true for null enumerable");
@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SafeCount() {
-            void SafeCountTest(IEnumerable<object> values, int expected, string message) {
+            static void SafeCountTest(IEnumerable<object> values, int expected, string message) {
                 Assert.AreEqual(expected, values.SafeCount(), message);
             }
             SafeCountTest(null, -1, "Should have returned -1 for null enumerable");
@@ -60,7 +60,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SelectSkippingNulls() {
-            void SelectSkippingNullsTest(IEnumerable<string> values, Func<string, string> selector, string message, params string[] expected) {
+            static void SelectSkippingNullsTest(IEnumerable<string> values, Func<string, string> selector, string message, params string[] expected) {
                 Assert.IsTrue(expected.EqualTo(values.SelectSkippingNulls(selector)), message);
             }
             SelectSkippingNullsTest(null, (o) => o, "Should have returned empty enumerable for null enumerable");
@@ -72,7 +72,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SkipNulls() {
-            void SkipNullsTest(IEnumerable<string> values, string message, params string[] expected) {
+            static void SkipNullsTest(IEnumerable<string> values, string message, params string[] expected) {
                 Assert.IsTrue(expected.EqualTo(values.SkipNulls()), message);
             }
             SkipNullsTest(null, "Should have returned empty enumerable for null enumerable");
@@ -83,10 +83,11 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void WithDefault() {
-            void WithDefaultTestWithEmptyInputAndNoDefault(IEnumerable<string> values, string message) {
+            static void WithDefaultTestWithEmptyInputAndNoDefault(IEnumerable<string> values, string message) {
                 Assert.IsTrue(_emptyList.EqualTo(values.WithDefault()), message);
             }
-            void WithDefaultTestWithEmptyInputAndNullDefault(IEnumerable<string> values, string message) {
+
+            static void WithDefaultTestWithEmptyInputAndNullDefault(IEnumerable<string> values, string message) {
                 Assert.IsTrue(_emptyList.EqualTo(values.WithDefault((IEnumerable<string>)null)), message);
                 Assert.IsTrue(_emptyList.EqualTo(values.WithDefault(() => null)), message);
             }
