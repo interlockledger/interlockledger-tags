@@ -44,6 +44,7 @@ text eol=lf
 #*.png   binary
 #*.gif   binary
 *.ttf	binary
+*.nupkg	binary
 
 ###############################################################################
 # diff behavior for common document formats
