@@ -9,14 +9,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET Core 3.0
+    - name: Setup .NET Core 2.2
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.0.101
-    - name: Install additional dotnet 2.2
-      run: sudo apt-get install dotnet-sdk-2.2
+        dotnet-version: 2.2.207
+    - name: Install additional dotnet 3.0
+      run: sudo apt-get install dotnet-sdk-3.0
     - name: Restore local copy of ILInt nuget
-      run: dotnet restore -s  `pwd` -s https://api.nuget.org/v3/index.json --ignore-failed-sources
+      run: dotnet restore -s  `pwd` -s https://api.nuget.org/v3/index.json --ignore-failed-sources  -v:m
     - name: Build with dotnet
       run: dotnet build --configuration Release --no-restore
     - name: Test with dotnet
