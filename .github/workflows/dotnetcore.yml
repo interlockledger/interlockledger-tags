@@ -14,7 +14,7 @@ jobs:
       with:
         dotnet-version: 3.0.101
     - name: Install additional dotnet 2.2
-      run: sudo apt-get install aspnetcore-runtime-2.2
+      run: sudo apt-get install dotnet-sdk-2.2
     - name: Restore local copy of ILInt nuget
       run: dotnet restore -s  `pwd` -s https://api.nuget.org/v3/index.json --ignore-failed-sources
     - name: Build with dotnet
