@@ -11,7 +11,6 @@ using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using InterlockLedger.ILInt;
 
 namespace InterlockLedger.Tags
 {

@@ -15,9 +15,5 @@ jobs:
         dotnet-version: 2.2.207
     - name: Install additional dotnet 3.0
       run: sudo apt-get install dotnet-sdk-3.0
-    - name: Restore local copy of ILInt nuget
-      run: dotnet restore -s  `pwd` -s https://api.nuget.org/v3/index.json --ignore-failed-sources  -v:m
-    - name: Build with dotnet
-      run: dotnet build --configuration Release --no-restore
-    - name: Test with dotnet
-      run: dotnet test --configuration Release --no-build
+    - name: Build and test with dotnet
+      run: dotnet test --configuration Release -v:m

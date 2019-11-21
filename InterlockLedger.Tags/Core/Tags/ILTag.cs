@@ -33,7 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.IO;
-using InterlockLedger.ILInt;
 using Newtonsoft.Json;
 
 namespace InterlockLedger.Tags
@@ -164,7 +163,6 @@ namespace InterlockLedger.Tags
                 [ILTagId.DataModel] = (s => new ILTagDataModel(s), NoJson),
                 [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),
                 [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),
-
             };
 
         private byte[] SerializeToByteArray() {

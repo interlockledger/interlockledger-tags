@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -33,13 +33,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using InterlockLedger.ILInt;
 
 namespace InterlockLedger.Tags
 {
     public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T>> where T : class
     {
         public T this[string key] => Value?[key];
+
+        public override bool Equals(object obj)
+            => obj is ILTag other ? EncodedBytes.SequenceEqual(other.EncodedBytes) : false;
+
+        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
         protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T> value) : base(tagId, value) {
         }
@@ -71,10 +75,5 @@ namespace InterlockLedger.Tags
                     }
                 }
             });
-
-        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
-
-        public override bool Equals(object obj)
-            => obj is ILTag other ? EncodedBytes.SequenceEqual(other.EncodedBytes) : false;
     }
 }
