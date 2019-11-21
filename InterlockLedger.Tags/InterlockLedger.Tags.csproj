@@ -13,7 +13,7 @@
       <PackageReleaseNotes>Switch to repackaged InterlockLedger.Tags.ILInt</PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
-      <RepositoryUrl>https://github.com/interlockledger/il2tags.git</RepositoryUrl>
+      <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
       <Version>2.2.0</Version>
   </PropertyGroup>
   <ItemGroup>
