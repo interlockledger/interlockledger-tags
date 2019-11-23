@@ -148,7 +148,7 @@ namespace InterlockLedger.Tags
             : throw new InvalidDataException($"Unknown tagId {field.TagId}");
 
         private static bool ExpandEnumeration(Dictionary<ulong, DataField.Pair> oldEnumeration, Dictionary<ulong, DataField.Pair> newEnumeration)
-            => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration != null && newEnumeration.Take(oldEnumeration.Count).SequenceEqual(oldEnumeration));
+            => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration?.Take(oldEnumeration.Count).SequenceEqual(oldEnumeration) == true);
 
         private static bool FindFieldInPath(string[] parts, int part, IEnumerable<DataField> fields) {
             var name = parts[part];
@@ -163,7 +163,7 @@ namespace InterlockLedger.Tags
         }
 
         private static ILTag FromPartialNavigable(Dictionary<string, object> json, ulong tagId, IEnumerable<DataField> dataFields, DataModel dataModel) {
-            if (json is null || !json.Any())
+            if (json is null || json.Count == 0)
                 return ILTagNull.Instance;
             ushort version = 0;
             var isVersioned = IsVersioned(dataFields);
@@ -209,7 +209,7 @@ namespace InterlockLedger.Tags
                 if (field.HasSubFields) {
                     json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
                 } else {
-                    ILTag value = DecodePartial(field.TagId, bytes, ref offset);
+                    var value = DecodePartial(field.TagId, bytes, ref offset);
                     json[field.Name] = value.AsJson;
                     if (field.IsEnumeration && !value.IsNull)
                         json[$"__{field.Name}__"] = field.Enumerated(value);

@@ -22,8 +22,6 @@ namespace InterlockLedger.Tags
         //  HyperStrong = 5,    // RSA 7172
         //  UltraStrong = 6     // RSA 8192
 
-        public static int KeySize(KeyStrength strength) => 2048 + 1024 * (int)strength;
-
         public static KeyStrength KeyStrengthGuess(this RSA key) {
             if (key is null)
                 throw new ArgumentNullException(nameof(key));
@@ -36,5 +34,7 @@ namespace InterlockLedger.Tags
             if (size <= 7172) return KeyStrength.HyperStrong;
             return KeyStrength.UltraStrong;
         }
+
+        public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
     }
 }

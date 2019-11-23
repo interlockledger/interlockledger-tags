@@ -34,7 +34,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagNull : ILTag
+    public sealed class ILTagNull : ILTag
     {
         public static readonly ILTagNull Instance = new ILTagNull();
 

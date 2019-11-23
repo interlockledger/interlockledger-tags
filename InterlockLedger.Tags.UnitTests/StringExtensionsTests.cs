@@ -29,5 +29,4 @@ namespace InterlockLedger.Tags
             Assert.AreEqual("file.txt", "file. ".WithSuffix("txt"));
         }
     }
-
 }

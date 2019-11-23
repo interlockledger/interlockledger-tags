@@ -21,6 +21,6 @@ namespace InterlockLedger.Tags
         }
 
         public TimeSpan MaxAgeOfSignatureKey { get; private set; }
-        public ulong MaxSignaturesWithTheSameKey { get; private set; }
+        public ulong MaxSignaturesWithTheSameKey { get; }
     }
 }

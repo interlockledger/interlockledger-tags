@@ -31,7 +31,7 @@ namespace InterlockLedger.Tags
             : this(new InterlockKeyParts(key.Purposes, key.AppId, key.SpecificActions, key.Name, key.Description, key.CurrentPublicKey, key.Strength, key.Id)) {
         }
 
-        public bool AllActions => Value.Actionable && (SpecificActions == null || !SpecificActions.Any());
+        public bool AllActions => Value.Actionable && SpecificActions.None();
         public ulong AppId => Value.AppId;
         public string Description => Value.Description;
         public BaseKeyId Id => Value.Id;
@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
         public IEnumerable<ulong> SpecificActions => Value.SpecificActions;
         public ushort Version => Value.Version;
 
-        public bool CanAct(ulong appId, ulong actionId) => appId == AppId && Purposes.Contains(KeyPurpose.Action) && (SpecificActions == null || SpecificActions.Contains(actionId));
+        public bool CanAct(ulong appId, ulong actionId) => appId == AppId && Purposes.Contains(KeyPurpose.Action) && (SpecificActions?.Contains(actionId) != false);
 
         public override bool Equals(object obj) => Equals(obj as InterlockKey);
 
@@ -121,19 +121,19 @@ namespace InterlockLedger.Tags
             AppId = appId;
             Strength = strength;
             SpecificActions = actionIds ?? Enumerable.Empty<ulong>();
-            Identity = new KeyId(TagHash.HashSha256Of(Hashable));
+            Identity = new KeyId(TagHash.HashSha256Of(_hashable));
             Id = keyId ?? Identity;
         }
 
         public bool Actionable => Purposes.Contains(KeyPurpose.Action);
 
-        public string ToShortString() => $@"{Name.Safe().PadRight(58)} [{DisplayablePurposes}] {ActionsFor} ";
+        public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {_actionsFor} ";
 
         public override string ToString() =>
         $@"-- Key '{Name}' - {Description}
 ++ Id: {Id}
 ++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
-++ with purposes: {DisplayablePurposes}  {ActionsFor.ToLowerInvariant()}
+++ with purposes: {_displayablePurposes}  {_actionsFor.ToLowerInvariant()}
 ++ from: {Identity}
 ++ with strength {Strength}";
 
@@ -144,11 +144,11 @@ namespace InterlockLedger.Tags
             set => Purposes = value?.Select(u => (KeyPurpose)u).ToArray();
         }
 
-        private string ActionsFor => Actionable ? AppAndActions() : string.Empty;
+        private string _actionsFor => Actionable ? AppAndActions() : string.Empty;
 
-        private string DisplayablePurposes => Purposes.ToStringAsList();
+        private string _displayablePurposes => Purposes.ToStringAsList();
 
-        private byte[] Hashable => PublicKey.EncodedBytes.Append(ActionsFor.UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+        private byte[] _hashable => PublicKey.EncodedBytes.Append(_actionsFor.UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
 
         private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
 

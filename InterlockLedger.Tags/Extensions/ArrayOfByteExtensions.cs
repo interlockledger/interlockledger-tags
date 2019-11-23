@@ -82,7 +82,7 @@ namespace InterlockLedger.Tags
             var start = 0;
             while (start < value.Length) {
                 var howMany = Math.Min(length, value.Length - start);
-                sb.Append(value.Substring(start, howMany)).Append(Environment.NewLine);
+                sb.Append(value, start, howMany).Append(Environment.NewLine);
                 start += length;
             }
             return sb.ToString();

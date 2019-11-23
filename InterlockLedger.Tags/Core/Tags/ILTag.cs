@@ -51,7 +51,7 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public bool IsNull => TagId == ILTagId.Null;
 
-        public ulong TagId { get; private set; }
+        public ulong TagId { get; }
 
         public static ILTag DeserializeFrom(Stream s) {
             if (s.HasBytes()) {
@@ -117,7 +117,7 @@ namespace InterlockLedger.Tags
 
         private static readonly Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> _deserializers
             = new Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> {
-                [ILTagId.Null] = (s => ILTagNull.Instance, o => ILTagNull.Instance),
+                [ILTagId.Null] = (_ => ILTagNull.Instance, _ => ILTagNull.Instance),
                 [ILTagId.Bool] = (s => s.ReadSingleByte() != 0 ? ILTagBool.True : ILTagBool.False, o => (bool)o ? ILTagBool.True : ILTagBool.False),
                 [ILTagId.Int8] = (s => new ILTagInt8(s, ILTagId.Int8), o => new ILTagInt8(Convert.ToSByte(o))),
                 [ILTagId.UInt8] = (s => new ILTagUInt8(s, ILTagId.UInt8), o => new ILTagUInt8(Convert.ToByte(o))),

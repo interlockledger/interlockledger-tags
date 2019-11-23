@@ -75,7 +75,7 @@ namespace InterlockLedger.Tags
 
         public bool Contains(LimitedRange other) => Contains(other.Start) && Contains(other.End);
 
-        public override bool Equals(object obj) => obj is LimitedRange && Equals((LimitedRange)obj);
+        public override bool Equals(object obj) => obj is LimitedRange limitedRange && Equals(limitedRange);
 
         public bool Equals(LimitedRange other) => End == other.End && Start == other.Start;
 

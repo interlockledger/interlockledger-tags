@@ -10,11 +10,11 @@
       <Description>This library implements the basic TLV encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <PackageReleaseNotes>Upgrade to InterlockLedger.Tags.ILInt 1.2.0</PackageReleaseNotes>
+      <PackageReleaseNotes>Bring more extension methods and cleanup code</PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>2.2.1</Version>
+      <Version>2.2.2</Version>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

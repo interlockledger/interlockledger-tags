@@ -112,7 +112,7 @@ namespace InterlockLedger.Tags
         }
 
         public static Stream WriteBytes(this Stream s, byte[] bytes) {
-            if (bytes != null && bytes.Length > 0)
+            if (bytes?.Length > 0)
                 s.Write(bytes, 0, bytes.Length);
             s.Flush();
             return s;

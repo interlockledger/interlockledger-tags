@@ -4,9 +4,6 @@
  *
  ******************************************************************************************************************************/
 
-
-using InterlockLedger.Tags;
-
 namespace InterlockLedger.Tags
 {
     public interface IOwnerData

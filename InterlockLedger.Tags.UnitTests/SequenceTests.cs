@@ -24,7 +24,7 @@ namespace InterlockLedger.Tags
 
             Assert.AreEqual(2, value.Length);
             Assert.AreEqual(firstElement, value[0].AsString());
-            Assert.AreEqual(secondElement, (value[1] as ILTagILInt).Value);
+            Assert.AreEqual(secondElement, (value[1] as ILTagILInt)?.Value);
         }
 
         [TestCase(null, new byte[0], new byte[] { 22, 0 }, TestName = "Deserialize a Null Sequence")]

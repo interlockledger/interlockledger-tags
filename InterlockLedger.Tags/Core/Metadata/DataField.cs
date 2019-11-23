@@ -100,7 +100,7 @@ namespace InterlockLedger.Tags
 
         public string Enumerated(ulong number) {
             try {
-                if (Enumeration is null || !Enumeration.Any())
+                if (Enumeration is null || Enumeration.Count == 0)
                     return "?";
                 if (!EnumerationAsFlags)
                     return Enumeration.ContainsKey(number) ? Enumeration[number].Name : "?";
@@ -197,7 +197,7 @@ namespace InterlockLedger.Tags
                     SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
                     Description = (serVersion > 1) ? s.DecodeString() : null,
                     Enumeration = (serVersion > 2) ? DecodeEnumeration(s) : null,
-                    EnumerationAsFlags = (serVersion > 3) ? s.DecodeBool() : false
+                    EnumerationAsFlags = (serVersion > 3) && s.DecodeBool()
                 };
             });
         }

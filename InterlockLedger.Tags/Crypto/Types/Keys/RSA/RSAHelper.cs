@@ -7,14 +7,13 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using InterlockLedger.Tags;
 
 namespace InterlockLedger.Tags
 {
     public static class RSAHelper
     {
         public static TagRSAParameters CreateNewRSAParameters(KeyStrength strength) {
-            var keySize = RSAExtensions.KeySize(strength);
+            var keySize = strength.RSAKeySize();
             using var provider = new RSACryptoServiceProvider(keySize);
             return new TagRSAParameters(provider.ExportParameters(true));
         }
@@ -57,8 +56,8 @@ namespace InterlockLedger.Tags
                     if (retries-- <= 0)
                         throw new InterlockLedgerCryptographicException($"Failed to sign data with current parameters after {_maxRetries} retries", e);
                 }
-
         }
+
         public static bool Verify(byte[] dataToVerify, TagSignature signature, RSAParameters parameters) {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));

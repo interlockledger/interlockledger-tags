@@ -35,7 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagBool : ILTagImplicit<bool>
+    public sealed class ILTagBool : ILTagImplicit<bool>
     {
         public static readonly ILTagBool False = new ILTagBool(false);
         public static readonly ILTagBool True = new ILTagBool(true);

@@ -87,7 +87,7 @@ namespace InterlockLedger.Tags
             var tag = ms.Decode<EncryptedBlob.Payload>();
             Assert.AreEqual(ILTagId.EncryptedBlob, tag.TagId);
             Assert.AreEqual(algorithm, tag.Value.Cipher);
-            var clearBlob = tag.Value.DecryptBlob(TestFakeSigner.FixedKeysInstance, c => new AES256Engine());
+            var clearBlob = tag.Value.DecryptBlob(TestFakeSigner.FixedKeysInstance, _ => new AES256Engine());
             Assert.IsNotNull(clearBlob);
             Assert.AreEqual(data.Length, clearBlob.Length);
         }

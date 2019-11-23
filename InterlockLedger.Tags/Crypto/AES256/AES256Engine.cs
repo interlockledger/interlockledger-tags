@@ -17,7 +17,7 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(cipherData));
             if (key is null)
                 throw new ArgumentNullException(nameof(key));
-            return Decrypt(cipherData, readHeader: (s) => (key, iv));
+            return Decrypt(cipherData, readHeader: _ => (key, iv));
         }
 
         public byte[] Decrypt(byte[] cipherData, Func<MemoryStream, (byte[] key, byte[] iv)> readHeader) {
