@@ -30,6 +30,8 @@ namespace InterlockLedger.Tags
             return values;
         }
 
+        public static string JoinedBy<T>(this IEnumerable<T> list, string joiner) => list == null ? string.Empty : string.Join(joiner, list);
+
         public static bool None<T>(this IEnumerable<T> items) => !items.SafeAny();
 
         public static bool None<T>(this IEnumerable<T> items, Func<T, bool> predicate) => !items.SafeAny(predicate);
@@ -49,6 +51,8 @@ namespace InterlockLedger.Tags
             => EmptyIfNull(values?.Select(selector).SkipNulls());
 
         public static IEnumerable<T> SkipNulls<T>(this IEnumerable<T> values) where T : class => EmptyIfNull(values?.Where(item => item != null));
+
+        public static string WithCommas<T>(this IEnumerable<T> list, bool noSpaces = false) => JoinedBy(list, noSpaces ? "," : ", ");
 
         public static IEnumerable<T> WithDefault<T>(this IEnumerable<T> values, Func<IEnumerable<T>> alternativeValues)
             => values.SafeAny() ? values : EmptyIfNull(alternativeValues?.Invoke());

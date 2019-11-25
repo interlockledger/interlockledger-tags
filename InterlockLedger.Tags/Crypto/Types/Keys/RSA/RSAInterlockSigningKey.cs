@@ -26,8 +26,7 @@ namespace InterlockLedger.Tags
                 using var ms = new MemoryStream();
                 ms.EncodeTag(_value);
                 ms.EncodeTag(_keyParameters);
-                ms.Flush();
-                return ms.GetBuffer();
+                return ms.ToArray();
             }
         }
 

@@ -29,8 +29,7 @@ namespace InterlockLedger.Tags
                 ms.EncodeTag(_value);
                 ms.EncodeString(_password);
                 ms.EncodeByteArray(_certificateBytes);
-                ms.Flush();
-                return ms.GetBuffer();
+                return ms.ToArray();
             }
         }
 
@@ -43,7 +42,7 @@ namespace InterlockLedger.Tags
         }
 
         public override byte[] Decrypt(byte[] bytes) {
-            using RSA rsa = _certificateBytes.OpenCertificate(_password).GetRSAPrivateKey();
+            using var rsa = _certificateBytes.OpenCertificate(_password).GetRSAPrivateKey();
             return rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1);
         }
 
@@ -53,7 +52,7 @@ namespace InterlockLedger.Tags
         private readonly string _password;
 
         private byte[] HashAndSign(byte[] dataToSign) {
-            using RSA rsa = _certificateBytes.OpenCertificate(_password).GetRSAPrivateKey();
+            using var rsa = _certificateBytes.OpenCertificate(_password).GetRSAPrivateKey();
             return rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
     }

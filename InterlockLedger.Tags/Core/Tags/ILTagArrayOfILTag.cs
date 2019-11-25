@@ -49,6 +49,8 @@ namespace InterlockLedger.Tags
 
         public T this[int i] => Value?[i];
 
+        public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagImplicit<TV> tv ? tv.Value : default);
+
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
         }
 

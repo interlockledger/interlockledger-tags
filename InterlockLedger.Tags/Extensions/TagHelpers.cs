@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -42,21 +42,17 @@ namespace InterlockLedger.Tags
         public static ILTag Decoded(this byte[] buffer) => ILTag.DeserializeFrom(buffer);
 
         public static byte[] ToBytesHelper(Action<Stream> serialize) {
-            if (serialize == null) {
+            if (serialize == null)
                 throw new ArgumentNullException(nameof(serialize));
-            }
-
             using var s = new MemoryStream();
             serialize(s);
-            s.Flush();
-            return s.GetBuffer().PartOf((int)s.Position);
+            return s.ToArray();
         }
 
-        public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag {
-            if (convert == null) {
-                throw new ArgumentNullException(nameof(convert));
-            }
-            return new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
-        }
+        public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag
+            => convert == null ? throw new ArgumentNullException(nameof(convert)) : new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
+
+        public static ILTagArrayOfILTag<ILTagExplicit<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagExplicit<T>> convert)
+            => ToTagArray<T, ILTagExplicit<T>>(list, convert);
     }
 }

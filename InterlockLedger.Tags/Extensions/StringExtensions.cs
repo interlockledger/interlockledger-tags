@@ -49,8 +49,6 @@ namespace InterlockLedger.Tags
 
         public static bool IsEmptyOrMatches(this string s, params string[] matches) => string.IsNullOrWhiteSpace(s) || matches.Any(m => s.Trim().Equals(m, StringComparison.InvariantCultureIgnoreCase));
 
-        public static string JoinedBy<T>(this IEnumerable<T> list, string joiner) => list == null ? string.Empty : string.Join(joiner, list);
-
         public static string Parenthesize(this string s) => s.ParenthesizeIf(!s.Parenthesized());
 
         public static bool Parenthesized(this string s) {
@@ -95,8 +93,6 @@ namespace InterlockLedger.Tags
 
         public static string ValidateNonEmpty(this string parameter, string parameterName)
             => string.IsNullOrWhiteSpace(parameter) ? throw new ArgumentNullException(parameterName) : parameter.Trim();
-
-        public static string WithCommas<T>(this IEnumerable<T> list, bool noSpaces = false) => JoinedBy(list, noSpaces ? "," : ", ");
 
         public static string WithDefault(this string s, string @default) => string.IsNullOrWhiteSpace(s) ? @default : s.Trim();
 
