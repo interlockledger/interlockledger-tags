@@ -7,7 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags
@@ -58,9 +58,9 @@ namespace InterlockLedger.Tags
         public void JsonSerialization() {
             var seq = new ILTagSequence(new ILTagString("JsonTest"), new ILTagILInt(13), ILTagBool.False);
             var jsonModel = seq.AsJson;
-            var json = JsonConvert.SerializeObject(jsonModel, Formatting.Indented);
+            var json = JsonSerializer.Serialize(jsonModel, ILTagDictionaryTests.JsonOptions);
             TestContext.WriteLine(json);
-            var parsedJson = JsonConvert.DeserializeObject<List<object>>(json);
+            var parsedJson = JsonSerializer.Deserialize<List<object>>(json);
             var backSeq = ILTag.DeserializeFromJson(ILTagId.Sequence, parsedJson);
             Assert.IsTrue(seq.Equals(backSeq));
         }

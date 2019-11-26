@@ -35,7 +35,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
@@ -182,18 +182,14 @@ namespace InterlockLedger.Tags
         public static readonly InterlockColor Yellow = new InterlockColor(255, 255, 0, "Yellow");
         public static readonly InterlockColor YellowGreen = new InterlockColor(154, 205, 50, "YellowGreen");
 
-        [JsonIgnore]
         public readonly byte A;
 
-        [JsonIgnore]
         public readonly byte B;
 
-        [JsonIgnore]
         public readonly byte G;
 
-        public readonly string Name;
+        public string Name { get; }
 
-        [JsonIgnore]
         public readonly byte R;
 
         public InterlockColor(byte r, byte g, byte b, string name = null, byte a = 255) {

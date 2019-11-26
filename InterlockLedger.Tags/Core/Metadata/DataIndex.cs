@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
@@ -16,7 +16,6 @@ namespace InterlockLedger.Tags
     {
         public const string PrimaryIndexName = "~Primary~";
 
-        [JsonProperty(Order = 2)]
         public IEnumerable<DataIndexElement> Elements { get; set; }
 
         [JsonIgnore]
@@ -25,10 +24,8 @@ namespace InterlockLedger.Tags
             set => Elements = DataIndexElement.ParseList(value.ValidateNonEmpty(nameof(ElementsAsString)));
         }
 
-        [JsonProperty(Order = 1)]
         public bool IsUnique { get; set; }
 
-        [JsonProperty(Order = 0)]
         public string Name { get; set; }
 
         public override bool Equals(object obj) => Equals(obj as DataIndex);
@@ -52,13 +49,10 @@ namespace InterlockLedger.Tags
 
     public class DataIndexElement
     {
-        [JsonProperty(Order = 2)]
         public bool DescendingOrder { get; set; }
 
-        [JsonProperty(Order = 0)]
         public string FieldPath { get; set; } // in the form 'FieldName.ChildrenFieldName'
 
-        [JsonProperty(Order = 1)]
         public string Function { get; set; }
 
         [JsonIgnore]

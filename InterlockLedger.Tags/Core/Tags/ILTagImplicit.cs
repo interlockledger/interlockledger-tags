@@ -32,20 +32,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.IO;
-
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     public abstract class ILTagImplicit<T> : ILTag
     {
         [JsonIgnore]
-        public readonly T Value;
-
         public override object AsJson => Value;
 
-        protected ILTagImplicit(ulong tagId, T value) : base(tagId)
-            => Value = value;
+        public T Value { get; set; }
+
+        protected ILTagImplicit() : base(0) { }
+
+        protected ILTagImplicit(ulong tagId, T value) : base(tagId) => Value = value;
 
         protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup = null) : base(alreadyDeserializedTagId) {
             setup?.Invoke(this);

@@ -4,12 +4,11 @@
  *
  ******************************************************************************************************************************/
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Algorithm : ushort
     {
         RSA = 0,     // PKCS#1 RSASSA-PSS

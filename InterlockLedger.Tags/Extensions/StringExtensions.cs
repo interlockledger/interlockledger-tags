@@ -31,11 +31,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json.Linq;
 
 namespace InterlockLedger.Tags
 {
@@ -43,7 +42,7 @@ namespace InterlockLedger.Tags
     {
         public static ulong AsUlong(this string s) => ulong.TryParse(s?.Trim(), out var value) ? value : 0ul;
 
-        public static object DeserializeJson(this string json) => JsonTokenToObject(JToken.Parse(json));
+        public static JsonDocument DeserializeJson(this string json) => JsonDocument.Parse(json, new JsonDocumentOptions { AllowTrailingCommas = true });
 
         public static TagHash HashOf(this string s) => TagHash.HashSha256Of(s.UTF8Bytes());
 
@@ -115,13 +114,5 @@ namespace InterlockLedger.Tags
         }
 
         private static readonly Regex _nameFilter = new Regex(@"[\.\s\r\n<>\:""/\\|\?\*]+");
-
-        private static object JsonTokenToObject(JToken token)
-            => token.Type switch
-            {
-                JTokenType.Object => token.Children<JProperty>().ToDictionary(prop => prop.Name, prop => JsonTokenToObject(prop.Value)),
-                JTokenType.Array => token.Select(JsonTokenToObject).ToList(),
-                _ => ((JValue)token).Value,
-            };
     }
 }

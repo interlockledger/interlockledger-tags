@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
@@ -51,7 +51,7 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public bool IsNull => TagId == ILTagId.Null;
 
-        public ulong TagId { get; }
+        public ulong TagId { get; set; }
 
         public static ILTag DeserializeFrom(Stream s) {
             if (s.HasBytes()) {

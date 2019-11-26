@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -30,11 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 
 namespace InterlockLedger.Tags
 {
@@ -61,13 +59,8 @@ namespace InterlockLedger.Tags
         private static Dictionary<string, T> Elicit(object opaqueValue) {
             if (opaqueValue is Dictionary<string, T> dict)
                 return dict;
-            if (opaqueValue is Dictionary<string, object> dictString)
-                return dictString.ToDictionary(p => p.Key, pp => {
-                    var valuePair = (JObject) pp.Value;
-                    var tagId = Convert.ToUInt64(((JValue)valuePair[nameof(TagId)]).Value);
-                    var value = ((JValue)valuePair[nameof(Value)]).Value;
-                    return (T)ILTag.DeserializeFromJson(tagId, value);
-                });
+            if (opaqueValue is Dictionary<string, object> odict)
+                return odict.ToDictionary(p => p.Key, pp => (T)pp.Value.AsNavigable());
             return new Dictionary<string, T>();
         }
     }

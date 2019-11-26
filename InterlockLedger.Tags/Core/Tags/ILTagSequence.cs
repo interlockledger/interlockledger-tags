@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -31,10 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Linq;
+using System.Collections;
 
 namespace InterlockLedger.Tags
 {
@@ -54,25 +53,8 @@ namespace InterlockLedger.Tags
 
         public override bool Equals(object obj) => obj is ILTagSequence other && other.Length == Length && other.ToString().Equals(ToString());
 
-        internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) {
-        }
+        internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) { }
 
-        private static ILTag[] Elicit(object opaqueValue) {
-            if (opaqueValue is List<object> list) {
-                var newList = new List<ILTag>();
-                foreach (object o in list) {
-                    if (o is JObject jo) {
-                        JValue tagId = jo["TagId"] as JValue;
-                        JValue payload = jo["Value"] as JValue;
-                        newList.Add(ILTag.DeserializeFromJson(Convert.ToUInt64(tagId.Value), payload.Value));
-                    } else {
-                        var pair = o.AsNavigable() as Dictionary<string, object>;
-                        newList.Add(ILTag.DeserializeFromJson(Convert.ToUInt64(pair["TagId"]), pair["Value"]));
-                    }
-                }
-                return newList.ToArray();
-            }
-            return Array.Empty<ILTag>();
-        }
+        private static ILTag[] Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : Array.Empty<ILTag>();
     }
 }

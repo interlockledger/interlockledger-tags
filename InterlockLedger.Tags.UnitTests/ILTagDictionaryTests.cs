@@ -7,7 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags
@@ -15,6 +15,8 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class ILTagDictionaryTests
     {
+        public static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions { WriteIndented = true };
+
         [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize a Null Dictionary")]
         [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize an Empty Dictionary")]
         [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize One Dictionary with Zero Bytes")]
@@ -79,9 +81,9 @@ namespace InterlockLedger.Tags
         public void JsonSerializationDictionary() {
             var dict = new ILTagDictionary<ILTag>(("Key1", ILTagBool.False), ("Key2", new ILTagString("Value2")));
             var jsonModel = dict.AsJson;
-            var json = JsonConvert.SerializeObject(jsonModel, Formatting.Indented);
+            var json = JsonSerializer.Serialize(jsonModel, JsonOptions);
             TestContext.WriteLine(json);
-            var parsedJson = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+            var parsedJson = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
             var backDict = ILTag.DeserializeFromJson(ILTagId.Dictionary, parsedJson);
             Assert.IsTrue(dict.Equals(backDict));
         }
@@ -90,9 +92,9 @@ namespace InterlockLedger.Tags
         public void JsonSerializationStringDictionary() {
             var dict = new ILTagStringDictionary(("Key1", "Value1"), ("Key2", "Value2"));
             var jsonModel = dict.AsJson;
-            var json = JsonConvert.SerializeObject(jsonModel, Formatting.Indented);
+            var json = JsonSerializer.Serialize(jsonModel, JsonOptions);
             TestContext.WriteLine(json);
-            var parsedJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            var parsedJson = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
             var backDict = ILTag.DeserializeFromJson(ILTagId.StringDictionary, parsedJson);
             Assert.IsTrue(dict.Equals(backDict));
         }

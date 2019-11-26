@@ -3,12 +3,12 @@
  *      Copyright (c) 2017-2019 InterlockLedger Network
  *
  ******************************************************************************************************************************/
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum HashAlgorithm : ushort
     {
         SHA1 = 0,

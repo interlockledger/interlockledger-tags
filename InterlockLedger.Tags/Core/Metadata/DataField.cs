@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 #pragma warning disable CA2227 // Collection properties should be read only
 
@@ -29,20 +29,14 @@ namespace InterlockLedger.Tags
 
         public DataField() => Version = 1;
 
-        [JsonProperty(Order = 5)]
         public CastType Cast { get; set; }
 
-        [JsonProperty(Order = 8)]
         public string Description { get; set; }
 
-        // for ArrayOfTags
-        [JsonProperty(Order = 6)]
         public ulong ElementTagId { get; set; }
 
-        [JsonProperty(Order = 10, DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Dictionary<ulong, Pair> Enumeration { get; set; }
 
-        [JsonProperty(Order = 11, DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool EnumerationAsFlags { get; set; }
 
         // tags that have children
@@ -53,29 +47,22 @@ namespace InterlockLedger.Tags
         public bool IsEnumeration => Enumeration.SafeAny();
 
         // treat as opaque byte array
-        [JsonProperty(Order = 3)]
         public bool IsOpaque { get; set; }
 
-        [JsonProperty(Order = 2)]
         public bool IsOptional { get; set; }
 
         [JsonIgnore]
         public bool IsVersion => Name == "Version" && TagId == ILTagId.UInt16;
 
         // Case-insensitive (can't contain dots or whitespace)
-        [JsonProperty(Order = 1)]
         public string Name { get; set; }
 
-        [JsonProperty(Order = 9)]
         public ushort SerializationVersion { get; set; } = CurrentVersion;
 
-        [JsonProperty(Order = 4)]
         public IEnumerable<DataField> SubDataFields { get; set; }
 
-        [JsonProperty(Order = 0)]
         public ulong TagId { get; set; }
 
-        [JsonProperty(Order = 7)]
         public ushort Version { get; set; }
 
         public static ulong AsNumber(ILTag value) {

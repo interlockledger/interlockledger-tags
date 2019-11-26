@@ -4,17 +4,14 @@
  *
  ******************************************************************************************************************************/
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using InterlockLedger.Tags;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     [SuppressMessage("Design", "CA1027:Mark enums with FlagsAttribute", Justification = "This is not to be bit-ored")]
     public enum KeyPurpose : ulong
     {

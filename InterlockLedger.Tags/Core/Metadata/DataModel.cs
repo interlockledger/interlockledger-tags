@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using InterlockLedger.Tags;
-using Newtonsoft.Json;
 
 namespace InterlockLedger.Tags
 {
@@ -18,22 +17,16 @@ namespace InterlockLedger.Tags
     {
         public const ushort CurrentVersion = 2;
 
-        [JsonProperty(Order = 3)]
         public IEnumerable<DataField> DataFields { get; set; }
 
-        [JsonProperty(Order = 5)]
         public string Description { get; set; }
 
-        [JsonProperty(Order = 4)]
         public IEnumerable<DataIndex> Indexes { get; set; }
 
-        [JsonProperty(Order = 2)]
         public string PayloadName { get; set; }
 
-        [JsonProperty(Order = 1)]
         public ulong PayloadTagId { get; set; }
 
-        [JsonProperty(Order = 0)]
         public ushort Version { get; set; } = CurrentVersion;
 
         public override bool Equals(object obj) => Equals(obj as DataModel);
