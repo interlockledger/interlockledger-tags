@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -40,7 +40,7 @@ using System.Text.Json.Serialization;
 namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(InterlockColorConverter))]
-    public struct InterlockColor
+    public struct InterlockColor : IJsonCustom<InterlockColor>
     {
         public static readonly InterlockColor AliceBlue = new InterlockColor(240, 248, 255, "AliceBlue");
         public static readonly InterlockColor AntiqueWhite = new InterlockColor(250, 235, 215, "AntiqueWhite");
@@ -188,7 +188,7 @@ namespace InterlockLedger.Tags
 
         public readonly byte G;
 
-        public string Name { get; }
+        public readonly string Name;
 
         public readonly byte R;
 
@@ -206,7 +206,12 @@ namespace InterlockLedger.Tags
         public string AsCSS => Name.StartsWith("#") && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
 
         [JsonIgnore]
+        public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
+
+        [JsonIgnore]
         public uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
+
+        public string TextualRepresentation => ToString();
 
         public static InterlockColor From(uint value) {
             LazyInitKnownColors();
@@ -227,6 +232,8 @@ namespace InterlockLedger.Tags
         public override bool Equals(object obj) => (obj is InterlockColor other) && other.RGBA == RGBA;
 
         public override int GetHashCode() => (int)RGBA;
+
+        public InterlockColor ResolveFrom(string textualRepresentation) => FromText(textualRepresentation);
 
         public override string ToString() => Name;
 
@@ -254,6 +261,8 @@ namespace InterlockLedger.Tags
         }
 
         private static string InvariantPercent(byte a) => (a / 255.0).ToString(CultureInfo.InvariantCulture);
+
+        private static byte Invert(byte component) => (byte)(255 - component);
 
 #pragma warning disable S138 // Functions should not have too many lines of code
 

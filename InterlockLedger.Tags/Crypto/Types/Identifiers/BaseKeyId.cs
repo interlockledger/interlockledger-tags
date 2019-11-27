@@ -6,9 +6,11 @@
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
+    [JsonConverter(typeof(JsonInterlockIdConverter))]
     public class BaseKeyId : InterlockId
     {
         public static BaseKeyId OptionalResolve(Stream s) {

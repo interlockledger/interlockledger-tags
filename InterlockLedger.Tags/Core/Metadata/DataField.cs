@@ -40,15 +40,9 @@ namespace InterlockLedger.Tags
 
         public bool EnumerationAsFlags { get; set; }
 
-        public string EnumerationItems {
-            get => Enumeration?.Select(p => p.Value.ToFull(p.Key)).JoinedBy(":");
-            set {
-                if (value is null) {
-                    Enumeration = null;
-                    return;
-                }
-                Enumeration = value.Split(':').Select(s => new FullEnumerationDetails(s)).ToDictionary(d => d.Index, dd => dd.Shorter);
-            }
+        public EnumerationItems EnumerationItems {
+            get => new EnumerationItems(Enumeration);
+            set => Enumeration = value?.UpdateFrom();
         }
 
         // tags that have children

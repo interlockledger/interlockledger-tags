@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using NUnit.Framework;
 
@@ -14,6 +15,13 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class ILTagJsonTests
     {
+        [OneTimeSetUp]
+        public void _SetupConverters() {
+            _jsonOptions.Converters.Add(new JsonInterlockIdConverter());
+            _jsonOptions.Converters.Add(new JsonCustomConverter<EnumerationItems>());
+            _jsonOptions.Converters.Add(new JsonCustomConverter<InterlockColor>());
+        }
+
         [TestCase("true", TestName = "BoolFromJsonTrue", ExpectedResult = true)]
         [TestCase("false", TestName = "BoolFromJsonFalse", ExpectedResult = false)]
         public bool BoolFrom(string json) {
@@ -38,7 +46,7 @@ namespace InterlockLedger.Tags
             TestContext.WriteLine(json);
             var payload = JsonSerializer.Deserialize<DataField>(json, _jsonOptions);
             Assert.IsInstanceOf<DataField>(payload);
-            Assert.AreEqual(payload, datafield);
+            Assert.AreEqual(datafield, payload);
         }
 
         [TestCase("0", TestName = "Int8FromJson0", ExpectedResult = (sbyte)0)]
@@ -58,6 +66,37 @@ namespace InterlockLedger.Tags
         public void Int8FromThrows(string json) {
             var payload = json.DeserializeJson();
             Assert.Throws<OverflowException>(() => ILTag.DeserializeFromJson(ILTagId.Int8, payload));
+        }
+
+        [Test]
+        public void InterlockColorConverter() {
+            static void TestWith(InterlockColor color) {
+                var json = JsonSerializer.Serialize(color, _jsonOptions);
+                TestContext.WriteLine(json);
+                var payload = JsonSerializer.Deserialize<InterlockColor>(json, _jsonOptions);
+                Assert.IsInstanceOf<InterlockColor>(payload);
+                Assert.AreEqual(color, payload);
+                var wrapper = new ColorWrapper(color, color.Opposite);
+                var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
+                TestContext.WriteLine(biggerJson);
+                var biggerPayload = JsonSerializer.Deserialize<ColorWrapper>(biggerJson, _jsonOptions);
+                Assert.IsInstanceOf<ColorWrapper>(biggerPayload);
+                Assert.AreEqual(wrapper, biggerPayload);
+            }
+            TestWith(InterlockColor.Gainsboro);
+            TestWith(InterlockColor.DeepPink.Opposite);
+            TestWith(InterlockColor.Transparent);
+            TestWith(InterlockColor.WhiteSmoke);
+        }
+
+        [Test]
+        public void InterlockIdConverter() {
+            var owner = new OwnerId("Tester".HashOf());
+            var json = JsonSerializer.Serialize(owner, _jsonOptions);
+            TestContext.WriteLine(json);
+            var payload = JsonSerializer.Deserialize<BaseKeyId>(json, _jsonOptions);
+            Assert.IsInstanceOf<OwnerId>(payload);
+            Assert.AreEqual(owner, payload);
         }
 
         [TestCase("", TestName = "NullFromJsonStringEmpty")]
@@ -107,5 +146,28 @@ namespace InterlockLedger.Tags
         }
 
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
+
+        private class ColorWrapper : IEquatable<ColorWrapper>
+        {
+            public ColorWrapper() { }
+
+            public ColorWrapper(InterlockColor foreground, InterlockColor background) {
+                Foreground = foreground;
+                Background = background;
+            }
+
+            public InterlockColor Background { get; set; }
+            public InterlockColor Foreground { get; set; }
+
+            public static bool operator !=(ColorWrapper left, ColorWrapper right) => !(left == right);
+
+            public static bool operator ==(ColorWrapper left, ColorWrapper right) => EqualityComparer<ColorWrapper>.Default.Equals(left, right);
+
+            public override bool Equals(object obj) => Equals(obj as ColorWrapper);
+
+            public bool Equals([AllowNull] ColorWrapper other) => other != null && EqualityComparer<InterlockColor>.Default.Equals(Background, other.Background) && EqualityComparer<InterlockColor>.Default.Equals(Foreground, other.Foreground);
+
+            public override int GetHashCode() => HashCode.Combine(Background, Foreground);
+        }
     }
 }
