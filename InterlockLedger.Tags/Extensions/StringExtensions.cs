@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
     {
         public static ulong AsUlong(this string s) => ulong.TryParse(s?.Trim(), out var value) ? value : 0ul;
 
-        public static JsonDocument DeserializeJson(this string json) => JsonDocument.Parse(json, new JsonDocumentOptions { AllowTrailingCommas = true });
+        public static object DeserializeJson(this string json) => string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<object>(json, _jsonOptions).AsNavigable();
 
         public static TagHash HashOf(this string s) => TagHash.HashSha256Of(s.UTF8Bytes());
 
@@ -113,6 +113,7 @@ namespace InterlockLedger.Tags
             return s.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) ? s : s + separator + suffix.TrimStart(separator);
         }
 
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
         private static readonly Regex _nameFilter = new Regex(@"[\.\s\r\n<>\:""/\\|\?\*]+");
     }
 }

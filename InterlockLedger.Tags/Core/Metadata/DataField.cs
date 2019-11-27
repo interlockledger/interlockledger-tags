@@ -35,9 +35,21 @@ namespace InterlockLedger.Tags
 
         public ulong ElementTagId { get; set; }
 
-        public Dictionary<ulong, Pair> Enumeration { get; set; }
+        [JsonIgnore]
+        public Dictionary<ulong, EnumerationDetails> Enumeration { get; set; }
 
         public bool EnumerationAsFlags { get; set; }
+
+        public string EnumerationItems {
+            get => Enumeration?.Select(p => p.Value.ToFull(p.Key)).JoinedBy(":");
+            set {
+                if (value is null) {
+                    Enumeration = null;
+                    return;
+                }
+                Enumeration = value.Split(':').Select(s => new FullEnumerationDetails(s)).ToDictionary(d => d.Index, dd => dd.Shorter);
+            }
+        }
 
         // tags that have children
         [JsonIgnore]
@@ -132,31 +144,7 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => $"{Name} #{TagId} {Enumeration?.Values.JoinedBy(",")}";
 
-        public class Pair : IEquatable<Pair>
-        {
-            public readonly string Description;
-            public readonly string Name;
-
-            public Pair(string name, string description) {
-                Description = description ?? throw new ArgumentNullException(nameof(description));
-                Name = name ?? throw new ArgumentNullException(nameof(name));
-            }
-
-            public override bool Equals(object obj) => Equals(obj as Pair);
-
-            public bool Equals(Pair other) => other != null && Description == other.Description && Name == other.Name;
-
-            public override int GetHashCode() {
-                var hashCode = -1174144137;
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-                return hashCode;
-            }
-
-            public override string ToString() => $"{Name}: {Description}";
-        }
-
-        private static readonly IEnumerable<KeyValuePair<ulong, Pair>> _noEnumeration = Enumerable.Empty<KeyValuePair<ulong, Pair>>();
+        private static readonly IEnumerable<KeyValuePair<ulong, EnumerationDetails>> _noEnumeration = Enumerable.Empty<KeyValuePair<ulong, EnumerationDetails>>();
 
         private bool CompareEnumeration(DataField other) => Enumeration.SafeAny() ? Enumeration.SequenceEqual(other.Enumeration ?? _noEnumeration) : !other.Enumeration.SafeAny();
     }
@@ -205,15 +193,15 @@ namespace InterlockLedger.Tags
                 s.EncodeBool(Value.EnumerationAsFlags);
             });
 
-        private Dictionary<ulong, DataField.Pair> DecodeEnumeration(Stream s) {
+        private Dictionary<ulong, EnumerationDetails> DecodeEnumeration(Stream s) {
             var triplets = s.DecodeArray<Triplet, Triplet.Tag>(s => new Triplet.Tag(s));
-            return triplets.SkipNulls().ToDictionary(t => t.Value, t => new DataField.Pair(t.Name, t.Description));
+            return triplets.SkipNulls().ToDictionary(t => t.Value, t => new EnumerationDetails(t.Name, t.Description));
         }
 
-        private void EncodeEnumeration(Stream s, Dictionary<ulong, DataField.Pair> enumeration)
+        private void EncodeEnumeration(Stream s, Dictionary<ulong, EnumerationDetails> enumeration)
             => s.EncodeTagArray(enumeration?.Select(p => new Triplet(p.Key, p.Value.Name, p.Value.Description).AsTag));
 
-        private class Triplet : DataField.Pair
+        private class Triplet : EnumerationDetails
         {
             public readonly ulong Value;
 

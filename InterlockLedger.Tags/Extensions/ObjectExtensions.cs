@@ -81,7 +81,9 @@ namespace InterlockLedger.Tags
                 return jo.GetString();
 
             case JsonValueKind.Number:
-                return jo.GetUInt64();
+                if (jo.TryGetUInt64(out var value))
+                    return value;
+                return jo.GetInt64();
 
             case JsonValueKind.Null:
             case JsonValueKind.Undefined:

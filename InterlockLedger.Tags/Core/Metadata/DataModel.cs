@@ -140,7 +140,7 @@ namespace InterlockLedger.Tags
             ? FromPartialNavigable(fieldValue as Dictionary<string, object>, field.TagId, field.SubDataFields, null)
             : throw new InvalidDataException($"Unknown tagId {field.TagId}");
 
-        private static bool ExpandEnumeration(Dictionary<ulong, DataField.Pair> oldEnumeration, Dictionary<ulong, DataField.Pair> newEnumeration)
+        private static bool ExpandEnumeration(Dictionary<ulong, EnumerationDetails> oldEnumeration, Dictionary<ulong, EnumerationDetails> newEnumeration)
             => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration?.Take(oldEnumeration.Count).SequenceEqual(oldEnumeration) == true);
 
         private static bool FindFieldInPath(string[] parts, int part, IEnumerable<DataField> fields) {
