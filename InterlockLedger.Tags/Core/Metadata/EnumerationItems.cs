@@ -42,37 +42,35 @@ namespace InterlockLedger.Tags
     {
         public EnumerationItems() { }
 
-        public EnumerationItems(Dictionary<ulong, EnumerationDetails> values) => _details.AddRange(values?.Select(p => p.Value.ToFull(p.Key)));
+        public EnumerationItems(Dictionary<ulong, EnumerationDetails> values) => _ = Resolve(values, ConvertFromDictionary);
 
         [JsonIgnore]
         public bool IsEmpty => _details.None();
 
         [JsonIgnore]
-        public string TextualRepresentation => $"{_detailSeparator}" + _details.JoinedBy($"{_detailSeparator}");
+        public string TextualRepresentation => IsEmpty ? null : $"{_detailSeparator}" + _details.JoinedBy($"{_detailSeparator}");
 
-        public EnumerationItems ResolveFrom(string textualRepresentation) {
-            _details.Clear();
-            _details.AddRange(textualRepresentation.Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries).Select(t => new FullEnumerationDetails().FromTextualRepresentation(t)));
-            return this;
-        }
+        public EnumerationItems ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation, ConvertFromString);
 
         internal const char _detailSeparator = '#';
 
-        internal Dictionary<ulong, EnumerationDetails> UpdateFrom() => IsEmpty ? null : ToDictionary();
+        internal EnumerationDictionary UpdateFrom() => IsEmpty ? null : ToDictionary();
 
         internal class FullEnumerationDetails : EnumerationDetails
         {
             public FullEnumerationDetails() { }
+
+            public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
 
             public ulong Index { get; set; }
             public EnumerationDetails Shorter => new EnumerationDetails { Name = Name, Description = Description };
 
             public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
 
-            internal FullEnumerationDetails FromTextualRepresentation(string parsing) {
-                if (parsing is null)
-                    throw new ArgumentNullException(nameof(parsing));
-                var parts = parsing.Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
+            internal FullEnumerationDetails FromTextualRepresentation(string s) {
+                if (s is null)
+                    throw new ArgumentNullException(nameof(s));
+                var parts = s.Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
                 Index = Convert.ToUInt64(parts[0]);
                 Name = parts[1];
                 Description = parts.Length > 2 ? parts[2] : null;
@@ -86,11 +84,19 @@ namespace InterlockLedger.Tags
 
         private readonly List<FullEnumerationDetails> _details = new List<FullEnumerationDetails>();
 
-        private Dictionary<ulong, EnumerationDetails> ToDictionary() {
-            var values = new Dictionary<ulong, EnumerationDetails>();
-            foreach (var d in _details)
-                values.Add(d.Index, d.Shorter);
-            return values;
+        private static IEnumerable<FullEnumerationDetails> ConvertFromDictionary(Dictionary<ulong, EnumerationDetails> values)
+            => values.Select(p => p.Value.ToFull(p.Key));
+
+        private static IEnumerable<FullEnumerationDetails> ConvertFromString(string s)
+            => s.Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries).Select(t => new FullEnumerationDetails(t));
+
+        private EnumerationItems Resolve<T>(T originalData, Func<T, IEnumerable<FullEnumerationDetails>> converter) {
+            _details.Clear();
+            if (!(originalData is null))
+                _details.AddRange(converter(originalData));
+            return this;
         }
+
+        private EnumerationDictionary ToDictionary() => new EnumerationDictionary(_details.ToDictionary(d => d.Index, dd => dd.Shorter));
     }
 }

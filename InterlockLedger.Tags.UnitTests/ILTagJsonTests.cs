@@ -53,19 +53,48 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void DataFieldToFrom() {
-            var datafield = new DataField {
-                Name = "TestEnumeration",
+            static void TestWith(DataField datafield) {
+                var json = JsonSerializer.Serialize(datafield, _jsonOptions);
+                TestContext.WriteLine(json);
+                var payload = JsonSerializer.Deserialize<DataField>(json, _jsonOptions);
+                Assert.IsInstanceOf<DataField>(payload);
+                Assert.AreEqual(datafield, payload);
+            }
+            TestWith(new DataField {
+                Name = "TestEnumeration0",
+                TagId = 0,
+            });
+            TestWith(new DataField {
+                Name = "TestEnumeration1",
+                TagId = 1,
+                Enumeration = new EnumerationDictionary {
+                    [1ul] = new EnumerationDetails("Name1", "Descr1"),
+                }
+            });
+            TestWith(new DataField {
+                Name = "TestEnumeration2",
                 TagId = 2,
-                Enumeration = new Dictionary<ulong, EnumerationDetails> {
+                Enumeration = new EnumerationDictionary {
                     [1ul] = new EnumerationDetails("Name1", "Descr1"),
                     [3ul] = new EnumerationDetails("Name3", null)
+                },
+                Description = "This with Flags kind of enumeration",
+                EnumerationAsFlags = true
+            });
+            TestWith(new DataField {
+                Name = "TestFields",
+                TagId = 3,
+                SubDataFields = new DataField[] {
+                    new DataField {
+                        Name = "Field1",
+                        TagId = 31
+                    },
+                    new DataField {
+                        Name = "Field2",
+                        TagId = 32
+                    },
                 }
-            };
-            var json = JsonSerializer.Serialize(datafield, _jsonOptions);
-            TestContext.WriteLine(json);
-            var payload = JsonSerializer.Deserialize<DataField>(json, _jsonOptions);
-            Assert.IsInstanceOf<DataField>(payload);
-            Assert.AreEqual(datafield, payload);
+            });
         }
 
         [Test]
@@ -187,7 +216,12 @@ namespace InterlockLedger.Tags
             Assert.Throws<OverflowException>(() => ILTag.DeserializeFromJson(ILTagId.UInt8, payload));
         }
 
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions {
+            AllowTrailingCommas = true,
+            WriteIndented = true,
+            IgnoreNullValues = true,
+            IgnoreReadOnlyProperties = true
+        };
 
         private static void TestTwiceWith<T>(T id) {
             var json = JsonSerializer.Serialize(id, _jsonOptions);

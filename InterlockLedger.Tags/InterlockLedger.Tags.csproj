@@ -10,11 +10,11 @@
       <Description>This library implements the basic TLV encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <PackageReleaseNotes>Delving deeper in System.Text.Json to have some missing behavior we had with Json.NET</PackageReleaseNotes>
+      <PackageReleaseNotes>Fix NPE</PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.0.2</Version>
+      <Version>3.0.3</Version>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

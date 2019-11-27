@@ -165,23 +165,23 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(ILTagId.UInt16, fieldVersion.TagId);
             Assert.AreEqual((ushort)1, fieldVersion.Version);
             Assert.IsTrue(fieldVersion.IsVersion);
-            Assert.IsFalse(fieldVersion.IsOptional);
-            Assert.IsFalse(fieldVersion.IsOpaque);
+            Assert.IsFalse(fieldVersion.IsOptional.GetValueOrDefault());
+            Assert.IsFalse(fieldVersion.IsOpaque.GetValueOrDefault());
             var fieldCipherText = fd.SubDataFields.Skip(1).First();
             Assert.AreEqual(nameof(EncryptedBlob.CipherText), fieldCipherText.Name);
             Assert.AreEqual(ILTagId.ByteArray, fieldCipherText.TagId);
             Assert.AreEqual((ushort)1, fieldCipherText.Version);
             Assert.IsFalse(fieldCipherText.IsVersion);
-            Assert.IsFalse(fieldCipherText.IsOptional);
-            Assert.IsTrue(fieldCipherText.IsOpaque);
+            Assert.IsFalse(fieldCipherText.IsOptional.GetValueOrDefault());
+            Assert.IsTrue(fieldCipherText.IsOpaque.GetValueOrDefault());
             var fieldKeys = fd.SubDataFields.Skip(2).First();
             Assert.AreEqual(nameof(EncryptedBlob.ReadingKeys), fieldKeys.Name);
             Assert.AreEqual(ILTagId.ILTagArray, fieldKeys.TagId);
             Assert.AreEqual((ushort)1, fieldKeys.Version);
             Assert.IsFalse(fieldKeys.IsVersion);
-            Assert.IsFalse(fieldKeys.IsOptional);
-            Assert.IsFalse(fieldKeys.IsOpaque);
-            Assert.AreEqual(ILTagId.ReadingKey, fieldKeys.ElementTagId);
+            Assert.IsFalse(fieldKeys.IsOptional.GetValueOrDefault());
+            Assert.IsFalse(fieldKeys.IsOpaque.GetValueOrDefault());
+            Assert.AreEqual(ILTagId.ReadingKey, fieldKeys.ElementTagId.GetValueOrDefault());
         }
     }
 }

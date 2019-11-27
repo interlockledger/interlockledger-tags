@@ -55,19 +55,20 @@ namespace InterlockLedger.Tags
 
         public DataField() => Version = 1;
 
-        public CastType Cast { get; set; }
+        public CastType? Cast { get; set; }
 
         public string Description { get; set; }
 
-        public ulong ElementTagId { get; set; }
+        public ulong? ElementTagId { get; set; }
 
         [JsonIgnore]
-        public Dictionary<ulong, EnumerationDetails> Enumeration { get; set; }
+        public EnumerationDictionary Enumeration { get; set; }
 
-        public bool EnumerationAsFlags { get; set; }
+        public bool? EnumerationAsFlags { get; set; }
 
+        [JsonPropertyName(nameof(Enumeration))]
         public EnumerationItems EnumerationItems {
-            get => new EnumerationItems(Enumeration);
+            get => Enumeration?.ToEnumerationItems();
             set => Enumeration = value?.UpdateFrom();
         }
 
@@ -79,9 +80,9 @@ namespace InterlockLedger.Tags
         public bool IsEnumeration => Enumeration.SafeAny();
 
         // treat as opaque byte array
-        public bool IsOpaque { get; set; }
+        public bool? IsOpaque { get; set; }
 
-        public bool IsOptional { get; set; }
+        public bool? IsOptional { get; set; }
 
         [JsonIgnore]
         public bool IsVersion => Name == "Version" && TagId == ILTagId.UInt16;
@@ -121,7 +122,7 @@ namespace InterlockLedger.Tags
             try {
                 if (Enumeration is null || Enumeration.Count == 0)
                     return "?";
-                if (!EnumerationAsFlags)
+                if (!EnumerationAsFlags.GetValueOrDefault())
                     return Enumeration.ContainsKey(number) ? Enumeration[number].Name : "?";
                 return Enumeration.Keys.Where(k => (number & k) == k && k > 0).Select(k => Enumeration[k].Name).JoinedBy("|");
             } catch {
@@ -166,7 +167,7 @@ namespace InterlockLedger.Tags
 
         private static readonly IEnumerable<KeyValuePair<ulong, EnumerationDetails>> _noEnumeration = Enumerable.Empty<KeyValuePair<ulong, EnumerationDetails>>();
 
-        private bool CompareEnumeration(DataField other) => Enumeration.SafeAny() ? Enumeration.SequenceEqual(other.Enumeration ?? _noEnumeration) : !other.Enumeration.SafeAny();
+        private bool CompareEnumeration(DataField other) => Enumeration.None() ? other.Enumeration.None() : Enumeration.SequenceEqual(other.Enumeration ?? _noEnumeration);
     }
 
     public class ILTagDataField : ILTagExplicit<DataField>
@@ -179,21 +180,19 @@ namespace InterlockLedger.Tags
 
         protected override DataField FromBytes(byte[] bytes) {
             ushort serVersion = 0;
-            return FromBytesHelper(bytes, s => {
-                return new DataField {
-                    Version = s.DecodeUShort(),
-                    TagId = s.DecodeILInt(),
-                    Name = s.DecodeString(),
-                    IsOptional = s.DecodeBool(),
-                    IsOpaque = s.DecodeBool(),
-                    ElementTagId = s.DecodeILInt(),
-                    SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
-                    Cast = s.HasBytes() ? (CastType)s.DecodeByte() : CastType.None,
-                    SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
-                    Description = (serVersion > 1) ? s.DecodeString() : null,
-                    Enumeration = (serVersion > 2) ? DecodeEnumeration(s) : null,
-                    EnumerationAsFlags = (serVersion > 3) && s.DecodeBool()
-                };
+            return FromBytesHelper(bytes, s => new DataField {
+                Version = s.DecodeUShort(),
+                TagId = s.DecodeILInt(),
+                Name = s.DecodeString(),
+                IsOptional = s.DecodeNullableBool(),
+                IsOpaque = s.DecodeNullableBool(),
+                ElementTagId = s.DecodeNullableILInt(),
+                SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
+                Cast = s.HasBytes() ? (CastType?)s.DecodeNullableByte() : null,
+                SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
+                Description = (serVersion > 1) ? s.DecodeString() : null,
+                Enumeration = (serVersion > 2) ? DecodeEnumeration(s) : null,
+                EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,
             });
         }
 
@@ -202,23 +201,23 @@ namespace InterlockLedger.Tags
                 s.EncodeUShort(Value.Version);
                 s.EncodeILInt(Value.TagId);
                 s.EncodeString(Value.Name);
-                s.EncodeBool(Value.IsOptional);
-                s.EncodeBool(Value.IsOpaque);
-                s.EncodeILInt(Value.ElementTagId);
+                s.EncodeBool(Value.IsOptional.GetValueOrDefault());
+                s.EncodeBool(Value.IsOpaque.GetValueOrDefault());
+                s.EncodeILInt(Value.ElementTagId.GetValueOrDefault());
                 s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
-                s.EncodeByte((byte)Value.Cast);
+                s.EncodeByte((byte)Value.Cast.GetValueOrDefault());
                 s.EncodeUShort(Value.SerializationVersion);
                 s.EncodeString(Value.Description);
                 EncodeEnumeration(s, Value.Enumeration);
-                s.EncodeBool(Value.EnumerationAsFlags);
+                s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
             });
 
-        private Dictionary<ulong, EnumerationDetails> DecodeEnumeration(Stream s) {
+        private EnumerationDictionary DecodeEnumeration(Stream s) {
             var triplets = s.DecodeArray<Triplet, Triplet.Tag>(s => new Triplet.Tag(s));
-            return triplets.SkipNulls().ToDictionary(t => t.Value, t => new EnumerationDetails(t.Name, t.Description));
+            return new EnumerationDictionary(triplets.SkipNulls().ToDictionary(t => t.Value, t => new EnumerationDetails(t.Name, t.Description)));
         }
 
-        private void EncodeEnumeration(Stream s, Dictionary<ulong, EnumerationDetails> enumeration)
+        private void EncodeEnumeration(Stream s, EnumerationDictionary enumeration)
             => s.EncodeTagArray(enumeration?.Select(p => new Triplet(p.Key, p.Value.Name, p.Value.Description).AsTag));
 
         private class Triplet : EnumerationDetails

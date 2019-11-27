@@ -53,23 +53,17 @@ namespace InterlockLedger.Tags
             throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<TT>).Name}");
         }
 
-        public static bool DecodeBool(this Stream s)
-            => s.Decode<ILTagBool>().Value;
+        public static bool DecodeBool(this Stream s) => s.Decode<ILTagBool>().Value;
 
-        public static byte DecodeByte(this Stream s)
-            => s.Decode<ILTagUInt8>().Value;
+        public static byte DecodeByte(this Stream s) => s.Decode<ILTagUInt8>().Value;
 
-        public static byte[] DecodeByteArray(this Stream s)
-            => s.Decode<ILTagByteArray>()?.Value;
+        public static byte[] DecodeByteArray(this Stream s) => s.Decode<ILTagByteArray>()?.Value;
 
-        public static InterlockColor DecodeColor(this Stream s)
-            => InterlockColor.From(s.Decode<ILTagUInt32>().Value);
+        public static InterlockColor DecodeColor(this Stream s) => InterlockColor.From(s.Decode<ILTagUInt32>().Value);
 
-        public static DateTimeOffset DecodeDateTimeOffset(this Stream s)
-            => s.DecodeILInt().AsDateTime();
+        public static DateTimeOffset DecodeDateTimeOffset(this Stream s) => s.DecodeILInt().AsDateTime();
 
-        public static Dictionary<string, string> DecodeDictionary(this Stream s)
-            => s.Decode<ILTagStringDictionary>()?.Value;
+        public static Dictionary<string, string> DecodeDictionary(this Stream s) => s.Decode<ILTagStringDictionary>()?.Value;
 
         public static Dictionary<string, T> DecodeDictionary<T>(this Stream s) where T : ILTag {
             var tagId = s.DecodeTagId();
@@ -78,17 +72,19 @@ namespace InterlockLedger.Tags
             throw new InvalidDataException($"Not a {typeof(ILTagDictionary<T>).Name}");
         }
 
-        public static ulong DecodeILInt(this Stream s)
-            => s.Decode<ILTagILInt>().Value;
+        public static ulong DecodeILInt(this Stream s) => s.Decode<ILTagILInt>().Value;
 
-        public static ulong[] DecodeILIntArray(this Stream s)
-            => s.Decode<ILTagArrayOfILInt>()?.Value;
+        public static ulong[] DecodeILIntArray(this Stream s) => s.Decode<ILTagArrayOfILInt>()?.Value;
 
-        public static int DecodeInt(this Stream s)
-            => s.Decode<ILTagInt32>().Value;
+        public static int DecodeInt(this Stream s) => s.Decode<ILTagInt32>().Value;
 
-        public static ulong? DecodeOptionalILInt(this Stream s)
-            => s.Decode<ILTagILInt>()?.Value;
+        public static bool? DecodeNullableBool(this Stream s) => NullableIfDefault(s.Decode<ILTagBool>().Value);
+
+        public static byte? DecodeNullableByte(this Stream s) => NullableIfDefault(s.Decode<ILTagUInt8>().Value);
+
+        public static ulong? DecodeNullableILInt(this Stream s) => NullableIfDefault(s.Decode<ILTagILInt>().Value);
+
+        public static ulong? DecodeOptionalILInt(this Stream s) => s.Decode<ILTagILInt>()?.Value;
 
         public static ILTag[] DecodeSequence(this Stream s) {
             var tagId = s.DecodeTagId();
@@ -125,5 +121,7 @@ namespace InterlockLedger.Tags
 
         public static Version DecodeVersion(this Stream s)
             => s.Decode<ILTagVersion>().Value;
+
+        private static T? NullableIfDefault<T>(T value) where T : struct => value.Equals(default(T)) ? (T?)null : value;
     }
 }

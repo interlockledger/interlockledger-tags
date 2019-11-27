@@ -30,25 +30,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace InterlockLedger.Tags
 {
-    public class JsonCustomConverter<T> : JsonConverter<T> where T : IJsonCustom<T>, new()
+    public class EnumerationDictionary : Dictionary<ulong, EnumerationDetails>
     {
-        public override bool CanConvert(Type typeToConvert) => typeToConvert == typeof(T) || typeToConvert.IsSubclassOf(typeof(T));
+        public EnumerationDictionary() { }
 
-        public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            => reader.TokenType == JsonTokenType.String ? new T().ResolveFrom(reader.GetString()) : throw new NotSupportedException();
+        public EnumerationDictionary(IDictionary<ulong, EnumerationDetails> dictionary) : base(dictionary) { }
 
-        public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) {
-            string t = value.TextualRepresentation;
-            if (t is null)
-                writer.WriteNullValue();
-            else
-                writer.WriteStringValue(t);
-        }
+        public EnumerationItems ToEnumerationItems() => new EnumerationItems(this);
     }
 }

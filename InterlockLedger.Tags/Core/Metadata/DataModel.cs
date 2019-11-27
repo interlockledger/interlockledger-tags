@@ -111,11 +111,11 @@ namespace InterlockLedger.Tags
                     return false; // Names diverge
                 if (oldField.Version > newField.Version)
                     return false; // Misversioning
-                if (oldField.TagId != newField.TagId && !oldField.IsOpaque)
+                if (oldField.TagId != newField.TagId && !oldField.IsOpaque.GetValueOrDefault())
                     return false; // Changing type is only allowed if previously it was an opaque type
                 if (oldField.ElementTagId != newField.ElementTagId)
                     return false; // Changing type of array elements is bad
-                if (newField.IsOpaque && !oldField.IsOpaque)
+                if (newField.IsOpaque.GetValueOrDefault() && !oldField.IsOpaque.GetValueOrDefault())
                     return false; // Can't make field opaque afterwards
                 if (oldField.HasSubFields && !CompareFields(oldField.SubDataFields, newField.SubDataFields))
                     return false; // Incompatible subfields
@@ -171,7 +171,7 @@ namespace InterlockLedger.Tags
 
         private static bool FindFieldInPath(string[] parts, int part, IEnumerable<DataField> fields) {
             var name = parts[part];
-            var field = fields?.FirstOrDefault(df => df.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !df.IsOpaque);
+            var field = fields?.FirstOrDefault(df => df.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !df.IsOpaque.GetValueOrDefault());
             if (field is null)
                 return false;
             if (part + 1 >= parts.Length)
