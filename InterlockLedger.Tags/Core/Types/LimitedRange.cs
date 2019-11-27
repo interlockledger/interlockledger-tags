@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
-
+ 
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -36,11 +36,13 @@ using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(LimitedRangeConverter))]
-    public struct LimitedRange : IEquatable<LimitedRange>
+    [JsonConverter(typeof(JsonCustomConverter<LimitedRange>))]
+    public struct LimitedRange : IEquatable<LimitedRange>, IJsonCustom<LimitedRange>
     {
         public readonly ulong End;
         public readonly ulong Start;
@@ -56,6 +58,8 @@ namespace InterlockLedger.Tags
                 End = start + count - 1;
             }
         }
+
+        public string TextualRepresentation => ToString();
 
         public static bool operator !=(LimitedRange left, LimitedRange right) => !(left == right);
 
@@ -87,6 +91,8 @@ namespace InterlockLedger.Tags
         }
 
         public bool OverlapsWith(LimitedRange other) => Contains(other.Start) || Contains(other.End) || other.Contains(Start);
+
+        public LimitedRange ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation);
 
         public override string ToString() => $"[{Start}{((End != Start) ? ("-" + End) : "")}]";
 

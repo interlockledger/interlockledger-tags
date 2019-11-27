@@ -1,8 +1,34 @@
 /******************************************************************************************************************************
- *
- *      Copyright (c) 2017-2019 InterlockLedger Network
- *
- ******************************************************************************************************************************/
+ 
+Copyright (c) 2018-2019 InterlockLedger Network
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+******************************************************************************************************************************/
 
 using System;
 using System.Collections.Generic;
@@ -15,13 +41,6 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class ILTagJsonTests
     {
-        [OneTimeSetUp]
-        public void _SetupConverters() {
-            _jsonOptions.Converters.Add(new JsonInterlockIdConverter());
-            _jsonOptions.Converters.Add(new JsonCustomConverter<EnumerationItems>());
-            _jsonOptions.Converters.Add(new JsonCustomConverter<InterlockColor>());
-        }
-
         [TestCase("true", TestName = "BoolFromJsonTrue", ExpectedResult = true)]
         [TestCase("false", TestName = "BoolFromJsonFalse", ExpectedResult = false)]
         public bool BoolFrom(string json) {
@@ -47,6 +66,15 @@ namespace InterlockLedger.Tags
             var payload = JsonSerializer.Deserialize<DataField>(json, _jsonOptions);
             Assert.IsInstanceOf<DataField>(payload);
             Assert.AreEqual(datafield, payload);
+        }
+
+        [Test]
+        public void ILTagVersionConverter() {
+            TestTwiceWith(new ILTagVersion(new Version(1, 0, 0)));
+            TestTwiceWith(new ILTagVersion(new Version(1, 2, 3, 4)));
+            TestTwiceWith(new ILTagVersion(new Version(3, 0)));
+            TestTwiceWith(new ILTagVersion(new Version()));
+            TestTwiceWith(new ILTagVersion());
         }
 
         [TestCase("0", TestName = "Int8FromJson0", ExpectedResult = (sbyte)0)]
@@ -91,12 +119,18 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void InterlockIdConverter() {
-            var owner = new OwnerId("Tester".HashOf());
-            var json = JsonSerializer.Serialize(owner, _jsonOptions);
-            TestContext.WriteLine(json);
-            var payload = JsonSerializer.Deserialize<BaseKeyId>(json, _jsonOptions);
-            Assert.IsInstanceOf<OwnerId>(payload);
-            Assert.AreEqual(owner, payload);
+            TestTwiceWith(new OwnerId("Tester".HashOf()));
+            TestTwiceWith(new KeyId("Tester".HashOf()));
+        }
+
+        [Test]
+        public void LimitedRangeConverter() {
+            TestTwiceWith(new LimitedRange(100));
+            TestTwiceWith(new LimitedRange());
+            TestTwiceWith(new LimitedRange(200, 50));
+            TestTwiceWith(new ILTagRange(new LimitedRange(300, 50)));
+            TestTwiceWith(new ILTagRange(new LimitedRange(400)));
+            TestTwiceWith(new ILTagRange(new LimitedRange()));
         }
 
         [TestCase("", TestName = "NullFromJsonStringEmpty")]
@@ -117,6 +151,14 @@ namespace InterlockLedger.Tags
             var tag = ILTag.DeserializeFromJson(ILTagId.String, payload);
             Assert.AreEqual(payload, tag.AsJson);
             Assert.IsInstanceOf<ILTagString>(tag);
+        }
+
+        [Test]
+        public void TagHashConverter() {
+            TestTwiceWith(TagHash.Empty);
+            TestTwiceWith(new TagHash(HashAlgorithm.SHA3_256, TagHash.HashSha256Of(TagHash.Empty.Data).Data));
+            TestTwiceWith(new TagHash());
+            TestTwiceWith(TagHash.HashSha256Of(new byte[] { 3, 2, 1 }));
         }
 
         [TestCase("true")]
@@ -147,6 +189,20 @@ namespace InterlockLedger.Tags
 
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
 
+        private static void TestTwiceWith<T>(T id) {
+            var json = JsonSerializer.Serialize(id, _jsonOptions);
+            TestContext.WriteLine(json);
+            var payload = JsonSerializer.Deserialize<T>(json, _jsonOptions);
+            Assert.IsInstanceOf<T>(payload);
+            Assert.AreEqual(id, payload);
+            var wrapper = new WrapperOf<T> { Item = id };
+            var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
+            TestContext.WriteLine(biggerJson);
+            var biggerPayload = JsonSerializer.Deserialize<WrapperOf<T>>(biggerJson, _jsonOptions);
+            Assert.IsInstanceOf<WrapperOf<T>>(biggerPayload);
+            Assert.AreEqual(wrapper, biggerPayload);
+        }
+
         private class ColorWrapper : IEquatable<ColorWrapper>
         {
             public ColorWrapper() { }
@@ -168,6 +224,21 @@ namespace InterlockLedger.Tags
             public bool Equals([AllowNull] ColorWrapper other) => other != null && EqualityComparer<InterlockColor>.Default.Equals(Background, other.Background) && EqualityComparer<InterlockColor>.Default.Equals(Foreground, other.Foreground);
 
             public override int GetHashCode() => HashCode.Combine(Background, Foreground);
+        }
+
+        private class WrapperOf<T> : IEquatable<WrapperOf<T>>
+        {
+            public T Item { get; set; }
+
+            public static bool operator !=(WrapperOf<T> left, WrapperOf<T> right) => !(left == right);
+
+            public static bool operator ==(WrapperOf<T> left, WrapperOf<T> right) => EqualityComparer<WrapperOf<T>>.Default.Equals(left, right);
+
+            public override bool Equals(object obj) => Equals(obj as WrapperOf<T>);
+
+            public bool Equals([AllowNull] WrapperOf<T> other) => other != null && EqualityComparer<T>.Default.Equals(Item, other.Item);
+
+            public override int GetHashCode() => HashCode.Combine(Item);
         }
     }
 }

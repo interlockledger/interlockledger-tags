@@ -1,8 +1,34 @@
 /******************************************************************************************************************************
- *
- *      Copyright (c) 2017-2019 InterlockLedger Network
- *
- ******************************************************************************************************************************/
+ 
+Copyright (c) 2018-2019 InterlockLedger Network
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+******************************************************************************************************************************/
 
 using System;
 using System.Collections.Generic;
@@ -11,10 +37,12 @@ using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(InterlockIdConverter))]
+    [JsonConverter(typeof(JsonInterlockIdConverter))]
     public class InterlockId : ILTagExplicit<InterlockIdParts>, IEquatable<InterlockId>, IComparable<InterlockId>
     {
         public static byte DefaultType {
@@ -58,7 +86,7 @@ namespace InterlockLedger.Tags
 
         public bool Equals(InterlockId other) => (!(other is null)) && Type == other.Type && Algorithm == other.Algorithm && DataEquals(other.Data);
 
-        public override int GetHashCode() => -1_574_110_226 + DataHashCode + Algorithm.GetHashCode();
+        public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
 
         public string ToFullString() => Value.ToFullString();
 
@@ -95,7 +123,7 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes() => ToBytesHelper(s => Value.ToStream(s));
 
-        private int DataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
+        private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 
         private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
 
@@ -140,8 +168,7 @@ namespace InterlockLedger.Tags
         public byte[] Data;
         public byte Type;
 
-        public InterlockIdParts() {
-        }
+        public InterlockIdParts() { }
 
         public override string ToString() => ToShortString();
 
@@ -165,7 +192,7 @@ namespace InterlockLedger.Tags
                 var parts = textualRepresentation.Split(_suffixSeparator);
                 return (parts[0], algorithm: parts.Length < 2 ? _defaultAlgorithm : ToHashAlgorithm(parts[1]));
             }
-            (string strippedOfSuffix, HashAlgorithm algorithm) = ParseSuffix(NormalizePrefix(textualRepresentation));
+            (string strippedOfSuffix, var algorithm) = ParseSuffix(NormalizePrefix(textualRepresentation));
             var parts = strippedOfSuffix.Split(_prefixSeparator);
             Algorithm = algorithm;
             Data = parts[1].FromSafeBase64();
@@ -190,9 +217,9 @@ namespace InterlockLedger.Tags
             throw new InvalidDataException($"Could not match this InterlockId type {Type}");
         }
 
-        internal string ToFullString() => $"{TypePrefix}{DataInfix}{AlgorithmSuffix}";
+        internal string ToFullString() => $"{_typePrefix}{_dataInfix}{_algorithmSuffix}";
 
-        internal string ToShortString() => $"{ConditionalTypePrefix}{DataInfix}{ConditionalAlgorithmSuffix}";
+        internal string ToShortString() => $"{_conditionalTypePrefix}{_dataInfix}{_conditionalAlgorithmSuffix}";
 
         internal void ToStream(Stream s) => s.WriteSingleByte(Type).BigEndianWriteUShort((ushort)Algorithm).WriteBytes(Data);
 
@@ -203,11 +230,11 @@ namespace InterlockLedger.Tags
         private static readonly Dictionary<byte, (string typeName, Func<InterlockIdParts, InterlockId> resolver)> _knownTypes =
             new Dictionary<byte, (string typeName, Func<InterlockIdParts, InterlockId> resolver)>();
 
-        private string AlgorithmSuffix => $"{_suffixSeparator}{Algorithm}";
-        private string ConditionalAlgorithmSuffix => Algorithm == _defaultAlgorithm ? string.Empty : AlgorithmSuffix;
-        private string ConditionalTypePrefix => Type == DefaultType ? string.Empty : TypePrefix;
-        private string DataInfix => Data?.ToSafeBase64() ?? string.Empty;
-        private string TypePrefix => BuildTypePrefix(Type);
+        private string _algorithmSuffix => $"{_suffixSeparator}{Algorithm}";
+        private string _conditionalAlgorithmSuffix => Algorithm == _defaultAlgorithm ? string.Empty : _algorithmSuffix;
+        private string _conditionalTypePrefix => Type == DefaultType ? string.Empty : _typePrefix;
+        private string _dataInfix => Data?.ToSafeBase64() ?? string.Empty;
+        private string _typePrefix => BuildTypePrefix(Type);
 
         private static string BuildTypePrefix(byte type) => $"{ToTypeName(type)}{_prefixSeparator}";
 

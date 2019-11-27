@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
-
+ 
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -31,9 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Collections;
 
 namespace InterlockLedger.Tags
 {

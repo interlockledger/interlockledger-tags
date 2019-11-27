@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
-
+ 
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -40,6 +40,7 @@ using System.Text.Json.Serialization;
 namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(InterlockColorConverter))]
+    [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
     public struct InterlockColor : IJsonCustom<InterlockColor>
     {
         public static readonly InterlockColor AliceBlue = new InterlockColor(240, 248, 255, "AliceBlue");

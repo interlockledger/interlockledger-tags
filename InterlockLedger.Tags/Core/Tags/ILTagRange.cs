@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
-
+ 
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -30,19 +30,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagRange : ILTagExplicit<LimitedRange>
+    [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
+    public class ILTagRange : ILTagExplicit<LimitedRange>, IJsonCustom<ILTagRange>, IEquatable<ILTagRange>
     {
-        public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) {
-        }
+        public ILTagRange() : this(new LimitedRange()) { }
 
-        public override object AsJson => Value.ToString();
+        public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
 
-        internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
-        }
+        public override object AsJson => Value;
+        public override string Formatted => TextualRepresentation;
+        public string TextualRepresentation => Value.TextualRepresentation;
+
+        public static bool operator !=(ILTagRange left, ILTagRange right) => !(left == right);
+
+        public static bool operator ==(ILTagRange left, ILTagRange right) => EqualityComparer<ILTagRange>.Default.Equals(left, right);
+
+        public override bool Equals(object obj) => Equals(obj as ILTagRange);
+
+        public bool Equals(ILTagRange other) => other != null && TextualRepresentation == other.TextualRepresentation;
+
+        public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
+
+        public ILTagRange ResolveFrom(string textualRepresentation) => new ILTagRange(new LimitedRange().ResolveFrom(textualRepresentation));
+
+        internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
 
         protected override LimitedRange FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
-
+ 
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -37,14 +37,11 @@ namespace InterlockLedger.Tags
 {
     public abstract class ILTagExplicit<T> : ILTagImplicit<T>
     {
-        public static byte[] ToBytesHelper(Action<Stream> serialize)
-            => TagHelpers.ToBytesHelper(serialize);
+        public static byte[] ToBytesHelper(Action<Stream> serialize) => TagHelpers.ToBytesHelper(serialize);
 
-        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
-        }
+        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) { }
 
-        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null) : base(s, alreadyDeserializedTagId, setup) {
-        }
+        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null) : base(s, alreadyDeserializedTagId, setup) { }
 
         protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
             if (bytes == null || bytes.Length == 0)
@@ -56,8 +53,7 @@ namespace InterlockLedger.Tags
             return deserialize(s);
         }
 
-        protected sealed override T DeserializeInner(Stream s)
-            => FromBytes(s.ReadBytes((int)s.ILIntDecode()));
+        protected sealed override T DeserializeInner(Stream s) => FromBytes(s.ReadBytes((int)s.ILIntDecode()));
 
         protected abstract T FromBytes(byte[] bytes);
 

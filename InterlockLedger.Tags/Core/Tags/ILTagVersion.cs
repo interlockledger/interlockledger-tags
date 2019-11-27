@@ -31,19 +31,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagVersion : ILTagExplicit<Version>
+    [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
+    public class ILTagVersion : ILTagExplicit<Version>, IJsonCustom<ILTagVersion>, IEquatable<ILTagVersion>
     {
+        public ILTagVersion() : this(new Version()) { }
+
         public ILTagVersion(Version version) : base(ILTagId.Version, version) {
         }
 
-        public override object AsJson => Value.ToString(4);
+        public override object AsJson => this;
 
-        internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
-        }
+        public string TextualRepresentation => Value.ToString();
+
+        public static bool operator !=(ILTagVersion left, ILTagVersion right) => !(left == right);
+
+        public static bool operator ==(ILTagVersion left, ILTagVersion right) => EqualityComparer<ILTagVersion>.Default.Equals(left, right);
+
+        public override bool Equals(object obj) => Equals(obj as ILTagVersion);
+
+        public bool Equals(ILTagVersion other) => other != null && TextualRepresentation == other.TextualRepresentation;
+
+        public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
+
+        public ILTagVersion ResolveFrom(string textualRepresentation) => new ILTagVersion(Version.Parse(textualRepresentation));
+
+        internal ILTagVersion(Stream s) : base(ILTagId.Version, s) { }
 
         protected override Version FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
