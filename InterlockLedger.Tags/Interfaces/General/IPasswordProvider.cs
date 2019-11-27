@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -34,7 +34,8 @@ namespace InterlockLedger.Tags
 {
     public interface IPasswordProvider
     {
-        string PasswordFor(InterlockId id);
         OwnerId OwnerId { get; }
+
+        string PasswordFor(InterlockId id);
     }
 }

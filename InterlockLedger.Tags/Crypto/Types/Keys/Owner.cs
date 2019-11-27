@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -51,6 +51,8 @@ namespace InterlockLedger.Tags
         public IEnumerable<ulong> SpecificActions => Enumerable.Empty<ulong>();
         public KeyStrength Strength { get; protected set; }
 
+        public abstract byte[] Decrypt(byte[] bytes);
+
         public string PasswordFor(InterlockId id) {
             if (id is null)
                 throw new ArgumentNullException(nameof(id));
@@ -64,7 +66,6 @@ namespace InterlockLedger.Tags
         public string ToShortString() => $"Owner {Name} using {SignAlgorithm} with {Strength} strength ({Id})";
 
         public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {CurrentPublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
-        public abstract byte[] Decrypt(byte[] bytes);
 
         protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.KeyManagement, KeyPurpose.Action, KeyPurpose.ClaimSigner, KeyPurpose.Protocol };
     }

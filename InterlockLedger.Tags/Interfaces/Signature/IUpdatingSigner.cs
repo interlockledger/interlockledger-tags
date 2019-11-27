@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -41,7 +41,8 @@ namespace InterlockLedger.Tags
         TagPubKey NextPublicKey { get; }
         ulong SignaturesWithCurrentKey { get; }
 
-        void RegenerateKeys();
         IUpdatingSigner DestroyKeys();
+
+        void RegenerateKeys();
     }
 }

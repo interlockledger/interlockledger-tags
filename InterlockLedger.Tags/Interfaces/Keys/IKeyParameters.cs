@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags
 {
     public interface IKeyParameters
     {
-        TagPubKey PublicKey { get; }
         byte[] EncodedBytes { get; }
+        TagPubKey PublicKey { get; }
     }
 }

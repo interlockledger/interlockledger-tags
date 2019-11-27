@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -34,9 +34,9 @@ namespace InterlockLedger.Tags
 {
     public class ExportedKeyFile
     {
-        public readonly string KeyName;
-        public readonly string KeyFileName;
         public readonly byte[] KeyFileBytes;
+        public readonly string KeyFileName;
+        public readonly string KeyName;
 
         public ExportedKeyFile(string keyName, string keyFileName, byte[] keyFileBytes) {
             if (string.IsNullOrWhiteSpace(keyName))

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -36,8 +36,8 @@ namespace InterlockLedger.Tags
 {
     public interface IKeyStorageProvider : IKeyFileExporter
     {
-        IEnumerable<InterlockSigningKeyData> Keys { get; }
         string AppKeysFolderPath { get; }
+        IEnumerable<InterlockSigningKeyData> Keys { get; }
 
         InterlockSigningKeyData Create(KeyPurpose[] purposes, ulong appId, IEnumerable<ulong> actionIds, Algorithm algorithm, KeyStrength strength, string name, string description, string password);
 

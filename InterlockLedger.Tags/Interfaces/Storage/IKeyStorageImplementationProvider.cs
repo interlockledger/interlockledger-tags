@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -35,8 +35,8 @@ namespace InterlockLedger.Tags
     public interface IKeyStorageImplementationProvider : IKeyStorageProvider
     {
         string Name { get; }
-        bool SupportsKeyCreation { get; }
         bool SupportsCertificateImport { get; }
+        bool SupportsKeyCreation { get; }
 
         bool SupportsAlgorithm(Algorithm algorithm);
     }

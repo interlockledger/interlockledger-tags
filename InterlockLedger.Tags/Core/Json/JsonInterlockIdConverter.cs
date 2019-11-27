@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -46,5 +46,4 @@ namespace InterlockLedger.Tags
         public override void Write(Utf8JsonWriter writer, InterlockId value, JsonSerializerOptions options)
             => writer.WriteStringValue(value.TextualRepresentation);
     }
-
 }

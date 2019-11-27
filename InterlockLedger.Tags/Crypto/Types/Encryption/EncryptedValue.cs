@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -57,7 +57,7 @@ namespace InterlockLedger.Tags
 
         public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => (Decrypt(reader, findEngine) as ILTagByteArray)?.Value;
 
-        public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm,ISymmetricEngine> findEngine) {
+        public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
             if (reader is null)
                 throw new ArgumentNullException(nameof(reader));
             if (findEngine is null)

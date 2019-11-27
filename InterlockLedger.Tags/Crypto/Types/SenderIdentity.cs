@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -46,6 +46,7 @@ namespace InterlockLedger.Tags
         }
 
         public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey()) { }
+
         public override string ToString() => $"Sender {Id} with public key {PublicKey}";
     }
 }

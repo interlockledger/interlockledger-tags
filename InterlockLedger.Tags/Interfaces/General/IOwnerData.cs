@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -34,11 +34,11 @@ namespace InterlockLedger.Tags
 {
     public interface IOwnerData
     {
+        Algorithm Algorithm { get; }
         string Description { get; }
         string Email { get; }
-        string Name { get; }
-        Algorithm Algorithm { get; }
-        KeyStrength Strength { get; }
         BaseKeyId Id { get; }
+        string Name { get; }
+        KeyStrength Strength { get; }
     }
 }
