@@ -69,9 +69,9 @@ namespace InterlockLedger.Tags
 
             public override int GetHashCode() {
                 var hashCode = -1433170334;
-                hashCode = hashCode * -1521134295 + EqualityComparer<TagPubKey>.Default.GetHashCode(PublicKey);
-                hashCode = hashCode * -1521134295 + EqualityComparer<TagSignature>.Default.GetHashCode(Signature);
-                hashCode = hashCode * -1521134295 + EqualityComparer<BaseKeyId>.Default.GetHashCode(SignerId);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<TagPubKey>.Default.GetHashCode(PublicKey);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<TagSignature>.Default.GetHashCode(Signature);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<BaseKeyId>.Default.GetHashCode(SignerId);
                 return hashCode;
             }
 

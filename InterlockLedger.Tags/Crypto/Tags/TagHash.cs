@@ -51,7 +51,8 @@ namespace InterlockLedger.Tags
     {
         public static readonly TagHash Empty = new TagHash(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
 
-        public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) { }
+        public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) {
+        }
 
         public TagHash(HashAlgorithm algorithm, byte[] data) : base(ILTagId.Hash, new TagHashParts { Algorithm = algorithm, Data = data }) {
         }
@@ -59,11 +60,11 @@ namespace InterlockLedger.Tags
         public TagHash(string textualRepresentation) : base(ILTagId.Hash, Split(textualRepresentation)) {
         }
 
+        public HashAlgorithm Algorithm => Value.Algorithm;
         public override object AsJson => TextualRepresentation;
+        public byte[] Data => Value.Data;
         public override string Formatted => TextualRepresentation;
         public string TextualRepresentation => ToString();
-        public HashAlgorithm Algorithm => Value.Algorithm;
-        public byte[] Data => Value.Data;
 
         [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SafeAny takes care")]
         public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
@@ -124,7 +125,7 @@ namespace InterlockLedger.Tags
             return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
         }
 
-        private bool DataEquals(byte[] otherData) => IsNullOrEmpty(Data) && IsNullOrEmpty(otherData) || Data.HasSameBytesAs(otherData);
+        private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
     }
 
     public class TagHashConverter : TypeConverter

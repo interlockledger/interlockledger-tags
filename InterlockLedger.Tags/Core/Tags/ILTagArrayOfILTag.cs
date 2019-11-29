@@ -87,10 +87,16 @@ namespace InterlockLedger.Tags
         private static T[] Elicit(object o) {
             if (o is Dictionary<string, object> dictionary) {
                 var elementTagId = Convert.ToUInt64(dictionary[nameof(JsonRepresentation.ElementTagId)]);
-                if (dictionary[nameof(JsonRepresentation.Elements)] is List<object> elements) {
+                if (dictionary[nameof(JsonRepresentation.Elements)] is IEnumerable<object> elements) {
                     var list = new List<T>();
                     foreach (var item in elements) {
-                        list.Add(DeserializeFromJson(elementTagId, item) as T);
+                        if (item is ILTag tag) {
+                            if (tag.TagId != elementTagId || !(tag is T))
+                                throw new InvalidCastException($"Value in Array is a tag {tag.TagId} != {elementTagId}");
+                            list.Add((T)tag);
+                        } else {
+                            list.Add(DeserializeFromJson(elementTagId, item) as T);
+                        }
                     }
                     return list.ToArray();
                 }

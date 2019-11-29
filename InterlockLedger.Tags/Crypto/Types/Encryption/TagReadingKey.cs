@@ -75,10 +75,10 @@ namespace InterlockLedger.Tags
 
             public override int GetHashCode() {
                 var hashCode = 390428901;
-                hashCode = hashCode * -1521134295 + EqualityComparer<byte[]>.Default.GetHashCode(EncryptedIV);
-                hashCode = hashCode * -1521134295 + EqualityComparer<byte[]>.Default.GetHashCode(EncryptedKey);
-                hashCode = hashCode * -1521134295 + EqualityComparer<TagHash>.Default.GetHashCode(PublickKeyHash);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ReaderId);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(EncryptedIV);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(EncryptedKey);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<TagHash>.Default.GetHashCode(PublickKeyHash);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ReaderId);
                 return hashCode;
             }
 

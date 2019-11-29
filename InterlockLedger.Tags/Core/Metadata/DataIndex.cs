@@ -64,9 +64,9 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() {
             var hashCode = 2121638569;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementsAsString);
-            hashCode = hashCode * -1521134295 + IsUnique.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ElementsAsString);
+            hashCode = (hashCode * -1521134295) + IsUnique.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Name);
             return hashCode;
         }
 

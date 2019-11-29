@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
 
         public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
 
-        public override object AsJson => Value;
+        public override object AsJson => this;
         public override string Formatted => TextualRepresentation;
         public string TextualRepresentation => Value.TextualRepresentation;
 

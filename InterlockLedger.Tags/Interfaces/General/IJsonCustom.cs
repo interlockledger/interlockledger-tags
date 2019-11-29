@@ -32,10 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace InterlockLedger.Tags
 {
-    public interface IJsonCustom<T>
+    public interface IJsonCustom<T> : IJsonCustomized
+    {
+        T ResolveFrom(string textualRepresentation);
+    }
+
+    public interface IJsonCustomized
     {
         string TextualRepresentation { get; }
-
-        T ResolveFrom(string textualRepresentation);
     }
 }

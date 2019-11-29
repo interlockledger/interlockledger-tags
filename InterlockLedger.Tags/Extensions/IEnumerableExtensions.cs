@@ -38,8 +38,8 @@ namespace InterlockLedger.Tags
 {
     public static class IEnumerableExtensions
     {
-        public static IEnumerable<T> AsList<T>(this IEnum items) where T : class => AsNavigableList(items).Select(o => o as T);
+        public static IEnumerable<T> AsList<T>(this IEnum items) where T : class => (items).AsNavigableList().Select(o => o as T).ToArray();
 
-        public static IEnumerable<object> AsNavigableList(IEnum items) => from object item in items select item.AsNavigable();
+        public static IEnumerable<object> AsNavigableList(this IEnum items) => from object item in items select item.AsNavigable();
     }
 }

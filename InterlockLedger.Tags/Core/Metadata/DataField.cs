@@ -149,17 +149,17 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() {
             var hashCode = 679_965_117;
-            hashCode = hashCode * -1_521_134_295 + TagId.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + IsOptional.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + IsOpaque.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + EqualityComparer<string>.Default.GetHashCode(Name ?? string.Empty);
-            hashCode = hashCode * -1_521_134_295 + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(SubDataFields ?? Enumerable.Empty<DataField>());
-            hashCode = hashCode * -1_521_134_295 + Cast.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + ElementTagId.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + Version.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + SerializationVersion.GetHashCode();
-            hashCode = hashCode * -1_521_134_295 + EqualityComparer<string>.Default.GetHashCode(Description ?? string.Empty);
-            hashCode = hashCode * -1_521_134_295 + (Enumeration ?? _noEnumeration).GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + TagId.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + IsOptional.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + IsOpaque.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + EqualityComparer<string>.Default.GetHashCode(Name ?? string.Empty);
+            hashCode = (hashCode * -1_521_134_295) + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(SubDataFields ?? Enumerable.Empty<DataField>());
+            hashCode = (hashCode * -1_521_134_295) + Cast.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + ElementTagId.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + Version.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + SerializationVersion.GetHashCode();
+            hashCode = (hashCode * -1_521_134_295) + EqualityComparer<string>.Default.GetHashCode(Description ?? string.Empty);
+            hashCode = (hashCode * -1_521_134_295) + (Enumeration ?? _noEnumeration).GetHashCode();
             return hashCode;
         }
 
@@ -230,9 +230,11 @@ namespace InterlockLedger.Tags
 
             public class Tag : ILTagExplicit<Triplet>
             {
-                public Tag(Triplet v) : base(0, v) { }
+                public Tag(Triplet v) : base(0, v) {
+                }
 
-                public Tag(Stream s) : base(s.DecodeTagId(), s) { }
+                public Tag(Stream s) : base(s.DecodeTagId(), s) {
+                }
 
                 protected override Triplet FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
 

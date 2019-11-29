@@ -40,7 +40,8 @@ namespace InterlockLedger.Tags
     [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
     public class ILTagVersion : ILTagExplicit<Version>, IJsonCustom<ILTagVersion>, IEquatable<ILTagVersion>
     {
-        public ILTagVersion() : this(new Version()) { }
+        public ILTagVersion() : this(new Version()) {
+        }
 
         public ILTagVersion(Version version) : base(ILTagId.Version, version) {
         }
@@ -48,6 +49,8 @@ namespace InterlockLedger.Tags
         public override object AsJson => this;
 
         public string TextualRepresentation => Value.ToString();
+
+        public static ILTagVersion FromJson(object o) => new ILTagVersion(new Version((string)o));
 
         public static bool operator !=(ILTagVersion left, ILTagVersion right) => !(left == right);
 
@@ -61,7 +64,8 @@ namespace InterlockLedger.Tags
 
         public ILTagVersion ResolveFrom(string textualRepresentation) => new ILTagVersion(Version.Parse(textualRepresentation));
 
-        internal ILTagVersion(Stream s) : base(ILTagId.Version, s) { }
+        internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
+        }
 
         protected override Version FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));

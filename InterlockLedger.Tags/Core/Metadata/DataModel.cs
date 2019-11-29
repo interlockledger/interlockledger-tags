@@ -72,12 +72,12 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() {
             var hashCode = -874208485;
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(DataFields);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<DataIndex>>.Default.GetHashCode(Indexes);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PayloadName);
-            hashCode = hashCode * -1521134295 + PayloadTagId.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
-            hashCode = hashCode * -1521134295 + Version.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(DataFields);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<IEnumerable<DataIndex>>.Default.GetHashCode(Indexes);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(PayloadName);
+            hashCode = (hashCode * -1521134295) + PayloadTagId.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Description);
+            hashCode = (hashCode * -1521134295) + Version.GetHashCode();
             return hashCode;
         }
 
@@ -195,10 +195,16 @@ namespace InterlockLedger.Tags
                 if (isVersioned && firstField)
                     version = Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
                 firstField = false;
-                var item = ILTag.HasDeserializer(field.TagId)
-                    ? ILTag.DeserializeFromJson(field.TagId, fieldValue)
-                    : DeserializePartialFromJson(field, fieldValue);
-                tags.Add(item);
+                if (fieldValue is ILTag tag) {
+                    if (tag.TagId != field.TagId)
+                        throw new InvalidCastException($"Value for field {field.Name} is a tag {tag.TagId} != {field.TagId}");
+                    tags.Add(tag);
+                } else {
+                    var item = ILTag.HasDeserializer(field.TagId)
+                        ? ILTag.DeserializeFromJson(field.TagId, fieldValue)
+                        : DeserializePartialFromJson(field, fieldValue);
+                    tags.Add(item);
+                }
             }
             var tagsAsBytes = tags.Select(t => t.EncodedBytes).SelectMany(b => b).ToArray();
             if (json.ContainsKey("_RemainingBytes_")) {

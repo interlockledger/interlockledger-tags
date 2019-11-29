@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 using IEnum = System.Collections.IEnumerable;
@@ -43,7 +44,7 @@ namespace InterlockLedger.Tags
         public static object AsNavigable(this object value) {
             if (value is null)
                 return null;
-            if (value.GetType().IsPrimitive || value is string)
+            if (value.GetType().IsPrimitive || value is string || value is IJsonCustomized)
                 return value;
             if (value is JsonElement jo)
                 return AsILTag(FromJsonElement(jo));
@@ -56,6 +57,7 @@ namespace InterlockLedger.Tags
 
         public static string PadRight(this object value, int totalWidth) => value.ToString().PadRight(totalWidth);
 
+        [SuppressMessage("Style", "RCS1196:Call extension method as instance method.", Justification = "Better clarity about reuse of method name")]
         public static string WithDefault(this object value, string @default) => StringExtensions.WithDefault(value?.ToString(), @default);
 
         private static object AsILTag(object o)
@@ -85,8 +87,6 @@ namespace InterlockLedger.Tags
                     return value;
                 return jo.GetInt64();
 
-            case JsonValueKind.Null:
-            case JsonValueKind.Undefined:
             default:
                 return null;
             }
@@ -94,8 +94,12 @@ namespace InterlockLedger.Tags
 
         private static Dictionary<string, object> ToDictionary(object value) {
             var dictionary = new Dictionary<string, object>();
-            foreach (var p in value.GetType().GetProperties())
-                dictionary[p.Name] = AsNavigable(p.GetValue(value, null));
+            foreach (var p in value.GetType().GetProperties()) {
+                object propertyValue = p.GetValue(value, null);
+                object navigable = AsNavigable(propertyValue);
+                dictionary[p.Name] = navigable;
+            }
+
             return dictionary;
         }
     }

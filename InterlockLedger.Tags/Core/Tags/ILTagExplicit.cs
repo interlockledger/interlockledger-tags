@@ -39,9 +39,11 @@ namespace InterlockLedger.Tags
     {
         public static byte[] ToBytesHelper(Action<Stream> serialize) => TagHelpers.ToBytesHelper(serialize);
 
-        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) { }
+        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
+        }
 
-        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null) : base(s, alreadyDeserializedTagId, setup) { }
+        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null) : base(s, alreadyDeserializedTagId, setup) {
+        }
 
         protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
             if (bytes == null || bytes.Length == 0)
