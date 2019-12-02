@@ -37,6 +37,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
@@ -62,8 +63,10 @@ namespace InterlockLedger.Tags
     }
 
     [TypeConverter(typeof(TagPubKeyConverter))]
-    public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>
+    [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
+    public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, IJsonCustom<TagPubKey>
     {
+        public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
         public virtual KeyStrength Strength => KeyStrength.Normal;
         public string TextualRepresentation => ToString();
         public Algorithm Algorithm => Value.Algorithm;
@@ -100,6 +103,8 @@ namespace InterlockLedger.Tags
             hashCode = (hashCode * -1521134295) + Data.SafeGetHashCode();
             return hashCode;
         }
+
+        public TagPubKey ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation);
 
         public override string ToString() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
 

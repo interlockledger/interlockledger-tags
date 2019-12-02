@@ -142,7 +142,7 @@ namespace InterlockLedger.Tags
                 [ILTagId.Range] = (s => new ILTagRange(s), o => new ILTagRange(LimitedRange.Resolve((string)o))),
                 [ILTagId.Dictionary] = (s => new ILTagDictionary<ILTag>(s), o => new ILTagDictionary<ILTag>(o)),
                 [ILTagId.StringDictionary] = (s => new ILTagStringDictionary(s), o => new ILTagStringDictionary(o)),
-                [ILTagId.PubKey] = (s => TagPubKey.Resolve(s), NoJson),
+                [ILTagId.PubKey] = (s => TagPubKey.Resolve(s), o => TagPubKey.Resolve((string)o)),
                 [ILTagId.Signature] = (s => new TagSignature(s), NoJson),
                 [ILTagId.Hash] = (s => new TagHash(s), o => TagHash.From((string)o)),
                 [ILTagId.PublicRSAParameters] = (s => new TagPublicRSAParameters(s), NoJson),

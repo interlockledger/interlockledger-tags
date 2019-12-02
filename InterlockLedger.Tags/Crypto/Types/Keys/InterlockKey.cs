@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using InterlockLedger.Tags;
 
 namespace InterlockLedger.Tags
@@ -122,16 +123,6 @@ namespace InterlockLedger.Tags
     public class InterlockKeyParts
     {
         public const ushort InterlockKeyVersion = 0x0003;
-        public ulong AppId;
-        public string Description;
-        public BaseKeyId Id;
-        public BaseKeyId Identity;
-        public string Name;
-        public TagPubKey PublicKey;
-        public KeyPurpose[] Purposes;
-        public IEnumerable<ulong> SpecificActions;
-        public KeyStrength Strength;
-        public ushort Version;
 
         public InterlockKeyParts() {
         }
@@ -151,7 +142,18 @@ namespace InterlockLedger.Tags
             Id = keyId ?? Identity;
         }
 
+        [JsonIgnore]
         public bool Actionable => Purposes.Contains(KeyPurpose.Action);
+        public ulong AppId { get; set; }
+        public string Description { get; set; }
+        public BaseKeyId Id { get; set; }
+        public BaseKeyId Identity { get; set; }
+        public string Name { get; set; }
+        public TagPubKey PublicKey { get; set; }
+        public KeyPurpose[] Purposes { get; set; }
+        public IEnumerable<ulong> SpecificActions { get; set; }
+        public KeyStrength Strength { get; set; }
+        public ushort Version { get; set; }
 
         public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {_actionsFor} ";
 
