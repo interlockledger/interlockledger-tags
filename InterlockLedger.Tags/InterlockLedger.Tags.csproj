@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -10,11 +10,11 @@
       <Description>This library implements the basic TLV encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <PackageReleaseNotes>Fixes Json Serialization for PubKeys and InterlockKey </PackageReleaseNotes>
+      <PackageReleaseNotes>May fix Json Serialization for InterlockKey </PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.0.5</Version>
+      <Version>3.0.6</Version>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

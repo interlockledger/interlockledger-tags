@@ -35,7 +35,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
-using InterlockLedger.Tags;
 
 namespace InterlockLedger.Tags
 {
@@ -58,7 +57,12 @@ namespace InterlockLedger.Tags
             : this(new InterlockKeyParts(key.Purposes, key.AppId, key.SpecificActions, key.Name, key.Description, key.CurrentPublicKey, key.Strength, key.Id)) {
         }
 
+        [JsonIgnore]
         public bool AllActions => Value.Actionable && SpecificActions.None();
+
+        [JsonIgnore]
+        public override object AsJson => Value;
+
         public ulong AppId => Value.AppId;
         public string Description => Value.Description;
         public BaseKeyId Id => Value.Id;
@@ -144,6 +148,7 @@ namespace InterlockLedger.Tags
 
         [JsonIgnore]
         public bool Actionable => Purposes.Contains(KeyPurpose.Action);
+
         public ulong AppId { get; set; }
         public string Description { get; set; }
         public BaseKeyId Id { get; set; }
