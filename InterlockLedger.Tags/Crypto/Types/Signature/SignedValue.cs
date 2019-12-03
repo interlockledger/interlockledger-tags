@@ -42,26 +42,26 @@ namespace InterlockLedger.Tags
     {
         public const int CurrentVersion = 1;
 
-        public SignedValue() : base(CurrentVersion) {
+        public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
         }
 
+        public ulong ContentTagId => SignedContent.TagId;
         public IEnumerable<TagIdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.EncodedBytes);
 
         public IEnumerable<TagIdentifiedSignature> Signatures { get; private set; }
 
         public T SignedContent { get; private set; }
 
-        protected SignedValue(T payload, IEnumerable<TagIdentifiedSignature> signatures) : base(CurrentVersion) {
+        protected SignedValue(T payload, IEnumerable<TagIdentifiedSignature> signatures) : this() {
             SignedContent = payload ?? throw new ArgumentNullException(nameof(payload));
             Signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
         }
 
-        protected virtual ulong ContentTagId => 0;
+        protected override object AsJson => new { TagId, ContentTagId, SignedContent = SignedContent.AsJson, Signatures = Signatures.AsJsonArray() };
 
         protected override IEnumerable<DataField> RemainingStateFields => new DataField(nameof(SignedContent), ContentTagId)
             .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) { ElementTagId = ILTagId.IdentifiedSignature });
 
-        protected override ulong TagId => ILTagId.SignedValue;
         protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
         protected override string TypeName => $"SignedValueOf{typeof(T).Name}";
 

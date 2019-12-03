@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -37,11 +38,9 @@ namespace InterlockLedger.Tags
 {
     public abstract class VersionedValue<T> : IVersion where T : VersionedValue<T>, new()
     {
-        public Payload AsPayload => new Payload((T)this);
+        public Payload AsPayload => _payload.Value;
 
-        public DataField FieldModel => new DataField(TypeName, TagId, TypeDescription) {
-            SubDataFields = _versionField.AppendedOf(RemainingStateFields)
-        };
+        public DataField FieldModel => _fieldModel.Value;
 
         public ushort Version { get; private set; }
 
@@ -52,16 +51,16 @@ namespace InterlockLedger.Tags
         }
 
         public void ToStream(Stream s) {
-            s.EncodeUShort(Version);              // Field index 0 //
+            s.EncodeUShort(Version);    // Field index 0 //
             EncodeRemainingStateTo(s);
         }
 
         public class Payload : ILTagExplicit<T>, IVersion, INamed
         {
-            public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
-            }
+            public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => ValidateTagId(Value.TagId);
 
             public string TypeName => typeof(T).Name;
+            public override object AsJson => Value.AsJson;
             public ushort Version => Value.Version;
 
             internal Payload(T Value) : base(Value.TagId, Value) {
@@ -74,10 +73,18 @@ namespace InterlockLedger.Tags
                 => ToBytesHelper(Value.ToStream);
         }
 
-        protected VersionedValue(ushort version) => Version = version;
+        protected VersionedValue(ulong tagId, ushort version) {
+            TagId = tagId;
+            Version = version;
+            _payload = new Lazy<Payload>(() => new Payload((T)this));
+            _fieldModel = new Lazy<DataField>(() => new DataField(TypeName, TagId, TypeDescription) {
+                SubDataFields = _versionField.AppendedOf(RemainingStateFields)
+            });
+        }
 
+        protected abstract object AsJson { get; }
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
-        protected abstract ulong TagId { get; }
+        protected ulong TagId { get; }
         protected abstract string TypeDescription { get; }
         protected abstract string TypeName { get; }
 
@@ -86,5 +93,7 @@ namespace InterlockLedger.Tags
         protected abstract void EncodeRemainingStateTo(Stream s);
 
         private static readonly DataField _versionField = new DataField(nameof(Version), ILTagId.UInt16);
+        private readonly Lazy<DataField> _fieldModel;
+        private readonly Lazy<Payload> _payload;
     }
 }

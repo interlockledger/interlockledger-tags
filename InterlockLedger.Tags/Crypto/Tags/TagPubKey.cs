@@ -67,6 +67,7 @@ namespace InterlockLedger.Tags
     public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, IJsonCustom<TagPubKey>
     {
         public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
+
         public virtual KeyStrength Strength => KeyStrength.Normal;
         public string TextualRepresentation => ToString();
         public Algorithm Algorithm => Value.Algorithm;

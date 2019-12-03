@@ -31,15 +31,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System.Collections.Generic;
-using System.Linq;
-using IEnum = System.Collections.IEnumerable;
+using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public static class IEnumerableExtensions
+    public interface IVersionedEmbeddedValue
     {
-        public static IEnumerable<T> AsList<T>(this IEnum items) where T : class => (items).AsNavigableList().Select(o => o as T).ToArray();
+        object AsJson { get; }
+        IEnumerable<DataField> RemainingStateFields { get; }
 
-        public static IEnumerable<object> AsNavigableList(this IEnum items) => from object item in items select item.AsNavigable();
+        string TypeDescription { get; }
+        string TypeName { get; }
+        ulong TagId { get; }
+
+        void DecodeRemainingStateFrom(Stream s);
+
+        void EncodeRemainingStateTo(Stream s);
     }
 }

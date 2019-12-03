@@ -158,7 +158,6 @@ namespace InterlockLedger.Tags
                 [ILTagId.IdentifiedSignature] = (s => new TagIdentifiedSignature(s), NoJson),
                 [ILTagId.Reader] = (s => new TagReader(s), NoJson),
                 [ILTagId.ReadingKey] = (s => new TagReadingKey(s), NoJson),
-                [ILTagId.EncryptedTag] = (s => new EncryptedValue<ILTag>.Payload(ILTagId.EncryptedTag, s), NoJson),
                 [ILTagId.EncryptedBlob] = (s => new EncryptedBlob.Payload(ILTagId.EncryptedBlob, s), NoJson),
                 [ILTagId.DataModel] = (s => new ILTagDataModel(s), NoJson),
                 [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),

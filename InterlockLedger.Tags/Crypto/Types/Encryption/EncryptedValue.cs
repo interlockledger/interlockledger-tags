@@ -37,25 +37,48 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class EncryptedValue<T> : VersionedValue<EncryptedValue<T>> where T : ILTag
+    public class EncryptedValue<T> : IVersionedEmbeddedValue where T : ILTag
     {
         public const int CurrentVersion = 1;
 
-        public EncryptedValue() : base(CurrentVersion) {
+        public EncryptedValue(ulong tagId) => TagId = tagId;
+
+        public EncryptedValue(ulong tagId, CipherAlgorithm cipher, T payloadInClearText, ISigner author, IEnumerable<TagReader> readers) : this(tagId) {
+            if (author is null)
+                throw new ArgumentNullException(nameof(author));
+            if (readers is null)
+                throw new ArgumentNullException(nameof(readers));
+            byte[] key;
+            byte[] iv;
+            (CipherText, key, iv) = author.Encrypt(cipher, payloadInClearText ?? throw new ArgumentNullException(nameof(payloadInClearText)));
+            ReadingKeys = BuildReadingKeys(readers, key, iv, author.Id.TextualRepresentation, author.PublicKey);
+            Cipher = cipher;
         }
 
+        public object AsJson => new { TagId, Cipher, CipherText, ReadingKeys = ReadingKeys.AsJsonArray() };
         public CipherAlgorithm Cipher { get; }
 
         public byte[] CipherText { get; private set; }
 
         public IEnumerable<TagReadingKey> ReadingKeys { get; private set; }
 
+        public IEnumerable<DataField> RemainingStateFields { get; } =
+            new DataField(nameof(CipherText), ILTagId.ByteArray) { IsOpaque = true }
+                .AppendedOf(new DataField(nameof(ReadingKeys), ILTagId.ILTagArray) { ElementTagId = ILTagId.ReadingKey });
+
+        public ulong TagId { get; }
+        public string TypeDescription => $"EncryptedValueOf{typeof(T).Name}";
+        public string TypeName => $"EncryptedValueOf{typeof(T).Name}";
+
+        public void DecodeRemainingStateFrom(Stream s) {
+            CipherText = s.DecodeByteArray();
+            ReadingKeys = s.DecodeTagArray<TagReadingKey>();
+        }
+
         public T Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
             byte[] clearText = DecryptRaw(reader, findEngine);
             return clearText is null ? null : ILTag.DeserializeFrom(clearText) as T;
         }
-
-        public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => (Decrypt(reader, findEngine) as ILTagByteArray)?.Value;
 
         public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
             if (reader is null)
@@ -69,32 +92,7 @@ namespace InterlockLedger.Tags
             return findEngine(Cipher)?.Decrypt(CipherText, key, iv);
         }
 
-        protected EncryptedValue(CipherAlgorithm cipher, T payloadInClearText, ISigner author, IEnumerable<TagReader> readers) : base(CurrentVersion) {
-            if (author is null)
-                throw new ArgumentNullException(nameof(author));
-            if (readers is null)
-                throw new ArgumentNullException(nameof(readers));
-            byte[] key;
-            byte[] iv;
-            (CipherText, key, iv) = author.Encrypt(cipher, payloadInClearText ?? throw new ArgumentNullException(nameof(payloadInClearText)));
-            ReadingKeys = BuildReadingKeys(readers, key, iv, author.Id.TextualRepresentation, author.PublicKey);
-            Cipher = cipher;
-        }
-
-        protected override IEnumerable<DataField> RemainingStateFields { get; } =
-            new DataField(nameof(CipherText), ILTagId.ByteArray) { IsOpaque = true }
-            .AppendedOf(new DataField(nameof(ReadingKeys), ILTagId.ILTagArray) { ElementTagId = ILTagId.ReadingKey });
-
-        protected override ulong TagId => ILTagId.Encrypted;
-        protected override string TypeDescription => $"EncryptedValueOf{typeof(T).Name}";
-        protected override string TypeName => $"EncryptedValueOf{typeof(T).Name}";
-
-        protected override void DecodeRemainingStateFrom(Stream s) {
-            CipherText = s.DecodeByteArray();
-            ReadingKeys = s.DecodeTagArray<TagReadingKey>();
-        }
-
-        protected override void EncodeRemainingStateTo(Stream s) {
+        public void EncodeRemainingStateTo(Stream s) {
             s.EncodeByteArray(CipherText);
             s.EncodeTagArray(ReadingKeys);
         }
