@@ -35,17 +35,18 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public interface IVersionedEmbeddedValue
+    public interface IVersionedEmbeddedValue<T> where T : IVersionedEmbeddedValue<T>
     {
         object AsJson { get; }
         IEnumerable<DataField> RemainingStateFields { get; }
-
+        ulong TagId { get; }
         string TypeDescription { get; }
         string TypeName { get; }
-        ulong TagId { get; }
 
         void DecodeRemainingStateFrom(Stream s);
 
         void EncodeRemainingStateTo(Stream s);
+
+        T FromJson(object o);
     }
 }

@@ -70,10 +70,9 @@ namespace InterlockLedger.Tags
             Signatures = s.DecodeTagArray<TagIdentifiedSignature>();
         }
 
-        protected override void EncodeRemainingStateTo(Stream s) {
-            s.EncodeTag(SignedContent);
-            s.EncodeTagArray(Signatures);
-        }
+        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeTag(SignedContent).EncodeTagArray(Signatures);
+
+        protected override SignedValue<T> FromJson(object json) => throw new NotImplementedException();
 
         private IEnumerable<TagIdentifiedSignature> FailedSignaturesFor(byte[] encodedBytes) => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();
     }

@@ -39,10 +39,9 @@ namespace InterlockLedger.Tags
     public abstract class VersionedValue<T> : IVersion where T : VersionedValue<T>, new()
     {
         public Payload AsPayload => _payload.Value;
-
         public DataField FieldModel => _fieldModel.Value;
-
-        public ushort Version { get; private set; }
+        public DataModel PayloadDataModel => _payloadDataModel.Value;
+        public ushort Version { get; protected set; }
 
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //
@@ -63,14 +62,13 @@ namespace InterlockLedger.Tags
             public override object AsJson => Value.AsJson;
             public ushort Version => Value.Version;
 
-            internal Payload(T Value) : base(Value.TagId, Value) {
-            }
+            public T FromJson(object o) => new T().FromJson(o);
 
-            protected override T FromBytes(byte[] bytes)
-                => FromBytesHelper(bytes, new T().FromStream);
+            internal Payload(T Value) : base(Value.TagId, Value) { }
 
-            protected override byte[] ToBytes()
-                => ToBytesHelper(Value.ToStream);
+            protected override T FromBytes(byte[] bytes) => FromBytesHelper(bytes, new T().FromStream);
+
+            protected override byte[] ToBytes() => ToBytesHelper(Value.ToStream);
         }
 
         protected VersionedValue(ulong tagId, ushort version) {
@@ -80,20 +78,35 @@ namespace InterlockLedger.Tags
             _fieldModel = new Lazy<DataField>(() => new DataField(TypeName, TagId, TypeDescription) {
                 SubDataFields = _versionField.AppendedOf(RemainingStateFields)
             });
+            _payloadDataModel = new Lazy<DataModel>(() => new DataModel {
+                PayloadName = TypeName,
+                PayloadTagId = TagId,
+                DataFields = _versionField.AppendedOf(RemainingStateFields),
+                Indexes = PayloadIndexes
+            });
         }
 
         protected abstract object AsJson { get; }
+
+        protected virtual DataIndex[] PayloadIndexes => Array.Empty<DataIndex>();
+
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
+
         protected ulong TagId { get; }
+
         protected abstract string TypeDescription { get; }
+
         protected abstract string TypeName { get; }
 
         protected abstract void DecodeRemainingStateFrom(Stream s);
 
         protected abstract void EncodeRemainingStateTo(Stream s);
 
+        protected abstract T FromJson(object json);
+
         private static readonly DataField _versionField = new DataField(nameof(Version), ILTagId.UInt16);
         private readonly Lazy<DataField> _fieldModel;
         private readonly Lazy<Payload> _payload;
+        private readonly Lazy<DataModel> _payloadDataModel;
     }
 }

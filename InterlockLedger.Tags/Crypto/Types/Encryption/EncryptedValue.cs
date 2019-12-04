@@ -37,7 +37,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class EncryptedValue<T> : IVersionedEmbeddedValue where T : ILTag
+    public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> where T : ILTag
     {
         public const int CurrentVersion = 1;
 
@@ -55,11 +55,9 @@ namespace InterlockLedger.Tags
             Cipher = cipher;
         }
 
-        public object AsJson => new { TagId, Cipher, CipherText, ReadingKeys = ReadingKeys.AsJsonArray() };
-        public CipherAlgorithm Cipher { get; }
-
+        public object AsJson => new { TagId, Version, Cipher, CipherText, ReadingKeys = ReadingKeys.AsJsonArray() };
+        public CipherAlgorithm Cipher { get; private set; }
         public byte[] CipherText { get; private set; }
-
         public IEnumerable<TagReadingKey> ReadingKeys { get; private set; }
 
         public IEnumerable<DataField> RemainingStateFields { get; } =
@@ -69,6 +67,7 @@ namespace InterlockLedger.Tags
         public ulong TagId { get; }
         public string TypeDescription => $"EncryptedValueOf{typeof(T).Name}";
         public string TypeName => $"EncryptedValueOf{typeof(T).Name}";
+        public ushort Version { get; set; }
 
         public void DecodeRemainingStateFrom(Stream s) {
             CipherText = s.DecodeByteArray();
@@ -92,10 +91,9 @@ namespace InterlockLedger.Tags
             return findEngine(Cipher)?.Decrypt(CipherText, key, iv);
         }
 
-        public void EncodeRemainingStateTo(Stream s) {
-            s.EncodeByteArray(CipherText);
-            s.EncodeTagArray(ReadingKeys);
-        }
+        public void EncodeRemainingStateTo(Stream s) => s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);
+
+        public EncryptedValue<T> FromJson(object o) => new EncryptedValue<T>(TagId);
 
         private static TagReadingKey BuildReadingKey(byte[] symmetricKey, byte[] IV, string id, TagPubKey publicKey)
             => new TagReadingKey(id, publicKey.Hash, publicKey.Encrypt(symmetricKey), publicKey.Encrypt(IV));
