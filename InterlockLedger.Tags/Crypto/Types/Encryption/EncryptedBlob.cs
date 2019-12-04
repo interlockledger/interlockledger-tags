@@ -69,7 +69,7 @@ namespace InterlockLedger.Tags
 
         protected override string TypeDescription => "An array of bytes encrypted for some readers";
 
-        protected override string TypeName => nameof(EncryptedBlob);
+        public override string TypeName => nameof(EncryptedBlob);
 
         protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
 

@@ -63,7 +63,7 @@ namespace InterlockLedger.Tags
             .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) { ElementTagId = ILTagId.IdentifiedSignature });
 
         protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
-        protected override string TypeName => $"SignedValueOf{typeof(T).Name}";
+        public override string TypeName => $"SignedValueOf{typeof(T).Name}";
 
         protected override void DecodeRemainingStateFrom(Stream s) {
             SignedContent = s.Decode<T>();

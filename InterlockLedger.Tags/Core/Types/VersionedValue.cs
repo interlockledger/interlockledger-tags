@@ -92,11 +92,11 @@ namespace InterlockLedger.Tags
 
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
 
-        protected ulong TagId { get; }
+        public ulong TagId { get; }
 
         protected abstract string TypeDescription { get; }
 
-        protected abstract string TypeName { get; }
+        public abstract string TypeName { get; }
 
         protected abstract void DecodeRemainingStateFrom(Stream s);
 
