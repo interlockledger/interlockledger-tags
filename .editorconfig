@@ -89,3 +89,6 @@ dotnet_diagnostic.CA1819.severity = none
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.CA2225.severity = none
 dotnet_diagnostic.CA2227.severity = none
+
+# RCS1194: Implement exception constructors.
+dotnet_diagnostic.RCS1194.severity = suggestion

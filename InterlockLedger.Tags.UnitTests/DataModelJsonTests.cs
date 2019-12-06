@@ -14,7 +14,6 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-
     [TestFixture]
     public class DataModelJsonTests
     {

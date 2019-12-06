@@ -93,7 +93,9 @@ namespace InterlockLedger.Tags
 
         public void EncodeRemainingStateTo(Stream s) => s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);
 
-        public EncryptedValue<T> FromJson(object o) => new EncryptedValue<T>(TagId);
+        public EncryptedValue<T> FromJson(object o) => new EncryptedValue<T>(TagId) {
+            Cipher = CipherAlgorithm.AES256, // TODO deserialize from o
+        };
 
         private static TagReadingKey BuildReadingKey(byte[] symmetricKey, byte[] IV, string id, TagPubKey publicKey)
             => new TagReadingKey(id, publicKey.Hash, publicKey.Encrypt(symmetricKey), publicKey.Encrypt(IV));
