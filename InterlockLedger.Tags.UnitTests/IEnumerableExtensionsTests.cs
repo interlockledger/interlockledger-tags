@@ -66,9 +66,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SafeAny() {
-            static void SafeAnyTest(IEnumerable<object> values, bool expected, string message) {
-                Assert.AreEqual(expected, values.SafeAny(), message);
-            }
+            static void SafeAnyTest(IEnumerable<object> values, bool expected, string message) => Assert.AreEqual(expected, values.SafeAny(), message);
             SafeAnyTest(null, false, "Shouldn't have returned true for null enumerable");
             SafeAnyTest(Array.Empty<object>(), false, "Shouldn't have returned true for empty enumerable");
             SafeAnyTest(new object[] { "something" }, true, "Should have returned true for non empty enumerable");
@@ -76,9 +74,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SafeCount() {
-            static void SafeCountTest(IEnumerable<object> values, int expected, string message) {
-                Assert.AreEqual(expected, values.SafeCount(), message);
-            }
+            static void SafeCountTest(IEnumerable<object> values, int expected, string message) => Assert.AreEqual(expected, values.SafeCount(), message);
             SafeCountTest(null, -1, "Should have returned -1 for null enumerable");
             SafeCountTest(Array.Empty<object>(), 0, "Should have returned 0 for empty enumerable");
             SafeCountTest(new object[] { "something" }, 1, "Should have returned 1 for single member enumerable");
@@ -86,9 +82,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SelectSkippingNulls() {
-            static void SelectSkippingNullsTest(IEnumerable<string> values, Func<string, string> selector, string message, params string[] expected) {
-                Assert.IsTrue(expected.EqualTo(values.SelectSkippingNulls(selector)), message);
-            }
+            static void SelectSkippingNullsTest(IEnumerable<string> values, Func<string, string> selector, string message, params string[] expected) => Assert.IsTrue(expected.EqualTo(values.SelectSkippingNulls(selector)), message);
             SelectSkippingNullsTest(null, (o) => o, "Should have returned empty enumerable for null enumerable");
             SelectSkippingNullsTest(Array.Empty<string>(), (o) => o, "Should have returned empty enumerable for empty enumerable");
             SelectSkippingNullsTest(new string[] { "something" }, (o) => o, "Should have returned single member enumerable for single member enumerable", "something");
@@ -98,9 +92,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void SkipNulls() {
-            static void SkipNullsTest(IEnumerable<string> values, string message, params string[] expected) {
-                Assert.IsTrue(expected.EqualTo(values.SkipNulls()), message);
-            }
+            static void SkipNullsTest(IEnumerable<string> values, string message, params string[] expected) => Assert.IsTrue(expected.EqualTo(values.SkipNulls()), message);
             SkipNullsTest(null, "Should have returned empty enumerable for null enumerable");
             SkipNullsTest(Array.Empty<string>(), "Should have returned empty enumerable for empty enumerable");
             SkipNullsTest(new string[] { "something" }, "Should have returned single member enumerable for single member enumerable", "something");
@@ -109,9 +101,7 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void WithDefault() {
-            static void WithDefaultTestWithEmptyInputAndNoDefault(IEnumerable<string> values, string message) {
-                Assert.IsTrue(_emptyList.EqualTo(values.WithDefault()), message);
-            }
+            static void WithDefaultTestWithEmptyInputAndNoDefault(IEnumerable<string> values, string message) => Assert.IsTrue(_emptyList.EqualTo(values.WithDefault()), message);
 
             static void WithDefaultTestWithEmptyInputAndNullDefault(IEnumerable<string> values, string message) {
                 Assert.IsTrue(_emptyList.EqualTo(values.WithDefault((IEnumerable<string>)null)), message);

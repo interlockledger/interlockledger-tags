@@ -138,7 +138,7 @@ namespace InterlockLedger.Tags
                 [ILTagId.ILIntArray] = (s => new ILTagArrayOfILInt(s), o => new ILTagArrayOfILInt(o)),
                 [ILTagId.ILTagArray] = (s => new ILTagArrayOfILTag<ILTag>(s), o => new ILTagArrayOfILTag<ILTag>(o)),
                 [ILTagId.Sequence] = (s => new ILTagSequence(s), o => new ILTagSequence(o)),
-                [ILTagId.Version] = (s => new ILTagVersion(s), o =>  ILTagVersion.FromJson(o)),
+                [ILTagId.Version] = (s => new ILTagVersion(s), o => ILTagVersion.FromJson(o)),
                 [ILTagId.Range] = (s => new ILTagRange(s), o => new ILTagRange(LimitedRange.Resolve((string)o))),
                 [ILTagId.Dictionary] = (s => new ILTagDictionary<ILTag>(s), o => new ILTagDictionary<ILTag>(o)),
                 [ILTagId.StringDictionary] = (s => new ILTagStringDictionary(s), o => new ILTagStringDictionary(o)),

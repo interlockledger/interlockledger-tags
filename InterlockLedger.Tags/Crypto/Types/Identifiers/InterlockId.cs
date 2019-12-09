@@ -188,6 +188,7 @@ namespace InterlockLedger.Tags
 
         internal InterlockIdParts(string textualRepresentation) {
             static HashAlgorithm ToHashAlgorithm(string suffix) => (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), suffix, ignoreCase: true);
+
             static (string strippedOfSuffix, HashAlgorithm algorithm) ParseSuffix(string textualRepresentation) {
                 var parts = textualRepresentation.Split(_suffixSeparator);
                 return (parts[0], algorithm: parts.Length < 2 ? _defaultAlgorithm : ToHashAlgorithm(parts[1]));

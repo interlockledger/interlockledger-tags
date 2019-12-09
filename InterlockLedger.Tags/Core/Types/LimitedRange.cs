@@ -119,12 +119,7 @@ namespace InterlockLedger.Tags
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-            if (destinationType == typeof(InstanceDescriptor)) {
-                return true;
-            }
-            return destinationType == typeof(string);
-        }
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) => destinationType == typeof(InstanceDescriptor) ? true : destinationType == typeof(string);
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) {
             if (value is string text) {

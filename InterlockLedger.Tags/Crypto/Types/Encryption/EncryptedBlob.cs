@@ -46,17 +46,18 @@ namespace InterlockLedger.Tags
         public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, ISigner author, IEnumerable<TagReader> readers) : this()
             => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, new ILTagByteArray(blobInClearText), author, readers);
 
+        public override string TypeName => nameof(EncryptedBlob);
         public CipherAlgorithm Cipher => _encrypted.Cipher;
         public byte[] CipherText => _encrypted.CipherText;
         public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
+
+        public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value) => new EncryptedBlob(value);
 
         public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
         public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
 
         public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
-
-        public EncryptedBlob SetEmbedded(EncryptedValue<ILTagByteArray> value) => new EncryptedBlob(value);
 
         protected override object AsJson {
             get {
@@ -68,8 +69,6 @@ namespace InterlockLedger.Tags
         protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
 
         protected override string TypeDescription => "An array of bytes encrypted for some readers";
-
-        public override string TypeName => nameof(EncryptedBlob);
 
         protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
 
