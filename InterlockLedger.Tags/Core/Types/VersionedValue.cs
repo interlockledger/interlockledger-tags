@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -33,15 +33,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 
 namespace InterlockLedger.Tags
 {
     public abstract class VersionedValue<T> : IVersion where T : VersionedValue<T>, new()
     {
+        public static JsonSerializerOptions JsonOptions { get; } = new JsonSerializerOptions {
+            AllowTrailingCommas = true,
+            PropertyNameCaseInsensitive = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            WriteIndented = true,
+            IgnoreNullValues = true,
+            IgnoreReadOnlyProperties = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        };
+
         public Payload AsPayload => _payload.Value;
         public DataField FieldModel => _fieldModel.Value;
         public DataModel PayloadDataModel => _payloadDataModel.Value;
-        public ushort Version { get; protected set; }
+        public ulong TagId { get => _tagId; set { if (value != 0 && value != _tagId) throw new InvalidDataException($"Invalid value for TagId: {_tagId}"); } }
+        public abstract string TypeName { get; }
+        public ushort Version { get; set; }
+
+        public static T FromJsonText(string jsonText) => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
 
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //
@@ -72,7 +88,7 @@ namespace InterlockLedger.Tags
         }
 
         protected VersionedValue(ulong tagId, ushort version) {
-            TagId = tagId;
+            _tagId = tagId;
             Version = version;
             _payload = new Lazy<Payload>(() => new Payload((T)this));
             _fieldModel = new Lazy<DataField>(() => new DataField(TypeName, TagId, TypeDescription) {
@@ -87,16 +103,9 @@ namespace InterlockLedger.Tags
         }
 
         protected abstract object AsJson { get; }
-
         protected virtual DataIndex[] PayloadIndexes => Array.Empty<DataIndex>();
-
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
-
-        public ulong TagId { get; }
-
         protected abstract string TypeDescription { get; }
-
-        public abstract string TypeName { get; }
 
         protected abstract void DecodeRemainingStateFrom(Stream s);
 
@@ -108,5 +117,6 @@ namespace InterlockLedger.Tags
         private readonly Lazy<DataField> _fieldModel;
         private readonly Lazy<Payload> _payload;
         private readonly Lazy<DataModel> _payloadDataModel;
+        private readonly ulong _tagId;
     }
 }

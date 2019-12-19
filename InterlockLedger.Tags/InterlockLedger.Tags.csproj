@@ -14,7 +14,7 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.1.0</Version>
+      <Version>3.1.1</Version>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -33,37 +33,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
     public static partial class StreamExtensions
     {
-        public static byte[] BuildPayloadBytes(this Stream s, ulong tagId) {
-            var bytes = ReadAllBytes(s);
+        public static async Task<byte[]> BuildPayloadBytesAsync(this Stream s, ulong tagId) {
+            var bytes = await ReadAllBytesAsync(s);
             using var ms = new MemoryStream();
             ms.ILIntEncode(tagId);
             ms.ILIntEncode((ulong)bytes.Length);
             ms.WriteBytes(bytes);
             ms.Position = 0;
-            return ms.ReadAllBytes();
+            return await ms.ReadAllBytesAsync();
         }
 
-        public static BaseKeyId DecodeBaseKeyId(this Stream s)
-            => s.Decode<BaseKeyId>();
+        public static BaseKeyId DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
 
-        public static OwnerId DecodeOwnerId(this Stream s)
-            => s.Decode<OwnerId>();
+        public static OwnerId DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
 
-        public static Stream EncodeInterlockId(this Stream s, InterlockId value)
-            => s.EncodeTag(value);
+        public static Stream EncodeInterlockId(this Stream s, InterlockId value) => s.EncodeTag(value);
 
         public static bool HasBytes(this Stream s) => s.CanSeek && (s.Position < s.Length);
 
-        public static byte[] ReadAllBytes(this Stream s) {
+        public static async Task<byte[]> ReadAllBytesAsync(this Stream s) {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
             using var buffer = new MemoryStream();
-            s.CopyTo(buffer);
+            await s.CopyToAsync(buffer).ConfigureAwait(false);
             return buffer.ToArray();
         }
 
@@ -123,11 +121,9 @@ namespace InterlockLedger.Tags
             return s;
         }
 
-        private static byte AsByte(long value)
-            => (byte)(value & 0xFF);
+        private static byte AsByte(long value) => (byte)(value & 0xFF);
 
-        private static byte AsByteU(ulong value)
-            => (byte)(value & 0xFF);
+        private static byte AsByteU(ulong value) => (byte)(value & 0xFF);
 
         private static byte ReadByte(Stream s) {
             var retries = 3;
