@@ -10,11 +10,12 @@
       <Description>This library implements the basic TLV/JSON encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <PackageReleaseNotes>Upgrade dependencies</PackageReleaseNotes>
+      <PackageReleaseNotes>Upgrade to InterlockLedger.Tags.ILInt.2.1.1</PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.1.1</Version>
+      <Version>3.1.2</Version>
+      <PackageId>InterlockLedger.Tags</PackageId>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">
@@ -24,14 +25,14 @@
   </ItemGroup>
   <Target Name="PublishLocally" AfterTargets="Pack" Condition="Exists('$(INTERLOCK_LOCAL_NUGETS_FOLDER)')">
       <ItemGroup>
-          <NugetPackages Include="$(PackageOutputAbsolutePath)\*.nupkg" />
+          <NugetPackages Include="$(PackageOutputAbsolutePath)\$(PackageId).$(Version).nupkg" />
       </ItemGroup>
       <Message Importance="high" Text="Publish to Local Nugets Folder '$(INTERLOCK_LOCAL_NUGETS_FOLDER)'" />
       <Copy DestinationFolder="$(INTERLOCK_LOCAL_NUGETS_FOLDER)" SourceFiles="@(NugetPackages)" ContinueOnError="true" SkipUnchangedFiles="false" />
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="InterlockLedger.Tags.ILInt" Version="2.0.0" />
+    <PackageReference Include="InterlockLedger.Tags.ILInt" Version="2.1.1" />
     <PackageReference Include="System.Memory" Version="4.5.3" />
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
   </ItemGroup>
