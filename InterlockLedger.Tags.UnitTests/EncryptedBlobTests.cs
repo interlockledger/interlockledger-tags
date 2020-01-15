@@ -74,7 +74,7 @@ namespace InterlockLedger.Tags
                             142, 87, 138, 98, 117, 135, 141, 67, 104, 21, 150, 250, 115, 203, 24, 142, 69, 105, 124, 142, 104, 153, 176, 100, 38, 75, 112,
                             147, 206, 83, 148, 57, 70, 57, 48, 10, 132, 62, 3, 149, 214, 32, 237, 89, 48, 36, 213, 184, 123, 156, 188, 91, 223, 193, 202, 97,
                             83, 152, 241
-        }, CipherAlgorithm.AES256, new byte[] { 0, 0 }, TestName = "NewEncryptedBlobFromStream [0, 0]")]
+        }, CipherAlgorithm.AES256, new byte[] { 0, 0 }, TestName = "NewEncryptedBlobFromStreamFromZeroes")]
         [TestCase(new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
@@ -107,7 +107,7 @@ namespace InterlockLedger.Tags
                             153, 29, 242, 20, 176, 87, 83, 70, 104, 40, 137, 230, 245, 144, 215, 192, 139, 33, 127, 249, 255, 141, 225, 106, 51, 41, 119, 212, 202, 150,
                             134, 211, 110, 36, 124, 101, 19, 246, 18, 196, 175, 113, 136, 226, 141, 27, 139, 123, 127, 226, 98, 125, 36, 40, 118, 210, 6, 146, 235, 150, 46,
                             152, 218, 113, 174, 82
-        }, CipherAlgorithm.AES256, new byte[] { }, TestName = "NewEncryptedBlobFromStream []")]
+        }, CipherAlgorithm.AES256, new byte[] { }, TestName = "NewEncryptedBlobFromStream")]
         public void NewEncryptedBlobFromStream(byte[] bytes, CipherAlgorithm algorithm, byte[] data) {
             using var ms = new MemoryStream(bytes);
             var tag = ms.Decode<EncryptedBlob.Payload>();
@@ -129,7 +129,7 @@ namespace InterlockLedger.Tags
                         39, 34, 1, 0, 90, 234, 31, 9, 108, 223, 128, 59, 77, 2, 215, 129, 119, 28, 194, 164, 198, 5, 74, 36,
                             106, 221, 140, 204, 78, 212, 55, 139, 19, 26, 150, 206,
                         16, 248, 8,
-        }, TestName = "SerializeEncryptedBlob [0, 0]")]
+        }, TestName = "SerializeEncryptedBlobAsZeroes")]
         [TestCase(CipherAlgorithm.AES256, new byte[] { }, ExpectedResult = new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
@@ -145,7 +145,7 @@ namespace InterlockLedger.Tags
                         39, 34,
                             1, 0, 90, 234, 31, 9, 108, 223, 128, 59, 77, 2, 215, 129, 119, 28, 194, 164, 198, 5, 74, 36, 106, 221, 140, 204, 78, 212, 55, 139, 19, 26, 150, 206,
                         16, 248, 8,
-        }, TestName = "SerializeEncryptedBlob []")]
+        }, TestName = "SerializeEncryptedBlob")]
         public byte[] SerializeEncryptedBlob(CipherAlgorithm algorithm, byte[] data) {
             var encodedBytes = new EncryptedBlob(algorithm, data, TestFakeSigner.FixedKeysInstance, Array.Empty<TagReader>()).AsPayload.EncodedBytes;
             return encodedBytes.PartOf(124);

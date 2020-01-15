@@ -60,11 +60,11 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, true, "password", TestName = "AES256Encrypted<True>FromStream")]
+            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, true, "password", TestName = "AES256Encrypted-True-FromStream")]
         [TestCase(new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, false, "password", TestName = "AES256Encrypted<False>FromStream")]
+            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, false, "password", TestName = "AES256Encrypted-False-FromStream")]
         public void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
             var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));
             var clear = tag.Decrypt(password);
@@ -74,11 +74,11 @@ namespace InterlockLedger.Tags
         [TestCase(true, "password", ExpectedResult = new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, TestName = "AES256Encrypted<True>EncodedBytes")]
+            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, TestName = "AES256Encrypted-True-EncodedBytes")]
         [TestCase(false, "password", ExpectedResult = new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, TestName = "AES256Encrypted<False>EncodedBytes")]
+            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, TestName = "AES256Encrypted-False-EncodedBytes")]
         public byte[] SerializeAES256Encrypted(bool value, string password) {
             var result = new TestableAES256Encrypted(value ? ILTagBool.True : ILTagBool.False, password);
             var clear = result.Decrypt(password);

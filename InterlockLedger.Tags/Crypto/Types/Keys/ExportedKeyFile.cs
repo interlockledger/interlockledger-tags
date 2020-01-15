@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -34,10 +34,6 @@ namespace InterlockLedger.Tags
 {
     public class ExportedKeyFile
     {
-        public readonly byte[] KeyFileBytes;
-        public readonly string KeyFileName;
-        public readonly string KeyName;
-
         public ExportedKeyFile(string keyName, string keyFileName, byte[] keyFileBytes) {
             if (string.IsNullOrWhiteSpace(keyName))
                 throw new System.ArgumentException("Can't have an empty key name!!!", nameof(keyName));
@@ -49,5 +45,11 @@ namespace InterlockLedger.Tags
             KeyFileName = keyFileName;
             KeyFileBytes = keyFileBytes;
         }
+
+        public byte[] KeyFileBytes { get; }
+
+        public string KeyFileName { get; }
+
+        public string KeyName { get; }
     }
 }
