@@ -226,7 +226,7 @@ namespace InterlockLedger.Tags
         public void ToFromJsonV0()
             => ToFromBaseTest(
                 new JsonTestTaggedData(0, 123, "DataModelToJson", "Hidden on Version 0").AsPayload,
-                s => s.Replace("\r\n}", ",\r\n  \"_RemainingBytes_\": \"ERNIaWRkZW4gb24gVmVyc2lvbiAw\"\r\n}", StringComparison.Ordinal));
+                s => s.Replace($"{Environment.NewLine}}}", $",{Environment.NewLine}  \"_RemainingBytes_\": \"ERNIaWRkZW4gb24gVmVyc2lvbiAw\"{Environment.NewLine}}}", StringComparison.Ordinal));
 
         [Test]
         public void ToFromJsonV1()
