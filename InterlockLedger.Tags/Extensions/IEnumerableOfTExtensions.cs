@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace InterlockLedger.Tags
@@ -50,6 +51,7 @@ namespace InterlockLedger.Tags
             return first?.SequenceEqual(second) ?? true;
         }
 
+        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SafeAny checks")]
         public static IEnumerable<T> IfAnyDo<T>(this IEnumerable<T> values, Action action) {
             if (values.SafeAny())
                 action();

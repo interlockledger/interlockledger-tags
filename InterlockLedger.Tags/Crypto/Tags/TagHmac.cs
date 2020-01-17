@@ -60,7 +60,7 @@ namespace InterlockLedger.Tags
 
         public override bool Equals(object obj) => Equals(obj as TagHmac);
 
-        public override int GetHashCode() => ToString().GetHashCode();
+        public override int GetHashCode() => ToString().GetHashCode(StringComparison.InvariantCulture);
 
         public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
 

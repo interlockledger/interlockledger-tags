@@ -54,7 +54,15 @@ namespace InterlockLedger.Tags
         }
 
         public InterlockKey(ISigningKey key)
-            : this(new InterlockKeyParts(key.Purposes, key.AppId, key.SpecificActions, key.Name, key.Description, key.CurrentPublicKey, key.Strength, key.Id)) {
+            : this(new InterlockKeyParts(
+                (key ?? throw new ArgumentNullException(nameof(key))).Purposes,
+                key.AppId,
+                key.SpecificActions,
+                key.Name,
+                key.Description,
+                key.CurrentPublicKey,
+                key.Strength,
+                key.Id)) {
         }
 
         [JsonIgnore]

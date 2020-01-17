@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Globalization;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -40,16 +41,17 @@ namespace InterlockLedger.Tags
         public static readonly ILTagBool False = new ILTagBool(false);
         public static readonly ILTagBool True = new ILTagBool(true);
 
-        public override string Formatted => Value.ToString();
+        public override string Formatted => Value.ToString(CultureInfo.InvariantCulture);
 
         public static ILTagBool From(bool value) => value ? True : False;
 
-        public static ILTagBool From(byte[] bytes) => (bytes.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
+        public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
 
         protected override bool DeserializeInner(Stream s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
         protected override void SerializeInner(Stream s) => s.WriteByte((byte)(Value ? 1 : 0));
 
-        private ILTagBool(bool value) : base(ILTagId.Bool, value) { }
+        private ILTagBool(bool value) : base(ILTagId.Bool, value) {
+        }
     }
 }

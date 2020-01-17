@@ -39,25 +39,12 @@ namespace InterlockLedger.Tags
 {
     public abstract class VersionedValue<T> : IVersion where T : VersionedValue<T>, new()
     {
-        public static JsonSerializerOptions JsonOptions { get; } = new JsonSerializerOptions {
-            AllowTrailingCommas = true,
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            WriteIndented = true,
-            IgnoreNullValues = true,
-            IgnoreReadOnlyProperties = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-        };
-
         public Payload AsPayload => _payload.Value;
         public DataField FieldModel => _fieldModel.Value;
         public DataModel PayloadDataModel => _payloadDataModel.Value;
         public ulong TagId { get => _tagId; set { if (value != 0 && value != _tagId) throw new InvalidDataException($"Invalid value for TagId: {_tagId}"); } }
         public abstract string TypeName { get; }
         public ushort Version { get; set; }
-
-        public static T FromJsonText(string jsonText) => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
 
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //

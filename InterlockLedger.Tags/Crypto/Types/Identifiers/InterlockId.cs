@@ -239,7 +239,7 @@ namespace InterlockLedger.Tags
 
         private static string BuildTypePrefix(byte type) => $"{ToTypeName(type)}{_prefixSeparator}";
 
-        private static string NormalizePrefix(string s) => s.Contains(_prefixSeparator) ? s : $"{BuildTypePrefix(DefaultType)}{s}";
+        private static string NormalizePrefix(string s) => s.Contains(_prefixSeparator, StringComparison.InvariantCulture) ? s : $"{BuildTypePrefix(DefaultType)}{s}";
 
         private static byte ToType(string prefix) => _knownTypes.First(t => t.Value.typeName.Equals(prefix.Trim(), StringComparison.InvariantCultureIgnoreCase)).Key;
 

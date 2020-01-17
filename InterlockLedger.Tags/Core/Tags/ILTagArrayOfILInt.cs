@@ -70,10 +70,12 @@ namespace InterlockLedger.Tags
             });
 
         private static ulong[] Elicit(object opaqueValue) {
+            if (opaqueValue is null)
+                throw new ArgumentNullException(nameof(opaqueValue));
             if (opaqueValue is ulong[] values)
                 return values;
             if (opaqueValue is IEnumerable<object> items)
-                return items.Select(o => Convert.ToUInt64(o)).ToArray();
+                return items.Select(Convert.ToUInt64).ToArray();
             throw new InvalidCastException($"Can't elicit an ulong[] from {opaqueValue.GetType()}");
         }
     }

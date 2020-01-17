@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -46,12 +46,13 @@ namespace InterlockLedger.Tags
         public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, ISigner author, IEnumerable<TagReader> readers) : this()
             => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, new ILTagByteArray(blobInClearText), author, readers);
 
-        public override string TypeName => nameof(EncryptedBlob);
         public CipherAlgorithm Cipher => _encrypted.Cipher;
         public byte[] CipherText => _encrypted.CipherText;
         public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
+        public override string TypeName => nameof(EncryptedBlob);
 
-        public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value) => new EncryptedBlob(value);
+        public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
+            => new EncryptedBlob(value ?? throw new ArgumentNullException(nameof(value)));
 
         public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 

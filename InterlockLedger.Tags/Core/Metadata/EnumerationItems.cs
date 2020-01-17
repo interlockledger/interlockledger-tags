@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -71,7 +72,7 @@ namespace InterlockLedger.Tags
                 if (s is null)
                     throw new ArgumentNullException(nameof(s));
                 var parts = s.Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
-                Index = Convert.ToUInt64(parts[0]);
+                Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
                 Name = parts[1];
                 Description = parts.Length > 2 ? parts[2] : null;
                 return this;

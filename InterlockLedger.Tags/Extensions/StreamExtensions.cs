@@ -40,13 +40,13 @@ namespace InterlockLedger.Tags
     public static partial class StreamExtensions
     {
         public static async Task<byte[]> BuildPayloadBytesAsync(this Stream s, ulong tagId) {
-            var bytes = await ReadAllBytesAsync(s);
+            var bytes = await ReadAllBytesAsync(s).ConfigureAwait(false);
             using var ms = new MemoryStream();
             ms.ILIntEncode(tagId);
             ms.ILIntEncode((ulong)bytes.Length);
             ms.WriteBytes(bytes);
             ms.Position = 0;
-            return await ms.ReadAllBytesAsync();
+            return await ms.ReadAllBytesAsync().ConfigureAwait(false);
         }
 
         public static BaseKeyId DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
@@ -55,7 +55,7 @@ namespace InterlockLedger.Tags
 
         public static Stream EncodeInterlockId(this Stream s, InterlockId value) => s.EncodeTag(value);
 
-        public static bool HasBytes(this Stream s) => s.CanSeek && (s.Position < s.Length);
+        public static bool HasBytes(this Stream s) => s is null ? false : s.CanSeek && s.Position < s.Length;
 
         public static async Task<byte[]> ReadAllBytesAsync(this Stream s) {
             if (s == null)
@@ -66,7 +66,7 @@ namespace InterlockLedger.Tags
         }
 
         public static byte[] ReadBytes(this Stream s, int length) {
-            if (length <= 0)
+            if (s is null || length <= 0)
                 return Array.Empty<byte>();
             var bytes = new byte[length];
             var offset = 0;
@@ -99,6 +99,8 @@ namespace InterlockLedger.Tags
         }
 
         public static byte ReadSingleByte(this Stream s) {
+            if (s is null)
+                throw new ArgumentNullException(nameof(s));
             var bytes = new byte[1];
             var retries = 3;
             while (retries-- > 0) {
@@ -110,6 +112,8 @@ namespace InterlockLedger.Tags
         }
 
         public static Stream WriteBytes(this Stream s, byte[] bytes) {
+            if (s is null)
+                throw new ArgumentNullException(nameof(s));
             if (bytes?.Length > 0)
                 s.Write(bytes, 0, bytes.Length);
             s.Flush();
@@ -117,6 +121,8 @@ namespace InterlockLedger.Tags
         }
 
         public static Stream WriteSingleByte(this Stream s, byte value) {
+            if (s is null)
+                throw new ArgumentNullException(nameof(s));
             s.WriteByte(value);
             return s;
         }

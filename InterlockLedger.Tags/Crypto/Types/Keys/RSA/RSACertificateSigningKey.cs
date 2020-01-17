@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -67,7 +67,8 @@ namespace InterlockLedger.Tags
         }
 
         public override byte[] Decrypt(byte[] bytes) {
-            using var rsa = _certificateBytes.OpenCertificate(_password).GetRSAPrivateKey();
+            using var x509Certificate = _certificateBytes.OpenCertificate(_password);
+            using var rsa = x509Certificate.GetRSAPrivateKey();
             return rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1);
         }
 
@@ -77,7 +78,8 @@ namespace InterlockLedger.Tags
         private readonly string _password;
 
         private byte[] HashAndSign(byte[] dataToSign) {
-            using var rsa = _certificateBytes.OpenCertificate(_password).GetRSAPrivateKey();
+            using var x509Certificate = _certificateBytes.OpenCertificate(_password);
+            using var rsa = x509Certificate.GetRSAPrivateKey();
             return rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
     }

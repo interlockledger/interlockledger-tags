@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.Json.Serialization;
 
@@ -56,9 +57,9 @@ namespace InterlockLedger.Tags
         public static ILTag DeserializeFrom(Stream s) {
             if (s.HasBytes()) {
                 var tagId = s.DecodeTagId();
-                if (!_deserializers.ContainsKey(tagId))
-                    return new ILTagUnknown(tagId, s);
-                return _deserializers[tagId].fromStream(s);
+                return !_deserializers.ContainsKey(tagId)
+                    ? new ILTagUnknown(tagId, s)
+                    : _deserializers[tagId].fromStream(s);
             }
             return ILTagNull.Instance;
         }
@@ -100,6 +101,7 @@ namespace InterlockLedger.Tags
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
         public Stream SerializeInto(Stream s) {
+            if (s is null) return s;
             try {
                 s.ILIntEncode(TagId);
                 SerializeInner(s);
@@ -119,15 +121,15 @@ namespace InterlockLedger.Tags
             = new Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> {
                 [ILTagId.Null] = (_ => ILTagNull.Instance, _ => ILTagNull.Instance),
                 [ILTagId.Bool] = (s => s.ReadSingleByte() != 0 ? ILTagBool.True : ILTagBool.False, o => (bool)o ? ILTagBool.True : ILTagBool.False),
-                [ILTagId.Int8] = (s => new ILTagInt8(s, ILTagId.Int8), o => new ILTagInt8(Convert.ToSByte(o))),
-                [ILTagId.UInt8] = (s => new ILTagUInt8(s, ILTagId.UInt8), o => new ILTagUInt8(Convert.ToByte(o))),
-                [ILTagId.Int16] = (s => new ILTagInt16(s, ILTagId.Int16), o => new ILTagInt16(Convert.ToInt16(o))),
-                [ILTagId.UInt16] = (s => new ILTagUInt16(s, ILTagId.UInt16), o => new ILTagUInt16(Convert.ToUInt16(o))),
-                [ILTagId.Int32] = (s => new ILTagInt32(s, ILTagId.Int32), o => new ILTagInt32(Convert.ToInt32(o))),
-                [ILTagId.UInt32] = (s => new ILTagUInt32(s, ILTagId.UInt32), o => new ILTagUInt32(Convert.ToUInt32(o))),
-                [ILTagId.Int64] = (s => new ILTagInt64(s, ILTagId.Int64), o => new ILTagInt64(Convert.ToInt64(o))),
-                [ILTagId.UInt64] = (s => new ILTagUInt64(s, ILTagId.UInt64), o => new ILTagUInt64(Convert.ToUInt64(o))),
-                [ILTagId.ILInt] = (s => new ILTagILInt(s, ILTagId.ILInt), o => new ILTagILInt(Convert.ToUInt64(o))),
+                [ILTagId.Int8] = (s => new ILTagInt8(s, ILTagId.Int8), o => new ILTagInt8(Convert.ToSByte(o, CultureInfo.InvariantCulture))),
+                [ILTagId.UInt8] = (s => new ILTagUInt8(s, ILTagId.UInt8), o => new ILTagUInt8(Convert.ToByte(o, CultureInfo.InvariantCulture))),
+                [ILTagId.Int16] = (s => new ILTagInt16(s, ILTagId.Int16), o => new ILTagInt16(Convert.ToInt16(o, CultureInfo.InvariantCulture))),
+                [ILTagId.UInt16] = (s => new ILTagUInt16(s, ILTagId.UInt16), o => new ILTagUInt16(Convert.ToUInt16(o, CultureInfo.InvariantCulture))),
+                [ILTagId.Int32] = (s => new ILTagInt32(s, ILTagId.Int32), o => new ILTagInt32(Convert.ToInt32(o, CultureInfo.InvariantCulture))),
+                [ILTagId.UInt32] = (s => new ILTagUInt32(s, ILTagId.UInt32), o => new ILTagUInt32(Convert.ToUInt32(o, CultureInfo.InvariantCulture))),
+                [ILTagId.Int64] = (s => new ILTagInt64(s, ILTagId.Int64), o => new ILTagInt64(Convert.ToInt64(o, CultureInfo.InvariantCulture))),
+                [ILTagId.UInt64] = (s => new ILTagUInt64(s, ILTagId.UInt64), o => new ILTagUInt64(Convert.ToUInt64(o, CultureInfo.InvariantCulture))),
+                [ILTagId.ILInt] = (s => new ILTagILInt(s, ILTagId.ILInt), o => new ILTagILInt(Convert.ToUInt64(o, CultureInfo.InvariantCulture))),
                 [ILTagId.Binary32] = (s => new ILTagBinary32(s), NoJson),
                 [ILTagId.Binary64] = (s => new ILTagBinary64(s), NoJson),
                 [ILTagId.Binary128] = (s => new ILTagBinary128(s), NoJson),
@@ -170,5 +172,7 @@ namespace InterlockLedger.Tags
             stream.Flush();
             return stream.GetBuffer().PartOf((int)stream.Length);
         }
+
+        public static byte[] ToBytesHelper(Action<Stream> serialize) => TagHelpers.ToBytesHelper(serialize);
     }
 }

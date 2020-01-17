@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Globalization;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -40,7 +41,7 @@ namespace InterlockLedger.Tags
         public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
         }
 
-        public override string Formatted => Value.ToString("X16");
+        public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
 
         public override bool Equals(object obj)
                     => Equals(obj as ILTagILInt);

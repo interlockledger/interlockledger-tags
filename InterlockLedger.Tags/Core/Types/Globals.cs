@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -30,41 +30,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
-using System.IO;
+using System.Text.Json;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagExplicit<T> : ILTagImplicit<T>
+    public static class Globals
     {
-        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
-        }
+        public static JsonSerializerOptions JsonOptions { get; } = new JsonSerializerOptions {
+            AllowTrailingCommas = true,
+            PropertyNameCaseInsensitive = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            WriteIndented = true,
+            IgnoreNullValues = true,
+            IgnoreReadOnlyProperties = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+        };
 
-        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null) : base(s, alreadyDeserializedTagId, setup) {
-        }
-
-        protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
-            if (bytes == null || bytes.Length == 0)
-                return default;
-            if (deserialize == null) {
-                throw new ArgumentNullException(nameof(deserialize));
-            }
-            using var s = new MemoryStream(bytes);
-            return deserialize(s);
-        }
-
-        protected sealed override T DeserializeInner(Stream s) => FromBytes(s.ReadBytes((int)s.ILIntDecode()));
-
-        protected abstract T FromBytes(byte[] bytes);
-
-        protected sealed override void SerializeInner(Stream s) {
-            var bytes = ToBytes();
-            var length = bytes?.Length ?? 0;
-            s.ILIntEncode((ulong)length);
-            if (length > 0)
-                s.WriteBytes(bytes);
-        }
-
-        protected abstract byte[] ToBytes();
+        public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, new()
+            => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
     }
 }

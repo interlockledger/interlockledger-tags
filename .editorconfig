@@ -130,3 +130,6 @@ dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.CA2225.severity = none
 dotnet_diagnostic.CA2227.severity = none
 dotnet_diagnostic.RCS1194.severity = suggestion
+
+# CA1720: Identifier contains type name
+dotnet_diagnostic.CA1720.severity = none

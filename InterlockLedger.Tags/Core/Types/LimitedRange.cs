@@ -66,11 +66,13 @@ namespace InterlockLedger.Tags
         public static bool operator ==(LimitedRange left, LimitedRange right) => left.Equals(right);
 
         public static LimitedRange Resolve(string text) {
+            if (string.IsNullOrWhiteSpace(text))
+                throw new ArgumentException("Must come one or two numbers separated by '-'", nameof(text));
             var parts = text.Trim('[', ']').Split('-');
-            var start = ulong.Parse(parts[0].Trim());
+            var start = ulong.Parse(parts[0].Trim(), CultureInfo.InvariantCulture);
             if (parts.Length == 1)
                 return new LimitedRange(start);
-            var end = ulong.Parse(parts[1].Trim());
+            var end = ulong.Parse(parts[1].Trim(), CultureInfo.InvariantCulture);
             var range = new LimitedRange(start, end);
             return range;
         }
@@ -119,7 +121,8 @@ namespace InterlockLedger.Tags
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) => destinationType == typeof(InstanceDescriptor) ? true : destinationType == typeof(string);
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) {
             if (value is string text) {

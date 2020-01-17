@@ -51,7 +51,7 @@ namespace InterlockLedger.Tags
         public int Length => Value.Length;
         public new ILTag this[int i] => Value?[i];
 
-        public override bool Equals(object obj) => obj is ILTagSequence other && other.Length == Length && other.ToString().Equals(ToString());
+        public override bool Equals(object obj) => obj is ILTagSequence other && other.Length == Length && other.ToString().Equals(ToString(), StringComparison.InvariantCulture);
 
         internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) { }
 

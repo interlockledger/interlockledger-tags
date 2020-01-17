@@ -83,7 +83,7 @@ namespace InterlockLedger.Tags
         public static string SimplifyAsFileName(this string name) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException($"Name is empty or null");
-            return _nameFilter.Replace(name.Trim(), ".").ToLower();
+            return _nameFilter.Replace(name.Trim(), ".").ToLowerInvariant();
         }
 
         public static string TrimToNull(this string s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();

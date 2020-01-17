@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -86,7 +87,7 @@ namespace InterlockLedger.Tags
 
         private static T[] Elicit(object o) {
             if (o is Dictionary<string, object> dictionary) {
-                var elementTagId = Convert.ToUInt64(dictionary[nameof(JsonRepresentation.ElementTagId)]);
+                var elementTagId = Convert.ToUInt64(dictionary[nameof(JsonRepresentation.ElementTagId)], CultureInfo.InvariantCulture);
                 if (dictionary[nameof(JsonRepresentation.Elements)] is IEnumerable<object> elements) {
                     var list = new List<T>();
                     foreach (var item in elements) {

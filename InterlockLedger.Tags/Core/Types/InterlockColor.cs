@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(InterlockColorConverter))]
     [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
-    public struct InterlockColor : IJsonCustom<InterlockColor>
+    public struct InterlockColor : IJsonCustom<InterlockColor>, IEquatable<InterlockColor>
     {
         public static readonly InterlockColor AliceBlue = new InterlockColor(240, 248, 255, "AliceBlue");
         public static readonly InterlockColor AntiqueWhite = new InterlockColor(250, 235, 215, "AntiqueWhite");
@@ -204,7 +204,7 @@ namespace InterlockLedger.Tags
         public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
 
         [JsonIgnore]
-        public string AsCSS => Name.StartsWith("#") && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
+        public string AsCSS => Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
 
         [JsonIgnore]
         public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
@@ -230,7 +230,9 @@ namespace InterlockLedger.Tags
 
         public static bool operator ==(InterlockColor left, InterlockColor right) => left.Equals(right);
 
-        public override bool Equals(object obj) => (obj is InterlockColor other) && other.RGBA == RGBA;
+        public override bool Equals(object obj) => (obj is InterlockColor other) && Equals(other);
+
+        public bool Equals(InterlockColor other) => other.RGBA == RGBA;
 
         public override int GetHashCode() => (int)RGBA;
 
@@ -558,7 +560,9 @@ namespace InterlockLedger.Tags
         }
 
         private static string ToColorCode(byte r, byte g, byte b, byte a)
-            => "#" + r.ToString("X2") + g.ToString("X2") + b.ToString("X2") + (a < 255 ? a.ToString("X2") : "");
+            => "#" + ToHex(r) + ToHex(g) + ToHex(b) + (a < 255 ? ToHex(a) : "");
+
+        private static string ToHex(byte b) => b.ToString("X2", CultureInfo.InvariantCulture);
     }
 
     public class InterlockColorConverter : TypeConverter

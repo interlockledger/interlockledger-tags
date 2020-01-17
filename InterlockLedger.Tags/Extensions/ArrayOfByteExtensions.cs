@@ -42,8 +42,10 @@ namespace InterlockLedger.Tags
     public static class ArrayOfByteExtensions
     {
         public static byte[] Append(this byte[] bytes, byte[] newBytes) {
-            if (newBytes == null)
+            if (newBytes is null)
                 return bytes;
+            if (bytes is null)
+                return newBytes;
             var result = new byte[bytes.Length + newBytes.Length];
             Array.Copy(bytes, result, bytes.Length);
             Array.Copy(newBytes, 0, result, bytes.Length, newBytes.Length);
@@ -108,6 +110,10 @@ namespace InterlockLedger.Tags
         }
 
         public static void DumpToFile(this byte[] bytes, string filename) {
+            if (bytes is null)
+                throw new ArgumentNullException(nameof(bytes));
+            if (string.IsNullOrEmpty(filename))
+                throw new ArgumentException("message", nameof(filename));
             using var file = File.CreateText(filename);
             var count = 0;
             foreach (var b in bytes) {
@@ -155,7 +161,7 @@ namespace InterlockLedger.Tags
             return part;
         }
 
-        public static int SafeGetHashCode(this byte[] bytes) => bytes?.ToSafeBase64().GetHashCode() ?? 0;
+        public static int SafeGetHashCode(this byte[] bytes) => bytes?.ToSafeBase64().GetHashCode(StringComparison.InvariantCulture) ?? 0;
 
         public static int SafeLength(this byte[] bytes) => bytes?.Length ?? 0;
 

@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags
     {
         public ILTagBigInteger(Stream s) : base(ILTagId.BigInteger) => throw new NotImplementedException();
 
-        public override object AsJson => throw new NotImplementedException();
+        public override object AsJson => throw new NotSupportedException();
 
         protected override void SerializeInner(Stream s) => throw new NotImplementedException();
     }
