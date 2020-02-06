@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -36,7 +36,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-#pragma warning disable CA2227 // Collection properties should be read only
+//#pragma warning disable CA2227 // Collection properties should be read only
 
 namespace InterlockLedger.Tags
 {
@@ -66,7 +66,7 @@ namespace InterlockLedger.Tags
 
         public bool? EnumerationAsFlags { get; set; }
 
-        [JsonPropertyName(nameof(Enumeration))]
+        [JsonPropertyName("enumeration")]
         public EnumerationItems EnumerationItems {
             get => Enumeration?.ToEnumerationItems();
             set => Enumeration = value?.UpdateFrom();
@@ -85,7 +85,7 @@ namespace InterlockLedger.Tags
         public bool? IsOptional { get; set; }
 
         [JsonIgnore]
-        public bool IsVersion => Name == "Version" && TagId == ILTagId.UInt16;
+        public bool IsVersion => Name.Equals("Version", StringComparison.OrdinalIgnoreCase) && TagId == ILTagId.UInt16;
 
         // Case-insensitive (can't contain dots or whitespace)
         public string Name { get; set; }

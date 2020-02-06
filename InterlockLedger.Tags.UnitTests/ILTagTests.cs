@@ -45,7 +45,7 @@ namespace InterlockLedger.Tags
 
         [TestCase(new byte[] { 16, 3, 1, 2, 3 }, ExpectedResult = new byte[] { 1, 2, 3 }, TestName = "AsByteArray _1,2,3_")]
         [TestCase(new byte[] { 16, 1, 2 }, ExpectedResult = new byte[] { 2 }, TestName = "AsByteArray _2_")]
-        [TestCase(new byte[] { 16, 0 }, ExpectedResult = new byte[0], TestName = "AsByteArray Zero Length - Empty Array")]
+        [TestCase(new byte[] { 16, 0 }, ExpectedResult = new byte[0], TestName = "AsByteArray Zero Length _ Empty Array")]
         public byte[] AsByteArray(byte[] bytes) => new MemoryStream(bytes).DecodeByteArray();
 
         [TestCase(new byte[] { 10, 0xF9, 0xFF, 0xFF }, ExpectedResult = 65783, TestName = "AsILInt 65783")]
@@ -53,14 +53,14 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 10, 32 }, ExpectedResult = 32, TestName = "AsILInt 32")]
         public ulong AsILInt(byte[] bytes) => ((ILTagILInt)ILTag.DeserializeFrom(new MemoryStream(bytes))).Value;
 
-        [TestCase(new byte[] { 6, 255, 255, 255, 255 }, ExpectedResult = -1, TestName = "AsInt -1")]
+        [TestCase(new byte[] { 6, 255, 255, 255, 255 }, ExpectedResult = -1, TestName = "AsInt _1")]
         [TestCase(new byte[] { 6, 0, 0, 0, 1 }, ExpectedResult = 0x01000000, TestName = "AsInt 0x01000000")]
         [TestCase(new byte[] { 6, 0, 0, 1, 0 }, ExpectedResult = 0x010000, TestName = "AsInt 0x010000")]
         [TestCase(new byte[] { 6, 0, 1, 0, 0 }, ExpectedResult = 256, TestName = "AsInt 256")]
         [TestCase(new byte[] { 6, 1, 0, 0, 0 }, ExpectedResult = 1, TestName = "AsInt 1")]
         public int AsInt(byte[] bytes) => ((ILTagInt32)ILTag.DeserializeFrom(new MemoryStream(bytes))).Value;
 
-        [TestCase(new byte[] { 8, 255, 255, 255, 255, 255, 255, 255, 255 }, ExpectedResult = (long)-1, TestName = "AsLong -1")]
+        [TestCase(new byte[] { 8, 255, 255, 255, 255, 255, 255, 255, 255 }, ExpectedResult = (long)-1, TestName = "AsLong _1")]
         [TestCase(new byte[] { 8, 0, 0, 0, 0, 1, 0, 0, 0 }, ExpectedResult = 0x0100000000, TestName = "AsLong 0x0100000000")]
         [TestCase(new byte[] { 8, 0, 0, 0, 1, 0, 0, 0, 0 }, ExpectedResult = (long)0x01000000, TestName = "AsLong 0x01000000")]
         [TestCase(new byte[] { 8, 0, 0, 1, 0, 0, 0, 0, 0 }, ExpectedResult = (long)0x010000, TestName = "AsLong 0x010000")]
@@ -68,7 +68,7 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 8, 1, 0, 0, 0, 0, 0, 0, 0 }, ExpectedResult = (long)1, TestName = "AsLong 1")]
         public long AsLong(byte[] bytes) => ((ILTagInt64)ILTag.DeserializeFrom(new MemoryStream(bytes))).Value;
 
-        [TestCase(new byte[] { 4, 255, 255 }, ExpectedResult = (short)-1, TestName = "AsShort -1")]
+        [TestCase(new byte[] { 4, 255, 255 }, ExpectedResult = (short)-1, TestName = "AsShort _1")]
         [TestCase(new byte[] { 4, 0, 1 }, ExpectedResult = (short)256, TestName = "AsShort 256")]
         [TestCase(new byte[] { 4, 1, 0 }, ExpectedResult = (short)1, TestName = "AsShort 1")]
         [TestCase(new byte[] { 4, 0, 0 }, ExpectedResult = (short)0, TestName = "AsShort 0")]
@@ -76,7 +76,7 @@ namespace InterlockLedger.Tags
 
         [TestCase(new byte[] { 2, 0 }, ExpectedResult = (byte)0, TestName = "AsSignedByte 0")]
         [TestCase(new byte[] { 2, 1 }, ExpectedResult = (byte)1, TestName = "AsSignedByte 1")]
-        [TestCase(new byte[] { 2, 255 }, ExpectedResult = (sbyte)(-1), TestName = "AsSignedByte -1")]
+        [TestCase(new byte[] { 2, 255 }, ExpectedResult = (sbyte)(-1), TestName = "AsSignedByte _1")]
         public sbyte AsSignedByte(byte[] bytes) => ((ILTagInt8)ILTag.DeserializeFrom(new MemoryStream(bytes))).Value;
 
         [TestCase(new byte[] { 17, 6, 0x41, 0xC3, 0xA7, 0xC3, 0xA3, 0x6F }, ExpectedResult = "Ação", TestName = "AsString 'Ação'")]

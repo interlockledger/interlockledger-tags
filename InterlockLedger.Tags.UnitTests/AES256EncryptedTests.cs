@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -37,7 +37,6 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-    [TestFixture]
     public class AES256EncryptedTests
     {
         [Test]
@@ -57,34 +56,31 @@ namespace InterlockLedger.Tags
             AssertPasswordMissing(() => tag.Decrypt(null));
         }
 
-        [TestCase(new byte[] { 42, 68, 0, 0, 16, 64,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, true, "password", TestName = "AES256Encrypted-True-FromStream")]
-        [TestCase(new byte[] { 42, 68, 0, 0, 16, 64,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, false, "password", TestName = "AES256Encrypted-False-FromStream")]
-        public void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
-            var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));
-            var clear = tag.Decrypt(password);
-            Assert.AreEqual(value, AsBool(clear));
-        }
+        [Test]
+        public void EncodedBytesFalse() => Assert.That(() =>
+            SerializeAES256Encrypted(false, "password"), Is.EquivalentTo(new byte[] { 42, 68, 0, 0, 16, 64,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
+                82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }));
 
-        [TestCase(true, "password", ExpectedResult = new byte[] { 42, 68, 0, 0, 16, 64,
+        [Test]
+        public void EncodedBytesTrue() => Assert.That(() =>
+            SerializeAES256Encrypted(true, "password"), Is.EquivalentTo(new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, TestName = "AES256Encrypted-True-EncodedBytes")]
-        [TestCase(false, "password", ExpectedResult = new byte[] { 42, 68, 0, 0, 16, 64,
+            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }));
+
+        [Test]
+        public void FromStreamFalse() => NewAES256EncryptedFromStream(new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, TestName = "AES256Encrypted-False-EncodedBytes")]
-        public byte[] SerializeAES256Encrypted(bool value, string password) {
-            var result = new TestableAES256Encrypted(value ? ILTagBool.True : ILTagBool.False, password);
-            var clear = result.Decrypt(password);
-            Assert.AreEqual(value, AsBool(clear));
-            return result.EncodedBytes;
-        }
+            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, false, "password");
+
+        [Test]
+        public void FromStreamTrue() => NewAES256EncryptedFromStream(new byte[] { 42, 68, 0, 0, 16, 64,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
+            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, true, "password");
 
         private static bool AsBool(ILTagBool tag) => tag?.Value ?? throw new InvalidDataException("Not an ILTagBool");
 
@@ -96,6 +92,19 @@ namespace InterlockLedger.Tags
             var ae = Assert.Throws<ArgumentException>(code);
             Assert.AreEqual("password", ae.ParamName);
             Assert.IsTrue(ae.Message.StartsWith(expectedMessageStart, StringComparison.Ordinal), $"Exception message doesn't start with {expectedMessageStart}");
+        }
+
+        private void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
+            var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));
+            var clear = tag.Decrypt(password);
+            Assert.AreEqual(value, AsBool(clear));
+        }
+
+        private byte[] SerializeAES256Encrypted(bool value, string password) {
+            var result = new TestableAES256Encrypted(value ? ILTagBool.True : ILTagBool.False, password);
+            var clear = result.Decrypt(password);
+            Assert.AreEqual(value, AsBool(clear));
+            return result.EncodedBytes;
         }
 
         private class TestableAES256Encrypted : AES256Encrypted<ILTagBool>

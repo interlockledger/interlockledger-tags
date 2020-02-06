@@ -87,7 +87,7 @@ namespace InterlockLedger.Tags
 
         [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, TestName = "Guarantee Bijective Behavior for One String Dictionary with two strings")]
         [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, TestName = "Guarantee Bijective Behavior for One String Dictionary with one string and a null")]
-        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, TestName = "Guarantee Bijective Behavior for One String Dictionary with one non-empty string and one empty string")]
+        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, TestName = "Guarantee Bijective Behavior for One String Dictionary with one non_empty string and one empty string")]
         public void GuaranteeBijectiveBehaviorForStringTest(string[] keys, string[] values)
             => GuaranteeBijectiveBehaviorForString(BuildStringDictionary(keys, values));
 
@@ -136,7 +136,7 @@ namespace InterlockLedger.Tags
 
         [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, ExpectedResult = new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Serialize One String Dictionary with two strings")]
         [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, ExpectedResult = new byte[] { 31, 14, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 0 }, TestName = "Serialize One String Dictionary with one string and a null")]
-        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 17, 0 }, TestName = "Serialize One String Dictionary with one non-empty string and one empty string")]
+        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 17, 0 }, TestName = "Serialize One String Dictionary with one non_empty string and one empty string")]
         public byte[] SerializeILTagStringDictionary(string[] keys, string[] values)
             => new ILTagStringDictionary(BuildStringDictionary(keys, values)).EncodedBytes;
 

@@ -77,7 +77,7 @@ namespace InterlockLedger.Tags
                 return true;
 
             case JsonValueKind.Object:
-                return jo.EnumerateObject().ToDictionary(p => p.Name, pp => pp.Value.AsNavigable());
+                return jo.EnumerateObject().ToDictionary(p => p.Name, pp => pp.Value.AsNavigable(), StringComparer.InvariantCultureIgnoreCase);
 
             case JsonValueKind.Array:
                 return jo.EnumerateArray().Select(js => js.AsNavigable()).ToArray();
@@ -96,7 +96,7 @@ namespace InterlockLedger.Tags
         }
 
         private static Dictionary<string, object> ToDictionary(object value) {
-            var dictionary = new Dictionary<string, object>();
+            var dictionary = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var p in value.GetType().GetProperties()) {
                 object propertyValue = p.GetValue(value, null);
                 object navigable = AsNavigable(propertyValue);

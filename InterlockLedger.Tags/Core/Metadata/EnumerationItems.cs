@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -80,7 +80,7 @@ namespace InterlockLedger.Tags
 
             private const char _fieldSeparator = '|';
 
-            private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(EnumerationItems._detailSeparator, '?');
+            private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
         }
 
         private readonly List<FullEnumerationDetails> _details = new List<FullEnumerationDetails>();
