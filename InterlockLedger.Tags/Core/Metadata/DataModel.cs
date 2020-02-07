@@ -184,7 +184,8 @@ namespace InterlockLedger.Tags
         private static ILTag FromPartialNavigable(Dictionary<string, object> json, ulong tagId, IEnumerable<DataField> dataFields, DataModel dataModel) {
             if (json is null || json.Count == 0)
                 return ILTagNull.Instance;
-            ushort version = 1;
+            const ushort minVersion = 1;
+            ushort version = minVersion;
             var isVersioned = IsVersioned(dataFields);
             var firstField = true;
             var tags = new List<ILTag>();
@@ -193,7 +194,7 @@ namespace InterlockLedger.Tags
                     continue;
                 if (isVersioned) {
                     if (firstField) {
-                        version = Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
+                        version = Math.Max(Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture), minVersion);
                         firstField = false;
                     } else if (field.Version > version)
                         break;

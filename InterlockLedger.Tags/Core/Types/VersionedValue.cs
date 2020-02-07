@@ -33,23 +33,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     public abstract class VersionedValue<T> : IVersion where T : VersionedValue<T>, new()
     {
+        [JsonIgnore]
         public Payload AsPayload => _payload.Value;
+
+        [JsonIgnore]
         public DataField FieldModel => _fieldModel.Value;
+
+        [JsonIgnore]
         public DataModel PayloadDataModel => _payloadDataModel.Value;
+
         public ulong TagId { get => _tagId; set { if (value != 0 && value != _tagId) throw new InvalidDataException($"Invalid value for TagId: {_tagId}"); } }
+
+        [JsonIgnore]
         public abstract string TypeName { get; }
+
         public ushort Version { get; set; }
 
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //
             DecodeRemainingStateFrom(s);
             return (T)this;
+        }
+
+        public T FromUnknown(ILTagUnknown unknown) {
+            if (unknown is null)
+                throw new ArgumentNullException(nameof(unknown));
+            if (unknown.TagId != _tagId)
+                throw new InvalidCastException($"Wrong tagId! Expecting {_tagId} but came {unknown.TagId}");
+            if (unknown.Value.None())
+                throw new ArgumentException("Empty tagged value not expected!", nameof(unknown));
+            using var s = new MemoryStream(unknown.Value);
+            return FromStream(s);
         }
 
         public void ToStream(Stream s) {
