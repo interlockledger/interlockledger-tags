@@ -85,6 +85,7 @@ namespace InterlockLedger.Tags
         public const ulong ReadingKey = 53;  //                         Encrypted data reader encrypted key
         public const ulong EncryptedTag = 54;
         public const ulong EncryptedBlob = 55;
+        public const ulong InterlockKeyAppPermission = 56;
 
         // Metadata
         public const ulong DataField = 225;         //  DataField for Published Apps Records

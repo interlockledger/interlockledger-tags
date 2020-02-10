@@ -32,40 +32,46 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class Owner : ISigningKey, IPasswordProvider
+    public readonly struct AppPermissions
     {
-        public InterlockKey AsInterlockKey => new InterlockKey(this);
-        public TagPubKey CurrentPublicKey { get; protected set; }
-        public string Description { get; protected set; }
-        public string Email { get; protected set; }
-        public BaseKeyId Id { get; protected set; }
-        public string Name { get; protected set; }
-        public OwnerId OwnerId => (OwnerId)Id;
-        public IEnumerable<AppPermissions> Permissions { get; } = Array.Empty<AppPermissions>();
-        public KeyPurpose[] Purposes => keyPurposes;
-        public Algorithm SignAlgorithm { get; protected set; }
-        public KeyStrength Strength { get; protected set; }
+        public readonly IEnumerable<ulong> ActionIds;
+        public readonly ulong AppId;
 
-        public abstract byte[] Decrypt(byte[] bytes);
-
-        public string PasswordFor(InterlockId id) {
-            if (id is null)
-                throw new ArgumentNullException(nameof(id));
-            return Convert.ToBase64String(Sign(id.EncodedBytes).Data);
+        public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
+            AppId = appId;
+            ActionIds = actionIds ?? Array.Empty<ulong>();
+            _allActions = ActionIds.None();
         }
 
-        public abstract TagSignature Sign(byte[] data);
+        public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_allActions || ActionIds.Contains(actionId));
 
-        public string ToListing() => $"'{Name}' {Id}";
+        public Tag GetTag() => new Tag(this);
 
-        public string ToShortString() => $"Owner {Name} using {SignAlgorithm} with {Strength} strength ({Id})";
+        public override string ToString() {
+            var plural = ActionIds.SafeCount() == 1 ? "" : "s";
+            return $"App #{AppId} {(_allActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
+        }
 
-        public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {CurrentPublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
+        public class Tag : ILTagExplicit<AppPermissions>
+        {
+            public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
+            }
 
-        protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.KeyManagement, KeyPurpose.Action, KeyPurpose.ClaimSigner, KeyPurpose.Protocol };
+            internal Tag(Stream s) : base(ILTagId.InterlockKeyAppPermission, s) {
+            }
+
+            protected override AppPermissions FromBytes(byte[] bytes) => FromBytesHelper(bytes,
+                s => new AppPermissions(s.DecodeILInt(), s.DecodeILIntArray())
+            );
+
+            protected override byte[] ToBytes() => ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
+        }
+
+        private readonly bool _allActions;
     }
 }

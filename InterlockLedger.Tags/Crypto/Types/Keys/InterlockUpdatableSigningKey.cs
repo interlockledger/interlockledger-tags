@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -41,9 +41,8 @@ namespace InterlockLedger.Tags
     {
         public TagPubKey CurrentPublicKey => _value.PublicKey;
         public abstract TagPubKey NextPublicKey { get; }
+        public IEnumerable<AppPermissions> Permissions { get; } = Array.Empty<AppPermissions>();
         public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
-        public IEnumerable<ulong> SpecificActions => Enumerable.Empty<ulong>();
-        public ulong AppId => _value.AppId;
         public string Description => _value.Description;
         public byte[] EncodedBytes => _value.EncodedBytes;
         public BaseKeyId Id => _value.Id;
@@ -84,10 +83,9 @@ namespace InterlockLedger.Tags
         public InterlockUpdatableSigningKeyData(InterlockUpdatableSigningKeyParts parts) : base(ILTagId.InterlockUpdatableSigningKey, parts) {
         }
 
-        public InterlockKey AsInterlockKey => new InterlockKey(Purposes, Name, PublicKey, AppId, Value.SpecificActions, Id, Strength, Description);
+        public InterlockKey AsInterlockKey => new InterlockKey(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
         public DateTimeOffset LastSignatureTimeStamp { get => Value.LastSignatureTimeStamp; internal set => Value.LastSignatureTimeStamp = value; }
         public ulong SignaturesWithCurrentKey { get => Value.SignaturesWithCurrentKey; internal set => Value.SignaturesWithCurrentKey = value; }
-        public ulong AppId => Value.AppId;
         public string Description => Value.Description;
         byte[] IInterlockKeySecretData.Encrypted => Value.Encrypted;
         EncryptedContentType IInterlockKeySecretData.EncryptedContentType => EncryptedContentType.EncryptedKey;
@@ -97,7 +95,6 @@ namespace InterlockLedger.Tags
         public TagPubKey PublicKey => Value.PublicKey;
         public KeyPurpose[] Purposes => Value.Purposes;
         public KeyStrength Strength => Value.Strength;
-
         public ushort Version => Value.Version;
 
         public static InterlockUpdatableSigningKeyData DecodeFromBytes(byte[] bytes) {
@@ -159,7 +156,7 @@ namespace InterlockLedger.Tags
         }
 
         public InterlockUpdatableSigningKeyParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, BaseKeyId keyId)
-            : base(purposes, 0, null, name, description, pubKey, strength, keyId) {
+            : base(purposes, name, description, pubKey, strength, keyId, null) {
             Version = InterlockUpdatableSigningKeyVersion;
             Encrypted = encrypted;
             LastSignatureTimeStamp = DateTimeOffsetExtensions.TimeZero;

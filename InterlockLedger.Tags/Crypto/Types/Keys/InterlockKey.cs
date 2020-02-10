@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -38,50 +38,40 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
+
     public class InterlockKey : ILTagExplicit<InterlockKeyParts>, IEquatable<InterlockKey>
     {
-        public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, ulong appId, IEnumerable<ulong> actionIds, BaseKeyId keyId, KeyStrength? strength = null, string description = null)
+        public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
             : this(new InterlockKeyParts(purposes,
-                appId,
-                actionIds,
                 name,
                 description,
                 pubKey,
                 strength ?? pubKey?.Strength ?? throw new ArgumentNullException(nameof(pubKey)),
-                keyId)) { }
-
-        public InterlockKey(InterlockKeyParts parts) : base(ILTagId.InterlockKey, parts) {
-        }
+                keyId,
+                permissions)) { }
 
         public InterlockKey(ISigningKey key)
             : this(new InterlockKeyParts(
                 (key ?? throw new ArgumentNullException(nameof(key))).Purposes,
-                key.AppId,
-                key.SpecificActions,
                 key.Name,
                 key.Description,
                 key.CurrentPublicKey,
                 key.Strength,
-                key.Id)) {
+                key.Id,
+                key.Permissions)) {
         }
-
-        [JsonIgnore]
-        public bool AllActions => Value.Actionable && SpecificActions.None();
 
         [JsonIgnore]
         public override object AsJson => Value;
 
-        public ulong AppId => Value.AppId;
         public string Description => Value.Description;
         public BaseKeyId Id => Value.Id;
         public BaseKeyId Identity => Value.Identity;
         public string Name => Value.Name;
+        public IEnumerable<AppPermissions> Permissions => Value.Permissions;
         public TagPubKey PublicKey => Value.PublicKey;
         public KeyPurpose[] Purposes => Value.Purposes;
-        public IEnumerable<ulong> SpecificActions => Value.SpecificActions;
         public ushort Version => Value.Version;
-
-        public bool CanAct(ulong appId, ulong actionId) => appId == AppId && Purposes.Contains(KeyPurpose.Action) && (SpecificActions?.Contains(actionId) != false);
 
         public override bool Equals(object obj) => Equals(obj as InterlockKey);
 
@@ -111,9 +101,10 @@ namespace InterlockLedger.Tags
                     Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
                     Description = s.DecodeString(),                   // Field index 5 //
                     PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
-                    AppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 7  - since version 1 //
+                    FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 7  - since version 1 //
                     Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
-                    SpecificActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
+                    FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
+                    Permissions = version > 3 ? s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value) : Permissions,
                 };
             });
 
@@ -126,20 +117,24 @@ namespace InterlockLedger.Tags
                 s.EncodeInterlockId(Value.Identity);        // Field index 4 //
                 s.EncodeString(Value.Description);          // Field index 5 //
                 s.EncodeTag(Value.PublicKey);               // Field index 6 //
-                s.EncodeILInt(Value.AppId);                 // Field index 7 //
+                s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
                 s.EncodeILInt((ulong)Value.Strength);       // Field index 8 //
-                s.EncodeILIntArray(Value.SpecificActions ?? Enumerable.Empty<ulong>());  // Field index 9 - since version 3 //
+                s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
+                s.EncodeTagArray(Value.Permissions.Select(p => p.GetTag())); // Field index 10 - since version 4 //
             });
+
+        private InterlockKey(InterlockKeyParts parts) : base(ILTagId.InterlockKey, parts) {
+        }
     }
 
     public class InterlockKeyParts
     {
-        public const ushort InterlockKeyVersion = 0x0003;
+        public const ushort InterlockKeyVersion = 0x0004;
 
         public InterlockKeyParts() {
         }
 
-        public InterlockKeyParts(KeyPurpose[] purposes, ulong appId, IEnumerable<ulong> actionIds, string name, string description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId) {
+        public InterlockKeyParts(KeyPurpose[] purposes, string name, string description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId, IEnumerable<AppPermissions> permissions) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
             Version = InterlockKeyVersion;
@@ -147,9 +142,10 @@ namespace InterlockLedger.Tags
             Purposes = purposes ?? throw new ArgumentNullException(nameof(purposes));
             PublicKey = pubKey ?? throw new ArgumentNullException(nameof(pubKey));
             Description = description;
-            AppId = appId;
             Strength = strength;
-            SpecificActions = actionIds ?? Enumerable.Empty<ulong>();
+            if (Actionable && permissions.None())
+                throw new ArgumentException("A key with Action purpose need to specify some apps and actions to be permitted", nameof(permissions));
+            Permissions = permissions;
             Identity = new KeyId(TagHash.HashSha256Of(_hashable));
             Id = keyId ?? Identity;
         }
@@ -157,14 +153,13 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public bool Actionable => Purposes.Contains(KeyPurpose.Action);
 
-        public ulong AppId { get; set; }
         public string Description { get; set; }
         public BaseKeyId Id { get; set; }
         public BaseKeyId Identity { get; set; }
         public string Name { get; set; }
+        public IEnumerable<AppPermissions> Permissions { get; set; }
         public TagPubKey PublicKey { get; set; }
         public KeyPurpose[] Purposes { get; set; }
-        public IEnumerable<ulong> SpecificActions { get; set; }
         public KeyStrength Strength { get; set; }
         public ushort Version { get; set; }
 
@@ -178,6 +173,16 @@ namespace InterlockLedger.Tags
 ++ from: {Identity}
 ++ with strength {Strength}";
 
+        internal IEnumerable<ulong> FirstActions {
+            get => Permissions.FirstOrDefault().ActionIds ?? Array.Empty<ulong>();
+            set => Permissions = new List<AppPermissions> { new AppPermissions(_firstAppId, value) };
+        }
+
+        internal ulong FirstAppId {
+            get => Permissions.FirstOrDefault().AppId;
+            set => _firstAppId = value;
+        }
+
         internal ILTagArrayOfILTag<ILTagILInt> PurposesAsILInts => new ILTagArrayOfILTag<ILTagILInt>(AsILInts(Purposes));
 
         internal ulong[] PurposesAsUlongs {
@@ -185,6 +190,7 @@ namespace InterlockLedger.Tags
             set => Purposes = value?.Select(u => (KeyPurpose)u).ToArray();
         }
 
+        private ulong _firstAppId;
         private string _actionsFor => Actionable ? AppAndActions() : string.Empty;
 
         private string _displayablePurposes => Purposes.ToStringAsList();
@@ -195,12 +201,6 @@ namespace InterlockLedger.Tags
 
         private static ulong[] AsUlongs(KeyPurpose[] purposes) => purposes?.Select(p => (ulong)p).ToArray();
 
-        private string AppAndActions() {
-            var actions = SpecificActions.ToArray();
-            if (AppId == 0 && !actions.SafeAny())
-                return "All Apps & Actions";
-            var plural = (actions.Length == 1 ? "" : "s");
-            return $"App #{AppId} {(actions.SafeAny() ? $"Action{plural} {actions.WithCommas(noSpaces: true)}" : "All Actions")}";
-        }
+        private string AppAndActions() => Permissions.None() ? "No actions" : Environment.NewLine + Permissions.JoinedBy(Environment.NewLine);
     }
 }

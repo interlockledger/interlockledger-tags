@@ -164,6 +164,7 @@ namespace InterlockLedger.Tags
                 [ILTagId.DataModel] = (s => new ILTagDataModel(s), NoJson),
                 [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),
                 [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),
+                [ILTagId.InterlockKeyAppPermission] = (s => new AppPermissions.Tag(s), NoJson)
             };
 
         private byte[] SerializeToByteArray() {

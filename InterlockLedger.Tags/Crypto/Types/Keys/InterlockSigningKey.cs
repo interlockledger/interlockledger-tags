@@ -47,13 +47,12 @@ namespace InterlockLedger.Tags
         public abstract byte[] AsSessionState { get; }
         public TagPubKey CurrentPublicKey => _value.PublicKey;
         public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
-        public ulong AppId => _value.AppId;
         public string Description => _value.Description;
         protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;
         public BaseKeyId Id => _value.Id;
         public string Name => _value.Name;
         public KeyPurpose[] Purposes => _value.Purposes;
-        public IEnumerable<ulong> SpecificActions => _value.SpecificActions;
+        public IEnumerable<AppPermissions> Permissions => _value.Permissions;
         public KeyStrength Strength => _value.Strength;
 
         public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
@@ -83,14 +82,13 @@ namespace InterlockLedger.Tags
 
     public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData
     {
-        public InterlockSigningKeyData(KeyPurpose[] purposes, ulong appId, IEnumerable<ulong> actionIds, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
-            : this(new InterlockSigningKeyParts(purposes, appId, actionIds, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }
+        public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
+            : this(new InterlockSigningKeyParts(purposes, permissions, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }
 
         public InterlockSigningKeyData(InterlockSigningKeyParts parts) : base(ILTagId.InterlockSigningKey, parts) {
         }
 
-        public InterlockKey AsInterlockKey => new InterlockKey(Purposes, Name, PublicKey, AppId, SpecificActions, Id, Strength, Description);
-        public ulong AppId => Value.AppId;
+        public InterlockKey AsInterlockKey => new InterlockKey(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
         public string Description => Value.Description;
         public byte[] Encrypted => Value.Encrypted;
         public EncryptedContentType EncryptedContentType => Value.EncryptedContentType;
@@ -99,7 +97,7 @@ namespace InterlockLedger.Tags
         public string Name => Value.Name;
         public TagPubKey PublicKey => Value.PublicKey;
         public KeyPurpose[] Purposes => Value.Purposes;
-        public IEnumerable<ulong> SpecificActions => Value.SpecificActions;
+        public IEnumerable<AppPermissions> Permissions => Value.Permissions;
         public KeyStrength Strength => Value.Strength;
         public ushort Version => Value.Version;
 
@@ -130,10 +128,11 @@ namespace InterlockLedger.Tags
                     Description = s.DecodeString(),                   // Field index 5 //
                     PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
                     Encrypted = s.DecodeByteArray(),                  // Field index 7 //
-                    AppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 8 //
+                    FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 8 //
                     Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 9 //
-                    SpecificActions = version > 1 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 10 - since version 2 //
+                    FirstActions = version > 1 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
                     EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
+                    Permissions = version > 5 ? s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value) : Permissions,
                 };
             });
 
@@ -147,24 +146,26 @@ namespace InterlockLedger.Tags
                 s.EncodeString(Value.Description);          // Field index 5 //
                 s.EncodeTag(Value.PublicKey);               // Field index 6 //
                 s.EncodeByteArray(Value.Encrypted);         // Field index 7 //
-                s.EncodeILInt(Value.AppId);                 // Field index 8 //
+                s.EncodeILInt(Value.FirstAppId);            // Field index 8 //
                 s.EncodeILInt((ulong)Value.Strength);       // Field index 9 //
-                s.EncodeILIntArray(Value.SpecificActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
+                s.EncodeILIntArray(Value.FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
                 s.EncodeILInt((ulong)Value.EncryptedContentType); // Field index 11 - since version 5
+                s.EncodeTagArray(Value.Permissions.Select(p => p.GetTag())); // Field index 12 - since version 6 //
             });
     }
 
     public class InterlockSigningKeyParts : InterlockKeyParts
     {
-        public const ushort InterlockSigningKeyVersion = 0x0005;
+        public const ushort InterlockSigningKeyVersion = 0x0006;
         public byte[] Encrypted;
         public EncryptedContentType EncryptedContentType;
 
         public InterlockSigningKeyParts() {
         }
 
-        public InterlockSigningKeyParts(KeyPurpose[] purposes, ulong appId, IEnumerable<ulong> actionIds, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, EncryptedContentType encryptedContentType, BaseKeyId keyId)
-            : base(purposes, appId, actionIds, name, description, pubKey, strength, keyId) {
+        public InterlockSigningKeyParts(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, EncryptedContentType encryptedContentType, BaseKeyId keyId)
+            : base(purposes, name, description, pubKey, strength, keyId, permissions)
+        {
             Version = InterlockSigningKeyVersion;
             Encrypted = encrypted;
             EncryptedContentType = encryptedContentType;
