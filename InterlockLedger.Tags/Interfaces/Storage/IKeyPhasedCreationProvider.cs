@@ -38,6 +38,6 @@ namespace InterlockLedger.Tags
     {
         IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
 
-        InterlockSigningKeyData CreateUsing(IKeyParameters emergencyKeyParameters, KeyStrength strength, BaseKeyId identity, string name, string description, string password, ulong appId, IEnumerable<ulong> actionIds, params KeyPurpose[] purposes);
+        InterlockSigningKeyData CreateUsing(IKeyParameters emergencyKeyParameters, KeyStrength strength, BaseKeyId identity, string name, string description, string password, IEnumerable<AppPermissions> permissions, params KeyPurpose[] purposes);
     }
 }

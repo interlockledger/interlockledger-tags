@@ -38,9 +38,9 @@ namespace InterlockLedger.Tags
     {
         IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
 
-        InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, ulong appId, IEnumerable<ulong> actionIds, IKeyParameters keyParameters, string name, string description, KeyStrength strength, string password);
+        InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, IKeyParameters keyParameters, string name, string description, KeyStrength strength, string password);
 
-        InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, ulong appId, IEnumerable<ulong> actionIds, byte[] certificateBytes, string password);
+        InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
 
         InterlockSigningKey Open(InterlockSigningKeyData key, string password);
 
