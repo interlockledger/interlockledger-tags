@@ -39,14 +39,15 @@ namespace InterlockLedger.Tags
 {
     public readonly struct AppPermissions
     {
-        public readonly IEnumerable<ulong> ActionIds;
-        public readonly ulong AppId;
-
         public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
             AppId = appId;
             ActionIds = actionIds ?? Array.Empty<ulong>();
-            _allActions = ActionIds.None();
+            _allActions = actionIds.None();
         }
+
+        public IEnumerable<ulong> ActionIds { get; }
+
+        public ulong AppId { get; }
 
         public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_allActions || ActionIds.Contains(actionId));
 
