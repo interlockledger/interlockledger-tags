@@ -66,6 +66,6 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {CurrentPublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
 
-        protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.KeyManagement, KeyPurpose.Action, KeyPurpose.ClaimSigner, KeyPurpose.Protocol };
+        protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.ChainOperation, KeyPurpose.Protocol };
     }
 }
