@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -96,7 +96,7 @@ namespace InterlockLedger.Tags
         private static IEnumerable<T> EmptyIfNull<T>(IEnumerable<T> values) => values ?? Enumerable.Empty<T>();
 
         private static IEnumerable<T> InnerAppend<T>(T item, IEnumerable<T> remainingItems)
-            => new T[] { item }.SafeConcat(remainingItems);
+            => new SingleEnumerable<T>(item).SafeConcat(remainingItems);
 
         private static IEnumerable<T> InnerConcat<T>(IEnumerable<T> items, IEnumerable<T> remainingItems)
             => remainingItems.SafeAny() ? items.Concat(remainingItems) : items;

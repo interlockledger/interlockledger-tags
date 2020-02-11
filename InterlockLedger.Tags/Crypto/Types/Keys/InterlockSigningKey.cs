@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -51,8 +51,8 @@ namespace InterlockLedger.Tags
         protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;
         public BaseKeyId Id => _value.Id;
         public string Name => _value.Name;
-        public KeyPurpose[] Purposes => _value.Purposes;
         public IEnumerable<AppPermissions> Permissions => _value.Permissions;
+        public KeyPurpose[] Purposes => _value.Purposes;
         public KeyStrength Strength => _value.Strength;
 
         public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
@@ -95,9 +95,9 @@ namespace InterlockLedger.Tags
         public BaseKeyId Id => Value.Id;
         public BaseKeyId Identity => Value.Identity ?? Id;
         public string Name => Value.Name;
+        public IEnumerable<AppPermissions> Permissions => Value.Permissions;
         public TagPubKey PublicKey => Value.PublicKey;
         public KeyPurpose[] Purposes => Value.Purposes;
-        public IEnumerable<AppPermissions> Permissions => Value.Permissions;
         public KeyStrength Strength => Value.Strength;
         public ushort Version => Value.Version;
 
@@ -119,7 +119,7 @@ namespace InterlockLedger.Tags
         protected override InterlockSigningKeyParts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => {
                 var version = s.DecodeUShort();
-                return new InterlockSigningKeyParts {
+                var result = new InterlockSigningKeyParts {
                     Version = version,                                // Field index 0 //
                     Name = s.DecodeString(),                          // Field index 1 //
                     PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
@@ -132,8 +132,10 @@ namespace InterlockLedger.Tags
                     Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 9 //
                     FirstActions = version > 1 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
                     EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
-                    Permissions = version > 5 ? s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value) : Permissions,
                 };
+                if (version > 5)
+                    result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
+                return result;
             });
 
         protected override byte[] ToBytes()
@@ -164,8 +166,7 @@ namespace InterlockLedger.Tags
         }
 
         public InterlockSigningKeyParts(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, EncryptedContentType encryptedContentType, BaseKeyId keyId)
-            : base(purposes, name, description, pubKey, strength, keyId, permissions)
-        {
+            : base(purposes, name, description, pubKey, strength, keyId, permissions) {
             Version = InterlockSigningKeyVersion;
             Encrypted = encrypted;
             EncryptedContentType = encryptedContentType;

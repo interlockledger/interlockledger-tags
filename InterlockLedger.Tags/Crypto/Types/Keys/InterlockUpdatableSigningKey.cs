@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
     {
         public TagPubKey CurrentPublicKey => _value.PublicKey;
         public abstract TagPubKey NextPublicKey { get; }
-        public IEnumerable<AppPermissions> Permissions { get; } = Array.Empty<AppPermissions>();
+        public IEnumerable<AppPermissions> Permissions { get; } = InterlockKeyParts.NoPermissions;
         public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public string Description => _value.Description;
         public byte[] EncodedBytes => _value.EncodedBytes;

@@ -38,7 +38,6 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-
     public class InterlockKey : ILTagExplicit<InterlockKeyParts>, IEquatable<InterlockKey>
     {
         public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
@@ -93,7 +92,7 @@ namespace InterlockLedger.Tags
         protected override InterlockKeyParts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => {
                 var version = s.DecodeUShort();
-                return new InterlockKeyParts {
+                var result =  new InterlockKeyParts {
                     Version = version,                                // Field index 0 //
                     Name = s.DecodeString(),                          // Field index 1 //
                     PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
@@ -104,8 +103,10 @@ namespace InterlockLedger.Tags
                     FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 7  - since version 1 //
                     Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
                     FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
-                    Permissions = version > 3 ? s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value) : Permissions,
                 };
+                if (version > 3)
+                    result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
+                return result;
             });
 
         protected override byte[] ToBytes()
@@ -151,13 +152,13 @@ namespace InterlockLedger.Tags
         }
 
         [JsonIgnore]
-        public bool Actionable => Purposes.Contains(KeyPurpose.Action);
+        public bool Actionable => Purposes?.Contains(KeyPurpose.Action) ?? false;
 
         public string Description { get; set; }
         public BaseKeyId Id { get; set; }
         public BaseKeyId Identity { get; set; }
         public string Name { get; set; }
-        public IEnumerable<AppPermissions> Permissions { get; set; }
+        public IEnumerable<AppPermissions> Permissions { get; set; } = NoPermissions;
         public TagPubKey PublicKey { get; set; }
         public KeyPurpose[] Purposes { get; set; }
         public KeyStrength Strength { get; set; }
@@ -173,9 +174,11 @@ namespace InterlockLedger.Tags
 ++ from: {Identity}
 ++ with strength {Strength}";
 
+        internal static AppPermissions[] NoPermissions = Array.Empty<AppPermissions>();
+
         internal IEnumerable<ulong> FirstActions {
             get => Permissions.FirstOrDefault().ActionIds ?? Array.Empty<ulong>();
-            set => Permissions = new List<AppPermissions> { new AppPermissions(_firstAppId, value) };
+            set => Permissions = new AppPermissions(_firstAppId, value).ToEnumerable();
         }
 
         internal ulong FirstAppId {

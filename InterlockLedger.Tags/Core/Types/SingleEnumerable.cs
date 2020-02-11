@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2019 InterlockLedger Network
 All rights reserved.
 
@@ -30,45 +30,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System.IO;
-using NUnit.Framework;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace InterlockLedger.Tags
 {
-
-
-#pragma warning disable CA2000 // Dispose objects before losing scope
-
-    [TestFixture]
-    public class InterlockIdTests
+    public sealed class SingleEnumerable<T> : IEnumerable<T>
     {
-        [Test]
-        public void IsEmpty() {
-            InterlockId.DefaultType = OwnerId.TypeId;
-            Assert.AreEqual(true, new OwnerId("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty);
-            Assert.AreEqual(false, new OwnerId("#SHA3_256").IsEmpty);
+        public SingleEnumerable(T singleElement) => _singleElement = singleElement;
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new Enumerator(_singleElement);
+
+        IEnumerator IEnumerable.GetEnumerator() => new Enumerator(_singleElement);
+
+        private readonly T _singleElement;
+
+        private class Enumerator : IEnumerator<T>
+        {
+            public Enumerator(T singleElement) {
+                _singleElement = singleElement;
+                _count = 1;
+            }
+
+            T IEnumerator<T>.Current => _value;
+            object IEnumerator.Current => _value;
+
+            void IDisposable.Dispose() { }
+
+            bool IEnumerator.MoveNext() => _count-- > 0;
+
+            void IEnumerator.Reset() => _count = 1;
+
+            private readonly T _singleElement;
+            private byte _count;
+            private T _value => _count == 0 ? _singleElement : default;
         }
-
-        [Test]
-        public void ResolveFromStream() {
-            Assert.IsInstanceOf<OwnerId>(InterlockId.Resolve(ToStream(new byte[] { 43, 5, 1, 0, 0, 0, 0 })));
-            Assert.IsInstanceOf<KeyId>(InterlockId.Resolve(ToStream(new byte[] { 43, 5, 4, 0, 0, 0, 0 })));
-        }
-
-        [Test]
-        public void ResolveFromTextualRepresentation() {
-            Assert.IsInstanceOf<OwnerId>(InterlockId.Resolve("Owner!AAA#SHA1"));
-            Assert.IsInstanceOf<KeyId>(InterlockId.Resolve("Key!AAA#SHA1"));
-        }
-
-        [TestCase(HashAlgorithm.SHA512, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 4, 2, 0 }, TestName = "SerializeKeyIdFromParts#SHA512")]
-        public byte[] SerializeKeyIdFromParts(HashAlgorithm algorithm, byte[] data)
-            => new KeyId(new TagHash(algorithm, data)).EncodedBytes;
-
-        [TestCase(HashAlgorithm.SHA256, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 1, 1, 0 }, TestName = "SerializeOwnerIdFromParts#SHA512")]
-        public byte[] SerializeOwnerIdFromParts(HashAlgorithm algorithm, byte[] data)
-            => new OwnerId(new TagHash(algorithm, data)).EncodedBytes;
-
-        private static MemoryStream ToStream(byte[] bytes) => new MemoryStream(bytes);
     }
 }

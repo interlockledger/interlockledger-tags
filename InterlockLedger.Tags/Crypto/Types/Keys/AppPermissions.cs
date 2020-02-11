@@ -52,6 +52,8 @@ namespace InterlockLedger.Tags
 
         public Tag GetTag() => new Tag(this);
 
+        public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
+
         public override string ToString() {
             var plural = ActionIds.SafeCount() == 1 ? "" : "s";
             return $"App #{AppId} {(_allActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
