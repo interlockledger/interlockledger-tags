@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
- 
-Copyright (c) 2018-2019 InterlockLedger Network
+
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,8 @@ namespace InterlockLedger.Tags
                     RegisterDeserializer(id, deserializer, jsonDeserializer);
         }
 
+        public static byte[] ToBytesHelper(Action<Stream> serialize) => TagHelpers.ToBytesHelper(serialize);
+
         public T As<T>() where T : ILTag => this as T ?? throw new InvalidDataException($"Not an {typeof(T).Name}");
 
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
@@ -173,7 +175,5 @@ namespace InterlockLedger.Tags
             stream.Flush();
             return stream.GetBuffer().PartOf((int)stream.Length);
         }
-
-        public static byte[] ToBytesHelper(Action<Stream> serialize) => TagHelpers.ToBytesHelper(serialize);
     }
 }

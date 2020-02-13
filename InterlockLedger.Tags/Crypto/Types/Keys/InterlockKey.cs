@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
 
-Copyright (c) 2018-2019 InterlockLedger Network
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public class InterlockKey : ILTagExplicit<InterlockKeyParts>, IEquatable<InterlockKey>
+    public class InterlockKey : ILTagExplicit<InterlockKeyParts>, IEquatable<InterlockKey>, IBaseKey
     {
         public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
             : this(new InterlockKeyParts(purposes,
@@ -49,12 +49,12 @@ namespace InterlockLedger.Tags
                 keyId,
                 permissions)) { }
 
-        public InterlockKey(ISigningKey key)
+        public InterlockKey(IBaseKey key)
             : this(new InterlockKeyParts(
                 (key ?? throw new ArgumentNullException(nameof(key))).Purposes,
                 key.Name,
                 key.Description,
-                key.CurrentPublicKey,
+                key.PublicKey,
                 key.Strength,
                 key.Id,
                 key.Permissions)) {
@@ -70,6 +70,7 @@ namespace InterlockLedger.Tags
         public IEnumerable<AppPermissions> Permissions => Value.Permissions;
         public TagPubKey PublicKey => Value.PublicKey;
         public KeyPurpose[] Purposes => Value.Purposes;
+        public KeyStrength Strength => Value.Strength;
         public ushort Version => Value.Version;
 
         public override bool Equals(object obj) => Equals(obj as InterlockKey);
@@ -92,7 +93,7 @@ namespace InterlockLedger.Tags
         protected override InterlockKeyParts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => {
                 var version = s.DecodeUShort();
-                var result =  new InterlockKeyParts {
+                var result = new InterlockKeyParts {
                     Version = version,                                // Field index 0 //
                     Name = s.DecodeString(),                          // Field index 1 //
                     PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
@@ -164,13 +165,13 @@ namespace InterlockLedger.Tags
         public KeyStrength Strength { get; set; }
         public ushort Version { get; set; }
 
-        public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {_actionsFor} ";
+        public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {GetActionsFor(Environment.NewLine + "\t")} ";
 
         public override string ToString() =>
         $@"-- Key '{Name}' - {Description}
 ++ Id: {Id}
 ++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
-++ with purposes: {_displayablePurposes}  {_actionsFor.ToLowerInvariant()}
+++ with purposes: {_displayablePurposes}  {GetActionsFor(Environment.NewLine + "++++ ").ToLowerInvariant()}
 ++ from: {Identity}
 ++ with strength {Strength}";
 
@@ -194,16 +195,17 @@ namespace InterlockLedger.Tags
         }
 
         private ulong _firstAppId;
-        private string _actionsFor => Actionable ? AppAndActions() : string.Empty;
 
         private string _displayablePurposes => Purposes.ToStringAsList();
 
-        private byte[] _hashable => PublicKey.EncodedBytes.Append(_actionsFor.UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetActionsFor(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
 
         private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
 
         private static ulong[] AsUlongs(KeyPurpose[] purposes) => purposes?.Select(p => (ulong)p).ToArray();
 
-        private string AppAndActions() => Permissions.None() ? "No actions" : Environment.NewLine + Permissions.JoinedBy(Environment.NewLine);
+        private string AppAndActions(string separator) => Permissions.None() ? "No actions" : separator + Permissions.JoinedBy(separator);
+
+        private string GetActionsFor(string separator) => Actionable ? AppAndActions(separator) : string.Empty;
     }
 }

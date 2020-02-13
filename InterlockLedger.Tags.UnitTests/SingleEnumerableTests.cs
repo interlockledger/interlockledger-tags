@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
 
-Copyright (c) 2018-2019 InterlockLedger Network
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@ namespace InterlockLedger.Tags
 {
     public class SingleEnumerableTests
     {
-        private const string _niceString = "Nice";
-
         [Test]
         public void ForEach() {
             int count = 0;
@@ -159,5 +157,7 @@ namespace InterlockLedger.Tags
             IEnumerable<int> e = new SingleEnumerable<int>(2);
             TestIteration(e.GetEnumerator(), e.GetEnumerator());
         }
+
+        private const string _niceString = "Nice";
     }
 }

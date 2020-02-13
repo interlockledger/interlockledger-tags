@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
 
-Copyright (c) 2018-2019 InterlockLedger Network
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags
 {
     public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     {
-        public TagPubKey CurrentPublicKey => _value.PublicKey;
+        public TagPubKey PublicKey => _value.PublicKey;
         public abstract TagPubKey NextPublicKey { get; }
         public IEnumerable<AppPermissions> Permissions { get; } = InterlockKeyParts.NoPermissions;
         public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;

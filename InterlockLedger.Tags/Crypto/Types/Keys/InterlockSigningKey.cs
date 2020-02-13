@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
 
-Copyright (c) 2018-2019 InterlockLedger Network
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ namespace InterlockLedger.Tags
     public abstract class InterlockSigningKey : ISigningKey
     {
         public abstract byte[] AsSessionState { get; }
-        public TagPubKey CurrentPublicKey => _value.PublicKey;
+        public TagPubKey PublicKey => _value.PublicKey;
         public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public string Description => _value.Description;
         protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;

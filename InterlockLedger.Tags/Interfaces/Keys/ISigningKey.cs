@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
 
-Copyright (c) 2018-2019 InterlockLedger Network
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,28 +30,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace InterlockLedger.Tags
 {
-    public interface ISigningKey
-    {
-        TagPubKey CurrentPublicKey { get; }
-        string Description { get; }
-        BaseKeyId Id { get; }
-        string Name { get; }
-        IEnumerable<AppPermissions> Permissions { get; }
-        KeyPurpose[] Purposes { get; }
-        Algorithm SignAlgorithm { get; }
-        KeyStrength Strength { get; }
 
-        public bool CanAct(ulong appId, ulong actionId) => Purposes.Contains(KeyPurpose.Action) && Permissions.SafeAny(p => p.CanAct(appId, actionId));
+    public interface ISigningKey : IBaseKey
+    {
+        Algorithm SignAlgorithm { get; }
 
         byte[] Decrypt(byte[] bytes);
 
         TagSignature Sign(byte[] data);
-
-        string ToShortString();
     }
 }

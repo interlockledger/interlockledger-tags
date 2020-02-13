@@ -1,6 +1,6 @@
 /******************************************************************************************************************************
 
-Copyright (c) 2018-2019 InterlockLedger Network
+Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags
     public abstract class Owner : ISigningKey, IPasswordProvider
     {
         public InterlockKey AsInterlockKey => new InterlockKey(this);
-        public TagPubKey CurrentPublicKey { get; protected set; }
+        public TagPubKey PublicKey { get; protected set; }
         public string Description { get; protected set; }
         public string Email { get; protected set; }
         public BaseKeyId Id { get; protected set; }
@@ -64,7 +64,7 @@ namespace InterlockLedger.Tags
 
         public string ToShortString() => $"Owner {Name} using {SignAlgorithm} with {Strength} strength ({Id})";
 
-        public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {CurrentPublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
+        public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {PublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
 
         protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.ChainOperation, KeyPurpose.Protocol };
     }
