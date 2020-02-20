@@ -122,7 +122,7 @@ namespace InterlockLedger.Tags
                 s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
                 s.EncodeILInt((ulong)Value.Strength);       // Field index 8 //
                 s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
-                s.EncodeTagArray(Value.Permissions.Select(p => p.GetTag())); // Field index 10 - since version 4 //
+                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
             });
 
         private InterlockKey(InterlockKeyParts parts) : base(ILTagId.InterlockKey, parts) {

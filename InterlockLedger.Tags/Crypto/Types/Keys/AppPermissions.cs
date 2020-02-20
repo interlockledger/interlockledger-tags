@@ -42,9 +42,13 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
     [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
-    public sealed class AppPermissions : IJsonCustom<AppPermissions>, IEquatable<AppPermissions>
+    public struct AppPermissions : IJsonCustom<AppPermissions>, IEquatable<AppPermissions>
     {
         public static readonly Regex Mask = new Regex(@"^#[0-9]+(,[0-9]+)*$");
+
+        public IEnumerable<ulong> ActionIds;
+
+        public ulong AppId;
 
         public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }
 
@@ -53,24 +57,31 @@ namespace InterlockLedger.Tags
             ActionIds = actionIds ?? Array.Empty<ulong>();
         }
 
-        public AppPermissions() {
+        [JsonIgnore]
+        public Tag AsTag => new Tag(this);
+
+        [JsonIgnore]
+        public string Formatted {
+            get {
+                var plural = ActionIds.SafeCount() == 1 ? "" : "s";
+                return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
+            }
         }
 
-        public IEnumerable<ulong> ActionIds { get; private set; }
-
-        public ulong AppId { get; private set; }
-
+        [JsonIgnore]
         public string TextualRepresentation => $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
+
+        public static bool operator !=(AppPermissions left, AppPermissions right) => !(left == right);
+
+        public static bool operator ==(AppPermissions left, AppPermissions right) => left.Equals(right);
 
         public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
 
-        public bool Equals(AppPermissions other) => other?.AppId == AppId && ActionIds.SafeSequenceEqual(other.ActionIds);
+        public bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.SafeSequenceEqual(other.ActionIds);
 
-        public override bool Equals(object obj) => Equals(obj as AppPermissions);
+        public override bool Equals(object obj) => obj is AppPermissions other && Equals(other);
 
         public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
-
-        public Tag GetTag() => new Tag(this);
 
         public AppPermissions ResolveFrom(string textualRepresentation) {
             if (string.IsNullOrWhiteSpace(textualRepresentation) || !Mask.IsMatch(textualRepresentation))
@@ -83,10 +94,7 @@ namespace InterlockLedger.Tags
 
         public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
 
-        public override string ToString() {
-            var plural = ActionIds.SafeCount() == 1 ? "" : "s";
-            return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
-        }
+        public override string ToString() => TextualRepresentation;
 
         public class Tag : ILTagExplicit<AppPermissions>
         {

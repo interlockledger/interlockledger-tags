@@ -152,7 +152,7 @@ namespace InterlockLedger.Tags
                 s.EncodeILInt((ulong)Value.Strength);       // Field index 9 //
                 s.EncodeILIntArray(Value.FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
                 s.EncodeILInt((ulong)Value.EncryptedContentType); // Field index 11 - since version 5
-                s.EncodeTagArray(Value.Permissions.Select(p => p.GetTag())); // Field index 12 - since version 6 //
+                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
             });
     }
 

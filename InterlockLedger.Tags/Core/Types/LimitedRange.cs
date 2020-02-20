@@ -85,12 +85,7 @@ namespace InterlockLedger.Tags
 
         public bool Equals(LimitedRange other) => End == other.End && Start == other.Start;
 
-        public override int GetHashCode() {
-            var hashCode = 945720665;
-            hashCode = (hashCode * -1521134295) + End.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Start.GetHashCode();
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(End, Start);
 
         public bool OverlapsWith(LimitedRange other) => Contains(other.Start) || Contains(other.End) || other.Contains(Start);
 
