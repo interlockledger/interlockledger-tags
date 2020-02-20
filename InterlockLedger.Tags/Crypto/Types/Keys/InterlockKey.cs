@@ -165,13 +165,13 @@ namespace InterlockLedger.Tags
         public KeyStrength Strength { get; set; }
         public ushort Version { get; set; }
 
-        public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {GetActionsFor(Environment.NewLine + "\t")} ";
+        public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
 
         public override string ToString() =>
         $@"-- Key '{Name}' - {Description}
 ++ Id: {Id}
 ++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
-++ with purposes: {_displayablePurposes}  {GetActionsFor(Environment.NewLine + "++++ ").ToLowerInvariant()}
+++ with purposes: {_displayablePurposes}  {GetPermissions(Environment.NewLine + "++++ ", formatter: (p => p.Formatted)).ToLowerInvariant()}
 ++ from: {Identity}
 ++ with strength {Strength}";
 
@@ -198,14 +198,17 @@ namespace InterlockLedger.Tags
 
         private string _displayablePurposes => Purposes.ToStringAsList();
 
-        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetActionsFor(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
 
         private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
 
         private static ulong[] AsUlongs(KeyPurpose[] purposes) => purposes?.Select(p => (ulong)p).ToArray();
 
-        private string AppAndActions(string separator) => Permissions.None() ? "No actions" : separator + Permissions.JoinedBy(separator);
-
-        private string GetActionsFor(string separator) => Actionable ? AppAndActions(separator) : string.Empty;
+        private string GetPermissions(string separator, Func<AppPermissions, string> formatter = null, string firstSep = null)
+            => Actionable
+                ? Permissions.None()
+                    ? "No actions"
+                    : $"{firstSep ?? separator}{(Permissions.JoinedBy(separator, formatter))}"
+                : string.Empty;
     }
 }

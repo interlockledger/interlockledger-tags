@@ -57,6 +57,9 @@ namespace InterlockLedger.Tags
 
         public static string JoinedBy<T>(this IEnumerable<T> list, string joiner) => list == null ? string.Empty : string.Join(joiner, list);
 
+        public static string JoinedBy<T>(this IEnumerable<T> list, string joiner, Func<T, string> formatter)
+            => list == null ? string.Empty : string.Join(joiner, list.Select(formatter ?? (t => t.ToString())));
+
         public static bool None<T>(this IEnumerable<T> items) => !items.SafeAny();
 
         public static bool None<T>(this IEnumerable<T> items, Func<T, bool> predicate) => !items.SafeAny(predicate);

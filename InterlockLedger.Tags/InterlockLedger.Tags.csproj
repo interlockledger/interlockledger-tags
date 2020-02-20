@@ -10,11 +10,11 @@
       <Description>This library implements the basic TLV/JSON encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <PackageReleaseNotes>Make AppPermissions an struct again to better guide Swagger</PackageReleaseNotes>
+      <PackageReleaseNotes>Better AppPermissions formatting on key listing</PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.5.8</Version>
+      <Version>3.6.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
   </PropertyGroup>
   <ItemGroup>
