@@ -32,12 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
+    [TypeConverter(typeof(TypeCustomConverter<EnumerationItems>))]
     [JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
     public class EnumerationItems : IJsonCustom<EnumerationItems>
     {

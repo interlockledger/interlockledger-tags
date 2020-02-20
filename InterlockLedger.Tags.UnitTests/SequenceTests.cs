@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class SequenceTests
     {
-        [TestCase("Test", 1024ul, new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Deserialize One Sequence with a string and one ilint")]
+        [TestCase("Test", 1024ul, new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Deserialize_One_Sequence_with_a_string_and_one_ilint")]
         public void DeserializeHeterogenousILTagSequence(string firstElement, ulong secondElement, byte[] encodedBytes) {
             using var ms = new MemoryStream(encodedBytes);
             var tagValue = ms.DecodeTag();
@@ -53,12 +53,12 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(secondElement, (value[1] as ILTagILInt)?.Value);
         }
 
-        [TestCase(null, new byte[0], new byte[] { 22, 0 }, TestName = "Deserialize a Null Sequence")]
-        [TestCase(new byte[0], new byte[0], new byte[] { 22, 1, 0 }, TestName = "Deserialize an Empty Sequence")]
-        [TestCase(new byte[0], new byte[] { 0 }, new byte[] { 22, 3, 1, 16, 0 }, TestName = "Deserialize One Sequence with One Byte Generic")]
-        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 22, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize One Sequence with Four Bytes Generic")]
-        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Deserialize Two Sequences with Two Bytes Generic")]
-        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 22, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Deserialize Two Sequences with one and Three Bytes Generic")]
+        [TestCase(null, new byte[0], new byte[] { 22, 0 }, TestName = "Deserialize_a_Null_Sequence")]
+        [TestCase(new byte[0], new byte[0], new byte[] { 22, 1, 0 }, TestName = "Deserialize_an_Empty_Sequence")]
+        [TestCase(new byte[0], new byte[] { 0 }, new byte[] { 22, 3, 1, 16, 0 }, TestName = "Deserialize_One_Sequence_with_One_Byte_Generic")]
+        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 22, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Sequence_with_Four_Bytes_Generic")]
+        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Deserialize_Two_Sequences_with_Two_Bytes_Generic")]
+        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 22, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Deserialize_Two_Sequences_with_one_and_Three_Bytes_Generic")]
         public void DeserializeILTagSequence(byte[] bytes, byte[] splits, byte[] encodedBytes) {
             using var ms = new MemoryStream(encodedBytes);
             var tagValue = ms.DecodeTag();
@@ -91,16 +91,16 @@ namespace InterlockLedger.Tags
             Assert.IsTrue(seq.Equals(backSeq));
         }
 
-        [TestCase("Test", 1024ul, ExpectedResult = new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Serialize One Sequence with a string and one ilint")]
+        [TestCase("Test", 1024ul, ExpectedResult = new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Serialize_One_Sequence_with_a_string_and_one_ilint")]
         public byte[] SerializeHeterogenousILTagSequence(string firstElement, ulong secondElement)
             => new ILTagSequence(new ILTagString(firstElement), new ILTagILInt(secondElement)).EncodedBytes;
 
-        [TestCase(null, new byte[0], ExpectedResult = new byte[] { 22, 0 }, TestName = "Serialize a Null Sequence")]
-        [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 22, 1, 0 }, TestName = "Serialize an Empty Sequence")]
-        [TestCase(new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 22, 3, 1, 16, 0 }, TestName = "Serialize One Sequence with One Byte")]
-        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 22, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize One Sequence with Four Bytes")]
-        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize Two Sequences with Two Bytes")]
-        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize Two Sequences with One and Three Bytes")]
+        [TestCase(null, new byte[0], ExpectedResult = new byte[] { 22, 0 }, TestName = "Serialize_a_Null_Sequence")]
+        [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 22, 1, 0 }, TestName = "Serialize_an_Empty_Sequence")]
+        [TestCase(new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 22, 3, 1, 16, 0 }, TestName = "Serialize_One_Sequence_with_One_Byte")]
+        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 22, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Sequence_with_Four_Bytes")]
+        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Sequences_with_Two_Bytes")]
+        [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize_Two_Sequences_with_One_and_Three_Bytes")]
         public byte[] SerializeILTagSequence(byte[] bytes, byte[] splits)
             => new ILTagSequence(BuildArrayOfArrays(bytes, splits)).EncodedBytes;
 

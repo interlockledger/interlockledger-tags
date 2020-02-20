@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -41,6 +41,15 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class ILTagJsonTests
     {
+        [Test]
+        public void AppPermissions() {
+            TestTwiceWith(new AppPermissions(0));
+            TestTwiceWith(new AppPermissions(0, null));
+            TestTwiceWith(new AppPermissions(1, 100));
+            TestTwiceWith(new AppPermissions(2, 100, 101));
+            TestTwiceWith(new AppPermissions().ResolveFrom("#3,1,2,3"));
+        }
+
         [TestCase("true", TestName = "BoolFromJsonTrue", ExpectedResult = true)]
         [TestCase("false", TestName = "BoolFromJsonFalse", ExpectedResult = false)]
         public bool BoolFrom(string json) {

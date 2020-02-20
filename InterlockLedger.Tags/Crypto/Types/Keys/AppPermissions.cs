@@ -32,32 +32,60 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags
 {
-    public readonly struct AppPermissions
+    [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
+    [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
+    public sealed class AppPermissions : IJsonCustom<AppPermissions>, IEquatable<AppPermissions>
     {
+        public static readonly Regex Mask = new Regex(@"^#[0-9]+(,[0-9]+)*$");
+
+        public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }
+
         public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
             AppId = appId;
             ActionIds = actionIds ?? Array.Empty<ulong>();
-            _allActions = actionIds.None();
         }
 
-        public IEnumerable<ulong> ActionIds { get; }
+        public AppPermissions() {
+        }
 
-        public ulong AppId { get; }
+        public IEnumerable<ulong> ActionIds { get; private set; }
 
-        public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_allActions || ActionIds.Contains(actionId));
+        public ulong AppId { get; private set; }
+
+        public string TextualRepresentation => $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
+
+        public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
+
+        public bool Equals(AppPermissions other) => other?.AppId == AppId && ActionIds.SafeSequenceEqual(other.ActionIds);
+
+        public override bool Equals(object obj) => Equals(obj as AppPermissions);
+
+        public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
 
         public Tag GetTag() => new Tag(this);
+
+        public AppPermissions ResolveFrom(string textualRepresentation) {
+            if (string.IsNullOrWhiteSpace(textualRepresentation) || !Mask.IsMatch(textualRepresentation))
+                throw new ArgumentException($"Invalid textual representation '{textualRepresentation}'", nameof(textualRepresentation));
+            var parts = textualRepresentation.Substring(1).Split(',').AsUlongs();
+            AppId = parts.First();
+            ActionIds = parts.Skip(1).ToArray();
+            return this;
+        }
 
         public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
 
         public override string ToString() {
             var plural = ActionIds.SafeCount() == 1 ? "" : "s";
-            return $"App #{AppId} {(_allActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
+            return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
         }
 
         public class Tag : ILTagExplicit<AppPermissions>
@@ -75,6 +103,6 @@ namespace InterlockLedger.Tags
             protected override byte[] ToBytes() => ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
         }
 
-        private readonly bool _allActions;
+        private bool _noActions => ActionIds.None();
     }
 }

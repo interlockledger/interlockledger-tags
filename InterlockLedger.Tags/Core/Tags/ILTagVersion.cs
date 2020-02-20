@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -32,11 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
+    [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
     [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
     public class ILTagVersion : ILTagExplicit<Version>, IJsonCustom<ILTagVersion>, IEquatable<ILTagVersion>
     {

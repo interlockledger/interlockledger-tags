@@ -32,11 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
+    [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
     [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
     public class ILTagRange : ILTagExplicit<LimitedRange>, IJsonCustom<ILTagRange>, IEquatable<ILTagRange>
     {

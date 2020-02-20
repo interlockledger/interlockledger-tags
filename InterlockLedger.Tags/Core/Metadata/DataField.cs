@@ -167,7 +167,7 @@ namespace InterlockLedger.Tags
 
         private static readonly IEnumerable<KeyValuePair<ulong, EnumerationDetails>> _noEnumeration = Enumerable.Empty<KeyValuePair<ulong, EnumerationDetails>>();
 
-        private bool CompareEnumeration(DataField other) => Enumeration.None() ? other.Enumeration.None() : Enumeration.SequenceEqual(other.Enumeration ?? _noEnumeration);
+        private bool CompareEnumeration(DataField other) => Enumeration.SafeSequenceEqual(other.Enumeration);
     }
 
     public class ILTagDataField : ILTagExplicit<DataField>

@@ -45,11 +45,8 @@ namespace InterlockLedger.Tags
 
         public static IEnumerable<T> AppendedOf<T>(this T item, params T[] remainingItems) => InnerAppend(item, remainingItems);
 
-        public static bool EqualTo<T>(this IEnumerable<T> first, IEnumerable<T> second) {
-            if (first.SafeCount() != second.SafeCount())
-                return false;
-            return first?.SequenceEqual(second) ?? true;
-        }
+        public static bool EqualTo<T>(this IEnumerable<T> first, IEnumerable<T> second)
+            => first is null ? second is null : second is null ? false : first.SequenceEqual(second);
 
         [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SafeAny checks")]
         public static IEnumerable<T> IfAnyDo<T>(this IEnumerable<T> values, Action action) {
@@ -74,6 +71,9 @@ namespace InterlockLedger.Tags
             => InnerConcat(items ?? Enumerable.Empty<T>(), remainingItems);
 
         public static int SafeCount<T>(this IEnumerable<T> values) => values?.Count() ?? -1;
+
+        public static bool SafeSequenceEqual<T>(this IEnumerable<T> values, IEnumerable<T> otherValues)
+            => values?.SequenceEqual(EmptyIfNull(otherValues)) ?? otherValues.None();
 
         public static IEnumerable<TResult> SelectSkippingNulls<TSource, TResult>(this IEnumerable<TSource> values, Func<TSource, TResult> selector) where TResult : class
             => EmptyIfNull(values?.Select(selector).SkipNulls());

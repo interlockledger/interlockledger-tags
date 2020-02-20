@@ -30,15 +30,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
+using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
+using System.Globalization;
+
 namespace InterlockLedger.Tags
 {
-    public interface IJsonCustom<T> : IJsonCustomized
+    public class TypeCustomConverter<T> : TypeConverter where T : IJsonCustom<T>, new()
     {
-        T ResolveFrom(string textualRepresentation);
-    }
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
-    public interface IJsonCustomized
-    {
-        string TextualRepresentation { get; }
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            => destinationType == typeof(InstanceDescriptor) ? true : destinationType == typeof(string);
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            => value is string text ? new T().ResolveFrom(text) : base.ConvertFrom(context, culture, value);
+
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
+            if (destinationType == null)
+                throw new ArgumentNullException(nameof(destinationType));
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (destinationType != typeof(string) || !(value is T))
+                throw new InvalidOperationException("Can only convert AppPermissions to string!!!");
+            return ((T)value).TextualRepresentation;
+        }
     }
 }

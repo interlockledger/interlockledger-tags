@@ -167,7 +167,7 @@ namespace InterlockLedger.Tags
             : throw new InvalidDataException($"Unknown tagId {field.TagId}");
 
         private static bool ExpandEnumeration(Dictionary<ulong, EnumerationDetails> oldEnumeration, Dictionary<ulong, EnumerationDetails> newEnumeration)
-            => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration?.Take(oldEnumeration.Count).SequenceEqual(oldEnumeration) == true);
+            => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration?.Take(oldEnumeration.Count).SafeSequenceEqual(oldEnumeration) == true);
 
         private static bool FindFieldInPath(string[] parts, int part, IEnumerable<DataField> fields) {
             var name = parts[part];

@@ -43,12 +43,12 @@ namespace InterlockLedger.Tags
     {
         public static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions { WriteIndented = true };
 
-        [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize a Null Dictionary")]
-        [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize an Empty Dictionary")]
-        [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize One Dictionary with Zero Bytes")]
-        [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize One Dictionary with Four Bytes")]
-        [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Deserialize One Dictionary with Two Bytes")]
-        [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Deserialize One Dictionary with one and Three Bytes")]
+        [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize_a_Null_Dictionary")]
+        [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize_an_Empty_Dictionary")]
+        [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize_One_Dictionary_with_Zero_Bytes")]
+        [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Dictionary_with_Four_Bytes")]
+        [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Deserialize_One_Dictionary_with_Two_Bytes")]
+        [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Deserialize_One_Dictionary_with_one_and_Three_Bytes")]
         public void DeserializeILTagDictionaryOfILTagArray(string[] keys, byte[] bytes, byte[] splits, byte[] encodedBytes) {
             using var ms = new MemoryStream(encodedBytes);
             var value = ms.DecodeDictionary<ILTagByteArray>();
@@ -56,12 +56,12 @@ namespace InterlockLedger.Tags
             CompareDicts<ILTagByteArray, byte[]>(dict, value);
         }
 
-        [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize a Null Dictionary Generic")]
-        [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize an Empty Dictionary Generic")]
-        [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize One Dictionary with Zero Bytes Generic")]
-        [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize One Dictionary with Four Bytes Generic")]
-        [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Deserialize One Dictionary with Two Bytes Generic")]
-        [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Deserialize One Dictionary with one and Three Bytes Generic")]
+        [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize_a_Null_Dictionary_Generic")]
+        [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize_an_Empty_Dictionary_Generic")]
+        [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize_One_Dictionary_with_Zero_Bytes_Generic")]
+        [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Dictionary_with_Four_Bytes_Generic")]
+        [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Deserialize_One_Dictionary_with_Two_Bytes_Generic")]
+        [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Deserialize_One_Dictionary_with_one_and_Three_Bytes_Generic")]
         public void DeserializeILTagDictionaryOfILTagArrayGeneric(string[] keys, byte[] bytes, byte[] splits, byte[] encodedBytes) {
             using var ms = new MemoryStream(encodedBytes);
             var tagValue = ms.DecodeTag();
@@ -71,9 +71,9 @@ namespace InterlockLedger.Tags
             CompareSimilarDicts<ILTagByteArray, ILTag>(dict, value);
         }
 
-        [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Deserialize One String Dictionary with two strings")]
-        [TestCase(new string[] { "D", "E" }, new string[] { "Demo", "" }, new byte[] { 31, 15, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 17, 0 }, TestName = "Deserialize One String Dictionary with one string and one empty string")]
-        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", null }, new byte[] { 31, 14, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 0 }, TestName = "Deserialize One String Dictionary with one string and a null")]
+        [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Deserialize_One_String_Dictionary_with_two_strings")]
+        [TestCase(new string[] { "D", "E" }, new string[] { "Demo", "" }, new byte[] { 31, 15, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 17, 0 }, TestName = "Deserialize_One_String_Dictionary_with_one_string_and_one_empty_string")]
+        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", null }, new byte[] { 31, 14, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 0 }, TestName = "Deserialize_One_String_Dictionary_with_one_string_and_a_null")]
         public void DeserializeILTagStringDictionary(string[] keys, string[] values, byte[] encodedBytes) {
             using var ms = new MemoryStream(encodedBytes);
             var value = ms.DecodeStringDictionary();
@@ -85,9 +85,9 @@ namespace InterlockLedger.Tags
         public void GuaranteeBijectiveBehaviorEmptyArray()
             => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool>());
 
-        [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, TestName = "Guarantee Bijective Behavior for One String Dictionary with two strings")]
-        [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, TestName = "Guarantee Bijective Behavior for One String Dictionary with one string and a null")]
-        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, TestName = "Guarantee Bijective Behavior for One String Dictionary with one non_empty string and one empty string")]
+        [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_two_strings")]
+        [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_one_string_and_a_null")]
+        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_one_non_empty_string_and_one_empty_string")]
         public void GuaranteeBijectiveBehaviorForStringTest(string[] keys, string[] values)
             => GuaranteeBijectiveBehaviorForString(BuildStringDictionary(keys, values));
 
@@ -125,18 +125,18 @@ namespace InterlockLedger.Tags
             Assert.IsTrue(dict.Equals(backDict));
         }
 
-        [TestCase(new string[0], null, new byte[0], ExpectedResult = new byte[] { 30, 0 }, TestName = "Serialize a Null Dictionary")]
-        [TestCase(new string[0], new byte[0], new byte[0], ExpectedResult = new byte[] { 30, 1, 0 }, TestName = "Serialize an Empty Dictionary")]
-        [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Serialize One Dictionary with One Byte")]
-        [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize One Dictionary with Four Bytes")]
-        [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Serialize One Dictionary with Two Bytes")]
-        [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Serialize One Dictionary with One and Three Bytes")]
+        [TestCase(new string[0], null, new byte[0], ExpectedResult = new byte[] { 30, 0 }, TestName = "Serialize_a_Null_Dictionary")]
+        [TestCase(new string[0], new byte[0], new byte[0], ExpectedResult = new byte[] { 30, 1, 0 }, TestName = "Serialize_an_Empty_Dictionary")]
+        [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Serialize_One_Dictionary_with_One_Byte")]
+        [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Dictionary_with_Four_Bytes")]
+        [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Serialize_One_Dictionary_with_Two_Bytes")]
+        [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Serialize_One_Dictionary_with_One_and_Three_Bytes")]
         public byte[] SerializeILTagDictionaryOfILTagArray(string[] keys, byte[] bytes, byte[] splits)
             => new ILTagDictionary<ILTagByteArray>(BuildDictionary(keys, bytes, splits)).EncodedBytes;
 
-        [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, ExpectedResult = new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Serialize One String Dictionary with two strings")]
-        [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, ExpectedResult = new byte[] { 31, 14, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 0 }, TestName = "Serialize One String Dictionary with one string and a null")]
-        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 17, 0 }, TestName = "Serialize One String Dictionary with one non_empty string and one empty string")]
+        [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, ExpectedResult = new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Serialize_One_String_Dictionary_with_two_strings")]
+        [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, ExpectedResult = new byte[] { 31, 14, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_string_and_a_null")]
+        [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 17, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_non_empty_string_and_one_empty_string")]
         public byte[] SerializeILTagStringDictionary(string[] keys, string[] values)
             => new ILTagStringDictionary(BuildStringDictionary(keys, values)).EncodedBytes;
 
