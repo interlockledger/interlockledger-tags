@@ -37,10 +37,16 @@ namespace InterlockLedger.Tags
 {
     public static class IEnumerableOfStringExtensions
     {
-        public static IEnumerable<ulong> AsUlongs(this IEnumerable<string> strings) => strings.WithDefault().Select(StringExtensions.AsUlong).Distinct();
+        public static IEnumerable<ulong> AsDistinctUlongs(this IEnumerable<string> strings)
+            => strings.WithDefault().Select(StringExtensions.AsUlong).Distinct();
 
-        public static IEnumerable<string> SkipNullOrWhiteSpace(this IEnumerable<string> strings) => strings.WithDefault().Where(kn => !string.IsNullOrWhiteSpace(kn));
+        public static IEnumerable<ulong> AsOrderedUlongs(this IEnumerable<string> strings)
+            => strings.WithDefault().Select(StringExtensions.AsUlong);
 
-        public static IEnumerable<string> Trimmed(this IEnumerable<string> strings) => strings.WithDefault().SkipNullOrWhiteSpace().Select(kn => kn.Trim());
+        public static IEnumerable<string> SkipNullOrWhiteSpace(this IEnumerable<string> strings)
+            => strings.WithDefault().Where(kn => !string.IsNullOrWhiteSpace(kn));
+
+        public static IEnumerable<string> Trimmed(this IEnumerable<string> strings)
+            => strings.WithDefault().SkipNullOrWhiteSpace().Select(kn => kn.Trim());
     }
 }

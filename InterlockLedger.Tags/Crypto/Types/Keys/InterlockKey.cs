@@ -208,7 +208,7 @@ namespace InterlockLedger.Tags
             => Actionable
                 ? Permissions.None()
                     ? "No actions"
-                    : $"{firstSep ?? separator}{(Permissions.JoinedBy(separator, formatter))}"
+                    : $"{firstSep ?? separator}{Permissions.JoinedBy(separator, formatter)}"
                 : string.Empty;
     }
 }
