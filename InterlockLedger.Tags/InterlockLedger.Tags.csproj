@@ -10,12 +10,12 @@
       <Description>This library implements the basic TLV/JSON encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <PackageReleaseNotes>Fix AppPermissions parsing from text</PackageReleaseNotes>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.6.1</Version>
+      <Version>3.6.2</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
+      <PackageReleaseNotes>Upgrade to System.Text.Json.4.7.1</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">
@@ -38,7 +38,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Memory" Version="4.5.3" />
-    <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
   </ItemGroup>
 
 </Project>
