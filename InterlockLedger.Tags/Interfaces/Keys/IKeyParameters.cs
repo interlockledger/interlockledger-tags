@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -36,5 +36,6 @@ namespace InterlockLedger.Tags
     {
         byte[] EncodedBytes { get; }
         TagPubKey PublicKey { get; }
+        KeyStrength Strength { get; }
     }
 }

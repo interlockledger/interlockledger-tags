@@ -49,7 +49,7 @@ namespace InterlockLedger.Tags
         public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(_value.Strength);
 
         public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null) {
-            var signatureData = RSAHelper.HashAndSignBytes(data, _keyParameters.Value);
+            var signatureData = RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters);
             if (_destroyKeysAfterSigning) {
                 _keyParameters = null;
                 _nextKeyParameters = null;

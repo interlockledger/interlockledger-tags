@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
         public static TagRSAParameters CreateNewRSAParameters(KeyStrength strength) {
             var keySize = strength.RSAKeySize();
             using var provider = new RSACryptoServiceProvider(keySize);
-            return new TagRSAParameters(provider.ExportParameters(true));
+            return new TagRSAParameters(provider.ExportParameters(true), strength);
         }
 
         public static byte[] Decrypt(byte[] data, RSAParameters Key) {

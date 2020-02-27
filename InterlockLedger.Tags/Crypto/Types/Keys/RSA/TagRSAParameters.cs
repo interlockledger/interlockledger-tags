@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -30,17 +30,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-    public class TagRSAParameters : ILTagExplicit<RSAParameters>, IKeyParameters
+    public readonly struct KeyParameters
     {
-        public TagRSAParameters(RSAParameters parameters) : base(ILTagId.RSAParameters, parameters) {
+        public readonly RSAParameters Parameters;
+        public readonly KeyStrength Strength;
+
+        public KeyParameters(RSAParameters parameters, KeyStrength strength) {
+            Parameters = parameters;
+            Strength = strength;
         }
 
-        public TagPubKey PublicKey => new TagPubRSAKey(Value);
+        internal KeyParameters(Stream s) : this(
+            new RSAParameters {
+                Modulus = s.DecodeByteArray(),
+                Exponent = s.DecodeByteArray(),
+                P = s.DecodeByteArray(),
+                Q = s.DecodeByteArray(),
+                DP = s.DecodeByteArray(),
+                DQ = s.DecodeByteArray(),
+                InverseQ = s.DecodeByteArray(),
+                D = s.DecodeByteArray()
+            },
+            DecodeStrength(s)) { }
+
+        internal Stream EncodeTo(Stream s) => s
+            .EncodeByteArray(Parameters.Modulus)
+            .EncodeByteArray(Parameters.Exponent)
+            .EncodeByteArray(Parameters.P)
+            .EncodeByteArray(Parameters.Q)
+            .EncodeByteArray(Parameters.DP)
+            .EncodeByteArray(Parameters.DQ)
+            .EncodeByteArray(Parameters.InverseQ)
+            .EncodeByteArray(Parameters.D)
+            .EncodeILInt((ulong)Strength);
+
+        private static KeyStrength DecodeStrength(Stream s) => (KeyStrength)(s.HasBytes() ? s.DecodeILInt() : 0);
+    }
+
+    public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
+    {
+        public TagRSAParameters(RSAParameters parameters, KeyStrength strength) : base(ILTagId.RSAParameters, new KeyParameters(parameters, strength)) {
+        }
+
+        public TagPubKey PublicKey => new TagPubRSAKey(Value.Parameters);
+
+        public KeyStrength Strength => Value.Strength;
 
         public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
             using var s = new MemoryStream(encodedBytes);
@@ -50,27 +91,8 @@ namespace InterlockLedger.Tags
         internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) {
         }
 
-        protected override RSAParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new RSAParameters {
-            Modulus = s.DecodeByteArray(),
-            Exponent = s.DecodeByteArray(),
-            P = s.DecodeByteArray(),
-            Q = s.DecodeByteArray(),
-            DP = s.DecodeByteArray(),
-            DQ = s.DecodeByteArray(),
-            InverseQ = s.DecodeByteArray(),
-            D = s.DecodeByteArray(),
-        });
+        protected override KeyParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new KeyParameters(s));
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s
-                .EncodeByteArray(Value.Modulus)
-                .EncodeByteArray(Value.Exponent)
-                .EncodeByteArray(Value.P)
-                .EncodeByteArray(Value.Q)
-                .EncodeByteArray(Value.DP)
-                .EncodeByteArray(Value.DQ)
-                .EncodeByteArray(Value.InverseQ)
-                .EncodeByteArray(Value.D)
-                );
+        protected override byte[] ToBytes() => ToBytesHelper(s => Value.EncodeTo(s));
     }
 }
