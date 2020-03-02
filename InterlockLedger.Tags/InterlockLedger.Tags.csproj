@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.6.3</Version>
+      <Version>3.6.4</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Upgrade to System.Text.Json.4.7.1</PackageReleaseNotes>
+      <PackageReleaseNotes>Fix handling Owners without AppPermissions</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">
