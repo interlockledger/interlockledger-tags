@@ -145,8 +145,8 @@ namespace InterlockLedger.Tags
             PublicKey = pubKey ?? throw new ArgumentNullException(nameof(pubKey));
             Description = description;
             Strength = strength;
-            if (Actionable && permissions.None() && keyId is KeyId)
-                throw new ArgumentException("A key with Action purpose need to specify some apps and actions to be permitted", nameof(permissions));
+            if (Actionable && permissions.None())
+                Purposes = Purposes.Where(pu => pu != KeyPurpose.Action).ToArray(); // Remove Action Purpose
             Permissions = permissions;
             Identity = new KeyId(TagHash.HashSha256Of(_hashable));
             Id = keyId ?? Identity;
