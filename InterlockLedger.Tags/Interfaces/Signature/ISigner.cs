@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -32,13 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace InterlockLedger.Tags
 {
-    public interface ISigner
+    public interface ISigner : ISigningContext
     {
         Algorithm Algorithm { get; }
         InterlockKey AsInterlockKey { get; }
-        BaseKeyId Id { get; }
+        BaseKeyId Id => Key.Id;
         string Name { get; }
-        TagPubKey PublicKey { get; }
+        TagPubKey PublicKey => Key.PublicKey;
         KeyStrength Strength { get; }
 
         (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag;
@@ -46,6 +46,8 @@ namespace InterlockLedger.Tags
         (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText);
 
         TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
+
+        TagIdentifiedSignature SignWithId(byte[] data) => new TagIdentifiedSignature(Key.Sign(data), Id, PublicKey);
 
         bool Supports(KeyPurpose purpose, ulong? appId = null);
     }

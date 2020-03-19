@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.6.5</Version>
+      <Version>3.7.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Fix handling Actionable Key without AppPermissions, by removing the Action Purpose</PackageReleaseNotes>
+      <PackageReleaseNotes>Better Signing API</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

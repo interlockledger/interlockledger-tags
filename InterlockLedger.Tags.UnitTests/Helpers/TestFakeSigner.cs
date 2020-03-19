@@ -163,5 +163,9 @@ namespace InterlockLedger.Tags
             _generateEmptySignatures = generateEmptySignatures;
             PublicKey = new TagPubRSAKey(_rsaParameters);
         }
+
+        public ISigningKey Key => this;
+        public ITimeStamper TimeStamper => this;
+        
     }
 }

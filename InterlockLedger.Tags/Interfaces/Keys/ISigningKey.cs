@@ -32,7 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace InterlockLedger.Tags
 {
-
     public interface ISigningKey : IBaseKey
     {
         Algorithm SignAlgorithm { get; }
@@ -40,5 +39,7 @@ namespace InterlockLedger.Tags
         byte[] Decrypt(byte[] bytes);
 
         TagSignature Sign(byte[] data);
+
+        TagIdentifiedSignature SignWithId(byte[] data) => new TagIdentifiedSignature(Sign(data), Id, PublicKey);
     }
 }

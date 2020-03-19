@@ -45,14 +45,14 @@ namespace InterlockLedger.Tags
     public abstract class InterlockSigningKey : ISigningKey
     {
         public abstract byte[] AsSessionState { get; }
-        public TagPubKey PublicKey => _value.PublicKey;
-        public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public string Description => _value.Description;
         protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;
         public BaseKeyId Id => _value.Id;
         public string Name => _value.Name;
         public IEnumerable<AppPermissions> Permissions => _value.Permissions;
+        public TagPubKey PublicKey => _value.PublicKey;
         public KeyPurpose[] Purposes => _value.Purposes;
+        public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public KeyStrength Strength => _value.Strength;
 
         public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
@@ -60,6 +60,7 @@ namespace InterlockLedger.Tags
         public abstract byte[] Decrypt(byte[] bytes);
 
         public abstract TagSignature Sign(byte[] data);
+
 
         public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
 

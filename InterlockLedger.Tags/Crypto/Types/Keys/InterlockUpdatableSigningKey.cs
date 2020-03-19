@@ -73,6 +73,8 @@ namespace InterlockLedger.Tags
             _timeStamper = timeStamper ?? throw new ArgumentNullException(nameof(timeStamper));
             _value.LastSignatureTimeStamp = _timeStamper.Now;
         }
+
+        public TagIdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     }
 
     public sealed class InterlockUpdatableSigningKeyData : ILTagExplicit<InterlockUpdatableSigningKeyParts>, IInterlockKeySecretData
