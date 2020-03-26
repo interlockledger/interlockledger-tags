@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -53,6 +53,10 @@ namespace InterlockLedger.Tags
                 return items.AsList<object>();
             return AsILTag(ToDictionary(value));
         }
+
+        public static IEnumerable<T> AsSingle<T>(this T s) => new SingleEnumerable<T>(s);
+
+        public static List<T> AsSingleList<T>(this T s) => s.AsSingle().ToList();
 
         public static string PadLeft(this object value, int totalWidth)
             => value?.ToString().PadLeft(totalWidth);
