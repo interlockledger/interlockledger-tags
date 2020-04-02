@@ -103,10 +103,8 @@ namespace InterlockLedger.Tags
             var dictionary = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var p in value.GetType().GetProperties()) {
                 object propertyValue = p.GetValue(value, null);
-                object navigable = AsNavigable(propertyValue);
-                dictionary[p.Name] = navigable;
+                dictionary[p.Name] = AsNavigable(propertyValue);
             }
-
             return dictionary;
         }
     }
