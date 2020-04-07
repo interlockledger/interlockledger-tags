@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>3.7.1</Version>
+      <Version>3.8.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>New Extension Methods AsSingle/AsSingleList</PackageReleaseNotes>
+      <PackageReleaseNotes>Refactoring some signing features</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

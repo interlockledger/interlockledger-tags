@@ -72,6 +72,12 @@ namespace InterlockLedger.Tags
             return FromStream(s);
         }
 
+        public SignedValue<Payload> SignWith(ISigningContext context) {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            return new SignedValue<Payload>(AsPayload, context.Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
+        }
+
         public void ToStream(Stream s) {
             s.EncodeUShort(Version);    // Field index 0 //
             EncodeRemainingStateTo(s);
@@ -81,13 +87,14 @@ namespace InterlockLedger.Tags
         {
             public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => ValidateTagId(Value.TagId);
 
-            public string TypeName => typeof(T).Name;
             public override object AsJson => Value.AsJson;
+            public string TypeName => typeof(T).Name;
             public ushort Version => Value.Version;
 
             public T FromJson(object o) => new T().FromJson(o);
 
-            internal Payload(T Value) : base(Value.TagId, Value) { }
+            internal Payload(T Value) : base(Value.TagId, Value) {
+            }
 
             protected override T FromBytes(byte[] bytes) => FromBytesHelper(bytes, new T().FromStream);
 

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using InterlockLedger.Tags;
@@ -52,18 +53,22 @@ namespace InterlockLedger.Tags
 
         public T SignedContent { get; private set; }
 
-        protected SignedValue(T payload, IEnumerable<TagIdentifiedSignature> signatures) : this() {
+        public override string TypeName => $"SignedValueOf{typeof(T).Name}";
+
+        [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Needed in related classes")]
+        [SuppressMessage("Design", "RCS1158:Static member in generic type should use a type parameter.", Justification = "Non-Sense")]
+        public static IEnumerable<DataField> BuildRemainingStateFields(ulong contentTagId) =>
+            new DataField(nameof(SignedContent), contentTagId).AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) { ElementTagId = ILTagId.IdentifiedSignature });
+
+        internal SignedValue(T payload, IEnumerable<TagIdentifiedSignature> signatures) : this() {
             SignedContent = payload ?? throw new ArgumentNullException(nameof(payload));
             Signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
         }
 
         protected override object AsJson => new { TagId, ContentTagId, SignedContent = SignedContent.AsJson, Signatures = Signatures.AsJsonArray() };
 
-        protected override IEnumerable<DataField> RemainingStateFields => new DataField(nameof(SignedContent), ContentTagId)
-            .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) { ElementTagId = ILTagId.IdentifiedSignature });
-
+        protected override IEnumerable<DataField> RemainingStateFields => BuildRemainingStateFields(ContentTagId);
         protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
-        public override string TypeName => $"SignedValueOf{typeof(T).Name}";
 
         protected override void DecodeRemainingStateFrom(Stream s) {
             SignedContent = s.Decode<T>();
