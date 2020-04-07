@@ -46,7 +46,14 @@ namespace InterlockLedger.Tags
         public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
         }
 
+        public SignedValue(Stream s) : base(ILTagId.SignedValue, 0) {
+            var p = new Payload(s.ILIntDecode(), s);
+            SignedContent = p.Value.SignedContent;
+            Version = p.Version;
+        }
+
         public ulong ContentTagId => SignedContent.TagId;
+
         public IEnumerable<TagIdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.EncodedBytes);
 
         public IEnumerable<TagIdentifiedSignature> Signatures { get; private set; }
@@ -59,6 +66,13 @@ namespace InterlockLedger.Tags
         [SuppressMessage("Design", "RCS1158:Static member in generic type should use a type parameter.", Justification = "Non-Sense")]
         public static IEnumerable<DataField> BuildRemainingStateFields(ulong contentTagId) =>
             new DataField(nameof(SignedContent), contentTagId).AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) { ElementTagId = ILTagId.IdentifiedSignature });
+
+        public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey) {
+            if (SignedContent is null || Signatures.None())
+                return false;
+            byte[] encodedBytes = SignedContent.EncodedBytes;
+            return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(encodedBytes));
+        }
 
         internal SignedValue(T payload, IEnumerable<TagIdentifiedSignature> signatures) : this() {
             SignedContent = payload ?? throw new ArgumentNullException(nameof(payload));
