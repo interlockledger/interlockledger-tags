@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags
 {
@@ -40,6 +41,8 @@ namespace InterlockLedger.Tags
         IEnumerable<InterlockSigningKeyData> Keys { get; }
 
         InterlockSigningKeyData Create(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, Algorithm algorithm, KeyStrength strength, string name, string description, string password);
+
+        X509Certificate2 CreateCertificate(string name, string password, string file, Algorithm algorithm, KeyStrength strength);
 
         InterlockSigningKeyData Import(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
 
