@@ -156,7 +156,7 @@ namespace InterlockLedger.Tags
                 [ILTagId.InterlockKey] = (s => new InterlockKey(s), NoJson),
                 [ILTagId.InterlockSigningKey] = (s => new InterlockSigningKeyData(s), NoJson),
                 [ILTagId.InterlockUpdatableSigningKey] = (s => new InterlockUpdatableSigningKeyData(s), NoJson),
-                [ILTagId.Hmac] = (s => new TagHmac(s), NoJson),
+                [ILTagId.Hmac] = (s => new TagHmac(s), o => new TagHmac().ResolveFrom((string)o)),
                 [ILTagId.Certificate] = (s => new TagCertificate(s), NoJson),
                 [ILTagId.SignedValue] = (s => new SignedValue<ILTag>.Payload(ILTagId.SignedValue, s), NoJson),
                 [ILTagId.IdentifiedSignature] = (s => new TagIdentifiedSignature(s), NoJson),
