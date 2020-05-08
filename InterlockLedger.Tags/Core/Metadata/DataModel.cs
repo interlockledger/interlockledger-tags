@@ -194,9 +194,7 @@ namespace InterlockLedger.Tags
                         throw new InvalidCastException($"Value for field {field.Name} is a tag {tag.TagId} != {field.TagId}");
                     tags.Add(tag);
                 } else {
-                    var item = ILTag.HasDeserializer(field.TagId)
-                        ? ILTag.DeserializeFromJson(field.TagId, fieldValue)
-                        : DeserializePartialFromJson(field, fieldValue);
+                    var item = DeserializeItem(field, fieldValue);
                     tags.Add(item);
                 }
             }
@@ -207,6 +205,14 @@ namespace InterlockLedger.Tags
                 tagsAsBytes = tagsAsBytes.SafeConcat(remainingBytes).ToArray();
             }
             return dataModel is null ? new ILTagUnknown(tagId, tagsAsBytes) : new ILTagUnknown(dataModel, tagsAsBytes);
+
+            static ILTag DeserializeItem(DataField field, object fieldValue) {
+                try {
+                    return ILTag.HasDeserializer(field.TagId) ? ILTag.DeserializeFromJson(field.TagId, fieldValue) : DeserializePartialFromJson(field, fieldValue);
+                } catch (Exception e) {
+                    throw new InvalidOperationException($"Could not deserialize from json field {field.Name} of type {field.TagId}\r\nfrom {fieldValue}", e);
+                }
+            }
         }
 
         private static bool IsVersioned(IEnumerable<DataField> dataFields) => dataFields?.FirstOrDefault()?.IsVersion ?? false;

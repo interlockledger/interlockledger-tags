@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>4.0.1</Version>
+      <Version>4.0.2</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>public X509Certificate2 CreateCertificate(string name, string password, string file, Algorithm algorithm, KeyStrength strength) added to IKeyStorageProvider</PackageReleaseNotes>
+      <PackageReleaseNotes>Better diagnostics on DataModel.FromJson</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">
