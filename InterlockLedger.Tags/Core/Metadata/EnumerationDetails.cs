@@ -52,12 +52,7 @@ namespace InterlockLedger.Tags
 
         public bool Equals(EnumerationDetails other) => other != null && Description == other.Description && Name == other.Name;
 
-        public override int GetHashCode() {
-            var hashCode = -1174144137;
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Description);
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Name);
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(Description, Name);
 
         public override string ToString() => $"{Name}:{Description}";
 

@@ -64,12 +64,7 @@ namespace InterlockLedger.Tags
 
             public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && ReaderId == other.ReaderId;
 
-            public override int GetHashCode() {
-                var hashCode = 1852549026;
-                hashCode = (hashCode * -1521134295) + EqualityComparer<TagPubKey>.Default.GetHashCode(PublicKey);
-                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ReaderId);
-                return hashCode;
-            }
+            public override int GetHashCode() => HashCode.Combine(PublicKey, ReaderId);
 
             public override string ToString() => $"Reader {ReaderId} with public key {PublicKey}";
         }

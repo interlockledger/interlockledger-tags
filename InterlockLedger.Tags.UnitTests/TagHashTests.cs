@@ -58,11 +58,15 @@ namespace InterlockLedger.Tags
         [TestCase("#SHA3_256", HashAlgorithm.SHA3_256, new byte[] { })]
         [TestCase("#SHA256", HashAlgorithm.SHA256, new byte[] { })]
         public void NewTagHashFromString(string textual, HashAlgorithm algorithm, byte[] data) {
-            var tag = new TagHash(textual);
-            Assert.AreEqual(ILTagId.Hash, tag.TagId);
-            Assert.AreEqual(algorithm, tag.Algorithm);
-            Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
-            Assert.AreEqual(data, tag.Data);
+            DoAsserts(algorithm, data, new TagHash(textual));
+            DoAsserts(algorithm, data, new TagHash().ResolveFrom(textual));
+
+            static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHash tag) {
+                Assert.AreEqual(ILTagId.Hash, tag.TagId);
+                Assert.AreEqual(algorithm, tag.Algorithm);
+                Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
+                Assert.AreEqual(data, tag.Data);
+            }
         }
 
         [TestCase(HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 39, 4, 4, 0, 0, 0 })]

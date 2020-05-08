@@ -58,11 +58,15 @@ namespace InterlockLedger.Tags
         [TestCase("#HMAC-SHA3_256", HashAlgorithm.SHA3_256, new byte[] { })]
         [TestCase("#HMAC-SHA256", HashAlgorithm.SHA256, new byte[] { })]
         public void NewTagHmacFromString(string textual, HashAlgorithm algorithm, byte[] data) {
-            var tag = new TagHmac(textual);
-            Assert.AreEqual(ILTagId.Hmac, tag.TagId);
-            Assert.AreEqual(algorithm, tag.Algorithm);
-            Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
-            Assert.AreEqual(data, tag.Data);
+            DoAsserts(algorithm, data, new TagHmac(textual));
+            DoAsserts(algorithm, data, new TagHmac().ResolveFrom(textual));
+
+            static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHmac tag) {
+                Assert.AreEqual(ILTagId.Hmac, tag.TagId);
+                Assert.AreEqual(algorithm, tag.Algorithm);
+                Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
+                Assert.AreEqual(data, tag.Data);
+            }
         }
 
         [TestCase(HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 47, 4, 4, 0, 0, 0 })]

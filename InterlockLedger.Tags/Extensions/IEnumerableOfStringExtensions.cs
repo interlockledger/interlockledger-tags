@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -37,8 +37,11 @@ namespace InterlockLedger.Tags
 {
     public static class IEnumerableOfStringExtensions
     {
+        public static bool AnyNullOrWhiteSpace(this IEnumerable<string> strings)
+            => strings.SafeAny(kn => string.IsNullOrWhiteSpace(kn));
+
         public static IEnumerable<ulong> AsDistinctUlongs(this IEnumerable<string> strings)
-            => strings.WithDefault().Select(StringExtensions.AsUlong).Distinct();
+                    => strings.WithDefault().Select(StringExtensions.AsUlong).Distinct();
 
         public static IEnumerable<ulong> AsOrderedUlongs(this IEnumerable<string> strings)
             => strings.WithDefault().Select(StringExtensions.AsUlong);
@@ -47,6 +50,6 @@ namespace InterlockLedger.Tags
             => strings.WithDefault().Where(kn => !string.IsNullOrWhiteSpace(kn));
 
         public static IEnumerable<string> Trimmed(this IEnumerable<string> strings)
-            => strings.WithDefault().SkipNullOrWhiteSpace().Select(kn => kn.Trim());
+            => strings.SkipNullOrWhiteSpace().Select(kn => kn.Trim());
     }
 }

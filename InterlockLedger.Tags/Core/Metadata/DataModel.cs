@@ -70,21 +70,23 @@ namespace InterlockLedger.Tags
 
         public ILTag FromNavigable(Dictionary<string, object> json) => FromPartialNavigable(json, PayloadTagId, DataFields, this);
 
-        public override int GetHashCode() {
-            var hashCode = -874208485;
-            hashCode = (hashCode * -1521134295) + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(DataFields);
-            hashCode = (hashCode * -1521134295) + EqualityComparer<IEnumerable<DataIndex>>.Default.GetHashCode(Indexes);
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(PayloadName);
-            hashCode = (hashCode * -1521134295) + PayloadTagId.GetHashCode();
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Description);
-            hashCode = (hashCode * -1521134295) + Version.GetHashCode();
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(DataFields, Indexes, PayloadName, PayloadTagId, Description, Version);
 
         public bool HasField(string fieldName) {
-            if (fieldName is null)
-                throw new ArgumentNullException(nameof(fieldName));
-            return FindFieldInPath(fieldName.Split('.'), 0, DataFields);
+            return Find(DataFields, fieldName?.Split('.'));
+
+            static bool Find(IEnumerable<DataField> fields, string[] names) {
+                return !(names is null || names.AnyNullOrWhiteSpace()) && FindFieldInPath(fields, names.AsEnumerable().GetEnumerator());
+                static bool FindFieldInPath(IEnumerable<DataField> fields, IEnumerator<string> names) {
+                    bool result = true;
+                    if (names.MoveNext()) {
+                        var field = fields?.FirstOrDefault(df => df.IsVisibleMatch(names.Current));
+                        result = field != null && FindFieldInPath(field.SubDataFields, names);
+                    }
+                    names.Dispose();
+                    return result;
+                }
+            }
         }
 
         public bool IsCompatible(DataModel other) => other != null && other.PayloadName == PayloadName && other.PayloadTagId == PayloadTagId && ExpandsOver(other);
@@ -168,18 +170,6 @@ namespace InterlockLedger.Tags
 
         private static bool ExpandEnumeration(Dictionary<ulong, EnumerationDetails> oldEnumeration, Dictionary<ulong, EnumerationDetails> newEnumeration)
             => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration?.Take(oldEnumeration.Count).SafeSequenceEqual(oldEnumeration) == true);
-
-        private static bool FindFieldInPath(string[] parts, int part, IEnumerable<DataField> fields) {
-            var name = parts[part];
-            var field = fields?.FirstOrDefault(df => df.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !df.IsOpaque.GetValueOrDefault());
-            if (field is null)
-                return false;
-            if (part + 1 >= parts.Length)
-                return true;
-            if (!field.HasSubFields)
-                return false;
-            return FindFieldInPath(parts, part + 1, field.SubDataFields);
-        }
 
         private static ILTag FromPartialNavigable(Dictionary<string, object> json, ulong tagId, IEnumerable<DataField> dataFields, DataModel dataModel) {
             if (json is null || json.Count == 0)

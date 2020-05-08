@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -33,21 +33,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>
+    [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
+    public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, IJsonCustom<TagHmac>
     {
+        public TagHmac() : base(ILTagId.Hmac, null) {
+        }
+
         public TagHmac(HashAlgorithm algorithm, byte[] data) : base(ILTagId.Hmac, new TagHashParts { Algorithm = algorithm, Data = data }) {
         }
 
         public TagHmac(string textualRepresentation) : base(ILTagId.Hmac, Split(textualRepresentation)) {
         }
 
+        public HashAlgorithm Algorithm => Value?.Algorithm ?? HashAlgorithm.SHA256;
+        public byte[] Data => Value?.Data;
         public override string Formatted => ToString();
         public string TextualRepresentation => ToString();
-        public HashAlgorithm Algorithm => Value.Algorithm;
-        public byte[] Data => Value.Data;
 
         public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
             using var hash = new HMACSHA256(key);
@@ -61,6 +66,8 @@ namespace InterlockLedger.Tags
         public override bool Equals(object obj) => Equals(obj as TagHmac);
 
         public override int GetHashCode() => ToString().GetHashCode(StringComparison.InvariantCulture);
+
+        public TagHmac ResolveFrom(string textualRepresentation) => new TagHmac(textualRepresentation);
 
         public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
 

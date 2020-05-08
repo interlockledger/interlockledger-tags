@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -91,22 +91,18 @@ namespace InterlockLedger.Tags
         }
 
         public static int CompareTo(this byte[] bytes1, byte[] bytes2) {
-#pragma warning disable S2259 // Null pointers should not be dereferenced
             var length1 = bytes1?.Length ?? 0;
             var length2 = bytes2?.Length ?? 0;
-            var lengthToCompare = Math.Max(length1, length2);
+            var lengthToCompare = Math.Min(length1, length2);
             for (var i = 0; i < lengthToCompare; i++) {
-                if (bytes1[i] > bytes2[2])
+                byte b1 = bytes1[i];
+                byte b2 = bytes2[i];
+                if (b1 > b2)
                     return 1;
-                if (bytes1[i] < bytes2[i])
+                if (b1 < b2)
                     return -1;
             }
-            if (length1 > lengthToCompare)
-                return 1;
-            if (length2 > lengthToCompare)
-                return -1;
-            return 0;
-#pragma warning restore S2259 // Null pointers should not be dereferenced
+            return length1 > lengthToCompare ? 1 : length2 > lengthToCompare ? -1 : 0;
         }
 
         public static void DumpToFile(this byte[] bytes, string filename) {

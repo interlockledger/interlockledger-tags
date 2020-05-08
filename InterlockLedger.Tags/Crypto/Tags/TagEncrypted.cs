@@ -49,12 +49,7 @@ namespace InterlockLedger.Tags
 
         public bool Equals(TagEncryptedParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(CipherData, other.CipherData);
 
-        public override int GetHashCode() {
-            var hashCode = 462703764;
-            hashCode = (hashCode * -1521134295) + Algorithm.GetHashCode();
-            hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(CipherData);
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
     }
 
     public class TagEncrypted : ILTagExplicit<TagEncryptedParts>

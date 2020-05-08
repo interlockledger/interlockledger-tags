@@ -73,14 +73,7 @@ namespace InterlockLedger.Tags
 
             public bool Equals(Parts other) => EqualityComparer<byte[]>.Default.Equals(EncryptedIV, other.EncryptedIV) && EqualityComparer<byte[]>.Default.Equals(EncryptedKey, other.EncryptedKey) && EqualityComparer<TagHash>.Default.Equals(PublickKeyHash, other.PublickKeyHash) && ReaderId == other.ReaderId;
 
-            public override int GetHashCode() {
-                var hashCode = 390428901;
-                hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(EncryptedIV);
-                hashCode = (hashCode * -1521134295) + EqualityComparer<byte[]>.Default.GetHashCode(EncryptedKey);
-                hashCode = (hashCode * -1521134295) + EqualityComparer<TagHash>.Default.GetHashCode(PublickKeyHash);
-                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ReaderId);
-                return hashCode;
-            }
+            public override int GetHashCode() => HashCode.Combine(EncryptedIV, EncryptedKey, PublickKeyHash, ReaderId);
 
             public override string ToString() => $"Reading key for reader {ReaderId}";
         }

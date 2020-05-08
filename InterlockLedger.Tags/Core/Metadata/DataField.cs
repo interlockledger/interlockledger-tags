@@ -120,11 +120,11 @@ namespace InterlockLedger.Tags
 
         public string Enumerated(ulong number) {
             try {
-                if (Enumeration is null || Enumeration.Count == 0)
-                    return "?";
-                if (!EnumerationAsFlags.GetValueOrDefault())
-                    return Enumeration.ContainsKey(number) ? Enumeration[number].Name : "?";
-                return Enumeration.Keys.Where(k => (number & k) == k && k > 0).Select(k => Enumeration[k].Name).JoinedBy("|");
+                return Enumeration is null || Enumeration.Count == 0
+                    ? "?"
+                    : EnumerationAsFlags.GetValueOrDefault()
+                        ? Enumeration.Keys.Where(k => (number & k) == k && k > 0).Select(k => Enumeration[k].Name).JoinedBy("|")
+                        : Enumeration.ContainsKey(number) ? Enumeration[number].Name : "?";
             } catch {
                 return "*error*";
             }
@@ -162,6 +162,8 @@ namespace InterlockLedger.Tags
             hashCode = (hashCode * -1_521_134_295) + (Enumeration ?? _noEnumeration).GetHashCode();
             return hashCode;
         }
+
+        public bool IsVisibleMatch(string name) => Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !IsOpaque.GetValueOrDefault();
 
         public override string ToString() => $"{Name} #{TagId} {Enumeration?.Values.JoinedBy(",")}";
 

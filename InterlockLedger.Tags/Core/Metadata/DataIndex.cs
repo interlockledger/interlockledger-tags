@@ -62,13 +62,7 @@ namespace InterlockLedger.Tags
             IsUnique == other.IsUnique &&
             Name == other.Name;
 
-        public override int GetHashCode() {
-            var hashCode = 2121638569;
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ElementsAsString);
-            hashCode = (hashCode * -1521134295) + IsUnique.GetHashCode();
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Name);
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(ElementsAsString, IsUnique, Name);
 
         public override string ToString() => ElementsAsString;
     }

@@ -67,13 +67,7 @@ namespace InterlockLedger.Tags
 
             public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && EqualityComparer<TagSignature>.Default.Equals(Signature, other.Signature) && EqualityComparer<BaseKeyId>.Default.Equals(SignerId, other.SignerId);
 
-            public override int GetHashCode() {
-                var hashCode = -1433170334;
-                hashCode = (hashCode * -1521134295) + EqualityComparer<TagPubKey>.Default.GetHashCode(PublicKey);
-                hashCode = (hashCode * -1521134295) + EqualityComparer<TagSignature>.Default.GetHashCode(Signature);
-                hashCode = (hashCode * -1521134295) + EqualityComparer<BaseKeyId>.Default.GetHashCode(SignerId);
-                return hashCode;
-            }
+            public override int GetHashCode() => HashCode.Combine(PublicKey, Signature, SignerId);
 
             public override string ToString() => $"Signature by signer {SignerId} with public key {PublicKey}";
         }

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -84,6 +84,30 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void GoodCompatibilityUnblobedDataModel() => Assert.IsTrue(_ok_UnblobedDataModel.IsCompatible(_baseDataModel));
+
+        [Test]
+        public void HasField() {
+            ShouldHave("DateOfPurchase");
+            ShouldHave("dateofpurchase");
+            ShouldHave("Buyer");
+            ShouldHave("Buyer.Id");
+            ShouldHave("Blob");
+            ShouldHave("Blob.Balance");
+            ShouldNotHave("Date_Of_Purchase");
+            ShouldNotHave("Buyer.Balance");
+            ShouldNotHave(null);
+            ShouldNotHave("");
+            ShouldNotHave("    ");
+            ShouldNotHave(" .  ");
+            ShouldNotHave("Buyer.");
+            ShouldNotHave("Buyer..ID");
+
+            static void ShouldHave(string fieldName)
+                => Assert.IsTrue(_ok_UnblobedDataModel.HasField(fieldName), $"Should have '{fieldName}' field");
+
+            static void ShouldNotHave(string fieldName)
+                => Assert.IsFalse(_ok_UnblobedDataModel.HasField(fieldName), $"Should not have '{fieldName}' field");
+        }
 
         private static readonly DataModel _bad_ElementTagIdChangedDataModel = new DataModel {
             PayloadName = "Test",
