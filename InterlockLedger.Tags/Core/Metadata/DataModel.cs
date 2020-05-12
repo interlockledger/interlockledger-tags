@@ -166,14 +166,18 @@ namespace InterlockLedger.Tags
 
         private static ILTag DeserializeItem(DataField field, object fieldValue) {
             try {
-                return ILTag.HasDeserializer(field.TagId) ? ILTag.DeserializeFromJson(field.TagId, fieldValue) : DeserializePartialFromJson(field, fieldValue);
+                return field.IsEnumeration && fieldValue is string value
+                    ? field.EnumerationFromString(value)
+                    : ILTag.HasDeserializer(field.TagId)
+                        ? ILTag.DeserializeFromJson(field.TagId, fieldValue)
+                        : DeserializePartialFromJson(field, fieldValue);
             } catch (Exception e) {
                 throw new InvalidOperationException($"Could not deserialize from json field {field.Name} of type {field.TagId}\r\nfrom {fieldValue}", e);
             }
         }
 
         private static ILTag DeserializePartialFromJson(DataField field, object fieldValue) => field.HasSubFields
-                    ? FromPartialNavigable(fieldValue as Dictionary<string, object>, field.TagId, field.SubDataFields, null)
+            ? FromPartialNavigable(fieldValue as Dictionary<string, object>, field.TagId, field.SubDataFields, null)
             : throw new InvalidDataException($"Unknown tagId {field.TagId}");
 
         private static bool ExpandEnumeration(Dictionary<ulong, EnumerationDetails> oldEnumeration, Dictionary<ulong, EnumerationDetails> newEnumeration)
@@ -249,9 +253,7 @@ namespace InterlockLedger.Tags
                     json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
                 } else {
                     var value = DecodePartial(field.TagId, bytes, ref offset);
-                    json[field.Name] = value.AsJson;
-                    if (field.IsEnumeration && !value.IsNull)
-                        json[$"__{field.Name}__"] = field.Enumerated(value);
+                    json[field.Name] = field.IsEnumeration && !value.IsNull ? field.EnumerationToString(value) : value.AsJson;
                     if (isVersioned && firstField && field.IsVersion)
                         version = (ushort)value.AsJson;
                 }

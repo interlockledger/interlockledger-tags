@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -40,6 +40,14 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
+    [Flags]
+    public enum SomeEnumeration
+    {
+        None = 0,
+        Some = 1,
+        Lots = 2
+    }
+
     [TestFixture]
     public class DataModelJsonTests
     {
@@ -203,8 +211,7 @@ namespace InterlockLedger.Tags
                     ElementTagId = 23
                 },
                 Bytes = "Bgw=",
-                Enumeration = 2,
-                __Enumeration__ = "Some|Lots"
+                Enumeration = "Some|Lots"
             },
             249, 49, 221, 116,
                 5, 7, 0,
@@ -220,7 +227,7 @@ namespace InterlockLedger.Tags
                     23, 3, 10, 5, 0,
                     23, 3, 21, 13, 0,
                 16, 2, 6, 12,
-                3, 2);
+                3, 3);
 
         [Test]
         public void ToFromJsonV0()
@@ -254,13 +261,18 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void ToFromJsonV7()
-            => ToFromBaseTest(new JsonTestTaggedData(7, 32, "DataModelToJson", "Shown From Version 1", some: JsonTestTaggedData.SomeEnumeration.Lots | JsonTestTaggedData.SomeEnumeration.Some, 7, 12).AsPayload);
+            => ToFromBaseTest(new JsonTestTaggedData(7, 32, "DataModelToJson", "Shown From Version 1", some: SomeEnumeration.Lots | SomeEnumeration.Some, 7, 12).AsPayload);
 
-        private static readonly JsonSerializerOptions _options = new JsonSerializerOptions {
+        private static readonly JsonSerializerOptions _options = new JsonSerializerOptions() {
             WriteIndented = true,
             PropertyNamingPolicy = null,
-            PropertyNameCaseInsensitive = true,
+            PropertyNameCaseInsensitive = true
         };
+
+        static DataModelJsonTests() {
+            if (_options.Converters.None(c => c.GetType() == typeof(JsonStringEnumConverter)))
+                _options.Converters.Add(new JsonStringEnumConverter());
+        }
 
         private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
             var tag = JsonTestTaggedData.Model.FromJson(json);
@@ -404,14 +416,6 @@ namespace InterlockLedger.Tags
                 Enumeration = some;
             }
 
-            [Flags]
-            public enum SomeEnumeration
-            {
-                None = 0,
-                Some = 1,
-                Lots = 2
-            }
-
             [JsonIgnore]
             public object AsJson => Version switch
             {
@@ -467,13 +471,13 @@ namespace InterlockLedger.Tags
 
                 public class Data
                 {
-                    public ulong Id { get; set; }
-                    public string Name { get; set; }
-
                     public Data(ulong id, string name) {
                         Id = id;
                         Name = name;
                     }
+
+                    public ulong Id { get; set; }
+                    public string Name { get; set; }
                 }
 
                 protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()));
@@ -497,7 +501,7 @@ namespace InterlockLedger.Tags
 
             private object AsJsonV6() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges.AsJson, Bytes };
 
-            private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges.AsJson, Bytes, Enumeration = (byte)Enumeration, __Enumeration__ = "Some|Lots" };
+            private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges.AsJson, Bytes, Enumeration = Model.DataFields.Last().EnumerationToString((ulong)Enumeration) };
         }
     }
 }

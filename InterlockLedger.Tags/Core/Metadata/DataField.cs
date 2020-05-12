@@ -32,9 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 //#pragma warning disable CA2227 // Collection properties should be read only
 
@@ -116,17 +118,75 @@ namespace InterlockLedger.Tags
             };
         }
 
-        public string Enumerated(ILTag value) => Enumerated(AsNumber(value));
+        public static ILTag AsNumericTag(ulong tagId, ulong value) => tagId switch
+        {
+            2 => new ILTagInt8((sbyte)value),
+            3 => new ILTagUInt8((byte)value),
+            4 => new ILTagInt16((short)value),
+            5 => new ILTagUInt16((ushort)value),
+            6 => new ILTagInt32((int)value),
+            7 => new ILTagUInt32((uint)value),
+            8 => new ILTagInt64((long)value),
+            9 => new ILTagUInt64(value),
+            10 => new ILTagILInt(value),
+            _ => throw new InvalidCastException("Not an integral numeric ILTag"),
+        };
 
-        public string Enumerated(ulong number) {
+        public static bool operator !=(DataField left, DataField right) => !(left == right);
+
+        public static bool operator ==(DataField left, DataField right) => EqualityComparer<DataField>.Default.Equals(left, right);
+
+        public ILTag EnumerationFromString(string value) {
+            return string.IsNullOrWhiteSpace(value) || Enumeration is null || Enumeration.Count == 0 || value == "?"
+                ? ILTagNull.Instance
+                : AsNumericTag(TagId, Parse(value));
+
+            ulong Parse(string value) {
+                return !_isFlags ? FindKey(value) : SplitAndParse(value);
+
+                ulong FindKey(string value) {
+                    try {
+                        return Regex.IsMatch(value, @"^\?\d+$")
+                            ? ulong.Parse(value.Substring(1), CultureInfo.InvariantCulture)
+                            : Enumeration.First(kp => kp.Value.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase)).Key;
+                    } catch (Exception e) {
+                        throw new InvalidDataException($"Value '{value}' is not valid for the enumeration for field [{Name}]", e);
+                    }
+                }
+
+                ulong SplitAndParse(string value) {
+                    ulong numericValue = 0;
+                    foreach (var partValue in value.Split('|', ','))
+                        numericValue |= FindKey(partValue);
+                    return numericValue;
+                }
+            }
+        }
+
+        public string EnumerationToString(ILTag value) => EnumerationToString(AsNumber(value));
+
+        public string EnumerationToString(ulong number) {
             try {
                 return Enumeration is null || Enumeration.Count == 0
                     ? "?"
-                    : EnumerationAsFlags.GetValueOrDefault()
-                        ? Enumeration.Keys.Where(k => (number & k) == k && k > 0).Select(k => Enumeration[k].Name).JoinedBy("|")
-                        : Enumeration.ContainsKey(number) ? Enumeration[number].Name : "?";
+                    : _isFlags
+                        ? ToList(number)
+                        : Enumeration.ContainsKey(number) ? Enumeration[number].Name : $"?{number}";
             } catch {
                 return "*error*";
+            }
+
+            string ToList(ulong number) {
+                var names = new List<string>();
+                foreach (ulong k in Enumeration.Keys) {
+                    if (number == k || ((number & k) == k && k > 0)) {
+                        number ^= k;
+                        names.Add(Enumeration[k].Name);
+                    }
+                }
+                if (number > 0)
+                    names.Add($"?{number}");
+                return names.JoinedBy("|");
             }
         }
 
@@ -148,26 +208,28 @@ namespace InterlockLedger.Tags
             CompareEnumeration(other);
 
         public override int GetHashCode() {
-            var hashCode = 679_965_117;
-            hashCode = (hashCode * -1_521_134_295) + TagId.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + IsOptional.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + IsOpaque.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + EqualityComparer<string>.Default.GetHashCode(Name ?? string.Empty);
-            hashCode = (hashCode * -1_521_134_295) + EqualityComparer<IEnumerable<DataField>>.Default.GetHashCode(SubDataFields ?? Enumerable.Empty<DataField>());
-            hashCode = (hashCode * -1_521_134_295) + Cast.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + ElementTagId.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + Version.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + SerializationVersion.GetHashCode();
-            hashCode = (hashCode * -1_521_134_295) + EqualityComparer<string>.Default.GetHashCode(Description ?? string.Empty);
-            hashCode = (hashCode * -1_521_134_295) + (Enumeration ?? _noEnumeration).GetHashCode();
-            return hashCode;
+            var hash = new HashCode();
+            hash.Add(Cast);
+            hash.Add(Description);
+            hash.Add(ElementTagId);
+            hash.Add(Enumeration);
+            hash.Add(EnumerationAsFlags);
+            hash.Add(IsOpaque);
+            hash.Add(IsOptional);
+            hash.Add(IsVersion);
+            hash.Add(Name);
+            hash.Add(SerializationVersion);
+            hash.Add(SubDataFields);
+            hash.Add(TagId);
+            hash.Add(Version);
+            return hash.ToHashCode();
         }
 
         public bool IsVisibleMatch(string name) => Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !IsOpaque.GetValueOrDefault();
 
         public override string ToString() => $"{Name} #{TagId} {Enumeration?.Values.JoinedBy(",")}";
 
-        private static readonly IEnumerable<KeyValuePair<ulong, EnumerationDetails>> _noEnumeration = Enumerable.Empty<KeyValuePair<ulong, EnumerationDetails>>();
+        private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
 
         private bool CompareEnumeration(DataField other) => Enumeration.SafeSequenceEqual(other.Enumeration);
     }
