@@ -51,6 +51,11 @@ namespace InterlockLedger.Tags
     [TestFixture]
     public class DataModelJsonTests
     {
+        static DataModelJsonTests() {
+            if (_options.Converters.None(c => c.GetType() == typeof(JsonStringEnumConverter)))
+                _options.Converters.Add(new JsonStringEnumConverter());
+        }
+
         [Test]
         public void FromJsonObjectV0WithRemainingBytes() => FromJsonObjectBaseTest(
             new { Version = 0, Id = 123, Name = "DataModelToJson", _RemainingBytes_ = "ERNIaWRkZW4gb24gVmVyc2lvbiAw" },
@@ -268,11 +273,6 @@ namespace InterlockLedger.Tags
             PropertyNamingPolicy = null,
             PropertyNameCaseInsensitive = true
         };
-
-        static DataModelJsonTests() {
-            if (_options.Converters.None(c => c.GetType() == typeof(JsonStringEnumConverter)))
-                _options.Converters.Add(new JsonStringEnumConverter());
-        }
 
         private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
             var tag = JsonTestTaggedData.Model.FromJson(json);

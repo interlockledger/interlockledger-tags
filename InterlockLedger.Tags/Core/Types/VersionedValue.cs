@@ -93,6 +93,8 @@ namespace InterlockLedger.Tags
 
             public T FromJson(object o) => new T().FromJson(o);
 
+            public override string ToString() => Value.ToString();
+
             internal Payload(T Value) : base(Value.TagId, Value) {
             }
 

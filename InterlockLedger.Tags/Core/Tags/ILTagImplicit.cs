@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -42,9 +42,20 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public override object AsJson => Value;
 
+        [JsonIgnore]
+        public override byte[] EncodedInnerBytes {
+            get {
+                using var ms = new MemoryStream();
+                SerializeInner(ms);
+                ms.Flush();
+                return ms.ToArray();
+            }
+        }
+
         public T Value { get; set; }
 
-        protected ILTagImplicit() : base(0) { }
+        protected ILTagImplicit() : base(0) {
+        }
 
         protected ILTagImplicit(ulong tagId, T value) : base(tagId) => Value = value;
 

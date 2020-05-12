@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -40,6 +41,7 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => null;
 
+        public override byte[] EncodedInnerBytes => Array.Empty<byte>();
         public override string Formatted => "null";
 
         protected override void SerializeInner(Stream s) {

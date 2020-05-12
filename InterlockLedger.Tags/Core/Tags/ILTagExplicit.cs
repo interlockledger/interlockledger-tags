@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -32,11 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     public abstract class ILTagExplicit<T> : ILTagImplicit<T>
     {
+        [JsonIgnore]
+        public sealed override byte[] EncodedInnerBytes => ToBytes();
+
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 

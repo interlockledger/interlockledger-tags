@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -36,6 +36,7 @@ namespace InterlockLedger.Tags
     {
         object AsJson { get; }
         byte[] EncodedBytes { get; }
+        byte[] EncodedInnerBytes { get; }
         ulong TagId { get; }
     }
 }

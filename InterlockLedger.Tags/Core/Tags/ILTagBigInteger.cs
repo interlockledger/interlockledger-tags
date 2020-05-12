@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -40,6 +40,8 @@ namespace InterlockLedger.Tags
         public ILTagBigInteger(Stream s) : base(ILTagId.BigInteger) => throw new NotImplementedException();
 
         public override object AsJson => throw new NotSupportedException();
+
+        public override byte[] EncodedInnerBytes => Array.Empty<byte>();
 
         protected override void SerializeInner(Stream s) => throw new NotImplementedException();
     }
