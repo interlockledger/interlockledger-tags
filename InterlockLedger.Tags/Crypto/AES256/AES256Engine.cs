@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -83,7 +83,7 @@ namespace InterlockLedger.Tags
             return (ms.ToArray(), algorithm.Key, algorithm.IV);
         }
 
-        private SymmetricAlgorithm BuildAlgorithm(byte[] key, byte[] iv) {
+        private static SymmetricAlgorithm BuildAlgorithm(byte[] key, byte[] iv) {
             var AES = new RijndaelManaged {
                 KeySize = 256,
                 BlockSize = 128,

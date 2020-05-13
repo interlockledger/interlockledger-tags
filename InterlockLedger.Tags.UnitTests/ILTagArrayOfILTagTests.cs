@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -48,6 +48,18 @@ namespace InterlockLedger.Tags
             using var ms = new MemoryStream(encodedBytes);
             var value = ms.DecodeArray<byte, TestTagOfOneByte>(s => new TestTagOfOneByte(s.DecodeTagId(), s));
             Assert.AreEqual(bytes, value);
+        }
+
+        [Test]
+        public void DecodeArrayOfTagsWithNulls() {
+            var expectedBytes = new byte[] { 21, 6, 3, 10, 1, 0, 10, 3 };
+            var array = new ILTagILInt[] { new ILTagILInt(1), null, new ILTagILInt(3) };
+            var compound = new ILTagArrayOfILTag<ILTagILInt>(array);
+            byte[] encodedBytes = compound.EncodedBytes;
+            Assert.AreEqual(expectedBytes, encodedBytes);
+            using var ms = new MemoryStream(encodedBytes);
+            var value = ms.DecodeTagArray<ILTagILInt>();
+            Assert.AreEqual(array, value);
         }
 
         [TestCase(null, new byte[0], new byte[] { 21, 0 }, TestName = "Deserialize_a_Null_Array")]

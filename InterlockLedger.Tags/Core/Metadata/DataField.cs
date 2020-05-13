@@ -276,12 +276,12 @@ namespace InterlockLedger.Tags
                 s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
             });
 
-        private EnumerationDictionary DecodeEnumeration(Stream s) {
+        private static EnumerationDictionary DecodeEnumeration(Stream s) {
             var triplets = s.DecodeArray<Triplet, Triplet.Tag>(s => new Triplet.Tag(s));
             return new EnumerationDictionary(triplets.SkipNulls().ToDictionary(t => t.Value, t => new EnumerationDetails(t.Name, t.Description)));
         }
 
-        private void EncodeEnumeration(Stream s, EnumerationDictionary enumeration)
+        private static void EncodeEnumeration(Stream s, EnumerationDictionary enumeration)
             => s.EncodeTagArray(enumeration?.Select(p => new Triplet(p.Key, p.Value.Name, p.Value.Description).AsTag));
 
         private class Triplet : EnumerationDetails

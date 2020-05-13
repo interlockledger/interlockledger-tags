@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -83,7 +83,9 @@ namespace InterlockLedger.Tags
                 }
             });
 
-        private Func<Stream, T> _decoder = s => (T)s.DecodeTag();
+        private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
+
+        private static T AllowNull(ILTag tag) => tag.IsNull ? default : (T)tag;
 
         private static T[] Elicit(object o) {
             if (o is Dictionary<string, object> dictionary) {
