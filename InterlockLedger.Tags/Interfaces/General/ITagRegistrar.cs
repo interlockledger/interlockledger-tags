@@ -1,4 +1,4 @@
-﻿/******************************************************************************************************************************
+/******************************************************************************************************************************
 
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
@@ -37,6 +37,6 @@ namespace InterlockLedger.Tags
 {
     public interface ITagRegistrar
     {
-        bool RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer, Func<ILTag, ILTag> resolvingConverter);
+        bool RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer);
     }
 }

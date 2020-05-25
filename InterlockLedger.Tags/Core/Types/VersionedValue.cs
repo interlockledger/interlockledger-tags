@@ -129,7 +129,7 @@ namespace InterlockLedger.Tags
         protected static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
             if (registrar is null)
                 throw new ArgumentNullException(nameof(registrar));
-            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson, null);
+            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson);
         }
 
         protected abstract void DecodeRemainingStateFrom(Stream s);
