@@ -119,9 +119,18 @@ namespace InterlockLedger.Tags
         }
 
         protected abstract object AsJson { get; }
+
         protected virtual DataIndex[] PayloadIndexes => Array.Empty<DataIndex>();
+
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
+
         protected abstract string TypeDescription { get; }
+
+        protected static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
+            if (registrar is null)
+                throw new ArgumentNullException(nameof(registrar));
+            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson, null);
+        }
 
         protected abstract void DecodeRemainingStateFrom(Stream s);
 
@@ -130,9 +139,17 @@ namespace InterlockLedger.Tags
         protected abstract T FromJson(object json);
 
         private static readonly DataField _versionField = new DataField(nameof(Version), ILTagId.UInt16);
+
         private readonly Lazy<DataField> _fieldModel;
+
         private readonly Lazy<Payload> _payload;
+
         private readonly Lazy<DataModel> _payloadDataModel;
+
         private readonly ulong _tagId;
+
+        private static Payload BuildPayload(ulong fieldTagId, Stream s) => new Payload(fieldTagId, s);
+
+        private static Payload PayloadFromJson(object o) => new T().FromJson(o).AsPayload;
     }
 }
