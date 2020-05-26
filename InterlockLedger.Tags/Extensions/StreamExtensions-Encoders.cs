@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -39,6 +39,12 @@ namespace InterlockLedger.Tags
 {
     public static partial class StreamExtensions
     {
+        public static Stream EncodeAny<T>(this Stream s, T value) where T : class, ITaggable<T>
+            => s.EncodeTag(value?.AsTag);
+
+        public static Stream EncodeArray<T>(this Stream s, IEnumerable<T> values) where T : class, ITaggable<T>
+            => s.EncodeTag(new ILTagArrayOfILTag<ILTagExplicit<T>>(values?.Select(v => v.AsTag).ToArray()));
+
         public static Stream EncodeBool(this Stream s, bool value)
             => s.EncodeTag(value ? ILTagBool.True : ILTagBool.False);
 

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -41,9 +41,26 @@ namespace InterlockLedger.Tags
     {
         public static T Decode<T>(this Stream s) where T : ILTag {
             var tag = s.DecodeTag();
-            if (tag.IsNull)
-                return null;
-            return tag as T ?? throw new InvalidDataException($"Not a {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
+            return tag.IsNull
+                ? null
+                : tag as T
+                    ?? throw new InvalidDataException($"Not a {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
+        }
+
+        public static T DecodeAny<T>(this Stream s) where T : class, ITaggable<T> {
+            var tag = s.DecodeTag();
+            return tag.IsNull
+                ? (T)null
+                : tag is ILTagExplicit<T> t
+                    ? t.Value
+                    : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
+        }
+
+        public static T[] DecodeArray<T>(this Stream s) where T : class, ITaggable<T> {
+            var tagId = s.DecodeTagId();
+            if (tagId == ILTagId.ILTagArray)
+                return new ILTagArrayOfILTag<ILTagExplicit<T>>(s).Value?.Select(element => element.Value).ToArray();
+            throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagExplicit<T>>).Name}");
         }
 
         public static T[] DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where TT : ILTagExplicit<T> {

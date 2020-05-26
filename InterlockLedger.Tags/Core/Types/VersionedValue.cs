@@ -37,10 +37,13 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class VersionedValue<T> : IVersion where T : VersionedValue<T>, new()
+    public abstract class VersionedValue<T> : IVersion, ITaggable<T> where T : VersionedValue<T>, new()
     {
         [JsonIgnore]
         public Payload AsPayload => _payload.Value;
+
+        [JsonIgnore]
+        public ILTagExplicit<T> AsTag => AsPayload;
 
         [JsonIgnore]
         public DataField FieldModel => _fieldModel.Value;
