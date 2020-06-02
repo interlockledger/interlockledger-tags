@@ -79,14 +79,14 @@ namespace InterlockLedger.Tags
             TestWith(new DataField {
                 Name = "TestEnumeration1",
                 TagId = 1,
-                Enumeration = new EnumerationDictionary {
+                EnumerationDefinition = new EnumerationDictionary {
                     [1ul] = new EnumerationDetails("Name1", "Descr1"),
                 }
             });
             TestWith(new DataField {
                 Name = "TestEnumeration2",
                 TagId = 2,
-                Enumeration = new EnumerationDictionary {
+                EnumerationDefinition = new EnumerationDictionary {
                     [1ul] = new EnumerationDetails("Name1", "Descr1"),
                     [3ul] = new EnumerationDetails("Name3", null)
                 },

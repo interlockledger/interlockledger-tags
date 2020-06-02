@@ -41,8 +41,8 @@ namespace InterlockLedger.Tags
     {
         [Test]
         public void EnumerationFromString() {
-            foreach (ulong value in _dataFieldWithEnumeration.Enumeration.Keys)
-                Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithEnumeration.Enumeration[value].Name));
+            foreach (ulong value in _dataFieldWithEnumeration.EnumerationDefinition.Keys)
+                Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithEnumeration.EnumerationDefinition[value].Name));
             Assert.AreEqual(10, FromStringAsNumber("?10"));
             Assert.IsNull(FromStringAsNumber("?"));
             var e = Assert.Throws<InvalidDataException>(() => FromStringAsNumber("Donr"));
@@ -52,8 +52,8 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void EnumerationFromStringFlags() {
-            foreach (ulong value in _dataFieldWithFlagsEnumeration.Enumeration.Keys)
-                Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithFlagsEnumeration.Enumeration[value].Name));
+            foreach (ulong value in _dataFieldWithFlagsEnumeration.EnumerationDefinition.Keys)
+                Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name));
             Assert.AreEqual(7ul, FromStringAsNumber(AllFlags()));
             Assert.AreEqual(7ul, FromStringAsNumber(AllFlags(reversed: true)));
             Assert.AreEqual(15ul, FromStringAsNumber(AllFlags() + "|?8"));
@@ -65,16 +65,16 @@ namespace InterlockLedger.Tags
 
         [Test]
         public void EnumerationToString() {
-            foreach (ulong value in _dataFieldWithEnumeration.Enumeration.Keys)
-                Assert.AreEqual(_dataFieldWithEnumeration.Enumeration[value].Name, _dataFieldWithEnumeration.EnumerationToString(value));
+            foreach (ulong value in _dataFieldWithEnumeration.EnumerationDefinition.Keys)
+                Assert.AreEqual(_dataFieldWithEnumeration.EnumerationDefinition[value].Name, _dataFieldWithEnumeration.EnumerationToString(value));
             Assert.AreEqual("?10", _dataFieldWithEnumeration.EnumerationToString(10));
             Assert.AreEqual("?", _dataFieldWithoutEnumeration.EnumerationToString(1));
         }
 
         [Test]
         public void EnumerationToStringFlags() {
-            foreach (ulong value in _dataFieldWithFlagsEnumeration.Enumeration.Keys)
-                Assert.AreEqual(_dataFieldWithFlagsEnumeration.Enumeration[value].Name, _dataFieldWithFlagsEnumeration.EnumerationToString(value));
+            foreach (ulong value in _dataFieldWithFlagsEnumeration.EnumerationDefinition.Keys)
+                Assert.AreEqual(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name, _dataFieldWithFlagsEnumeration.EnumerationToString(value));
             Assert.AreEqual(AllFlags(), _dataFieldWithFlagsEnumeration.EnumerationToString(7));
             Assert.AreEqual("?8", _dataFieldWithFlagsEnumeration.EnumerationToString(8));
             Assert.AreEqual(AllFlags() + "|?8", _dataFieldWithFlagsEnumeration.EnumerationToString(15));
@@ -94,7 +94,7 @@ namespace InterlockLedger.Tags
                 Name = "DeliveryStatus",
                 Version = 3,
                 Description = "Enumerated Status for Delivery",
-                Enumeration = new EnumerationDictionary {
+                EnumerationDefinition = new EnumerationDictionary {
                     [0] = new EnumerationDetails("WaitingApproval", "Waiting for sale to be completed (paid)"),
                     [1] = new EnumerationDetails("Canceled", "Sale canceled won't be delivered"),
                     [2] = new EnumerationDetails("Handling", "Locating itens in stock"),
@@ -110,7 +110,7 @@ namespace InterlockLedger.Tags
                  Version = 3,
                  Description = "Policy Flags",
                  EnumerationAsFlags = true,
-                 Enumeration = new EnumerationDictionary {
+                 EnumerationDefinition = new EnumerationDictionary {
                      [1] = new EnumerationDetails("CheckMemory", "Check if memory is enough"),
                      [2] = new EnumerationDetails("CheckData", "Check if input is the proper format"),
                      [4] = new EnumerationDetails("CheckConnection", "Check if connection is alive")
@@ -125,7 +125,7 @@ namespace InterlockLedger.Tags
                 Description = "Status for Build"
             };
 
-        private static string AllFlags(bool reversed = false) => _dataFieldWithFlagsEnumeration.Enumeration
+        private static string AllFlags(bool reversed = false) => _dataFieldWithFlagsEnumeration.EnumerationDefinition
             .OrderBy(kp => reversed ? Reverse(kp.Key) : kp.Key)
             .Select(i => i.Value.Name)
             .JoinedBy("|");

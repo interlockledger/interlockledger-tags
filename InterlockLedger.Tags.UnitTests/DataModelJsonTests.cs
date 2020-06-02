@@ -372,7 +372,7 @@ namespace InterlockLedger.Tags
                         TagId = ILTagId.UInt8,
                         Name = nameof(Enumeration),
                         Version = 7,
-                        Enumeration = new EnumerationDictionary {
+                        EnumerationDefinition = new EnumerationDictionary {
                             [(byte)SomeEnumeration.None] = new EnumerationDetails(nameof(SomeEnumeration.None), "Nothing"),
                             [(byte)SomeEnumeration.Some] = new EnumerationDetails(nameof(SomeEnumeration.Some), "A small number"),
                             [(byte)SomeEnumeration.Lots] = new EnumerationDetails(nameof(SomeEnumeration.Lots), "A large number"),

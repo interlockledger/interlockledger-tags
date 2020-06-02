@@ -121,7 +121,7 @@ namespace InterlockLedger.Tags
                     return false; // Can't make field opaque afterwards
                 if (oldField.HasSubFields && !CompareFields(oldField.SubDataFields, newField.SubDataFields))
                     return false; // Incompatible subfields
-                if (!ExpandEnumeration(oldField.Enumeration, newField.Enumeration))
+                if (!ExpandEnumeration(oldField.EnumerationDefinition, newField.EnumerationDefinition))
                     return false; // Incompatible enumerations
             }
             return true;

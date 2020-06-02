@@ -49,7 +49,7 @@ namespace InterlockLedger.Tags
         public DataField(string name, ulong tagId, string description = null) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Need a name", nameof(name));
-            Description = description;
+            Description = description.TrimToNull();
             Name = name;
             TagId = tagId;
             Version = 1;
@@ -63,23 +63,22 @@ namespace InterlockLedger.Tags
 
         public ulong? ElementTagId { get; set; }
 
-        [JsonIgnore]
-        public EnumerationDictionary Enumeration { get; set; }
+        public EnumerationItems Enumeration {
+            get => EnumerationDefinition?.AsEnumerationItems;
+            set => EnumerationDefinition = value?.UpdateFrom();
+        }
 
         public bool? EnumerationAsFlags { get; set; }
 
-        [JsonPropertyName("enumeration")]
-        public EnumerationItems EnumerationItems {
-            get => Enumeration?.ToEnumerationItems();
-            set => Enumeration = value?.UpdateFrom();
-        }
+        [JsonIgnore]
+        public EnumerationDictionary EnumerationDefinition { get; set; }
 
         // tags that have children
         [JsonIgnore]
         public bool HasSubFields => SubDataFields.SafeAny();
 
         [JsonIgnore]
-        public bool IsEnumeration => Enumeration.SafeAny();
+        public bool IsEnumeration => EnumerationDefinition.SafeAny();
 
         // treat as opaque byte array
         public bool? IsOpaque { get; set; }
@@ -92,6 +91,7 @@ namespace InterlockLedger.Tags
         // Case-insensitive (can't contain dots or whitespace)
         public string Name { get; set; }
 
+        [JsonIgnore]
         public ushort SerializationVersion { get; set; } = CurrentVersion;
 
         public IEnumerable<DataField> SubDataFields { get; set; }
@@ -137,7 +137,7 @@ namespace InterlockLedger.Tags
         public static bool operator ==(DataField left, DataField right) => EqualityComparer<DataField>.Default.Equals(left, right);
 
         public ILTag EnumerationFromString(string value) {
-            return string.IsNullOrWhiteSpace(value) || Enumeration is null || Enumeration.Count == 0 || value == "?"
+            return string.IsNullOrWhiteSpace(value) || EnumerationDefinition is null || EnumerationDefinition.Count == 0 || value == "?"
                 ? ILTagNull.Instance
                 : AsNumericTag(TagId, Parse(value));
 
@@ -148,7 +148,7 @@ namespace InterlockLedger.Tags
                     try {
                         return Regex.IsMatch(value, @"^\?\d+$")
                             ? ulong.Parse(value.Substring(1), CultureInfo.InvariantCulture)
-                            : Enumeration.First(kp => kp.Value.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase)).Key;
+                            : EnumerationDefinition.First(kp => kp.Value.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase)).Key;
                     } catch (Exception e) {
                         throw new InvalidDataException($"Value '{value}' is not valid for the enumeration for field [{Name}]", e);
                     }
@@ -167,21 +167,21 @@ namespace InterlockLedger.Tags
 
         public string EnumerationToString(ulong number) {
             try {
-                return Enumeration is null || Enumeration.Count == 0
+                return EnumerationDefinition is null || EnumerationDefinition.Count == 0
                     ? "?"
                     : _isFlags
                         ? ToList(number)
-                        : Enumeration.ContainsKey(number) ? Enumeration[number].Name : $"?{number}";
+                        : EnumerationDefinition.ContainsKey(number) ? EnumerationDefinition[number].Name : $"?{number}";
             } catch {
                 return "*error*";
             }
 
             string ToList(ulong number) {
                 var names = new List<string>();
-                foreach (ulong k in Enumeration.Keys) {
+                foreach (ulong k in EnumerationDefinition.Keys) {
                     if (number == k || ((number & k) == k && k > 0)) {
                         number ^= k;
-                        names.Add(Enumeration[k].Name);
+                        names.Add(EnumerationDefinition[k].Name);
                     }
                 }
                 if (number > 0)
@@ -212,7 +212,7 @@ namespace InterlockLedger.Tags
             hash.Add(Cast);
             hash.Add(Description);
             hash.Add(ElementTagId);
-            hash.Add(Enumeration);
+            hash.Add(EnumerationDefinition);
             hash.Add(EnumerationAsFlags);
             hash.Add(IsOpaque);
             hash.Add(IsOptional);
@@ -227,11 +227,11 @@ namespace InterlockLedger.Tags
 
         public bool IsVisibleMatch(string name) => Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !IsOpaque.GetValueOrDefault();
 
-        public override string ToString() => $"{Name} #{TagId} {Enumeration?.Values.JoinedBy(",")}";
+        public override string ToString() => $"{Name} #{TagId} {EnumerationDefinition?.Values.JoinedBy(",")}";
 
         private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
 
-        private bool CompareEnumeration(DataField other) => Enumeration.SafeSequenceEqual(other.Enumeration);
+        private bool CompareEnumeration(DataField other) => EnumerationDefinition.SafeSequenceEqual(other.EnumerationDefinition);
     }
 
     public class ILTagDataField : ILTagExplicit<DataField>
@@ -255,7 +255,7 @@ namespace InterlockLedger.Tags
                 Cast = s.HasBytes() ? (CastType?)s.DecodeNullableByte() : null,
                 SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
                 Description = (serVersion > 1) ? s.DecodeString() : null,
-                Enumeration = (serVersion > 2) ? DecodeEnumeration(s) : null,
+                EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
                 EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,
             });
         }
@@ -272,7 +272,7 @@ namespace InterlockLedger.Tags
                 s.EncodeByte((byte)Value.Cast.GetValueOrDefault());
                 s.EncodeUShort(Value.SerializationVersion);
                 s.EncodeString(Value.Description);
-                EncodeEnumeration(s, Value.Enumeration);
+                EncodeEnumeration(s, Value.EnumerationDefinition);
                 s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
             });
 

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -36,10 +36,12 @@ namespace InterlockLedger.Tags
 {
     public class EnumerationDictionary : Dictionary<ulong, EnumerationDetails>
     {
-        public EnumerationDictionary() { }
+        public EnumerationDictionary() {
+        }
 
-        public EnumerationDictionary(IDictionary<ulong, EnumerationDetails> dictionary) : base(dictionary) { }
+        public EnumerationDictionary(IDictionary<ulong, EnumerationDetails> dictionary) : base(dictionary) {
+        }
 
-        public EnumerationItems ToEnumerationItems() => new EnumerationItems(this);
+        public EnumerationItems AsEnumerationItems => Count == 0 ? null : new EnumerationItems(this);
     }
 }

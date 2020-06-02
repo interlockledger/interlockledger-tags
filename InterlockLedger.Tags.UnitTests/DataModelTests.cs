@@ -292,7 +292,7 @@ namespace InterlockLedger.Tags
                     new DataField() { TagId = 8, Name= "Blob", Version = 2,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 6, Name= "Balance", Version = 2} }},
                     new DataField() { TagId = 10, Name= "DeliveryStatus", Version = 3, Description = "Enumerated Status for Delivery",
-                        Enumeration = new EnumerationDictionary {
+                        EnumerationDefinition = new EnumerationDictionary {
                             [0] = new EnumerationDetails("WaitingApproval", "Waiting for sale to be completed (paid)"),
                             [1] = new EnumerationDetails("Canceled", "Sale canceled won't be delivered"),
                             [2] = new EnumerationDetails("Handling", "Locating itens in stock"),
