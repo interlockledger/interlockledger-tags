@@ -64,13 +64,19 @@ namespace InterlockLedger.Tags
             DataFields.EqualTo(other.DataFields) &&
             Indexes.EqualTo(other.Indexes) &&
             Version.Equals(other.Version) &&
-            Description.SafeEqualsTo(other.Description);
+            Description.SafeTrimmedEqualsTo(other.Description);
 
         public ILTag FromJson(object o) => FromNavigable(o.AsNavigable() as Dictionary<string, object>);
 
         public ILTag FromNavigable(Dictionary<string, object> json) => FromPartialNavigable(json, PayloadTagId, DataFields, this);
 
-        public override int GetHashCode() => HashCode.Combine(DataFields, Indexes, PayloadName, PayloadTagId, Description, Version);
+        public override int GetHashCode()
+            => HashCode.Combine(DataFields,
+                                Indexes,
+                                PayloadName,
+                                PayloadTagId,
+                                Description.TrimToNull(),
+                                Version);
 
         public bool HasField(string fieldName) {
             return Find(DataFields, fieldName?.Split('.'));
@@ -287,7 +293,7 @@ namespace InterlockLedger.Tags
                     Indexes = s.DecodeTagArray<ILTagDataIndex>()?.Select(t => t.Value),
                     PayloadName = s.DecodeString(),
                     Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
-                    Description = s.HasBytes() ? s.DecodeString() : null
+                    Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null
                 };
             });
 
@@ -299,7 +305,7 @@ namespace InterlockLedger.Tags
                 s.EncodeTagArray(Value.Indexes?.Select(index => new ILTagDataIndex(index)));
                 s.EncodeString(Value.PayloadName);
                 s.EncodeUShort(Value.Version);
-                s.EncodeString(Value.Description);
+                s.EncodeString(Value.Description.TrimToNull());
             });
     }
 }
