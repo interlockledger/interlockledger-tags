@@ -80,6 +80,8 @@ namespace InterlockLedger.Tags
 
         public static bool SafeEqualsTo(this string s, string other) => s is null ? other is null : s.Equals(other, StringComparison.InvariantCulture);
 
+        public static bool SafeTrimmedEqualsTo(this string s, string other) => SafeEqualsTo(s.TrimToNull(), other.TrimToNull());
+
         public static string SimplifyAsFileName(this string name) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException($"Name is empty or null");

@@ -203,14 +203,14 @@ namespace InterlockLedger.Tags
             ElementTagId == other.ElementTagId &&
             Version == other.Version &&
             SerializationVersion == other.SerializationVersion &&
-            Description.SafeEqualsTo(other.Description) &&
+            Description.SafeTrimmedEqualsTo(other.Description) &&
             EnumerationAsFlags == other.EnumerationAsFlags &&
             CompareEnumeration(other);
 
         public override int GetHashCode() {
             var hash = new HashCode();
             hash.Add(Cast);
-            hash.Add(Description);
+            hash.Add(Description.TrimToNull());
             hash.Add(ElementTagId);
             hash.Add(EnumerationDefinition);
             hash.Add(EnumerationAsFlags);
@@ -254,7 +254,7 @@ namespace InterlockLedger.Tags
                 SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
                 Cast = s.HasBytes() ? (CastType?)s.DecodeNullableByte() : null,
                 SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
-                Description = (serVersion > 1) ? s.DecodeString() : null,
+                Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
                 EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
                 EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,
             });
