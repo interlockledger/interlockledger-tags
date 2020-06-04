@@ -106,6 +106,12 @@ namespace InterlockLedger.Tags
             protected override byte[] ToBytes() => ToBytesHelper(Value.ToStream);
         }
 
+        internal static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
+            if (registrar is null)
+                throw new ArgumentNullException(nameof(registrar));
+            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson);
+        }
+
         protected VersionedValue(ulong tagId, ushort version) {
             _tagId = tagId;
             Version = version;
@@ -128,12 +134,6 @@ namespace InterlockLedger.Tags
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
 
         protected abstract string TypeDescription { get; }
-
-        protected static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
-            if (registrar is null)
-                throw new ArgumentNullException(nameof(registrar));
-            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson);
-        }
 
         protected abstract void DecodeRemainingStateFrom(Stream s);
 
