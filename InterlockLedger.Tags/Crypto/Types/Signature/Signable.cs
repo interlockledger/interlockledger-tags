@@ -30,14 +30,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace InterlockLedger.Tags
 {
-    public static class ITagRegistrarExtensions
+    public class Signable : VersionedValue<Signable>
     {
-        public static bool RegisterAsField<TV>(this ITagRegistrar registrar) where TV : VersionedValue<TV>, new()
-            => VersionedValue<TV>.RegisterAsField(registrar, new TV().TagId);
+        public Signable() : base(0, 0) {
+        }
 
-        public static bool RegisterSignableAsField<TS>(this ITagRegistrar registrar) where TS : Signable, new()
-            => Signable.RegisterAsField(registrar, new TS().TagId);
+        public override string TypeName => throw new NotSupportedException();
+
+        public SignedValue<TS> SignWith<TS>(ISigningContext context) where TS : Signable, new() {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            if (this is TS signable)
+                return new SignedValue<TS>(signable, context.Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
+            throw new InvalidOperationException("Can't correctly sign this");
+        }
+
+        protected Signable(ulong tagId, ushort version) : base(tagId, version) {
+        }
+
+        protected override object AsJson => throw new NotSupportedException();
+        protected override IEnumerable<DataField> RemainingStateFields => throw new NotSupportedException();
+        protected override string TypeDescription => throw new NotSupportedException();
+
+        protected override void DecodeRemainingStateFrom(Stream s) => throw new NotSupportedException();
+
+        protected override void EncodeRemainingStateTo(Stream s) => throw new NotSupportedException();
+
+        protected override Signable FromJson(object json) => throw new NotSupportedException();
     }
 }

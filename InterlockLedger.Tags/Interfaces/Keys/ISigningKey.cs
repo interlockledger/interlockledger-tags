@@ -40,6 +40,6 @@ namespace InterlockLedger.Tags
 
         TagSignature Sign(byte[] data);
 
-        TagIdentifiedSignature SignWithId(byte[] data) => new TagIdentifiedSignature(Sign(data), Id, PublicKey);
+        IdentifiedSignature SignWithId(byte[] data) => new IdentifiedSignature(Sign(data), Id, PublicKey);
     }
 }

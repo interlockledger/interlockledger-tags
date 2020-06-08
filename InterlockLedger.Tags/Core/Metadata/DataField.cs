@@ -38,13 +38,12 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-//#pragma warning disable CA2227 // Collection properties should be read only
-
 namespace InterlockLedger.Tags
 {
     public sealed class DataField : IEquatable<DataField>
     {
-        public const ushort CurrentVersion = 4;
+        public const ushort CurrentVersion = 5;
+        internal bool? IsOptional_Deprecated;
 
         public DataField(string name, ulong tagId, string description = null) {
             if (string.IsNullOrWhiteSpace(name))
@@ -78,12 +77,15 @@ namespace InterlockLedger.Tags
         public bool HasSubFields => SubDataFields.SafeAny();
 
         [JsonIgnore]
+        public bool IsArray => ElementTagId != null && TagId == ILTagId.ILTagArray;
+
+        public bool? IsDeprecated { get; set; }
+
+        [JsonIgnore]
         public bool IsEnumeration => EnumerationDefinition.SafeAny();
 
         // treat as opaque byte array
         public bool? IsOpaque { get; set; }
-
-        public bool? IsOptional { get; set; }
 
         [JsonIgnore]
         public bool IsVersion => Name.Equals("Version", StringComparison.OrdinalIgnoreCase) && TagId == ILTagId.UInt16;
@@ -195,7 +197,7 @@ namespace InterlockLedger.Tags
         public bool Equals(DataField other) =>
             other != null &&
             TagId == other.TagId &&
-            IsOptional == other.IsOptional &&
+            IsDeprecated == other.IsDeprecated &&
             IsOpaque == other.IsOpaque &&
             Name.SafeEqualsTo(other.Name) &&
             SubDataFields.EqualTo(other.SubDataFields) &&
@@ -215,13 +217,13 @@ namespace InterlockLedger.Tags
             hash.Add(EnumerationDefinition);
             hash.Add(EnumerationAsFlags);
             hash.Add(IsOpaque);
-            hash.Add(IsOptional);
             hash.Add(IsVersion);
             hash.Add(Name);
             hash.Add(SerializationVersion);
             hash.Add(SubDataFields);
             hash.Add(TagId);
             hash.Add(Version);
+            hash.Add(IsDeprecated);
             return hash.ToHashCode();
         }
 
@@ -248,7 +250,7 @@ namespace InterlockLedger.Tags
                 Version = s.DecodeUShort(),
                 TagId = s.DecodeILInt(),
                 Name = s.DecodeString(),
-                IsOptional = s.DecodeNullableBool(),
+                IsOptional_Deprecated = s.DecodeNullableBool(),
                 IsOpaque = s.DecodeNullableBool(),
                 ElementTagId = s.DecodeNullableILInt(),
                 SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
@@ -257,6 +259,7 @@ namespace InterlockLedger.Tags
                 Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
                 EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
                 EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,
+                IsDeprecated = (serVersion > 4) ? s.DecodeNullableBool() : null,
             });
         }
 
@@ -265,7 +268,7 @@ namespace InterlockLedger.Tags
                 s.EncodeUShort(Value.Version);
                 s.EncodeILInt(Value.TagId);
                 s.EncodeString(Value.Name);
-                s.EncodeBool(Value.IsOptional.GetValueOrDefault());
+                s.EncodeBool(false);
                 s.EncodeBool(Value.IsOpaque.GetValueOrDefault());
                 s.EncodeILInt(Value.ElementTagId.GetValueOrDefault());
                 s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
@@ -274,6 +277,7 @@ namespace InterlockLedger.Tags
                 s.EncodeString(Value.Description);
                 EncodeEnumeration(s, Value.EnumerationDefinition);
                 s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
+                s.EncodeBool(Value.IsDeprecated.GetValueOrDefault());
             });
 
         private static EnumerationDictionary DecodeEnumeration(Stream s) {

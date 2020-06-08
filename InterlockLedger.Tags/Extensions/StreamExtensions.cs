@@ -55,7 +55,7 @@ namespace InterlockLedger.Tags
 
         public static Stream EncodeInterlockId(this Stream s, InterlockId value) => s.EncodeTag(value);
 
-        public static bool HasBytes(this Stream s) => s is null ? false : s.CanSeek && s.Position < s.Length;
+        public static bool HasBytes(this Stream s) => !(s is null) && s.CanSeek && s.Position < s.Length;
 
         public static async Task<byte[]> ReadAllBytesAsync(this Stream s) {
             if (s == null)

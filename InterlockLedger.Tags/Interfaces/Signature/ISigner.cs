@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
 
         TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
 
-        TagIdentifiedSignature SignWithId(byte[] data) => new TagIdentifiedSignature(Key.Sign(data), Id, PublicKey);
+        IdentifiedSignature SignWithId(byte[] data) => new IdentifiedSignature(Key.Sign(data), Id, PublicKey);
 
         bool Supports(KeyPurpose purpose, ulong? appId = null);
     }

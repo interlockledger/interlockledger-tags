@@ -108,9 +108,7 @@ namespace InterlockLedger.Tags
 
         internal static TagPubKey Resolve(Stream s) {
             var pubKey = new TagPubKey(s);
-            if (pubKey.Algorithm == Algorithm.RSA)
-                return new TagPubRSAKey(pubKey.Data);
-            return pubKey;
+            return pubKey.Algorithm == Algorithm.RSA ? new TagPubRSAKey(pubKey.Data) : pubKey;
         }
 
         protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts { Algorithm = algorithm, Data = data }) {
@@ -133,12 +131,8 @@ namespace InterlockLedger.Tags
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-            if (destinationType == typeof(InstanceDescriptor)) {
-                return true;
-            }
-            return destinationType == typeof(string);
-        }
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) {
             if (Value is string text) {

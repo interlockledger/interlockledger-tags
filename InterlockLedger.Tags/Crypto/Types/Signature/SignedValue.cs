@@ -39,7 +39,8 @@ using InterlockLedger.Tags;
 
 namespace InterlockLedger.Tags
 {
-    public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : ILTag
+
+    public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable, new()
     {
         public const int CurrentVersion = 1;
 
@@ -54,45 +55,68 @@ namespace InterlockLedger.Tags
 
         public ulong ContentTagId => SignedContent.TagId;
 
-        public IEnumerable<TagIdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.EncodedBytes);
+        public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.AsILTag.EncodedBytes);
 
-        public IEnumerable<TagIdentifiedSignature> Signatures { get; private set; }
+        public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
 
         public T SignedContent { get; private set; }
 
         public override string TypeName => $"SignedValueOf{typeof(T).Name}";
 
         [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Needed in related classes")]
-        [SuppressMessage("Design", "RCS1158:Static member in generic type should use a type parameter.", Justification = "Non-Sense")]
-        public static IEnumerable<DataField> BuildRemainingStateFields(ulong contentTagId) =>
-            new DataField(nameof(SignedContent), contentTagId).AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) { ElementTagId = ILTagId.IdentifiedSignature });
+        public static IEnumerable<DataField> BuildRemainingStateFields(DataField signedFieldModel) {
+            if (signedFieldModel is null || signedFieldModel.SubDataFields.None())
+                throw new ArgumentNullException(nameof(signedFieldModel));
+            return new DataField(nameof(SignedContent), signedFieldModel.TagId, signedFieldModel.Description) {
+                SubDataFields = signedFieldModel.SubDataFields
+            }.AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
+                ElementTagId = ILTagId.IdentifiedSignature,
+                SubDataFields = IdentifiedSignature.DataFields,
+            });
+        }
 
         public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey) {
             if (SignedContent is null || Signatures.None())
                 return false;
-            byte[] encodedBytes = SignedContent.EncodedBytes;
+            byte[] encodedBytes = SignedContent.AsILTag.EncodedBytes;
             return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(encodedBytes));
         }
 
-        internal SignedValue(T payload, IEnumerable<TagIdentifiedSignature> signatures) : this() {
-            SignedContent = payload ?? throw new ArgumentNullException(nameof(payload));
+        internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this() {
+            SignedContent = signedContent ?? throw new ArgumentNullException(nameof(signedContent));
             Signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
+            if (Signatures.None())
+                throw new InvalidDataException("At least one signature must be provided");
+            if (FailedSignatures.SafeAny())
+                throw new InvalidDataException("Some signatures don't match the payload");
         }
 
-        protected override object AsJson => new { TagId, ContentTagId, SignedContent = SignedContent.AsJson, Signatures = Signatures.AsJsonArray() };
+        protected override object AsJson => new {
+            TagId,
+            ContentTagId,
+            SignedContent = SignedContent.AsILTag.AsJson,
+            Signatures = Signatures.AsJsonArray()
+        };
 
-        protected override IEnumerable<DataField> RemainingStateFields => BuildRemainingStateFields(ContentTagId);
+        protected override IEnumerable<DataField> RemainingStateFields => BuildRemainingStateFields(SignedContent.FieldModel);
+
         protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
 
         protected override void DecodeRemainingStateFrom(Stream s) {
-            SignedContent = s.Decode<T>();
-            Signatures = s.DecodeTagArray<TagIdentifiedSignature>();
+            SignedContent = s.DecodeAny<T>();
+            Signatures = s.DecodeArray<IdentifiedSignature>();
         }
 
-        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeTag(SignedContent).EncodeTagArray(Signatures);
+        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
 
         protected override SignedValue<T> FromJson(object json) => throw new NotImplementedException();
 
-        private IEnumerable<TagIdentifiedSignature> FailedSignaturesFor(byte[] encodedBytes) => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();
+        protected void Register() => SignedValueHelper.RegisterResolver(ContentTagId, Resolver);
+
+        protected virtual ILTag Resolver(VersionedValue<SignedValue<Signable>>.Payload arg)
+            => throw new NotImplementedException();
+
+        private IEnumerable<IdentifiedSignature> FailedSignaturesFor(byte[] encodedBytes)
+            => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();
     }
 }

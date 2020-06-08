@@ -74,7 +74,7 @@ namespace InterlockLedger.Tags
             _value.LastSignatureTimeStamp = _timeStamper.Now;
         }
 
-        public TagIdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
+        public IdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     }
 
     public sealed class InterlockUpdatableSigningKeyData : ILTagExplicit<InterlockUpdatableSigningKeyParts>, IInterlockKeySecretData

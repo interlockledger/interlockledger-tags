@@ -1,4 +1,4 @@
-/******************************************************************************************************************************
+﻿/******************************************************************************************************************************
 
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
@@ -30,14 +30,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace InterlockLedger.Tags
 {
-    public static class ITagRegistrarExtensions
+    public static class SignedValueHelper
     {
-        public static bool RegisterAsField<TV>(this ITagRegistrar registrar) where TV : VersionedValue<TV>, new()
-            => VersionedValue<TV>.RegisterAsField(registrar, new TV().TagId);
+        public static ILTag SignedValueFromStream(this Stream s) {
+            var bytes = s.ReadBytes((int)s.ILIntDecode());
+            using var ms = new MemoryStream(bytes);
+            var unknown = new SignedValue<Signable>.Payload(ILTagId.SignedValue, s);
+            return Resolve(unknown);
+        }
 
-        public static bool RegisterSignableAsField<TS>(this ITagRegistrar registrar) where TS : Signable, new()
-            => Signable.RegisterAsField(registrar, new TS().TagId);
+        internal static void RegisterResolver(ulong tagId, Func<VersionedValue<SignedValue<Signable>>.Payload, ILTag> func)
+            => _ = _resolvers.TryAdd(tagId, func);
+
+        private static readonly Dictionary<ulong, Func<VersionedValue<SignedValue<Signable>>.Payload, ILTag>> _resolvers
+            = new Dictionary<ulong, Func<VersionedValue<SignedValue<Signable>>.Payload, ILTag>>();
+
+        private static ILTag Resolve(VersionedValue<SignedValue<Signable>>.Payload unknown)
+                            => _resolvers.TryGetValue(unknown.TagId, out var func) ? func(unknown) : unknown;
     }
 }

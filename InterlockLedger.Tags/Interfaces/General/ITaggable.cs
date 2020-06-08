@@ -32,8 +32,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace InterlockLedger.Tags
 {
-    public interface ITaggable<T> where T : class, ITaggable<T>
+    public interface ITaggable
     {
-        ILTagExplicit<T> AsTag { get; }
+        ILTag AsILTag { get; }
+
+        ulong TagId { get; }
+
+        DataField FieldModel { get; }
     }
 }
