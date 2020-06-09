@@ -30,21 +30,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System.Collections.Generic;
-using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
 {
     public static class SignedValueHelper
     {
-        public static ILTag SignedValueFromStream(this Stream s) {
-            var bytes = s.ReadBytes((int)s.ILIntDecode());
+        public static ILTag SignedValueFromStream(this Stream s) => FromBytes(s.ReadBytes((int)s.ILIntDecode()));
+
+        private static ILTag FromBytes(byte[] bytes) {
             using var ms = new MemoryStream(bytes);
-            var version = s.DecodeUShort();
-            var signedcontent = s.DecodeTag();
+            var version = ms.DecodeUShort();
+            var signedcontent = ms.DecodeTag();
             if (signedcontent is ISignable signable)
-                return signable.ResolveSigned(version, s);
+                return signable.ResolveSigned(version, ms);
             throw new InvalidDataException("Not a signable content");
         }
     }
