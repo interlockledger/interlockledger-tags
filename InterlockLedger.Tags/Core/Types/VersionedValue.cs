@@ -37,13 +37,6 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public interface IVersionedValue : IVersion
-    {
-        byte[] EncodedBytes { get; }
-        DataField FieldModel { get; }
-        ulong TagId { get; }
-    }
-
     public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : VersionedValue<T>, new()
     {
         [JsonIgnore]
@@ -71,6 +64,12 @@ namespace InterlockLedger.Tags
 
         public ushort Version { get; set; }
 
+        public static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
+            if (registrar is null)
+                throw new ArgumentNullException(nameof(registrar));
+            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson);
+        }
+
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //
             DecodeRemainingStateFrom(s);
@@ -87,7 +86,6 @@ namespace InterlockLedger.Tags
             using var s = new MemoryStream(unknown.Value);
             return FromStream(s);
         }
-
 
         public void ToStream(Stream s) {
             s.EncodeUShort(Version);    // Field index 0 //
@@ -112,12 +110,6 @@ namespace InterlockLedger.Tags
             protected override T FromBytes(byte[] bytes) => FromBytesHelper(bytes, new T().FromStream);
 
             protected override byte[] ToBytes() => ToBytesHelper(Value.ToStream);
-        }
-
-        public static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
-            if (registrar is null)
-                throw new ArgumentNullException(nameof(registrar));
-            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson);
         }
 
         protected static readonly DataField VersionField = new DataField(nameof(Version), ILTagId.UInt16);

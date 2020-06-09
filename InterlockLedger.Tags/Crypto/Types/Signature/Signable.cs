@@ -36,32 +36,25 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class Signable : VersionedValue<Signable>
+    public abstract class Signable<T> : VersionedValue<T>, ISignable where T : Signable<T>, new()
     {
         public Signable() : base(0, 0) {
         }
 
-        public override string TypeName => throw new NotSupportedException();
+        ILTag ISignable.ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
-        public SignedValue<TS> SignWith<TS>(ISigningContext context) where TS : Signable, new() {
+        public SignedValue<T> SignWith(ISigningContext context) {
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
-            if (this is TS signable)
-                return new SignedValue<TS>(signable, context.Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
-            throw new InvalidOperationException("Can't correctly sign this");
+            return new SignedValue<T>((T)this, context.Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
         }
 
         protected Signable(ulong tagId, ushort version) : base(tagId, version) {
         }
+    }
 
-        protected override object AsJson => throw new NotSupportedException();
-        protected override IEnumerable<DataField> RemainingStateFields => throw new NotSupportedException();
-        protected override string TypeDescription => throw new NotSupportedException();
-
-        protected override void DecodeRemainingStateFrom(Stream s) => throw new NotSupportedException();
-
-        protected override void EncodeRemainingStateTo(Stream s) => throw new NotSupportedException();
-
-        protected override Signable FromJson(object json) => throw new NotSupportedException();
+    internal interface ISignable
+    {
+        ILTag ResolveSigned(ushort version, Stream s);
     }
 }

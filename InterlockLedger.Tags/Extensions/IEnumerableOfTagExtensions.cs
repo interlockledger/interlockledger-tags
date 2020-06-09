@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -38,6 +38,7 @@ namespace InterlockLedger.Tags
     public static class IEnumerableOfTagExtensions
     {
         public static object[] AsJsonArray(this IEnumerable<ILTag> tags) => tags.Select(s => s.AsJson).ToArray();
+
         public static object[] AsJsonArray<T>(this IEnumerable<ITaggableOf<T>> tags) where T : class, ITaggableOf<T>
             => tags.Select(s => s.AsTag.AsJson).ToArray();
     }

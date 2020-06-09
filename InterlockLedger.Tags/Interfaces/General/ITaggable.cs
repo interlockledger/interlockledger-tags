@@ -36,8 +36,7 @@ namespace InterlockLedger.Tags
     {
         ILTag AsILTag { get; }
 
-        ulong TagId { get; }
-
         DataField FieldModel { get; }
+        ulong TagId { get; }
     }
 }

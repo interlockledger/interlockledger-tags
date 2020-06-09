@@ -1,4 +1,4 @@
-﻿/******************************************************************************************************************************
+/******************************************************************************************************************************
 
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
@@ -30,8 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.Collections.Generic;
+using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -41,17 +41,11 @@ namespace InterlockLedger.Tags
         public static ILTag SignedValueFromStream(this Stream s) {
             var bytes = s.ReadBytes((int)s.ILIntDecode());
             using var ms = new MemoryStream(bytes);
-            var unknown = new SignedValue<Signable>.Payload(ILTagId.SignedValue, s);
-            return Resolve(unknown);
+            var version = s.DecodeUShort();
+            var signedcontent = s.DecodeTag();
+            if (signedcontent is ISignable signable)
+                return signable.ResolveSigned(version, s);
+            throw new InvalidDataException("Not a signable content");
         }
-
-        internal static void RegisterResolver(ulong tagId, Func<VersionedValue<SignedValue<Signable>>.Payload, ILTag> func)
-            => _ = _resolvers.TryAdd(tagId, func);
-
-        private static readonly Dictionary<ulong, Func<VersionedValue<SignedValue<Signable>>.Payload, ILTag>> _resolvers
-            = new Dictionary<ulong, Func<VersionedValue<SignedValue<Signable>>.Payload, ILTag>>();
-
-        private static ILTag Resolve(VersionedValue<SignedValue<Signable>>.Payload unknown)
-                            => _resolvers.TryGetValue(unknown.TagId, out var func) ? func(unknown) : unknown;
     }
 }

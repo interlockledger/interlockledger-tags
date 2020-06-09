@@ -39,18 +39,11 @@ using InterlockLedger.Tags;
 
 namespace InterlockLedger.Tags
 {
-
-    public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable, new()
+    public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<T>, new()
     {
         public const int CurrentVersion = 1;
 
         public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
-        }
-
-        public SignedValue(Stream s) : base(ILTagId.SignedValue, 0) {
-            var p = new Payload(s.ILIntDecode(), s);
-            SignedContent = p.Value.SignedContent;
-            Version = p.Version;
         }
 
         public ulong ContentTagId => SignedContent.TagId;
@@ -61,7 +54,7 @@ namespace InterlockLedger.Tags
 
         public T SignedContent { get; private set; }
 
-        public override string TypeName => $"SignedValueOf{typeof(T).Name}";
+        public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
 
         [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Needed in related classes")]
         public static IEnumerable<DataField> BuildRemainingStateFields(DataField signedFieldModel) {
@@ -82,14 +75,11 @@ namespace InterlockLedger.Tags
             return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(encodedBytes));
         }
 
-        internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this() {
-            SignedContent = signedContent ?? throw new ArgumentNullException(nameof(signedContent));
-            Signatures = signatures ?? throw new ArgumentNullException(nameof(signatures));
-            if (Signatures.None())
-                throw new InvalidDataException("At least one signature must be provided");
-            if (FailedSignatures.SafeAny())
-                throw new InvalidDataException("Some signatures don't match the payload");
-        }
+        internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
+                                                                    => Init(signedContent, s.DecodeArray<IdentifiedSignature>());
+
+        internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
+            => Init(signedContent, signatures);
 
         protected override object AsJson => new {
             TagId,
@@ -111,12 +101,16 @@ namespace InterlockLedger.Tags
 
         protected override SignedValue<T> FromJson(object json) => throw new NotImplementedException();
 
-        protected void Register() => SignedValueHelper.RegisterResolver(ContentTagId, Resolver);
-
-        protected virtual ILTag Resolver(VersionedValue<SignedValue<Signable>>.Payload arg)
-            => throw new NotImplementedException();
-
         private IEnumerable<IdentifiedSignature> FailedSignaturesFor(byte[] encodedBytes)
             => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();
+
+        private void Init(T signedContent, IEnumerable<IdentifiedSignature> signatures) {
+            SignedContent = signedContent ?? throw new ArgumentNullException(nameof(signedContent));
+            Signatures = signatures;
+            if (Signatures.None())
+                throw new InvalidDataException("At least one signature must be provided");
+            if (FailedSignatures.SafeAny())
+                throw new InvalidDataException("Some signatures don't match the payload");
+        }
     }
 }

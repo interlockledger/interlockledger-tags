@@ -32,7 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace InterlockLedger.Tags
 {
-
     public interface ITaggableOf<T> : ITaggable where T : class, ITaggableOf<T>
     {
         ILTagExplicit<T> AsTag { get; }

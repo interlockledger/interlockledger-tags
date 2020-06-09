@@ -43,7 +43,6 @@ namespace InterlockLedger.Tags
     public sealed class DataField : IEquatable<DataField>
     {
         public const ushort CurrentVersion = 5;
-        internal bool? IsOptional_Deprecated;
 
         public DataField(string name, ulong tagId, string description = null) {
             if (string.IsNullOrWhiteSpace(name))
@@ -57,9 +56,7 @@ namespace InterlockLedger.Tags
         public DataField() => Version = 1;
 
         public CastType? Cast { get; set; }
-
         public string Description { get; set; }
-
         public ulong? ElementTagId { get; set; }
 
         public EnumerationItems Enumeration {
@@ -97,9 +94,7 @@ namespace InterlockLedger.Tags
         public ushort SerializationVersion { get; set; } = CurrentVersion;
 
         public IEnumerable<DataField> SubDataFields { get; set; }
-
         public ulong TagId { get; set; }
-
         public ushort Version { get; set; }
 
         public static ulong AsNumber(ILTag value) {
@@ -231,6 +226,7 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => $"{Name} #{TagId} {EnumerationDefinition?.Values.JoinedBy(",")}";
 
+        internal bool? IsOptional_Deprecated;
         private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
 
         private bool CompareEnumeration(DataField other) => EnumerationDefinition.SafeSequenceEqual(other.EnumerationDefinition);

@@ -36,8 +36,5 @@ namespace InterlockLedger.Tags
     {
         public static bool RegisterAsField<TV>(this ITagRegistrar registrar) where TV : VersionedValue<TV>, new()
             => VersionedValue<TV>.RegisterAsField(registrar, new TV().TagId);
-
-        public static bool RegisterSignableAsField<TS>(this ITagRegistrar registrar) where TS : Signable, new()
-            => Signable.RegisterAsField(registrar, new TS().TagId);
     }
 }
