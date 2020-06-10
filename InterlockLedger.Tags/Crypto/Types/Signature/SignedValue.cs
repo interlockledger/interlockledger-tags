@@ -76,7 +76,7 @@ namespace InterlockLedger.Tags
         }
 
         internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
-                                                                    => Init(signedContent, s.DecodeArray<IdentifiedSignature>());
+            => Init(signedContent, s.DecodeArray<IdentifiedSignature>());
 
         internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
             => Init(signedContent, signatures);

@@ -43,6 +43,8 @@ namespace InterlockLedger.Tags
 
         public override byte[] EncodedInnerBytes => Array.Empty<byte>();
 
+        public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
+
         protected override void SerializeInner(Stream s) => throw new NotImplementedException();
     }
 }

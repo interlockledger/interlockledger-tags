@@ -31,17 +31,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace InterlockLedger.Tags
 {
+    public interface ISignable
+    {
+        ILTag ResolveSigned(ushort version, Stream s);
+    }
+
     public abstract class Signable<T> : VersionedValue<T>, ISignable where T : Signable<T>, new()
     {
         public Signable() : base(0, 0) {
         }
 
-        ILTag ISignable.ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
+        public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
         public SignedValue<T> SignWith(ISigningContext context) {
             if (context is null)
@@ -51,10 +55,5 @@ namespace InterlockLedger.Tags
 
         protected Signable(ulong tagId, ushort version) : base(tagId, version) {
         }
-    }
-
-    internal interface ISignable
-    {
-        ILTag ResolveSigned(ushort version, Stream s);
     }
 }

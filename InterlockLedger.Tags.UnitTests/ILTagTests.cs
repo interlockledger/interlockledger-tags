@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 
@@ -148,7 +149,10 @@ namespace InterlockLedger.Tags
         public void ILTagNullInstanceBytes() => Assert.ByVal(ILTagNull.Instance.EncodedBytes, Is.EquivalentTo(new byte[] { 0 }));
 
         [TestCase(new byte[] { 0 }, ExpectedResult = true)]
-        public bool IsNull(byte[] bytes) => ILTag.DeserializeFrom(new MemoryStream(bytes)).IsNull;
+        public bool IsNull(byte[] bytes) {
+            var tag = ILTag.DeserializeFrom(new MemoryStream(bytes));
+            return tag.IsNull && !tag.ValueIs<object>(out _);
+        }
 
         [TestCase(null, ExpectedResult = new byte[] { 20, 0 }, TestName = "SerializeILTagArrayOfILInt_null")]
         [TestCase(new ulong[0], ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt")]
@@ -170,5 +174,30 @@ namespace InterlockLedger.Tags
         [TestCase("The fool doth think he is wise, but the wise man knows himself to be a fool.",
          ExpectedResult = new byte[] { 17, 76, 0x54, 0x68, 0x65, 0x20, 0x66, 0x6F, 0x6F, 0x6C, 0x20, 0x64, 0x6F, 0x74, 0x68, 0x20, 0x74, 0x68, 0x69, 0x6E, 0x6B, 0x20, 0x68, 0x65, 0x20, 0x69, 0x73, 0x20, 0x77, 0x69, 0x73, 0x65, 0x2C, 0x20, 0x62, 0x75, 0x74, 0x20, 0x74, 0x68, 0x65, 0x20, 0x77, 0x69, 0x73, 0x65, 0x20, 0x6D, 0x61, 0x6E, 0x20, 0x6B, 0x6E, 0x6F, 0x77, 0x73, 0x20, 0x68, 0x69, 0x6D, 0x73, 0x65, 0x6C, 0x66, 0x20, 0x74, 0x6F, 0x20, 0x62, 0x65, 0x20, 0x61, 0x20, 0x66, 0x6F, 0x6F, 0x6C, 0x2E }, TestName = "SerializeILTagString_The_fool_doth_...")]
         public byte[] SerializeILTagString(string value) => new ILTagString(value).EncodedBytes;
+
+        [Test]
+        public void ULongAsILintVariations() {
+            var tag = (ILTagILInt)ILTag.DeserializeFrom(new MemoryStream(new byte[] { 10, 32 }));
+            Assert.AreEqual(32, tag.Value);
+            Assert.IsTrue(tag.ValueIs<ulong>(out var v) && v == tag.Value, "Not an ulong value");
+            Assert.IsFalse(tag.ValueIs<ushort>(out var l) || l != default, "An ushort value?");
+        }
+
+        [Test]
+        public void ULongsAsILintArrayVariations() {
+            var tag = (ILTagArrayOfILInt)ILTag.DeserializeFrom(new MemoryStream(new byte[] { 20, 5, 3, 1, 248, 7, 3 }));
+            CollectionAssert.AreEqual(new ulong[] { 1, 255, 3 }, tag.Value);
+            Assert.IsTrue(tag.ValueIs<ulong[]>(out var v) && v.SafeSequenceEqual(tag.Value), "Not an ulong[] value");
+            Assert.IsFalse(tag.ValueIs<ulong>(out var l) || l != default, "An ushort value?");
+            Assert.IsTrue(tag.ValueIs<IEnumerable<ulong>>(out var list) && list.SafeSequenceEqual(tag.Value), "Not an IEnumerable<ulong> value");
+        }
+
+        [Test]
+        public void UShortVariations() {
+            var tag = (ILTagUInt16)ILTag.DeserializeFrom(new MemoryStream(new byte[] { 5, 1, 0 }));
+            Assert.AreEqual((ushort)1, tag.Value);
+            Assert.IsTrue(tag.ValueIs<ushort>(out var v) && v == tag.Value, "Not an ushort value");
+            Assert.IsFalse(tag.ValueIs<ulong>(out var l) || l != default, "An ulong value?");
+        }
     }
 }

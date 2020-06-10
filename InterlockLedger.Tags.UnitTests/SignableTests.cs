@@ -30,21 +30,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
+using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagBinary64 : ILTag
+    [TestFixture]
+    public class SignableTests
     {
-        public ILTagBinary64(Stream s) : base(ILTagId.Binary64) => throw new NotImplementedException();
+        [TestCase(32ul, new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
+        public void NewSignableFromStream(ulong ilint, byte[] bytes) {
+            using var ms = new MemoryStream(bytes);
+            var tag = ms.Decode<TestSignable.Payload>();
+            Assert.AreEqual(TestSignable.FieldTagId, tag.TagId);
+            Assert.AreEqual(ilint, tag.Value.SomeILInt);
+            Assert.IsTrue(tag.ValueIs<ISignable>(out _));
+        }
 
-        public override object AsJson => throw new NotSupportedException();
-
-        public override byte[] EncodedInnerBytes => Array.Empty<byte>();
-
-        public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
-
-        protected override void SerializeInner(Stream s) => throw new NotImplementedException();
+        [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
+        public byte[] SerializeSignable(ulong someILInt) {
+            var encodedBytes = new TestSignable(someILInt).EncodedBytes;
+            TestContext.WriteLine(encodedBytes.AsLiteral());
+            return encodedBytes;
+        }
     }
 }

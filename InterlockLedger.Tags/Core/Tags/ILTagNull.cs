@@ -44,6 +44,11 @@ namespace InterlockLedger.Tags
         public override byte[] EncodedInnerBytes => Array.Empty<byte>();
         public override string Formatted => "null";
 
+        public override bool ValueIs<TV>(out TV value) {
+            value = default;
+            return false;
+        }
+
         protected override void SerializeInner(Stream s) {
         }
 

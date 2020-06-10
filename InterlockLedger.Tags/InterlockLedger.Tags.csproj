@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>5.0.3</Version>
+      <Version>5.1.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>BugFix: Confusion with two streams</PackageReleaseNotes>
+      <PackageReleaseNotes>Add 'public abstract bool ValueIs&lt;TV&gt;(out TV value)' to ILTag</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -56,4 +56,5 @@ namespace InterlockLedger.Tags
         [TestCase(Algorithm.ElGamal, new byte[] { }, ExpectedResult = new byte[] { 38, 2, 3, 0 })]
         public byte[] SerializeTagSignature(Algorithm algorithm, byte[] data) => new TagSignature(algorithm, data).EncodedBytes;
     }
+
 }

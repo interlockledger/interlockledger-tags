@@ -118,6 +118,8 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => GetType().Name + $"#{TagId}:" + Formatted;
 
+        public abstract bool ValueIs<TV>(out TV value);
+
         protected ILTag(ulong tagId) => TagId = tagId;
 
         protected abstract void SerializeInner(Stream s);

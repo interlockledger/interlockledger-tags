@@ -1,4 +1,4 @@
-/******************************************************************************************************************************
+﻿/******************************************************************************************************************************
 
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
@@ -30,21 +30,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagBinary64 : ILTag
+    internal class TestSignable : Signable<TestSignable>
     {
-        public ILTagBinary64(Stream s) : base(ILTagId.Binary64) => throw new NotImplementedException();
+        public const ushort CurrentVersion = 1;
+        public const ulong FieldTagId = 1_000_000;
 
-        public override object AsJson => throw new NotSupportedException();
+        public TestSignable() : this(0ul) {
+        }
 
-        public override byte[] EncodedInnerBytes => Array.Empty<byte>();
+        public TestSignable(ulong someILInt) : base(FieldTagId, CurrentVersion) => SomeILInt = someILInt;
 
-        public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
+        public ulong SomeILInt { get; private set; }
+        public override string TypeName => nameof(TestSignable);
+        protected override object AsJson => new { TagId, Version, SomeILInt };
 
-        protected override void SerializeInner(Stream s) => throw new NotImplementedException();
+        protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {
+            Name = nameof(SomeILInt),
+            TagId = ILTagId.ILInt
+        }.AsSingle();
+
+        protected override string TypeDescription => "Signable for unit testing";
+
+        protected override void DecodeRemainingStateFrom(Stream s) => SomeILInt = s.DecodeILInt();
+
+        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeILInt(SomeILInt);
+
+        protected override TestSignable FromJson(object json) => throw new System.NotImplementedException();
     }
 }

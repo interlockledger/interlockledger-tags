@@ -54,6 +54,15 @@ namespace InterlockLedger.Tags
 
         public T Value { get; set; }
 
+        public override bool ValueIs<TV>(out TV value) {
+            if (Value is TV tvalue) {
+                value = tvalue;
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
         protected ILTagImplicit() : base(0) {
         }
 

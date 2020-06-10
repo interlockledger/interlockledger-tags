@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -30,14 +30,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System;
+using System.IO;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
     [SetUpFixture]
-    public class TestGlobalSetup
+    public class TestGlobalSetup : ITagRegistrar
     {
         [OneTimeSetUp]
-        public void OneTimeSetup() => BaseKeyId.RegisterKeyIdTypes();
+        public void OneTimeSetup() {
+            BaseKeyId.RegisterKeyIdTypes();
+            TestSignable.RegisterAsField(this, TestSignable.FieldTagId);
+        }
+
+        bool ITagRegistrar.RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer) {
+            if (!ILTag.HasDeserializer(tagId))
+                ILTag.RegisterDeserializer(tagId, deserializer, jsonDeserializer);
+            return true;
+        }
     }
 }
