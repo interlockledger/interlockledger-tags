@@ -35,6 +35,6 @@ namespace InterlockLedger.Tags
     public static class ITagRegistrarExtensions
     {
         public static bool RegisterAsField<TV>(this ITagRegistrar registrar) where TV : VersionedValue<TV>, new()
-            => VersionedValue<TV>.RegisterAsField(registrar, new TV().TagId);
+            => new TV().RegisterAsField(registrar);
     }
 }

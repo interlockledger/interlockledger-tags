@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
         [OneTimeSetUp]
         public void OneTimeSetup() {
             BaseKeyId.RegisterKeyIdTypes();
-            TestSignable.RegisterAsField(this, TestSignable.FieldTagId);
+            new TestSignable().RegisterAsField(this);
         }
 
         bool ITagRegistrar.RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer) {

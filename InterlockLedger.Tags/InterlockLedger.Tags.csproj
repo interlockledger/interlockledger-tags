@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>5.1.0</Version>
+      <Version>5.2.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Add 'public abstract bool ValueIs&lt;TV&gt;(out TV value)' to ILTag</PackageReleaseNotes>
+      <PackageReleaseNotes>Fix DataFields Metadata for Signables</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

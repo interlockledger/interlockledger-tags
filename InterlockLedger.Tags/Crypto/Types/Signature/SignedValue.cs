@@ -32,7 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using InterlockLedger.Tags;
@@ -56,18 +55,6 @@ namespace InterlockLedger.Tags
 
         public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
 
-        [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Needed in related classes")]
-        public static IEnumerable<DataField> BuildRemainingStateFields(DataField signedFieldModel) {
-            if (signedFieldModel is null || signedFieldModel.SubDataFields.None())
-                throw new ArgumentNullException(nameof(signedFieldModel));
-            return new DataField(nameof(SignedContent), signedFieldModel.TagId, signedFieldModel.Description) {
-                SubDataFields = signedFieldModel.SubDataFields
-            }.AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
-                ElementTagId = ILTagId.IdentifiedSignature,
-                SubDataFields = IdentifiedSignature.DataFields,
-            });
-        }
-
         public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey) {
             if (SignedContent is null || Signatures.None())
                 return false;
@@ -88,7 +75,8 @@ namespace InterlockLedger.Tags
             Signatures = Signatures.AsJsonArray()
         };
 
-        protected override IEnumerable<DataField> RemainingStateFields => BuildRemainingStateFields(SignedContent.FieldModel);
+        protected override IEnumerable<DataField> RemainingStateFields
+            => BuildRemainingStateFields(SignedContent.FieldModel);
 
         protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
 
@@ -100,6 +88,17 @@ namespace InterlockLedger.Tags
         protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
 
         protected override SignedValue<T> FromJson(object json) => throw new NotImplementedException();
+
+        private IEnumerable<DataField> BuildRemainingStateFields(DataField signedFieldModel) {
+            if (signedFieldModel is null || signedFieldModel.SubDataFields.None())
+                throw new ArgumentNullException(nameof(signedFieldModel));
+            return new DataField(nameof(SignedContent), signedFieldModel.TagId, signedFieldModel.Description) {
+                SubDataFields = signedFieldModel.SubDataFields
+            }.AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
+                ElementTagId = ILTagId.IdentifiedSignature,
+                SubDataFields = IdentifiedSignature.DataFields,
+            });
+        }
 
         private IEnumerable<IdentifiedSignature> FailedSignaturesFor(byte[] encodedBytes)
             => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();

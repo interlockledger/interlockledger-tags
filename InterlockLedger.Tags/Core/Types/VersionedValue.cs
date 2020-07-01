@@ -64,12 +64,6 @@ namespace InterlockLedger.Tags
 
         public ushort Version { get; set; }
 
-        public static bool RegisterAsField(ITagRegistrar registrar, ulong fieldTagId) {
-            if (registrar is null)
-                throw new ArgumentNullException(nameof(registrar));
-            return registrar.RegisterILTag(fieldTagId, s => BuildPayload(fieldTagId, s), PayloadFromJson);
-        }
-
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //
             DecodeRemainingStateFrom(s);
@@ -85,6 +79,12 @@ namespace InterlockLedger.Tags
                 throw new ArgumentException("Empty tagged value not expected!", nameof(unknown));
             using var s = new MemoryStream(unknown.Value);
             return FromStream(s);
+        }
+
+        public bool RegisterAsField(ITagRegistrar registrar) {
+            if (registrar is null)
+                throw new ArgumentNullException(nameof(registrar));
+            return registrar.RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload);
         }
 
         public void ToStream(Stream s) {
@@ -150,9 +150,5 @@ namespace InterlockLedger.Tags
         private readonly Lazy<DataModel> _payloadDataModel;
 
         private readonly ulong _tagId;
-
-        private static Payload BuildPayload(ulong fieldTagId, Stream s) => new Payload(fieldTagId, s);
-
-        private static Payload PayloadFromJson(object o) => new T().FromJson(o).AsPayload;
     }
 }
