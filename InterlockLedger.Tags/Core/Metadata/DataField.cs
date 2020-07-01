@@ -253,7 +253,7 @@ namespace InterlockLedger.Tags
 
         private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
 
-        private bool CompareEnumeration(DataField other) => EnumerationDefinition.SafeSequenceEqual(other.EnumerationDefinition);
+        private bool CompareEnumeration(DataField other) => EnumerationDefinition.EquivalentTo(other.EnumerationDefinition);
     }
 
     public class ILTagDataField : ILTagExplicit<DataField>

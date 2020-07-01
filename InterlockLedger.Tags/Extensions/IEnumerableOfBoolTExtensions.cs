@@ -1,4 +1,4 @@
-/******************************************************************************************************************************
+﻿/******************************************************************************************************************************
 
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
@@ -30,27 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public static class DictionaryExtensions
+    public static class IEnumerableOfBoolTExtensions
     {
-        public static readonly StringComparer CaseIgnoringComparer = StringComparer.Create(CultureInfo.InvariantCulture, true);
+        public static bool AllFalse(this IEnumerable<bool> items) => items.Safe().All(b => !b);
 
-        public static Dictionary<string, T> AddIf<T>(this Dictionary<string, T> dictionary, bool add, string key, T value) {
-            if (add)
-                dictionary?.Add(key, value);
-            return dictionary;
-        }
+        public static bool AllTrue(this IEnumerable<bool> items) => items.Safe().All(b => b);
 
-        public static Dictionary<string, T> CaseIgnoring<T>(this Dictionary<string, T> dictionary)
-            => new Dictionary<string, T>(dictionary, CaseIgnoringComparer);
+        public static bool AnyFalse(this IEnumerable<bool> items) => items.Safe().Any(b => !b);
 
-        internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary oldEnumeration, EnumerationDictionary newEnumeration)
-            => oldEnumeration.None() || oldEnumeration.EqualTo(newEnumeration?.Take(oldEnumeration.Count));
+        public static bool AnyTrue(this IEnumerable<bool> items) => items.Safe().Any(b => b);
     }
 }

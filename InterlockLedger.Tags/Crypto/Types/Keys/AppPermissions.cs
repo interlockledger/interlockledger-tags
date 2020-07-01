@@ -77,7 +77,7 @@ namespace InterlockLedger.Tags
 
         public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
 
-        public bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.SafeSequenceEqual(other.ActionIds);
+        public bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
         public override bool Equals(object obj) => obj is AppPermissions other && Equals(other);
 

@@ -95,7 +95,12 @@ namespace InterlockLedger.Tags
             }
         }
 
-        public bool IsCompatible(DataModel other) => other != null && other.PayloadName == PayloadName && other.PayloadTagId == PayloadTagId && ExpandsOver(other);
+        public bool IsCompatible(DataModel other)
+            => other != null
+               && other.PayloadName == PayloadName
+               && other.PayloadTagId == PayloadTagId
+               && CompareFields(other.DataFields, DataFields)
+               && CompareIndexes(other.Indexes, Indexes);
 
         public Dictionary<string, object> ToJson(byte[] bytes) {
             ulong offset = 0;
@@ -104,55 +109,29 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => $"{PayloadName ?? "Unnamed"} #{PayloadTagId}";
 
-        private static bool CompareFields(IEnumerable<DataField> oldFields, IEnumerable<DataField> newFields) {
-            if (newFields == null)
-                return false;
-            if (!oldFields.SafeAny())
-                return true;
-            var fields = newFields.ToArray();
-            if (fields.Length < oldFields.Count())
-                return false; // too few
-            var i = 0;
-            foreach (var oldField in oldFields) {
-                var newField = fields[i++];
-                if (oldField.Name != newField.Name)
-                    return false; // Names diverge
-                if (oldField.Version > newField.Version)
-                    return false; // Misversioning
-                if (oldField.TagId != newField.TagId && !oldField.IsOpaque.GetValueOrDefault())
-                    return false; // Changing type is only allowed if previously it was an opaque type
-                if (oldField.ElementTagId != newField.ElementTagId)
-                    return false; // Changing type of array elements is bad
-                if (newField.IsOpaque.GetValueOrDefault() && !oldField.IsOpaque.GetValueOrDefault())
-                    return false; // Can't make field opaque afterwards
-                if (oldField.HasSubFields && !CompareFields(oldField.SubDataFields, newField.SubDataFields))
-                    return false; // Incompatible subfields
-                if (!ExpandEnumeration(oldField.EnumerationDefinition, newField.EnumerationDefinition))
-                    return false; // Incompatible enumerations
-            }
-            return true;
-        }
+        private static bool Compare<T>(IEnumerable<T> older, IEnumerable<T> newer, Func<T, T, bool> areCompatible)
+            => older.None() // true as anything is acceptable if there was nothing from the previous version
+               || newer.Safe().Count() >= older.Count() // false if too few elements in the new version
+               && older.Zip(newer, areCompatible).AllTrue(); // true only if all pre-existing elements are compatible
 
-        private static bool CompareIndexes(IEnumerable<DataIndex> oldIndexes, IEnumerable<DataIndex> newIndexes) {
-            if (newIndexes == null)
-                return false;
-            if (!oldIndexes.SafeAny())
-                return true;
-            var indexes = newIndexes.ToArray();
-            if (indexes.Length < oldIndexes.Count())
-                return false; // too few
-            var i = 0;
-            foreach (var oldIndex in oldIndexes) {
-                var newIndex = indexes[i++];
-                if (oldIndex.Name != newIndex.Name)
-                    return false; // Names diverge
-                if (oldIndex.IsUnique != newIndex.IsUnique)
-                    return false; // Uniquenesses diverge
-                if (oldIndex.ElementsAsString != newIndex.ElementsAsString)
-                    return false; // Can't change composition
-            }
-            return true;
-        }
+        private static bool CompareFields(IEnumerable<DataField> oldFields, IEnumerable<DataField> newFields)
+            => Compare(oldFields,
+                       newFields,
+                       (o, n) => o.Name == n.Name // Names diverge
+                                 && (o.TagId == n.TagId || o.IsOpaque.GetValueOrDefault()) // Changing type is only allowed if previously it was an opaque type
+                                 && o.Version <= n.Version // Misversioning
+                                 && o.ElementTagId == n.ElementTagId // Changing type of array elements is bad
+                                 && (!n.IsOpaque.GetValueOrDefault() || o.IsOpaque.GetValueOrDefault()) // Can't make field opaque afterwards
+                                 && (n.IsDeprecated.GetValueOrDefault() || !o.IsDeprecated.GetValueOrDefault()) // Can't undeprecate field
+                                 && (!o.HasSubFields || CompareFields(o.SubDataFields, n.SubDataFields)) // Incompatible subfields
+                                 && o.EnumerationDefinition.IsSameAsOrExpandedBy(n.EnumerationDefinition)); // Incompatible enumerations
+
+        private static bool CompareIndexes(IEnumerable<DataIndex> oldIndexes, IEnumerable<DataIndex> newIndexes)
+            => Compare(oldIndexes,
+                       newIndexes,
+                       (o, n) => o.Name == n.Name
+                                 && o.IsUnique == n.IsUnique
+                                 && o.ElementsAsString == n.ElementsAsString);
 
         private static ILTag DecodePartial(ulong tagId, Span<byte> bytes, ref ulong offset) {
             using var ms = new MemoryStream(bytes.ToArray(), (int)offset, bytes.Length - (int)offset);
@@ -185,9 +164,6 @@ namespace InterlockLedger.Tags
         private static ILTag DeserializePartialFromJson(DataField field, object fieldValue) => field.HasSubFields
             ? FromPartialNavigable(fieldValue as Dictionary<string, object>, field.TagId, field.SubDataFields, null)
             : throw new InvalidDataException($"Unknown tagId {field.TagId}");
-
-        private static bool ExpandEnumeration(Dictionary<ulong, EnumerationDetails> oldEnumeration, Dictionary<ulong, EnumerationDetails> newEnumeration)
-            => oldEnumeration == null || oldEnumeration.Count == 0 || (newEnumeration?.Take(oldEnumeration.Count).SafeSequenceEqual(oldEnumeration) == true);
 
         private static ILTag FromPartialNavigable(Dictionary<string, object> json, ulong tagId, IEnumerable<DataField> dataFields, DataModel dataModel) {
             if (json is null || json.Count == 0)
@@ -271,8 +247,6 @@ namespace InterlockLedger.Tags
         }
 
         private static ushort ToUInt16(object fieldValue) => Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
-
-        private bool ExpandsOver(DataModel dm) => CompareFields(dm.DataFields, DataFields) && CompareIndexes(dm.Indexes, Indexes);
     }
 
     public class ILTagDataModel : ILTagExplicit<DataModel>

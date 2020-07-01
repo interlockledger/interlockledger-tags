@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>5.2.1</Version>
+      <Version>5.2.2</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>More fixes for DataFields Metadata for Signables</PackageReleaseNotes>
+      <PackageReleaseNotes>Metadata for IdentifiedSignature fix</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

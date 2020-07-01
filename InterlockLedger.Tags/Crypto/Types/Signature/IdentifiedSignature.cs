@@ -51,9 +51,6 @@ namespace InterlockLedger.Tags
         public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
         }
 
-        [JsonIgnore]
-        public static IEnumerable<DataField> DataFields { get; } = VersionField.AppendedOf(_remainingDataFields);
-
         public TagPubKey PublicKey { get; set; }
         public TagSignature Signature { get; set; }
         public BaseKeyId SignerId { get; set; }

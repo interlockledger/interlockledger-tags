@@ -81,17 +81,6 @@ namespace InterlockLedger.Tags
         }
 
         [Test]
-        public void SafeSequenceEqual() {
-            Assert.IsTrue(((IEnumerable<object>)null).SafeSequenceEqual(null), "Null should be sequenceEqual to Null");
-            Assert.IsTrue(((IEnumerable<object>)null).SafeSequenceEqual(Enumerable.Empty<object>()), "Null should be sequenceEqual to and Empty Enumeration");
-            Assert.IsTrue(Enumerable.Empty<object>().SafeSequenceEqual(Enumerable.Empty<object>()), "Empty Enumeration should be sequenceEqual to Empty Enumeration");
-            Assert.IsTrue(new int[] { 1 }.SafeSequenceEqual(new int[] { 1 }), "Single Member Enumeration should be sequenceEqual to equivalent Single Member Enumeration");
-            Assert.IsFalse(new int[] { 1, 2, 3 }.SafeSequenceEqual(new int[] { 1 }), "Multiple Member Enumeration should NOT be sequenceEqual to Single Member Enumeration");
-            Assert.IsTrue(new int[] { 1, 2, 3 }.SafeSequenceEqual(new int[] { 1, 2, 3 }), "Multiple Member Enumeration should be sequenceEqual to equivalent Multiple Member Enumeration");
-            Assert.IsFalse(new int[] { 1, 2, 3 }.SafeSequenceEqual(new int[] { 3, 2, 1 }), "Multiple Member Enumeration should NOT be sequenceEqual to reordered Multiple Member Enumeration");
-        }
-
-        [Test]
         public void SelectSkippingNulls() {
             static void SelectSkippingNullsTest(IEnumerable<string> values, Func<string, string> selector, string message, params string[] expected) => Assert.IsTrue(expected.EqualTo(values.SelectSkippingNulls(selector)), message);
             SelectSkippingNullsTest(null, (o) => o, "Should have returned empty enumerable for null enumerable");

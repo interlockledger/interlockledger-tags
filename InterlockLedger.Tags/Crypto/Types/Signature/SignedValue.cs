@@ -79,7 +79,7 @@ namespace InterlockLedger.Tags
             new T().FieldModel?.WithName(nameof(SignedContent))
             .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
                 ElementTagId = ILTagId.IdentifiedSignature,
-                SubDataFields = IdentifiedSignature.DataFields,
+                SubDataFields = new IdentifiedSignature().FieldModel.SubDataFields,
             });
 
         protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";

@@ -41,12 +41,17 @@ namespace InterlockLedger.Tags
     {
         public static bool AnyWithNoNulls<T>(this IEnumerable<T> items) => items.SafeAny() && items.NoNulls();
 
-        public static IEnumerable<T> AppendedOf<T>(this T item, IEnumerable<T> remainingItems) => InnerAppend(item, remainingItems);
+        public static IEnumerable<T> AppendedOf<T>(this T item, IEnumerable<T> remainingItems)
+            => InnerAppend(item, remainingItems);
 
-        public static IEnumerable<T> AppendedOf<T>(this T item, params T[] remainingItems) => InnerAppend(item, remainingItems);
+        public static IEnumerable<T> AppendedOf<T>(this T item, params T[] remainingItems)
+            => InnerAppend(item, remainingItems);
 
         public static bool EqualTo<T>(this IEnumerable<T> first, IEnumerable<T> second)
-            => first is null ? second is null : second is null ? false : first.SequenceEqual(second);
+            => first is null && second is null || !(first is null || second is null) && first.SequenceEqual(second);
+
+        public static bool EquivalentTo<T>(this IEnumerable<T> first, IEnumerable<T> second)
+            => first.Safe().SequenceEqual(second.Safe());
 
         [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SafeAny checks")]
         public static IEnumerable<T> IfAnyDo<T>(this IEnumerable<T> values, Action action) {
@@ -55,7 +60,8 @@ namespace InterlockLedger.Tags
             return values;
         }
 
-        public static string JoinedBy<T>(this IEnumerable<T> list, string joiner) => list == null ? string.Empty : string.Join(joiner, list);
+        public static string JoinedBy<T>(this IEnumerable<T> list, string joiner)
+            => list == null ? string.Empty : string.Join(joiner, list);
 
         public static string JoinedBy<T>(this IEnumerable<T> list, string joiner, Func<T, string> formatter)
             => list == null ? string.Empty : string.Join(joiner, list.Select(formatter ?? (t => t.ToString())));
@@ -66,37 +72,36 @@ namespace InterlockLedger.Tags
 
         public static bool NoNulls<T>(this IEnumerable<T> items) => items.None(item => item is null);
 
+        public static IEnumerable<T> Safe<T>(this IEnumerable<T> values) => values ?? Enumerable.Empty<T>();
+
         public static bool SafeAny<T>(this IEnumerable<T> values) => values?.Any() ?? false;
 
         public static bool SafeAny<T>(this IEnumerable<T> items, Func<T, bool> predicate) => items?.Any(predicate) == true;
 
         public static IEnumerable<T> SafeConcat<T>(this IEnumerable<T> items, IEnumerable<T> remainingItems)
-            => InnerConcat(items ?? Enumerable.Empty<T>(), remainingItems);
+            => InnerConcat(Safe(items), remainingItems);
 
         public static int SafeCount<T>(this IEnumerable<T> values) => values?.Count() ?? -1;
 
-        public static bool SafeSequenceEqual<T>(this IEnumerable<T> values, IEnumerable<T> otherValues)
-            => values?.SequenceEqual(EmptyIfNull(otherValues)) ?? otherValues.None();
-
         public static IEnumerable<TResult> SelectSkippingNulls<TSource, TResult>(this IEnumerable<TSource> values, Func<TSource, TResult> selector) where TResult : class
-            => EmptyIfNull(values?.Select(selector).SkipNulls());
+            => Safe(values?.Select(selector).SkipNulls());
 
-        public static IEnumerable<T> SkipNulls<T>(this IEnumerable<T> values) where T : class => EmptyIfNull(values?.Where(item => item != null));
+        public static IEnumerable<T> SkipNulls<T>(this IEnumerable<T> values) where T : class
+            => Safe(values?.Where(item => item != null));
 
-        public static string WithCommas<T>(this IEnumerable<T> list, bool noSpaces = false) => JoinedBy(list, noSpaces ? "," : ", ");
+        public static string WithCommas<T>(this IEnumerable<T> list, bool noSpaces = false)
+            => JoinedBy(list, noSpaces ? "," : ", ");
 
         public static IEnumerable<T> WithDefault<T>(this IEnumerable<T> values, Func<IEnumerable<T>> alternativeValues)
-            => values.SafeAny() ? values : EmptyIfNull(alternativeValues?.Invoke());
+            => values.SafeAny() ? values : Safe(alternativeValues?.Invoke());
 
-        public static IEnumerable<T> WithDefault<T>(this IEnumerable<T> values) => EmptyIfNull(values);
+        public static IEnumerable<T> WithDefault<T>(this IEnumerable<T> values) => Safe(values);
 
         public static IEnumerable<T> WithDefault<T>(this IEnumerable<T> values, params T[] alternativeValues)
             => WithDefault(values, (IEnumerable<T>)alternativeValues);
 
         public static IEnumerable<T> WithDefault<T>(this IEnumerable<T> values, IEnumerable<T> alternativeValues)
-            => values.SafeAny() ? values : EmptyIfNull(alternativeValues);
-
-        private static IEnumerable<T> EmptyIfNull<T>(IEnumerable<T> values) => values ?? Enumerable.Empty<T>();
+            => values.SafeAny() ? values : Safe(alternativeValues);
 
         private static IEnumerable<T> InnerAppend<T>(T item, IEnumerable<T> remainingItems)
             => new SingleEnumerable<T>(item).SafeConcat(remainingItems);

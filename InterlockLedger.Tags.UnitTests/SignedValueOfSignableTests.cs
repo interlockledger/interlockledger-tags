@@ -88,6 +88,10 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(TestSignable.FieldTagId, tag.ContentTagId);
             Assert.AreEqual(3, tag.FieldModel.SubDataFields.SafeCount());
             Assert.AreEqual(nameof(SignedValue<TestSignable>.SignedContent), tag.FieldModel.SubDataFields.Skip(1).First().Name);
+            var signaturesFieldModel = tag.FieldModel.SubDataFields.Last();
+            Assert.AreEqual(ILTagId.IdentifiedSignature, signaturesFieldModel.ElementTagId);
+            Assert.AreEqual(4, signaturesFieldModel.SubDataFields.SafeCount());
+            Assert.AreEqual(nameof(SignedValue<TestSignable>.Signatures), signaturesFieldModel.Name);
             var signedContent = tag.SignedContent;
             Assert.AreEqual(ilint, signedContent.SomeILInt);
             Assert.AreEqual(new TestSignable().FieldModel, signedContent.FieldModel);

@@ -187,9 +187,9 @@ namespace InterlockLedger.Tags
         public void ULongsAsILintArrayVariations() {
             var tag = (ILTagArrayOfILInt)ILTag.DeserializeFrom(new MemoryStream(new byte[] { 20, 5, 3, 1, 248, 7, 3 }));
             CollectionAssert.AreEqual(new ulong[] { 1, 255, 3 }, tag.Value);
-            Assert.IsTrue(tag.ValueIs<ulong[]>(out var v) && v.SafeSequenceEqual(tag.Value), "Not an ulong[] value");
+            Assert.IsTrue(tag.ValueIs<ulong[]>(out var v) && v.EqualTo(tag.Value), "Not an ulong[] value");
             Assert.IsFalse(tag.ValueIs<ulong>(out var l) || l != default, "An ushort value?");
-            Assert.IsTrue(tag.ValueIs<IEnumerable<ulong>>(out var list) && list.SafeSequenceEqual(tag.Value), "Not an IEnumerable<ulong> value");
+            Assert.IsTrue(tag.ValueIs<IEnumerable<ulong>>(out var list) && list.EqualTo(tag.Value), "Not an IEnumerable<ulong> value");
         }
 
         [Test]
