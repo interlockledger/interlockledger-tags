@@ -44,9 +44,8 @@ namespace InterlockLedger.Tags
     {
         public const ushort CurrentVersion = 5;
 
-        public DataField(string name, ulong tagId, string description = null) {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Need a name", nameof(name));
+        public DataField(string name, ulong tagId, string description = null) : this() {
+            name.ValidateNonEmpty(nameof(name));
             Description = description.TrimToNull();
             Name = name;
             TagId = tagId;
@@ -56,7 +55,9 @@ namespace InterlockLedger.Tags
         public DataField() => Version = 1;
 
         public CastType? Cast { get; set; }
+
         public string Description { get; set; }
+
         public ulong? ElementTagId { get; set; }
 
         public EnumerationItems Enumeration {
@@ -94,7 +95,9 @@ namespace InterlockLedger.Tags
         public ushort SerializationVersion { get; set; } = CurrentVersion;
 
         public IEnumerable<DataField> SubDataFields { get; set; }
+
         public ulong TagId { get; set; }
+
         public ushort Version { get; set; }
 
         public static ulong AsNumber(ILTag value) {
@@ -192,16 +195,16 @@ namespace InterlockLedger.Tags
         public bool Equals(DataField other) =>
             other != null &&
             TagId == other.TagId &&
+            Cast == other.Cast &&
+            Description.SafeTrimmedEqualsTo(other.Description) &&
+            ElementTagId == other.ElementTagId &&
+            EnumerationAsFlags == other.EnumerationAsFlags &&
             IsDeprecated == other.IsDeprecated &&
             IsOpaque == other.IsOpaque &&
             Name.SafeEqualsTo(other.Name) &&
-            SubDataFields.EqualTo(other.SubDataFields) &&
-            Cast == other.Cast &&
-            ElementTagId == other.ElementTagId &&
-            Version == other.Version &&
             SerializationVersion == other.SerializationVersion &&
-            Description.SafeTrimmedEqualsTo(other.Description) &&
-            EnumerationAsFlags == other.EnumerationAsFlags &&
+            SubDataFields.EqualTo(other.SubDataFields) &&
+            Version == other.Version &&
             CompareEnumeration(other);
 
         public override int GetHashCode() {
@@ -209,16 +212,15 @@ namespace InterlockLedger.Tags
             hash.Add(Cast);
             hash.Add(Description.TrimToNull());
             hash.Add(ElementTagId);
-            hash.Add(EnumerationDefinition);
             hash.Add(EnumerationAsFlags);
+            hash.Add(EnumerationDefinition);
+            hash.Add(IsDeprecated);
             hash.Add(IsOpaque);
-            hash.Add(IsVersion);
             hash.Add(Name);
             hash.Add(SerializationVersion);
             hash.Add(SubDataFields);
             hash.Add(TagId);
             hash.Add(Version);
-            hash.Add(IsDeprecated);
             return hash.ToHashCode();
         }
 
@@ -226,7 +228,29 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => $"{Name} #{TagId} {EnumerationDefinition?.Values.JoinedBy(",")}";
 
+        public DataField WithName(string newName) => new DataField(this) {
+            Name = newName.ValidateNonEmpty(nameof(newName))
+        };
+
         internal bool? IsOptional_Deprecated;
+
+        internal DataField(DataField source) {
+            if (source is null)
+                throw new ArgumentNullException(nameof(source));
+            Cast = source.Cast;
+            Description = source.Description;
+            ElementTagId = source.ElementTagId;
+            EnumerationAsFlags = source.EnumerationAsFlags;
+            EnumerationDefinition = source.EnumerationDefinition;
+            IsDeprecated = source.IsDeprecated;
+            IsOpaque = source.IsOpaque;
+            Name = source.Name;
+            SerializationVersion = source.SerializationVersion;
+            SubDataFields = source.SubDataFields;
+            TagId = source.TagId;
+            Version = source.Version;
+        }
+
         private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
 
         private bool CompareEnumeration(DataField other) => EnumerationDefinition.SafeSequenceEqual(other.EnumerationDefinition);

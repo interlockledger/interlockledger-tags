@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags
@@ -85,7 +86,13 @@ namespace InterlockLedger.Tags
             var tag = ms.DecodeAny<SignedValue<TestSignable>>();
             Assert.AreEqual(ILTagId.SignedValue, tag.TagId);
             Assert.AreEqual(TestSignable.FieldTagId, tag.ContentTagId);
-            Assert.AreEqual(ilint, tag.SignedContent.SomeILInt);
+            Assert.AreEqual(3, tag.FieldModel.SubDataFields.SafeCount());
+            Assert.AreEqual(nameof(SignedValue<TestSignable>.SignedContent), tag.FieldModel.SubDataFields.Skip(1).First().Name);
+            var signedContent = tag.SignedContent;
+            Assert.AreEqual(ilint, signedContent.SomeILInt);
+            Assert.AreEqual(new TestSignable().FieldModel, signedContent.FieldModel);
+            Assert.AreEqual(2, signedContent.FieldModel.SubDataFields.SafeCount());
+            Assert.AreEqual(nameof(TestSignable.SomeILInt), signedContent.FieldModel.SubDataFields.Last().Name);
         }
 
         [TestCase(64ul, ExpectedResult = new byte[] {

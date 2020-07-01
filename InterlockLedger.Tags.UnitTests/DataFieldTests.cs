@@ -40,6 +40,20 @@ namespace InterlockLedger.Tags
     public class DataFieldTests
     {
         [Test]
+        public void Cloning() {
+            AssertCloneIsEqualTo(_dataFieldWithEnumeration);
+            AssertCloneIsEqualTo(_dataFieldWithFlagsEnumeration);
+            AssertCloneIsEqualTo(_dataFieldWithoutEnumeration);
+
+            static void AssertCloneIsEqualTo(DataField source) {
+                var clone = source.WithName(source.Name);
+                Assert.AreEqual(source, clone);
+                Assert.AreNotSame(source, clone);
+                Assert.AreNotEqual(source, clone.WithName("testing"));
+            }
+        }
+
+        [Test]
         public void EnumerationFromString() {
             foreach (ulong value in _dataFieldWithEnumeration.EnumerationDefinition.Keys)
                 Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithEnumeration.EnumerationDefinition[value].Name));
