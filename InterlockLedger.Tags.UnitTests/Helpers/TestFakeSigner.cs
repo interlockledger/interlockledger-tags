@@ -166,6 +166,6 @@ namespace InterlockLedger.Tags
 
         public ISigningKey Key => this;
         public ITimeStamper TimeStamper => this;
-        
+
     }
 }
