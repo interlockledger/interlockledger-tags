@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>5.2.2</Version>
+      <Version>5.2.3</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Metadata for IdentifiedSignature fix</PackageReleaseNotes>
+      <PackageReleaseNotes>ILTagArrayOfILInt now never serializes as null array but as empty array</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="InterlockLedger.Tags.ILInt" Version="3.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
