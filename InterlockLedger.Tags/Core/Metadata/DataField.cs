@@ -100,23 +100,22 @@ namespace InterlockLedger.Tags
 
         public ushort Version { get; set; }
 
-        public static ulong AsNumber(ILTag value) {
-            if (value is null)
-                throw new ArgumentNullException(nameof(value));
-            return value.TagId switch
-            {
-                2 => (ulong)((ILTagInt8)value).Value,
-                3 => ((ILTagUInt8)value).Value,
-                4 => (ulong)((ILTagInt16)value).Value,
-                5 => ((ILTagUInt16)value).Value,
-                6 => (ulong)((ILTagInt32)value).Value,
-                7 => ((ILTagUInt32)value).Value,
-                8 => (ulong)((ILTagInt64)value).Value,
-                9 => ((ILTagUInt64)value).Value,
-                10 => ((ILTagILInt)value).Value,
-                _ => throw new InvalidCastException("Not an integral numeric ILTag"),
-            };
-        }
+        public static ulong AsNumber(ILTag value)
+            => value is null
+                ? throw new ArgumentNullException(nameof(value))
+                : (value.TagId switch
+                {
+                    2 => (ulong)((ILTagInt8)value).Value,
+                    3 => ((ILTagUInt8)value).Value,
+                    4 => (ulong)((ILTagInt16)value).Value,
+                    5 => ((ILTagUInt16)value).Value,
+                    6 => (ulong)((ILTagInt32)value).Value,
+                    7 => ((ILTagUInt32)value).Value,
+                    8 => (ulong)((ILTagInt64)value).Value,
+                    9 => ((ILTagUInt64)value).Value,
+                    10 => ((ILTagILInt)value).Value,
+                    _ => throw new InvalidCastException("Not an integral numeric ILTag"),
+                });
 
         public static ILTag AsNumericTag(ulong tagId, ulong value) => tagId switch
         {

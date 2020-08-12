@@ -37,10 +37,9 @@ namespace InterlockLedger.Tags
 {
     public static class ITagExtensions
     {
-        public static List<ArraySegment<byte>> AsSegments(this ITag tag) {
-            if (tag is null)
-                throw new ArgumentNullException(nameof(tag));
-            return new List<ArraySegment<byte>> { new ArraySegment<byte>(tag.EncodedBytes) };
-        }
+        public static List<ArraySegment<byte>> AsSegments(this ITag tag)
+            => tag is null
+                ? throw new ArgumentNullException(nameof(tag))
+                : new List<ArraySegment<byte>> { new ArraySegment<byte>(tag.EncodedBytes) };
     }
 }

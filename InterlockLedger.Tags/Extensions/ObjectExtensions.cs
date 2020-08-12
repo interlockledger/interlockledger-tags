@@ -42,17 +42,16 @@ namespace InterlockLedger.Tags
 {
     public static class ObjectExtensions
     {
-        public static object AsNavigable(this object value) {
-            if (value is null)
-                return null;
-            if (value.GetType().IsPrimitive || value is string || value is IJsonCustomized)
-                return value;
-            if (value is JsonElement jo)
-                return AsILTag(FromJsonElement(jo));
-            if (value is IEnum items)
-                return items.AsList<object>();
-            return AsILTag(ToDictionary(value));
-        }
+        public static object AsNavigable(this object value)
+            => value switch
+            {
+                null => null,
+                string s => s,
+                IJsonCustomized o => o,
+                JsonElement jo => AsILTag(FromJsonElement(jo)),
+                IEnum items => items.AsList<object>(),
+                _ => IsPrimitive(value) ? value : AsILTag(ToDictionary(value))
+            };
 
         public static IEnumerable<T> AsSingle<T>(this T s) => new SingleEnumerable<T>(s);
 
@@ -66,6 +65,8 @@ namespace InterlockLedger.Tags
 
         [SuppressMessage("Style", "RCS1196:Call extension method as instance method.", Justification = "Better clarity about reuse of method name")]
         public static string WithDefault(this object value, string @default) => StringExtensions.WithDefault(value?.ToString(), @default);
+
+        private static bool IsPrimitive(object value) => value?.GetType().IsPrimitive ?? false;
 
         private static object AsILTag(object o)
             => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")

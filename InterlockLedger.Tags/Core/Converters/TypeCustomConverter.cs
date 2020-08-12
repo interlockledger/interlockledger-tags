@@ -42,19 +42,18 @@ namespace InterlockLedger.Tags
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-            => destinationType == typeof(InstanceDescriptor) ? true : destinationType == typeof(string);
+            => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             => value is string text ? new T().ResolveFrom(text) : base.ConvertFrom(context, culture, value);
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
-            if (destinationType == null)
-                throw new ArgumentNullException(nameof(destinationType));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (destinationType != typeof(string) || !(value is T))
-                throw new InvalidOperationException("Can only convert AppPermissions to string!!!");
-            return ((T)value).TextualRepresentation;
-        }
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            => destinationType is null
+                ? throw new ArgumentNullException(nameof(destinationType))
+                : value is null
+                    ? throw new ArgumentNullException(nameof(value))
+                    : destinationType != typeof(string) || !(value is T type)
+                        ? throw new InvalidOperationException($"Can only convert {typeof(T).Name} to string!!!")
+                        : type.TextualRepresentation;
     }
 }

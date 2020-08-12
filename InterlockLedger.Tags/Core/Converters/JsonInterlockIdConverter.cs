@@ -38,11 +38,10 @@ namespace InterlockLedger.Tags
 {
     public class JsonInterlockIdConverter : JsonConverter<InterlockId>
     {
-        public override bool CanConvert(Type typeToConvert) {
-            if (typeToConvert is null)
-                throw new ArgumentNullException(nameof(typeToConvert));
-            return typeToConvert == typeof(InterlockId) || typeToConvert.IsSubclassOf(typeof(InterlockId));
-        }
+        public override bool CanConvert(Type typeToConvert)
+            => typeToConvert is null
+                ? throw new ArgumentNullException(nameof(typeToConvert))
+                : typeToConvert == typeof(InterlockId) || typeToConvert.IsSubclassOf(typeof(InterlockId));
 
         public override InterlockId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => reader.TokenType == JsonTokenType.String ? InterlockId.Resolve(reader.GetString()) : throw new NotSupportedException();

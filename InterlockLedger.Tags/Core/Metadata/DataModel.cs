@@ -211,11 +211,10 @@ namespace InterlockLedger.Tags
 
         private static bool IsVersioned(IEnumerable<DataField> dataFields) => dataFields?.FirstOrDefault()?.IsVersion ?? false;
 
-        private static ILTag MapItem(DataField field, ILTag tag) {
-            if (tag.TagId != field.TagId)
-                throw new InvalidCastException($"Value for field {field.Name} is a tag {tag.TagId} != {field.TagId}");
-            return tag;
-        }
+        private static ILTag MapItem(DataField field, ILTag tag)
+            => tag.TagId != field.TagId
+                ? throw new InvalidCastException($"Value for field {field.Name} is a tag {tag.TagId} != {field.TagId}")
+                : tag;
 
         private static Dictionary<string, object> ToJson(Span<byte> bytes, ulong expectedTagId, IEnumerable<DataField> dataFields, ref ulong offset) {
             var json = new Dictionary<string, object>();

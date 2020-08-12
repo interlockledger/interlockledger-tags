@@ -53,12 +53,12 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes() => Value;
 
-        private static byte[] Elicit(object opaqueValue) {
-            if (opaqueValue is byte[] value)
-                return value;
-            if (opaqueValue is string s)
-                return Convert.FromBase64String(s);
-            return Array.Empty<byte>();
-        }
+        private static byte[] Elicit(object opaqueValue)
+            => opaqueValue switch
+            {
+                byte[] value => value,
+                string s => Convert.FromBase64String(s),
+                _ => Array.Empty<byte>()
+            };
     }
 }

@@ -58,16 +58,16 @@ namespace InterlockLedger.Tags
 
         public static T[] DecodeArray<T>(this Stream s) where T : class, ITaggableOf<T> {
             var tagId = s.DecodeTagId();
-            if (tagId == ILTagId.ILTagArray)
-                return new ILTagArrayOfILTag<ILTagExplicit<T>>(s).Value?.Select(element => element.Value).ToArray();
-            throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagExplicit<T>>).Name}");
+            return tagId == ILTagId.ILTagArray
+                ? (new ILTagArrayOfILTag<ILTagExplicit<T>>(s).Value?.Select(element => element.Value).ToArray())
+                : throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagExplicit<T>>).Name}");
         }
 
         public static T[] DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where TT : ILTagExplicit<T> {
             var tagId = s.DecodeTagId();
-            if (tagId == ILTagId.ILTagArray)
-                return new ILTagArrayOfILTag<TT>(s, decoder).Value?.Select(element => element.Value).ToArray();
-            throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<TT>).Name}");
+            return tagId == ILTagId.ILTagArray
+                ? (new ILTagArrayOfILTag<TT>(s, decoder).Value?.Select(element => element.Value).ToArray())
+                : throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<TT>).Name}");
         }
 
         public static bool DecodeBool(this Stream s) => s.Decode<ILTagBool>().Value;
@@ -84,9 +84,9 @@ namespace InterlockLedger.Tags
 
         public static Dictionary<string, T> DecodeDictionary<T>(this Stream s) where T : ILTag {
             var tagId = s.DecodeTagId();
-            if (tagId == ILTagId.Dictionary)
-                return new ILTagDictionary<T>(s).Value;
-            throw new InvalidDataException($"Not a {typeof(ILTagDictionary<T>).Name}");
+            return tagId == ILTagId.Dictionary
+                ? new ILTagDictionary<T>(s).Value
+                : throw new InvalidDataException($"Not a {typeof(ILTagDictionary<T>).Name}");
         }
 
         public static ulong DecodeILInt(this Stream s) => s.Decode<ILTagILInt>().Value;
@@ -105,9 +105,7 @@ namespace InterlockLedger.Tags
 
         public static ILTag[] DecodeSequence(this Stream s) {
             var tagId = s.DecodeTagId();
-            if (tagId == ILTagId.Sequence)
-                return new ILTagSequence(s).Value;
-            throw new InvalidDataException($"Not a {nameof(ILTagSequence)}");
+            return tagId == ILTagId.Sequence ? new ILTagSequence(s).Value : throw new InvalidDataException($"Not a {nameof(ILTagSequence)}");
         }
 
         public static string DecodeString(this Stream s)
@@ -115,9 +113,9 @@ namespace InterlockLedger.Tags
 
         public static Dictionary<string, string> DecodeStringDictionary(this Stream s) {
             var tagId = s.DecodeTagId();
-            if (tagId == ILTagId.StringDictionary)
-                return new ILTagStringDictionary(s).Value;
-            throw new InvalidDataException($"Not a {nameof(ILTagStringDictionary)}");
+            return tagId == ILTagId.StringDictionary
+                ? new ILTagStringDictionary(s).Value
+                : throw new InvalidDataException($"Not a {nameof(ILTagStringDictionary)}");
         }
 
         public static ILTag DecodeTag(this Stream s)
@@ -125,9 +123,9 @@ namespace InterlockLedger.Tags
 
         public static T[] DecodeTagArray<T>(this Stream s) where T : ILTag {
             var tagId = s.DecodeTagId();
-            if (tagId == ILTagId.ILTagArray)
-                return new ILTagArrayOfILTag<T>(s).Value;
-            throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<T>).Name}");
+            return tagId == ILTagId.ILTagArray
+                ? new ILTagArrayOfILTag<T>(s).Value
+                : throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<T>).Name}");
         }
 
         public static ulong DecodeTagId(this Stream s)

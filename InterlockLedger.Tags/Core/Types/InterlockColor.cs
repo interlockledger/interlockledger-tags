@@ -569,24 +569,14 @@ namespace InterlockLedger.Tags
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-            if (destinationType == typeof(InstanceDescriptor)) {
-                return true;
-            }
-            return destinationType == typeof(string);
-        }
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             => value is string text ? InterlockColor.FromText(text) : base.ConvertFrom(context, culture, value);
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
-            if (destinationType == null)
-                throw new ArgumentNullException(nameof(destinationType));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (destinationType != typeof(string) || !(value is InterlockColor))
-                throw new InvalidOperationException("Can only convert InterlockColor to string!!!");
-            return ((InterlockColor)value).Name;
-        }
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            => destinationType == typeof(string) && value is InterlockColor color
+                ? color.Name
+                : throw new InvalidOperationException("Can only convert InterlockColor to string!!!");
     }
 }

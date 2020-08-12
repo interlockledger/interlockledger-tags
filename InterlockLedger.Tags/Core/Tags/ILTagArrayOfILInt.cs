@@ -30,6 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,13 +41,14 @@ namespace InterlockLedger.Tags
 {
     public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
     {
+
         public ILTagArrayOfILInt(object opaqueValue) : this(Elicit(opaqueValue)) {
         }
 
-        public ILTagArrayOfILInt(ulong[] Value) : base(ILTagId.ILIntArray, Value) {
+        public ILTagArrayOfILInt(ulong[] Value) : base(ILTagId.ILIntArray, Value ?? Array.Empty<ulong>()) {
         }
 
-        public ulong this[int i] => Value?[i] ?? 0ul;
+        public ulong this[int i] => Value[i];
 
         internal ILTagArrayOfILInt(Stream s) : base(ILTagId.ILIntArray, s) {
         }
@@ -62,21 +65,17 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes()
             => ToBytesHelper(s => {
-                if (Value != null) {
-                    s.ILIntEncode((ulong)Value.Length);
-                    foreach (var ilint in Value)
-                        s.ILIntEncode(ilint);
-                }
+                s.ILIntEncode((ulong)Value.Length);
+                foreach (var ilint in Value)
+                    s.ILIntEncode(ilint);
             });
 
-        private static ulong[] Elicit(object opaqueValue) {
-            if (opaqueValue is null)
-                throw new ArgumentNullException(nameof(opaqueValue));
-            if (opaqueValue is ulong[] values)
-                return values;
-            if (opaqueValue is IEnumerable<object> items)
-                return items.Select(Convert.ToUInt64).ToArray();
-            throw new InvalidCastException($"Can't elicit an ulong[] from {opaqueValue.GetType()}");
-        }
+        private static ulong[] Elicit(object? opaqueValue)
+            => opaqueValue switch
+            {
+                ulong[] values => values,
+                IEnumerable<object> items => items.Select(Convert.ToUInt64).ToArray(),
+                _ => throw new InvalidCastException($"Can't elicit an ulong[] from {opaqueValue?.GetType().Name ?? "null"}")
+            };
     }
 }

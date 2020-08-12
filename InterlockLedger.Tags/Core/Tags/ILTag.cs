@@ -72,13 +72,12 @@ namespace InterlockLedger.Tags
             return DeserializeFrom(ms);
         }
 
-        public static ILTag DeserializeFromJson(ulong tagId, object payload) {
-            if (payload is null)
-                return ILTagNull.Instance;
-            if (!_deserializers.ContainsKey(tagId))
-                throw new ArgumentException($"Unknown tagId: {tagId}", nameof(tagId));
-            return _deserializers[tagId].fromJson(payload);
-        }
+        public static ILTag DeserializeFromJson(ulong tagId, object payload)
+            => payload is null
+                ? ILTagNull.Instance
+                : !_deserializers.ContainsKey(tagId)
+                    ? throw new ArgumentException($"Unknown tagId: {tagId}", nameof(tagId))
+                    : _deserializers[tagId].fromJson(payload);
 
         public static bool HasDeserializer(ulong id) => _deserializers.ContainsKey(id);
 

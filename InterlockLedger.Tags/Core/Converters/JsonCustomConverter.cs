@@ -38,11 +38,10 @@ namespace InterlockLedger.Tags
 {
     public class JsonCustomConverter<T> : JsonConverter<T> where T : IJsonCustom<T>, new()
     {
-        public override bool CanConvert(Type typeToConvert) {
-            if (typeToConvert is null)
-                throw new ArgumentNullException(nameof(typeToConvert));
-            return typeToConvert == typeof(T) || typeToConvert.IsSubclassOf(typeof(T));
-        }
+        public override bool CanConvert(Type typeToConvert)
+            => typeToConvert is null
+                ? throw new ArgumentNullException(nameof(typeToConvert))
+                : typeToConvert == typeof(T) || typeToConvert.IsSubclassOf(typeof(T));
 
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => reader.TokenType == JsonTokenType.String ? new T().ResolveFrom(reader.GetString()) : throw new NotSupportedException();

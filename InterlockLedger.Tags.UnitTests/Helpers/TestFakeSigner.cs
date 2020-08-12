@@ -71,11 +71,10 @@ namespace InterlockLedger.Tags
         public (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag
             => EncryptRaw(cipher, clearText?.EncodedBytes);
 
-        public (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText) {
-            if (cipher != CipherAlgorithm.AES256)
-                throw new InvalidOperationException("Only AES256 is valid for now");
-            return new AES256Engine().Encrypt(clearText, key: _fakeCipherKey, iv: _fakeCipherIV);
-        }
+        public (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText)
+            => cipher != CipherAlgorithm.AES256
+                ? throw new InvalidOperationException("Only AES256 is valid for now")
+                : new AES256Engine().Encrypt(clearText, key: _fakeCipherKey, iv: _fakeCipherIV);
 
         public TagHash Hash(byte[] data, HashAlgorithm hashAlgorithm) => new TagHash(hashAlgorithm, Array.Empty<byte>());
 

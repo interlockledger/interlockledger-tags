@@ -56,12 +56,12 @@ namespace InterlockLedger.Tags
 
         protected override void EncodeValue(Stream s, T value) => s.EncodeTag(value);
 
-        private static Dictionary<string, T> Elicit(object opaqueValue) {
-            if (opaqueValue is Dictionary<string, T> dict)
-                return dict;
-            if (opaqueValue is Dictionary<string, object> odict)
-                return odict.ToDictionary(p => p.Key, pp => (T)pp.Value.AsNavigable());
-            return new Dictionary<string, T>();
-        }
+        private static Dictionary<string, T> Elicit(object opaqueValue)
+            => opaqueValue switch
+            {
+                Dictionary<string, T> dict => dict,
+                Dictionary<string, object> odict => odict.ToDictionary(p => p.Key, pp => (T)pp.Value.AsNavigable()),
+                _ => new Dictionary<string, T>()
+            };
     }
 }

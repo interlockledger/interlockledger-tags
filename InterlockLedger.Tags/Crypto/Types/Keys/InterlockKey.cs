@@ -165,7 +165,7 @@ namespace InterlockLedger.Tags
         public KeyStrength Strength { get; set; }
         public ushort Version { get; set; }
 
-        public string ToShortString() => $"{Name.Safe().PadRight(58)} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
+        public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
 
         public override string ToString() =>
         $@"-- Key '{Name}' - {Description}

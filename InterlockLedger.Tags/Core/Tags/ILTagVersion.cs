@@ -75,12 +75,11 @@ namespace InterlockLedger.Tags
         protected override byte[] ToBytes()
             => ToBytesHelper(s => s.BigEndianWriteInt(Value.Major).BigEndianWriteInt(Value.Minor).BigEndianWriteInt(Value.Build).BigEndianWriteInt(Value.Revision));
 
-        private static Version Build(int major, int minor, int build, int revision) {
-            if (revision >= 0)
-                return new Version(major, minor, build, revision);
-            if (build >= 0)
-                return new Version(major, minor, build);
-            return new Version(major, minor);
-        }
+        private static Version Build(int major, int minor, int build, int revision)
+            => revision >= 0
+                ? new Version(major, minor, build, revision)
+                : build >= 0
+                    ? new Version(major, minor, build)
+                    : new Version(major, minor);
     }
 }

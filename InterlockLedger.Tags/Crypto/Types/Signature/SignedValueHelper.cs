@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace InterlockLedger.Tags
 {
@@ -43,9 +42,9 @@ namespace InterlockLedger.Tags
             using var ms = new MemoryStream(bytes);
             var version = ms.DecodeUShort();
             var signedcontent = ms.DecodeTag();
-            if (signedcontent.ValueIs<ISignable>(out var signable))
-                return signable.ResolveSigned(version, ms);
-            throw new InvalidDataException("Not a signable content");
+            return signedcontent.ValueIs<ISignable>(out var signable)
+                ? signable.ResolveSigned(version, ms)
+                : throw new InvalidDataException("Not a signable content");
         }
     }
 }

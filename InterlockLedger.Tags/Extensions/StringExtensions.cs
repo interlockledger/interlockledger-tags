@@ -82,11 +82,10 @@ namespace InterlockLedger.Tags
 
         public static bool SafeTrimmedEqualsTo(this string s, string other) => SafeEqualsTo(s.TrimToNull(), other.TrimToNull());
 
-        public static string SimplifyAsFileName(this string name) {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException($"Name is empty or null");
-            return _nameFilter.Replace(name.Trim(), ".").ToLowerInvariant();
-        }
+        public static string SimplifyAsFileName(this string name)
+            => string.IsNullOrWhiteSpace(name)
+                ? throw new ArgumentException($"Name is empty or null")
+                : _nameFilter.Replace(name.Trim(), ".").ToLowerInvariant();
 
         public static string TrimToNull(this string s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
@@ -97,11 +96,10 @@ namespace InterlockLedger.Tags
 
         public static string WithDefault(this string s, string @default) => string.IsNullOrWhiteSpace(s) ? @default : s.Trim();
 
-        public static string WithDefault(this string s, Func<string> resolver) {
-            if (resolver == null)
-                throw new ArgumentNullException(nameof(resolver));
-            return string.IsNullOrWhiteSpace(s) ? resolver() : s.Trim();
-        }
+        public static string WithDefault(this string s, Func<string> resolver)
+            => resolver is null
+                ? throw new ArgumentNullException(nameof(resolver))
+                : string.IsNullOrWhiteSpace(s) ? resolver() : s.Trim();
 
         public static string WithoutWhiteSpace(this string s) => string.IsNullOrWhiteSpace(s) ? string.Empty : Regex.Replace(s, @"[\r\n\s]+", " ").Trim();
 
