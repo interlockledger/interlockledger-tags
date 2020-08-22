@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -41,7 +40,6 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => null;
 
-        public override byte[] EncodedInnerBytes => Array.Empty<byte>();
         public override string Formatted => "null";
 
         public override bool ValueIs<TV>(out TV value) {

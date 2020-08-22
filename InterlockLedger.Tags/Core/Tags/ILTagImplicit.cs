@@ -42,16 +42,6 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public override object AsJson => Value;
 
-        [JsonIgnore]
-        public override byte[] EncodedInnerBytes {
-            get {
-                using var ms = new MemoryStream();
-                SerializeInner(ms);
-                ms.Flush();
-                return ms.ToArray();
-            }
-        }
-
         public T Value { get; set; }
 
         public override bool ValueIs<TV>(out TV value) {

@@ -31,36 +31,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagILInt : ILTagImplicit<ulong>, IEquatable<ILTagILInt>
+    public static class StringSuffixExtensions
     {
-        public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
+        public static FileInfo TempFileInfo(this string suffix)
+            => new FileInfo(Path.GetTempFileName().WithSuffixReplaced(suffix));
+
+        public static string WithSuffix(this string s, string suffix, char separator = '.')
+            => SuffixAdder(s, suffix, separator, AddMissingSuffix);
+
+        public static string WithSuffixReplaced(this string s, string suffix, char separator = '.')
+            => SuffixAdder(s, suffix, separator, ReplaceSuffix);
+
+        private static string AddMissingSuffix(string s, string suffix)
+            => s.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) ? s : s + suffix;
+
+        private static string ReplaceSuffix(string s, string suffix) {
+            int lastSeparatorPosition = s.LastIndexOf(suffix.First());
+            return (lastSeparatorPosition > 1 ? s.Substring(0, lastSeparatorPosition) : s) + suffix;
         }
 
-        public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
-
-        public override bool Equals(object obj)
-                    => Equals(obj as ILTagILInt);
-
-        public bool Equals(ILTagILInt other)
-            => other != null && Value == other.Value;
-
-        public override int GetHashCode()
-            => -1937169414 + Value.GetHashCode();
-
-        internal ILTagILInt(Stream s) : base(ILTagId.ILInt, s) {
+        private static string SuffixAdder(string s, string suffix, char separator, Func<string, string, string> modifier) {
+            return s is null
+                           ? null
+                           : string.IsNullOrWhiteSpace(suffix)
+                               ? TrimSeparator(s, separator)
+                               : modifier(TrimSeparator(s, separator), NormalizeSuffix(suffix, separator));
+            static string NormalizeSuffix(string suffix, char separator)
+                => separator + suffix.Trim().TrimStart(separator);
+            static string TrimSeparator(string s, char separator) => s.Trim().TrimEnd(separator);
         }
-
-        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.ILInt) => ValidateTagId(alreadyDeserializedTagId);
-
-        protected override ulong DeserializeInner(Stream s)
-            => s.ILIntDecode();
-
-        protected override void SerializeInner(Stream s)
-            => s.ILIntEncode(Value);
     }
 }

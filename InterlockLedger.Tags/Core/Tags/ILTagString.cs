@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -37,11 +37,13 @@ namespace InterlockLedger.Tags
 {
     public class ILTagString : ILTagExplicit<string>
     {
-        public ILTagString(string value) : base(ILTagId.String, value) { }
+        public ILTagString(string value) : base(ILTagId.String, value) {
+        }
 
         public override string Formatted => Value;
 
-        internal ILTagString(Stream s) : base(ILTagId.String, s) { }
+        internal ILTagString(Stream s) : base(ILTagId.String, s) {
+        }
 
         protected override string FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
 

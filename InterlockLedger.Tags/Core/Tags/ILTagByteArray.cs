@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -35,6 +35,72 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
+    public class FileBackedByteArray : ILTag
+    {
+        private const int _bufferLength = 16 * 1024;
+        private readonly FileInfo _fileInfo;
+
+        public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray) {
+            if (source is null)
+                throw new ArgumentNullException(nameof(source));
+            _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
+            using (var fileStream = fileInfo.OpenWrite())
+                source.CopyTo(fileStream, _bufferLength);
+            Initialize(0, 0, fileInfo.Length);
+            NoRemoval = false;
+        }
+
+        public FileBackedByteArray(FileInfo fileInfo) : this(fileInfo, 0, 0) => NoRemoval = false;
+
+        public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray) {
+            if (fileInfo is null || !fileInfo.Exists)
+                throw new ArgumentNullException(nameof(fileInfo));
+            _fileInfo = fileInfo;
+            Initialize(offset, length, fileInfo.Length);
+            NoRemoval = true;
+        }
+
+        public override object AsJson => null;
+
+        public override string Formatted => $"{_fileInfo.FullName}[{Offset}:{Length}]";
+
+        public ulong Length { get; private set; }
+
+        public long Offset { get; private set; }
+
+        public bool NoRemoval { get; }
+
+        public void Remove() {
+            if (!NoRemoval)
+                _fileInfo.Delete();
+        }
+
+        public override bool ValueIs<TV>(out TV value) {
+            value = default;
+            return false;
+        }
+
+        protected override void SerializeInner(Stream s) {
+            s.ILIntEncode(Length);
+            if (Length > 0) {
+                using var fileStream = _fileInfo.OpenRead();
+                using var streamSlice = new StreamSpan(fileStream, Offset, Length);
+                streamSlice.CopyTo(s, _bufferLength);
+            }
+        }
+
+        private void Initialize(long offset, ulong length, long fileLength) {
+            if (offset < 0 || offset > fileLength)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            Offset = offset;
+            Length = length == 0
+                ? (ulong)(fileLength - offset)
+                : length >= long.MaxValue || (offset + (long)length) > fileLength
+                    ? throw new ArgumentOutOfRangeException(nameof(length))
+                    : length;
+        }
+    }
+
     public class ILTagByteArray : ILTagExplicit<byte[]>
     {
         public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {

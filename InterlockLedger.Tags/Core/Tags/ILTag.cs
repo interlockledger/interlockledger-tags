@@ -47,9 +47,6 @@ namespace InterlockLedger.Tags
         public byte[] EncodedBytes => SerializeToByteArray();
 
         [JsonIgnore]
-        public abstract byte[] EncodedInnerBytes { get; }
-
-        [JsonIgnore]
         public virtual string Formatted => EncodedBytes.ToSafeBase64();
 
         [JsonIgnore]

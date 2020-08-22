@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -37,9 +37,11 @@ namespace InterlockLedger.Tags
 {
     public class ILTagUnknown : ILTagExplicit<byte[]>
     {
-        public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) { }
+        public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
+        }
 
-        public ILTagUnknown(ulong tagId, byte[] bytes) : base(tagId, bytes) { }
+        public ILTagUnknown(ulong tagId, byte[] bytes) : base(tagId, bytes) {
+        }
 
         public ILTagUnknown(IDataModel model, Stream s)
             : base((model ?? throw new ArgumentNullException(nameof(model))).PayloadTagId, s)

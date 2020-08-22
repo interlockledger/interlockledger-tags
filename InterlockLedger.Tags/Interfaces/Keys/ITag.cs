@@ -36,7 +36,6 @@ namespace InterlockLedger.Tags
     {
         object AsJson { get; }
         byte[] EncodedBytes { get; }
-        byte[] EncodedInnerBytes { get; }
         ulong TagId { get; }
     }
 }

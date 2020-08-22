@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>5.2.3</Version>
+      <Version>6.0.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>ILTagArrayOfILInt now never serializes as null array but as empty array</PackageReleaseNotes>
+      <PackageReleaseNotes>(BREAKING) Less array of bytes usage&#10;Support for FileBackedByteArray special tag </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

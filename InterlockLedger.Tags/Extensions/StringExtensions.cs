@@ -40,6 +40,10 @@ namespace InterlockLedger.Tags
 {
     public static class StringExtensions
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
+
+        private static readonly Regex _nameFilter = new Regex(@"[\.\s\r\n<>\:""/\\|\?\*]+");
+
         public static ulong AsUlong(this string s) => ulong.TryParse(s?.Trim(), out var value) ? value : 0ul;
 
         public static object DeserializeJson(this string json) => string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<object>(json, _jsonOptions).AsNavigable();
@@ -102,18 +106,5 @@ namespace InterlockLedger.Tags
                 : string.IsNullOrWhiteSpace(s) ? resolver() : s.Trim();
 
         public static string WithoutWhiteSpace(this string s) => string.IsNullOrWhiteSpace(s) ? string.Empty : Regex.Replace(s, @"[\r\n\s]+", " ").Trim();
-
-        public static string WithSuffix(this string s, string suffix, char separator = '.') {
-            if (s == null)
-                return null;
-            if (string.IsNullOrWhiteSpace(suffix))
-                return s.Trim();
-            suffix = suffix.Trim();
-            s = s.Trim().TrimEnd(separator);
-            return s.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) ? s : s + separator + suffix.TrimStart(separator);
-        }
-
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
-        private static readonly Regex _nameFilter = new Regex(@"[\.\s\r\n<>\:""/\\|\?\*]+");
     }
 }

@@ -32,15 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     public abstract class ILTagExplicit<T> : ILTagImplicit<T>
     {
-        [JsonIgnore]
-        public sealed override byte[] EncodedInnerBytes => ToBytes();
-
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
@@ -57,7 +53,8 @@ namespace InterlockLedger.Tags
             return deserialize(s);
         }
 
-        protected sealed override T DeserializeInner(Stream s) => FromBytes(s.ReadBytes((int)s.ILIntDecode()));
+        protected sealed override T DeserializeInner(Stream s)
+            => FromBytes(s.ReadBytes((int)s.ILIntDecode()));
 
         protected abstract T FromBytes(byte[] bytes);
 

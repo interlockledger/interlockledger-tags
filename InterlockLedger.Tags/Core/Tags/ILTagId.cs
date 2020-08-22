@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -36,6 +36,7 @@ namespace InterlockLedger.Tags
     {
         // Implicit
         public const ulong Null = 0;        // length in bytes = 0	    The NULL value.
+
         public const ulong Bool = 1;        // length in bytes = 1	    A boolean value.
         public const ulong Int8 = 2;        // length in bytes = 1	    8-bit unsigned int.
         public const ulong UInt8 = 3;       // length in bytes = 1	    8-bit signed int.
@@ -52,6 +53,7 @@ namespace InterlockLedger.Tags
 
         // Explicit
         public const ulong ByteArray = 16;          //                  A raw byte array.
+
         public const ulong String = 17;             //                  A UTF-8 encoded string.
         public const ulong BigInteger = 18;         //                  A big integer encoded in big endian format.
         public const ulong BigDecimal = 19;         //                  A big decimal number.
@@ -68,6 +70,7 @@ namespace InterlockLedger.Tags
 
         // Core record parts
         public const ulong PubKey = 37;     //                          Public Key to verify the signature
+
         public const ulong Signature = 38;  //                          The signature data
         public const ulong Hash = 39;       //                          The hash data
         public const ulong PublicRSAParameters = 40;
@@ -89,6 +92,7 @@ namespace InterlockLedger.Tags
 
         // Metadata
         public const ulong DataField = 225;         //  DataField for Published Apps Records
+
         public const ulong DataIndex = 226;         //  DataIndex for Published Apps Records
         public const ulong DataModel = 224;         //  DataModel for Published Apps Records
     }

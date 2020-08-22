@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -45,7 +45,8 @@ namespace InterlockLedger.Tags
         public ILTagSequence(params ILTag[] value) : base(ILTagId.Sequence, value) {
         }
 
-        public ILTagSequence(object opaqueValue) : this(Elicit(opaqueValue)) { }
+        public ILTagSequence(object opaqueValue) : this(Elicit(opaqueValue)) {
+        }
 
         public override object AsJson => Value.Select(e => new { e.TagId, Value = e.AsJson }).ToArray();
         public int Length => Value.Length;
@@ -53,7 +54,8 @@ namespace InterlockLedger.Tags
 
         public override bool Equals(object obj) => obj is ILTagSequence other && other.Length == Length && other.ToString().Equals(ToString(), StringComparison.InvariantCulture);
 
-        internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) { }
+        internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) {
+        }
 
         private static ILTag[] Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : Array.Empty<ILTag>();
     }

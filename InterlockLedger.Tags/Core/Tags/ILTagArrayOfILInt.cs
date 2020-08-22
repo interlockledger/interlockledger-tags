@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -41,7 +41,6 @@ namespace InterlockLedger.Tags
 {
     public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
     {
-
         public ILTagArrayOfILInt(object opaqueValue) : this(Elicit(opaqueValue)) {
         }
 

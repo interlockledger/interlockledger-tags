@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -42,9 +42,11 @@ namespace InterlockLedger.Tags
     [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
     public class ILTagRange : ILTagExplicit<LimitedRange>, IJsonCustom<ILTagRange>, IEquatable<ILTagRange>
     {
-        public ILTagRange() : this(new LimitedRange()) { }
+        public ILTagRange() : this(new LimitedRange()) {
+        }
 
-        public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
+        public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) {
+        }
 
         public override object AsJson => this;
         public override string Formatted => TextualRepresentation;
@@ -62,7 +64,8 @@ namespace InterlockLedger.Tags
 
         public ILTagRange ResolveFrom(string textualRepresentation) => new ILTagRange(new LimitedRange().ResolveFrom(textualRepresentation));
 
-        internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
+        internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
+        }
 
         protected override LimitedRange FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
