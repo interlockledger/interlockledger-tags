@@ -57,11 +57,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(bytesLength, fbba.Offset);
                 Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
                 Assert.IsTrue(fbba.NoRemoval, "Backing file should not be removable");
-                using var mso = new MemoryStream();
-                _ = fbba.SerializeInto(mso);
-                var outputBytes = mso.ToArray();
-                Assert.IsNotNull(outputBytes);
-                CollectionAssert.AreEqual(prefixedArrayBytes, outputBytes);
+                using var mso = SerializeInto(fbba, prefixedArrayBytes);
                 mso.Position = 0;
                 var tagArray = ILTag.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
@@ -88,11 +84,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(0, fbba.Offset);
                 Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
                 Assert.IsFalse(fbba.NoRemoval, "Backing file should be removable");
-                using var mso = new MemoryStream();
-                _ = fbba.SerializeInto(mso);
-                var outputBytes = mso.ToArray();
-                Assert.IsNotNull(outputBytes);
-                CollectionAssert.AreEqual(prefixedArrayBytes, outputBytes);
+                using var mso = SerializeInto(fbba, prefixedArrayBytes);
                 mso.Position = 0;
                 var tagArray = ILTag.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
@@ -100,11 +92,52 @@ namespace InterlockLedger.Tags
                 var fbba2 = new FileBackedByteArray(fi);
                 CollectionAssert.AreEqual(prefixedArrayBytes, fbba2.EncodedBytes);
                 Assert.IsFalse(fbba2.NoRemoval, "Backing file should be removable");
-                fbba.Remove();
+                Assert.AreEqual(arrayBytes.Length, fbba2.Length);
+                using (var s = fbba2.ReadingStream) {
+                    var bytes = s.ReadAllBytesAsync().Result;
+                    Assert.IsNotNull(bytes);
+                    CollectionAssert.AreEqual(arrayBytes, bytes);
+                }
+                fbba2.Remove();
                 Assert.IsFalse(File.Exists(fi.FullName), "Backing file should have been deleted by calling Remove()");
+                Assert.AreEqual(0ul, fbba2.Length);
             } finally {
                 fi.Delete();
             }
+        }
+
+        [Test]
+        public void GetWritingStream() {
+            var fi = "unit".TempFileInfo();
+            try {
+                byte[] bytes = "This is just a test".UTF8Bytes();
+                FileBackedByteArray fbba = null;
+                using (var fs = FileBackedByteArray.GetWritingStream(fi, it => fbba = it)) {
+                    Assert.IsNull(fbba);
+                    fs.WriteBytes(bytes);
+                    Assert.IsTrue(fi.Exists, "Temp file was not created");
+                }
+                Assert.IsNotNull(fbba);
+                Assert.AreEqual(bytes.Length, fbba.Length);
+                Assert.AreEqual(0L, fbba.Offset);
+                using (var s = fbba.ReadingStream) {
+                    var readBytes = s.ReadAllBytesAsync().Result;
+                    CollectionAssert.AreEqual(bytes, readBytes);
+                }
+                var prefixedArrayBytes = bytes.Prepend((byte)bytes.Length).Prepend((byte)ILTagId.ByteArray).ToArray();
+                using var mso = SerializeInto(fbba, prefixedArrayBytes);
+            } finally {
+                fi.Delete();
+            }
+        }
+
+        private static MemoryStream SerializeInto(FileBackedByteArray fbba, byte[] prefixedArrayBytes) {
+            var mso = new MemoryStream();
+            _ = fbba.SerializeInto(mso);
+            var outputBytes = mso.ToArray();
+            Assert.IsNotNull(outputBytes);
+            CollectionAssert.AreEqual(prefixedArrayBytes, outputBytes);
+            return mso;
         }
     }
 }

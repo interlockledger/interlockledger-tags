@@ -43,8 +43,9 @@ namespace InterlockLedger.Tags
         public StreamSpan(Stream s, ulong length) : this(s, -1, length) {
         }
 
-        public StreamSpan(Stream s, long offset, ulong length) {
+        public StreamSpan(Stream s, long offset, ulong length, bool closeWrappedStreamOnDispose = false) {
             _s = s ?? throw new ArgumentNullException(nameof(s));
+            _closeWrappedStreamOnDispose = closeWrappedStreamOnDispose;
             if (!s.CanRead)
                 throw new ArgumentException("original stream needs to be readable");
             _length = (long)length;
@@ -100,16 +101,20 @@ namespace InterlockLedger.Tags
 
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException("This StreamSpan is readonly");
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2215:Dispose methods should call base class dispose", Justification = "Should NEVER dispose underlying stream")]
         protected override void Dispose(bool disposing) {
-            long positionAfterSpan = _length + _begin;
-            var unreadBytes = (int)(positionAfterSpan - _s.Position);
-            if (unreadBytes > 0) {
-                if (CanSeek) {
-                    _s.Position = positionAfterSpan;
-                } else {
-                    var buffer = new byte[unreadBytes];
-                    _s.Read(buffer, 0, unreadBytes);
+            base.Dispose(disposing);
+            if (_closeWrappedStreamOnDispose) {
+                _s.Dispose();
+            } else {
+                long positionAfterSpan = _length + _begin;
+                var unreadBytes = (int)(positionAfterSpan - _s.Position);
+                if (unreadBytes > 0) {
+                    if (CanSeek) {
+                        _s.Position = positionAfterSpan;
+                    } else {
+                        var buffer = new byte[unreadBytes];
+                        _s.Read(buffer, 0, unreadBytes);
+                    }
                 }
             }
         }
@@ -117,6 +122,7 @@ namespace InterlockLedger.Tags
         private readonly long _begin;
         private readonly long _length;
         private readonly Stream _s;
+        private readonly bool _closeWrappedStreamOnDispose;
 
         private long AdjustOffset(long offset, SeekOrigin origin)
             => origin switch

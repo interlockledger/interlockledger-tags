@@ -37,9 +37,6 @@ namespace InterlockLedger.Tags
 {
     public class FileBackedByteArray : ILTag
     {
-        private const int _bufferLength = 16 * 1024;
-        private readonly FileInfo _fileInfo;
-
         public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray) {
             if (source is null)
                 throw new ArgumentNullException(nameof(source));
@@ -52,6 +49,12 @@ namespace InterlockLedger.Tags
 
         public FileBackedByteArray(FileInfo fileInfo) : this(fileInfo, 0, 0) => NoRemoval = false;
 
+        public FileBackedByteArray() : base(ILTagId.ByteArray) {
+            NoRemoval = true;
+            Length = 0;
+            Offset = 0;
+        }
+
         public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray) {
             if (fileInfo is null || !fileInfo.Exists)
                 throw new ArgumentNullException(nameof(fileInfo));
@@ -61,18 +64,26 @@ namespace InterlockLedger.Tags
         }
 
         public override object AsJson => null;
-
         public override string Formatted => $"{_fileInfo.FullName}[{Offset}:{Length}]";
-
         public ulong Length { get; private set; }
-
+        public bool NoRemoval { get; }
         public long Offset { get; private set; }
 
-        public bool NoRemoval { get; }
+        public Stream ReadingStream =>
+            Length == 0
+                ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
+                : !_fileInfo.Exists || _fileInfo.Length == 0
+                    ? throw new InvalidOperationException("Nothing to read here")
+                    : new StreamSpan(_fileInfo.OpenRead(), Offset, Length, closeWrappedStreamOnDispose: true);
+
+        public static FileStream GetWritingStream(FileInfo fileInfo, Action<FileBackedByteArray> use)
+            => new FbbaInputStream(fileInfo, use);
 
         public void Remove() {
-            if (!NoRemoval)
+            if (!NoRemoval) {
                 _fileInfo.Delete();
+                Length = 0;
+            }
         }
 
         public override bool ValueIs<TV>(out TV value) {
@@ -89,6 +100,9 @@ namespace InterlockLedger.Tags
             }
         }
 
+        private const int _bufferLength = 16 * 1024;
+        private readonly FileInfo _fileInfo;
+
         private void Initialize(long offset, ulong length, long fileLength) {
             if (offset < 0 || offset > fileLength)
                 throw new ArgumentOutOfRangeException(nameof(offset));
@@ -98,6 +112,23 @@ namespace InterlockLedger.Tags
                 : length >= long.MaxValue || (offset + (long)length) > fileLength
                     ? throw new ArgumentOutOfRangeException(nameof(length))
                     : length;
+        }
+
+        private class FbbaInputStream : FileStream
+        {
+            public FbbaInputStream(FileInfo fileInfo, Action<FileBackedByteArray> use) : base(fileInfo?.FullName, FileMode.CreateNew, FileAccess.Write) {
+                _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
+                _use = use ?? throw new ArgumentNullException(nameof(use));
+            }
+
+            protected override void Dispose(bool disposing) {
+                base.Dispose(disposing);
+                if (disposing)
+                    _use(new FileBackedByteArray(_fileInfo));
+            }
+
+            private readonly FileInfo _fileInfo;
+            private readonly Action<FileBackedByteArray> _use;
         }
     }
 

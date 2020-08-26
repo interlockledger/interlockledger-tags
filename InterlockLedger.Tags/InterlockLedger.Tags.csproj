@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>6.0.0</Version>
+      <Version>6.1.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>(BREAKING) Less array of bytes usage&#10;Support for FileBackedByteArray special tag </PackageReleaseNotes>
+      <PackageReleaseNotes>Add better streaming support around FileBackedByteArray special tag </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
