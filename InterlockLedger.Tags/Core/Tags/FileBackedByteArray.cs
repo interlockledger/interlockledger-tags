@@ -30,38 +30,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
 {
-
-    public class ILTagByteArray : ILTagExplicitBase<byte[]>
+    public class FileBackedByteArray : FileBackedILTag<object>
     {
-        public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
-        }
+        public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
 
-        public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
-        }
+        public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo) { }
 
-        public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
-        }
+        public FileBackedByteArray() : base(ILTagId.ByteArray) { }
 
-        internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
-        }
+        public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
 
-        protected override byte[] DeserializeValueFromStream(Stream s, ulong length) => s.ReadBytes((int)length);
-
-        protected override ulong GetValueEncodedLength() => (ulong)(Value?.Length ?? 0);
-
-        protected override void SerializeValueToStream(Stream s) => s.WriteBytes(Value);
-
-        private static byte[] Elicit(object opaqueValue)
-            => opaqueValue switch
-            {
-                byte[] value => value,
-                string s => Convert.FromBase64String(s),
-                _ => Array.Empty<byte>()
-            };
     }
 }

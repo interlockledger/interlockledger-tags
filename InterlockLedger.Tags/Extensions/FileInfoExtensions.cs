@@ -35,33 +35,25 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-
-    public class ILTagByteArray : ILTagExplicitBase<byte[]>
+    public static class FileInfoExtensions
     {
-        public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
+        public static FileStream GetWritingStream(this FileInfo fileInfo, Action<FileInfo> use) => new FbbaInputStream(fileInfo, use);
+        private class FbbaInputStream : FileStream
+        {
+            public FbbaInputStream(FileInfo fileInfo, Action<FileInfo> use) : base(fileInfo?.FullName, FileMode.CreateNew, FileAccess.Write) {
+                _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
+                _use = use ?? throw new ArgumentNullException(nameof(use));
+            }
+
+            protected override void Dispose(bool disposing) {
+                base.Dispose(disposing);
+                if (disposing)
+                    _use(_fileInfo);
+            }
+
+            private readonly FileInfo _fileInfo;
+            private readonly Action<FileInfo> _use;
         }
 
-        public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
-        }
-
-        public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
-        }
-
-        internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
-        }
-
-        protected override byte[] DeserializeValueFromStream(Stream s, ulong length) => s.ReadBytes((int)length);
-
-        protected override ulong GetValueEncodedLength() => (ulong)(Value?.Length ?? 0);
-
-        protected override void SerializeValueToStream(Stream s) => s.WriteBytes(Value);
-
-        private static byte[] Elicit(object opaqueValue)
-            => opaqueValue switch
-            {
-                byte[] value => value,
-                string s => Convert.FromBase64String(s),
-                _ => Array.Empty<byte>()
-            };
     }
 }

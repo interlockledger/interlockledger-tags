@@ -56,6 +56,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(bytesLength, fbba.Length);
                 Assert.AreEqual(bytesLength, fbba.Offset);
                 Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
+                Assert.IsNull(fbba.Value);
                 Assert.IsTrue(fbba.NoRemoval, "Backing file should not be removable");
                 using var mso = SerializeInto(fbba, prefixedArrayBytes);
                 mso.Position = 0;
@@ -112,7 +113,7 @@ namespace InterlockLedger.Tags
             try {
                 byte[] bytes = "This is just a test".UTF8Bytes();
                 FileBackedByteArray fbba = null;
-                using (var fs = FileBackedByteArray.GetWritingStream(fi, it => fbba = it)) {
+                using (var fs = fi.GetWritingStream(it => fbba = new FileBackedByteArray(it))) {
                     Assert.IsNull(fbba);
                     fs.WriteBytes(bytes);
                     Assert.IsTrue(fi.Exists, "Temp file was not created");

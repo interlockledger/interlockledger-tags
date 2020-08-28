@@ -32,36 +32,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-
-    public class ILTagByteArray : ILTagExplicitBase<byte[]>
+    public abstract class ILTagExplicitBase<T> : ILTagImplicit<T>
     {
-        public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
+        protected ILTagExplicitBase(ulong tagId, T value) : base(tagId, value) {
         }
 
-        public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
+        protected ILTagExplicitBase(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
+            : base(s, alreadyDeserializedTagId, setup) {
         }
 
-        public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
+        public const int MaxEncodedValueLength = int.MaxValue / 16;
+        private ulong? _valueLength;
+
+        [JsonIgnore]
+        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength();
+
+        protected abstract ulong GetValueEncodedLength();
+        protected abstract T DeserializeValueFromStream(Stream s, ulong length);
+
+        protected sealed override T DeserializeInner(Stream s) {
+            _valueLength = s.ILIntDecode();
+            return _valueLength > MaxEncodedValueLength
+                ? throw new InvalidOperationException($"This content is too large to deserialize: {_valueLength} bytes")
+                : DeserializeValueFromStream(s, _valueLength.Value);
         }
 
-        internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
+        protected sealed override void SerializeInner(Stream s) {
+            s.ILIntEncode(EncodedValueLength);
+            if (EncodedValueLength > 0)
+                SerializeValueToStream(s);
         }
 
-        protected override byte[] DeserializeValueFromStream(Stream s, ulong length) => s.ReadBytes((int)length);
-
-        protected override ulong GetValueEncodedLength() => (ulong)(Value?.Length ?? 0);
-
-        protected override void SerializeValueToStream(Stream s) => s.WriteBytes(Value);
-
-        private static byte[] Elicit(object opaqueValue)
-            => opaqueValue switch
-            {
-                byte[] value => value,
-                string s => Convert.FromBase64String(s),
-                _ => Array.Empty<byte>()
-            };
+        protected abstract void SerializeValueToStream(Stream s);
     }
 }

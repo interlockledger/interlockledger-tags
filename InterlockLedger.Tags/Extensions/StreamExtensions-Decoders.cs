@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
         public static T DecodeAny<T>(this Stream s) where T : class, ITaggable {
             var tag = s.DecodeTag();
             return tag.IsNull
-                ? (T)null
+                ? null
                 : tag is ILTagExplicit<T> t
                     ? t.Value
                     : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
