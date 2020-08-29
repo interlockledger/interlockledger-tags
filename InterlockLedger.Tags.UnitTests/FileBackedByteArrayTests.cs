@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
             var fbba = new FileBackedByteArrayWithPublicMethods();
             using var source = new MemoryStream("Nothing".UTF8Bytes());
             Assert.ThrowsAsync<InvalidOperationException>(async () => {
-                await fbba.PublicCopyFromAsync(source);
+                await fbba.PublicCopyFromAsync(source, 0);
             });
             Assert.Throws<InvalidOperationException>(() => _ = fbba.FileInfo);
             Assert.Throws<InvalidOperationException>(() => _ = fbba.ReadingStream);
@@ -92,7 +92,7 @@ namespace InterlockLedger.Tags
         public async Task FromStreamToStreamAfterConstruction()
             => await FromStreamToStreamAsync(async (fi, ms) => {
                 var fbba = new FileBackedByteArrayWithPublicMethods(fi);
-                await fbba.PublicCopyFromAsync(ms).ConfigureAwait(true);
+                await fbba.PublicCopyFromAsync(ms, 0).ConfigureAwait(true);
                 return fbba;
             });
 
@@ -176,8 +176,8 @@ namespace InterlockLedger.Tags
             public FileBackedByteArrayWithPublicMethods(FileInfo fileInfo) : base(fileInfo) {
             }
 
-            public Task PublicCopyFromAsync(Stream source, bool noRemoval = false, CancellationToken cancellationToken = default)
-                => CopyFromAsync(source, noRemoval, cancellationToken);
+            public Task PublicCopyFromAsync(Stream source, long fileSizeLimit, bool noRemoval = false, CancellationToken cancellationToken = default)
+                => CopyFromAsync(source, fileSizeLimit, noRemoval, cancellationToken);
         }
     }
 }

@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -97,17 +98,18 @@ namespace InterlockLedger.Tags
 
         protected string TagTypeName => $"{GetType().Name}#{TagId}";
 
-        protected async Task CopyFromAsync(Stream source, bool noRemoval = false, CancellationToken cancellationToken = default) {
+        protected async Task CopyFromAsync(Stream source, long fileSizeLimit = 0, bool noRemoval = false, CancellationToken cancellationToken = default) {
             if (source is null)
                 throw new ArgumentNullException(nameof(source));
             using (var fileStream = FileInfo.OpenWrite()) {
-                await source.CopyToAsync(fileStream, _bufferLength, cancellationToken).ConfigureAwait(false);
-                await fileStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                await source.CopyToAsync(fileStream, fileSizeLimit, _bufferLength, cancellationToken).ConfigureAwait(false);
+                fileStream.Flush(flushToDisk:true);
             }
             NoRemoval = noRemoval;
             FileInfo.Refresh();
             Initialize(0, 0, FileInfo.Length);
         }
+
 
         protected override T DeserializeValueFromStream(Stream s, ulong length) => default;
 

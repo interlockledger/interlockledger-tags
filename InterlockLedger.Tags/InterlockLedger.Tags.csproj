@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>6.2.1</Version>
+      <Version>6.2.3</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Improve FileBackedILTag</PackageReleaseNotes>
+      <PackageReleaseNotes>Improve FileBackedILTag - add fileSizeLimit parameter where needed</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

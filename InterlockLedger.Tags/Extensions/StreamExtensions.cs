@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Buffers;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,6 +48,33 @@ namespace InterlockLedger.Tags
             ms.WriteBytes(bytes);
             ms.Position = 0;
             return await ms.ReadAllBytesAsync().ConfigureAwait(false);
+        }
+
+        public static async Task CopyToAsync(this Stream source, Stream destination, long fileSizeLimit, int bufferSize, CancellationToken cancellationToken) {
+            if (source is null)
+                throw new ArgumentNullException(nameof(source));
+            if (destination is null)
+                throw new ArgumentNullException(nameof(destination));
+            if (source.CanSeek)
+                CheckSizeLimit(source.Length);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            try {
+                long totalBytes = 0;
+                while (true) {
+                    int bytesRead = await source.ReadAsync(new Memory<byte>(buffer), cancellationToken).ConfigureAwait(false);
+                    if (bytesRead == 0) break;
+                    totalBytes += bytesRead;
+                    CheckSizeLimit(totalBytes);
+                    await destination.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+                }
+            } finally {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+
+            void CheckSizeLimit(long totalBytes) {
+                if (fileSizeLimit > 0 && totalBytes > fileSizeLimit)
+                    throw new InvalidDataException($"Stream is too big to copy (> {fileSizeLimit})");
+            }
         }
 
         public static BaseKeyId DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
