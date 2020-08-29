@@ -38,21 +38,17 @@ namespace InterlockLedger.Tags
 {
     public abstract class ILTagExplicitBase<T> : ILTagImplicit<T>
     {
+        public const int MaxEncodedValueLength = int.MaxValue / 16;
+
+        [JsonIgnore]
+        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength();
+
         protected ILTagExplicitBase(ulong tagId, T value) : base(tagId, value) {
         }
 
         protected ILTagExplicitBase(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
             : base(s, alreadyDeserializedTagId, setup) {
         }
-
-        public const int MaxEncodedValueLength = int.MaxValue / 16;
-        private ulong? _valueLength;
-
-        [JsonIgnore]
-        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength();
-
-        protected abstract ulong GetValueEncodedLength();
-        protected abstract T DeserializeValueFromStream(Stream s, ulong length);
 
         protected sealed override T DeserializeInner(Stream s) {
             _valueLength = s.ILIntDecode();
@@ -61,6 +57,10 @@ namespace InterlockLedger.Tags
                 : DeserializeValueFromStream(s, _valueLength.Value);
         }
 
+        protected abstract T DeserializeValueFromStream(Stream s, ulong length);
+
+        protected abstract ulong GetValueEncodedLength();
+
         protected sealed override void SerializeInner(Stream s) {
             s.ILIntEncode(EncodedValueLength);
             if (EncodedValueLength > 0)
@@ -68,5 +68,7 @@ namespace InterlockLedger.Tags
         }
 
         protected abstract void SerializeValueToStream(Stream s);
+
+        private ulong? _valueLength;
     }
 }

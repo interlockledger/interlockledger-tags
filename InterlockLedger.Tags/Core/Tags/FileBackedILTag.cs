@@ -31,31 +31,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public class FileBackedILTag<T> : ILTagExplicitBase<T>
     {
-        public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : base(tagId, default) {
-            if (source is null)
-                throw new ArgumentNullException(nameof(source));
+        public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : this(tagId) {
             _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
-            using (var fileStream = fileInfo.OpenWrite())
-                source.CopyTo(fileStream, _bufferLength);
-            Initialize(0, 0, fileInfo.Length);
-            NoRemoval = false;
+            CopyFromAsync(source).Wait();
         }
 
-        public FileBackedILTag(ulong tagId, FileInfo fileInfo) : this(tagId, fileInfo, 0, 0) => NoRemoval = false;
-
-        public FileBackedILTag(ulong tagId) : base(tagId, default) {
-            NoRemoval = true;
-            Length = 0;
-            Offset = 0;
-        }
-
-        public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset, ulong length) : base(tagId, default) {
+        public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset, ulong length) : this(tagId) {
             if (fileInfo is null || !fileInfo.Exists)
                 throw new ArgumentNullException(nameof(fileInfo));
             _fileInfo = fileInfo;
@@ -65,24 +56,23 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => null;
 
-        public override string Formatted => $"{_fileInfo.FullName}[{Offset}:{Length}]";
+        public FileInfo FileInfo => _fileInfo ?? throw new InvalidOperationException($"This instance of {TagTypeName} has not been set with a backing file");
+        public override string Formatted => TagTypeName;
 
         public ulong Length { get; private set; }
-
-        public bool NoRemoval { get; }
-
+        public bool NoRemoval { get; private set; }
         public long Offset { get; private set; }
 
         public Stream ReadingStream =>
             Length == 0
                 ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
-                : !_fileInfo.Exists || _fileInfo.Length == 0
+                : !FileInfo.Exists || FileInfo.Length == 0
                     ? throw new InvalidOperationException("Nothing to read here")
-                    : new StreamSpan(_fileInfo.OpenRead(), Offset, Length, closeWrappedStreamOnDispose: true);
+                    : new StreamSpan(FileInfo.OpenRead(), Offset, Length, closeWrappedStreamOnDispose: true);
 
         public void Remove() {
             if (!NoRemoval) {
-                _fileInfo.Delete();
+                FileInfo.Delete();
                 Length = 0;
             }
         }
@@ -91,20 +81,48 @@ namespace InterlockLedger.Tags
             value = default;
             return false;
         }
+
+        protected FileBackedILTag(ulong tagId, FileInfo fileInfo, bool noRemoval) : this(tagId) {
+            _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
+            NoRemoval = noRemoval;
+            if (fileInfo.Exists)
+                Initialize(0, 0, fileInfo.Length);
+        }
+
+        protected FileBackedILTag(ulong tagId) : base(tagId, default) {
+            NoRemoval = true;
+            Length = 0;
+            Offset = 0;
+        }
+
+        protected string TagTypeName => $"{GetType().Name}#{TagId}";
+
+        protected async Task CopyFromAsync(Stream source, bool noRemoval = false, CancellationToken cancellationToken = default) {
+            if (source is null)
+                throw new ArgumentNullException(nameof(source));
+            using (var fileStream = FileInfo.OpenWrite()) {
+                await source.CopyToAsync(fileStream, _bufferLength, cancellationToken).ConfigureAwait(false);
+                await fileStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+            NoRemoval = noRemoval;
+            FileInfo.Refresh();
+            Initialize(0, 0, FileInfo.Length);
+        }
+
         protected override T DeserializeValueFromStream(Stream s, ulong length) => default;
 
         protected override ulong GetValueEncodedLength() => Length;
 
         protected override void SerializeValueToStream(Stream s) {
-            using var fileStream = _fileInfo.OpenRead();
+            using var fileStream = FileInfo.OpenRead();
             using var streamSlice = new StreamSpan(fileStream, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);
         }
 
-
         private const int _bufferLength = 16 * 1024;
-
         private readonly FileInfo _fileInfo;
+
+        private string GetDebuggerDisplay() => $"{TagTypeName}: {_fileInfo?.FullName ?? "?"}[{Offset}:{Length}]";
 
         private void Initialize(long offset, ulong length, long fileLength) {
             if (offset < 0 || offset > fileLength)
@@ -116,6 +134,5 @@ namespace InterlockLedger.Tags
                     ? throw new ArgumentOutOfRangeException(nameof(length))
                     : length;
         }
-
     }
 }
