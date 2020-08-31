@@ -103,7 +103,7 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(source));
             using (var fileStream = FileInfo.OpenWrite()) {
                 await source.CopyToAsync(fileStream, fileSizeLimit, _bufferLength, cancellationToken).ConfigureAwait(false);
-                fileStream.Flush(flushToDisk:true);
+                fileStream.Flush(flushToDisk: true);
             }
             NoRemoval = noRemoval;
             FileInfo.Refresh();
