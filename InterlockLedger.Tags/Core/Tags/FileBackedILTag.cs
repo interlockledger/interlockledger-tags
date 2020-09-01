@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -106,14 +105,17 @@ namespace InterlockLedger.Tags
                 fileStream.Flush(flushToDisk: true);
             }
             NoRemoval = noRemoval;
-            FileInfo.Refresh();
-            Initialize(0, 0, FileInfo.Length);
+            Refresh();
         }
-
 
         protected override T DeserializeValueFromStream(Stream s, ulong length) => default;
 
         protected override ulong GetValueEncodedLength() => Length;
+
+        protected void Refresh() {
+            FileInfo.Refresh();
+            Initialize(0, 0, FileInfo.Length);
+        }
 
         protected override void SerializeValueToStream(Stream s) {
             using var fileStream = FileInfo.OpenRead();
