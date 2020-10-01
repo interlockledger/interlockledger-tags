@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>6.2.4</Version>
+      <Version>6.2.5</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Expose FileBackedILTag.Refresh() to descendants to call after they store data on the backing file</PackageReleaseNotes>
+      <PackageReleaseNotes>Fix Code Scanning Alert: #CWE-327  #CWE-780  #security&#10;- Weak encryption: inadequate RSA padding</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

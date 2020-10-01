@@ -50,7 +50,11 @@ namespace InterlockLedger.Tags
                 try {
                     using var RSAalg = new RSACryptoServiceProvider();
                     RSAalg.ImportParameters(Key);
-                    return RSAalg.Decrypt(data, false);
+                    try {
+                        return RSAalg.Decrypt(data, true);
+                    } catch (CryptographicException) {
+                        return RSAalg.Decrypt(data, false);
+                    }
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
                         throw new InterlockLedgerCryptographicException($"Failed to decrypt data with current parameters after {_maxRetries} retries", e);
@@ -63,7 +67,7 @@ namespace InterlockLedger.Tags
                 try {
                     using var RSAalg = new RSACryptoServiceProvider();
                     RSAalg.ImportParameters(Key);
-                    return RSAalg.Encrypt(data, false);
+                    return RSAalg.Encrypt(data, true);
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
                         throw new InterlockLedgerCryptographicException($"Failed to encrypt data with current parameters after {_maxRetries} retries", e);
