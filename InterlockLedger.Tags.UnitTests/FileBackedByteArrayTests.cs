@@ -141,7 +141,7 @@ namespace InterlockLedger.Tags
                 mso.Position = 0;
                 var tagArray = ILTag.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
-                CollectionAssert.AreEqual(arrayBytes, ((ILTagByteArray) tagArray).Value);
+                CollectionAssert.AreEqual(arrayBytes, ((ILTagByteArray)tagArray).Value);
                 var fbba2 = new FileBackedByteArray(fi);
                 Assert.IsFalse(fbba2.NoRemoval, "Backing file should be removable");
                 Assert.AreEqual(arrayBytes.Length, fbba2.Length);

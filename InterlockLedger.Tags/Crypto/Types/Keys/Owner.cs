@@ -51,7 +51,8 @@ namespace InterlockLedger.Tags
 
         public abstract byte[] Decrypt(byte[] bytes);
 
-        public string PasswordFor(InterlockId id) => id switch {
+        public string PasswordFor(InterlockId id) => id switch
+        {
             null => throw new ArgumentNullException(nameof(id)),
             _ => Convert.ToBase64String(Sign(id.EncodedBytes()).Data)
         };

@@ -134,7 +134,8 @@ namespace InterlockLedger.Tags
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) => Value switch {
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) => Value switch
+        {
             string text => TagPubKey.Resolve(text.Trim()),
             _ => base.ConvertFrom(context, culture, Value)
         };

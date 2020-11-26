@@ -78,7 +78,8 @@ namespace InterlockLedger.Tags
             return FromStream(s);
         }
 
-        public bool RegisterAsField(ITagRegistrar registrar) => registrar switch {
+        public bool RegisterAsField(ITagRegistrar registrar) => registrar switch
+        {
             null => throw new ArgumentNullException(nameof(registrar)),
             _ => registrar.RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload)
         };
