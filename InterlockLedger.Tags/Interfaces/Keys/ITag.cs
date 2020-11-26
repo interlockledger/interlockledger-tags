@@ -30,12 +30,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+using System.IO;
+
 namespace InterlockLedger.Tags
 {
     public interface ITag
     {
         object AsJson { get; }
-        byte[] EncodedBytes { get; }
         ulong TagId { get; }
+
+        Stream SerializeInto(Stream s);
     }
 }

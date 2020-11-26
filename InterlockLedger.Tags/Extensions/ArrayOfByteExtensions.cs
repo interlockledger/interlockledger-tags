@@ -41,6 +41,8 @@ namespace InterlockLedger.Tags
 {
     public static class ArrayOfByteExtensions
     {
+        public const string NULL = "null";
+
         public static byte[] Append(this byte[] bytes, byte[] newBytes) {
             if (newBytes is null)
                 return bytes;
@@ -122,6 +124,17 @@ namespace InterlockLedger.Tags
             file.WriteLine();
             file.Flush();
         }
+
+        public static string Formatted(this byte[] bytes)
+            => bytes switch
+            {
+                null => NULL,
+                _ => bytes.Length switch
+                {
+                    < 256 => bytes.ToSafeBase64(),
+                    _ => bytes[..256].ToSafeBase64() + "..."
+                }
+            };
 
         public static byte[] FromSafeBase64(this string base64) {
             if (!string.IsNullOrWhiteSpace(base64)) {

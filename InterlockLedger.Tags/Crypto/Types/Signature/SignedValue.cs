@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
 
         public ulong ContentTagId => SignedContent.TagId;
 
-        public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.AsILTag.EncodedBytes);
+        public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.AsILTag.EncodedBytes());
 
         public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
 
@@ -58,7 +58,7 @@ namespace InterlockLedger.Tags
         public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey) {
             if (SignedContent is null || Signatures.None())
                 return false;
-            byte[] encodedBytes = SignedContent.AsILTag.EncodedBytes;
+            byte[] encodedBytes = SignedContent.AsILTag.EncodedBytes();
             return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(encodedBytes));
         }
 

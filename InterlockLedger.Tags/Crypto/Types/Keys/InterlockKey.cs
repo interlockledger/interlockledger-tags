@@ -197,8 +197,7 @@ namespace InterlockLedger.Tags
         private ulong _firstAppId;
 
         private string _displayablePurposes => Purposes.ToStringAsList();
-
-        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+        private byte[] _hashable => PublicKey.EncodedBytes().Append(GetPermissions(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes());
 
         private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
 

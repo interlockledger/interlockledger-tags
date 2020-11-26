@@ -38,24 +38,23 @@ namespace InterlockLedger.Tags
     public abstract class Owner : ISigningKey, IPasswordProvider
     {
         public InterlockKey AsInterlockKey => new InterlockKey(this);
-        public TagPubKey PublicKey { get; protected set; }
         public string Description { get; protected set; }
         public string Email { get; protected set; }
         public BaseKeyId Id { get; protected set; }
         public string Name { get; protected set; }
         public OwnerId OwnerId => (OwnerId)Id;
         public IEnumerable<AppPermissions> Permissions { get; } = InterlockKeyParts.NoPermissions;
+        public TagPubKey PublicKey { get; protected set; }
         public KeyPurpose[] Purposes => keyPurposes;
         public Algorithm SignAlgorithm { get; protected set; }
         public KeyStrength Strength { get; protected set; }
 
         public abstract byte[] Decrypt(byte[] bytes);
 
-        public string PasswordFor(InterlockId id) {
-            if (id is null)
-                throw new ArgumentNullException(nameof(id));
-            return Convert.ToBase64String(Sign(id.EncodedBytes).Data);
-        }
+        public string PasswordFor(InterlockId id) => id switch {
+            null => throw new ArgumentNullException(nameof(id)),
+            _ => Convert.ToBase64String(Sign(id.EncodedBytes()).Data)
+        };
 
         public abstract TagSignature Sign(byte[] data);
 

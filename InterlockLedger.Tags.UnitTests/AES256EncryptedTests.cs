@@ -37,6 +37,8 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
+#if BLOB
+
     public class AES256EncryptedTests
     {
         [Test]
@@ -113,4 +115,6 @@ namespace InterlockLedger.Tags
             }
         }
     }
+#endif
+
 }

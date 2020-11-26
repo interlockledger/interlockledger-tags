@@ -149,7 +149,8 @@ namespace InterlockLedger.Tags
 
         private static void TestWith(DataField dataField) {
             var encodedBytes = new ILTagDataField(dataField).EncodedBytes;
-            using var ms = new MemoryStream(encodedBytes);
+            using var ms = new MemoryStream();
+
             var tagValue = ms.DecodeTag();
             Assert.IsInstanceOf<ILTagDataField>(tagValue);
             var value = ((ILTagDataField)tagValue).Value;

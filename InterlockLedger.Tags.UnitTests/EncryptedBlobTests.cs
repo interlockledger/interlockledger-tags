@@ -37,11 +37,10 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-#pragma warning disable CA1062 // Validate arguments of public methods
-
     [TestFixture]
     public class EncryptedBlobTests
     {
+#if BLOB
         [TestCase(new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
@@ -150,6 +149,7 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(data.Length, clearBlob.Length);
         }
 
+
         [TestCase(CipherAlgorithm.AES256, new byte[] { 0, 0 }, ExpectedResult = new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
@@ -183,6 +183,7 @@ namespace InterlockLedger.Tags
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes.PartOf(124);
         }
+#endif
 
         [Test]
         public void ValidateFieldDefinition() {

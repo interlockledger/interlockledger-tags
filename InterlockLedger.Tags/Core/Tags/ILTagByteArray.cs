@@ -38,17 +38,17 @@ namespace InterlockLedger.Tags
 
     public class ILTagByteArray : ILTagExplicitBase<byte[]>
     {
+
         public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
         }
 
-        public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
-        }
+        public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) => Formatted = value.Formatted();
+
 
         public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
         }
 
-        internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
-        }
+        internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) => Formatted = Value.Formatted();
 
         protected override byte[] DeserializeValueFromStream(Stream s, ulong length) => s.ReadBytes((int)length);
 
@@ -63,5 +63,7 @@ namespace InterlockLedger.Tags
                 string s => Convert.FromBase64String(s),
                 _ => Array.Empty<byte>()
             };
+
+        public override string Formatted { get; }
     }
 }

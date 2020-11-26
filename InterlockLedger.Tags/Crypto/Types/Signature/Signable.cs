@@ -47,11 +47,10 @@ namespace InterlockLedger.Tags
 
         public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
-        public SignedValue<T> SignWith(ISigningContext context) {
-            if (context is null)
-                throw new ArgumentNullException(nameof(context));
-            return new SignedValue<T>((T)this, context.Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
-        }
+        public SignedValue<T> SignWith(ISigningContext context) => context switch {
+            null => throw new ArgumentNullException(nameof(context)),
+            _ => new SignedValue<T>((T)this, context.Key.SignWithId(AsPayload.EncodedBytes()).AsSingle())
+        };
 
         protected Signable(ulong tagId, ushort version) : base(tagId, version) {
         }

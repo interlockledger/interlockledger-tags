@@ -43,7 +43,6 @@ namespace InterlockLedger.Tags
         public IEnumerable<AppPermissions> Permissions { get; } = InterlockKeyParts.NoPermissions;
         public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public string Description => _value.Description;
-        public byte[] EncodedBytes => _value.EncodedBytes;
         public BaseKeyId Id => _value.Id;
         public BaseKeyId Identity => _value.Identity;
         public DateTimeOffset LastSignatureTimeStamp => _value.LastSignatureTimeStamp;

@@ -43,6 +43,7 @@ namespace InterlockLedger.Tags
         public override object AsJson => Value;
 
         public T Value { get; set; }
+        public override string Formatted { get; }
 
         public override bool ValueIs<TV>(out TV value) {
             if (Value is TV tvalue) {
@@ -56,12 +57,16 @@ namespace InterlockLedger.Tags
         protected ILTagImplicit() : base(0) {
         }
 
-        protected ILTagImplicit(ulong tagId, T value) : base(tagId) => Value = value;
+        protected ILTagImplicit(ulong tagId, T value) : base(tagId) {
+            Value = value;
+            Formatted = value.ToString();
+        }
 
         [SuppressMessage("Usage", "CA2214:Do not call overridable methods in constructors", Justification = "We need it")]
         protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup = null) : base(alreadyDeserializedTagId) {
             setup?.Invoke(this);
             Value = DeserializeInner(s);
+            Formatted = Value.ToString();
         }
 
         [SuppressMessage("Usage", "CA2214:Do not call overridable methods in constructors", Justification = "We need it")]

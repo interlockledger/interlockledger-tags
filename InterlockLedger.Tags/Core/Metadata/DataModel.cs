@@ -177,7 +177,7 @@ namespace InterlockLedger.Tags
                 ushort version = minVersion;
                 bool isVersioned = IsVersioned(dataFields);
                 ScanFieldsToTags(ExtractVersion());
-                return AppendRemainingBytes(tags.Select(t => t.EncodedBytes).SelectMany(b => b).ToArray());
+                return AppendRemainingBytes(tags.Select(t => t.EncodedBytes()).SelectMany(b => b).ToArray());
 
                 IEnumerable<DataField> ExtractVersion() {
                     if (!isVersioned) return dataFields;

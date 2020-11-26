@@ -35,15 +35,12 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-
     public abstract class ILTagExplicit<T> : ILTagExplicitBase<T>
     {
-        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
-        }
+        protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) { }
 
         protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
-            : base(alreadyDeserializedTagId, s, setup) {
-        }
+            : base(alreadyDeserializedTagId, s, setup) { }
 
         protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
             if (bytes == null || bytes.Length == 0)
@@ -60,8 +57,10 @@ namespace InterlockLedger.Tags
 
         protected abstract T FromBytes(byte[] bytes);
 
-        protected sealed override void SerializeValueToStream(Stream s) => s.WriteBytes(ToBytes());
         protected override ulong GetValueEncodedLength() => (ulong)(ToBytes()?.Length ?? 0);
+
+        protected sealed override void SerializeValueToStream(Stream s) => s.WriteBytes(ToBytes());
+
         protected abstract byte[] ToBytes();
     }
 }

@@ -40,6 +40,7 @@ namespace InterlockLedger.Tags
         public ILTagBinary128(Stream s) : base(ILTagId.Binary128) => throw new NotImplementedException();
 
         public override object AsJson => throw new NotSupportedException();
+        public override string Formatted => throw new NotSupportedException();
 
         public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
 

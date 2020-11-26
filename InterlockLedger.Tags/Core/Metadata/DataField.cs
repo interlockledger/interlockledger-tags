@@ -146,7 +146,7 @@ namespace InterlockLedger.Tags
                 ulong FindKey(string value) {
                     try {
                         return Regex.IsMatch(value, @"^\?\d+$")
-                            ? ulong.Parse(value.Substring(1), CultureInfo.InvariantCulture)
+                            ? ulong.Parse(value[1..], CultureInfo.InvariantCulture)
                             : EnumerationDefinition.First(kp => kp.Value.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase)).Key;
                     } catch (Exception e) {
                         throw new InvalidDataException($"Value '{value}' is not valid for the enumeration for field [{Name}]", e);
@@ -257,11 +257,9 @@ namespace InterlockLedger.Tags
 
     public class ILTagDataField : ILTagExplicit<DataField>
     {
-        public ILTagDataField(DataField field) : base(ILTagId.DataField, field) {
-        }
+        public ILTagDataField(DataField field) : base(ILTagId.DataField, field) => Formatted = Value.ToString();
 
-        public ILTagDataField(Stream s) : base(ILTagId.DataField, s) {
-        }
+        public ILTagDataField(Stream s) : base(ILTagId.DataField, s) => Formatted = Value.ToString();
 
         protected override DataField FromBytes(byte[] bytes) {
             ushort serVersion = 0;
@@ -314,6 +312,7 @@ namespace InterlockLedger.Tags
             public Triplet(ulong value, string name, string description) : base(name, description) => Value = value;
 
             public Tag AsTag => new Tag(this);
+            public override string ToString() => $"#{Value:+000}-{Name} : {Description}";
 
             public class Tag : ILTagExplicit<Triplet>
             {
@@ -330,7 +329,10 @@ namespace InterlockLedger.Tags
                     s.EncodeString(Value.Name);
                     s.EncodeString(Value.Description);
                 });
+
             }
         }
+
+        public override string Formatted { get; }
     }
 }

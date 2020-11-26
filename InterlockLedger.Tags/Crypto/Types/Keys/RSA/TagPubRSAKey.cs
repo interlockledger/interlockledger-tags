@@ -63,6 +63,6 @@ namespace InterlockLedger.Tags
             return s.Decode<TagPublicRSAParameters>().Value;
         }
 
-        private static byte[] EncodeParameters(RSAParameters parameters) => new TagPublicRSAParameters(parameters).EncodedBytes;
+        private static byte[] EncodeParameters(RSAParameters parameters) => new TagPublicRSAParameters(parameters).EncodedBytes();
     }
 }

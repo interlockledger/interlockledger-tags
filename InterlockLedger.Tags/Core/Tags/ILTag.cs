@@ -44,10 +44,7 @@ namespace InterlockLedger.Tags
         public abstract object AsJson { get; }
 
         [JsonIgnore]
-        public byte[] EncodedBytes => SerializeToByteArray();
-
-        [JsonIgnore]
-        public virtual string Formatted => EncodedBytes.ToSafeBase64();
+        public abstract string Formatted { get; }
 
         [JsonIgnore]
         public bool IsNull => TagId == ILTagId.Null;
@@ -99,8 +96,6 @@ namespace InterlockLedger.Tags
 
         public T As<T>() where T : ILTag => this as T ?? throw new InvalidDataException($"Not an {typeof(T).Name}");
 
-        public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
-
         public Stream SerializeInto(Stream s) {
             if (s is null) return s;
             try {
@@ -112,9 +107,15 @@ namespace InterlockLedger.Tags
             return s;
         }
 
-        public override string ToString() => GetType().Name + $"#{TagId}:" + Formatted;
+        public override string ToString() => $"{GetType().Name}#{TagId}:{Formatted}";
 
         public abstract bool ValueIs<TV>(out TV value);
+
+        internal byte[] EncodedBytes() {
+            using var ms = new MemoryStream();
+            SerializeInto(ms);
+            return ms.ToArray();
+        }
 
         protected ILTag(ulong tagId) => TagId = tagId;
 
@@ -169,12 +170,5 @@ namespace InterlockLedger.Tags
                 [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),
                 [ILTagId.InterlockKeyAppPermission] = (s => new AppPermissions.Tag(s), NoJson)
             };
-
-        private byte[] SerializeToByteArray() {
-            using var stream = new MemoryStream();
-            SerializeInto(stream);
-            stream.Flush();
-            return stream.GetBuffer().PartOf((int)stream.Length);
-        }
     }
 }

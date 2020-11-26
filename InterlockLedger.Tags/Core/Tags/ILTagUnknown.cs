@@ -40,21 +40,20 @@ namespace InterlockLedger.Tags
         public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
         }
 
-        public ILTagUnknown(ulong tagId, byte[] bytes) : base(tagId, bytes) {
-        }
-
         public ILTagUnknown(IDataModel model, Stream s)
             : base((model ?? throw new ArgumentNullException(nameof(model))).PayloadTagId, s)
             => Model = model;
 
-        public ILTagUnknown(IDataModel model, byte[] bytes)
-            : base((model ?? throw new ArgumentNullException(nameof(model))).PayloadTagId, bytes)
-            => Model = model;
-
-        public override object AsJson => (object)Model?.ToJson(EncodedBytes) ?? Value;
-
         public IDataModel Model { get; }
 
+        internal ILTagUnknown(IDataModel model, byte[] value)
+            : base((model ?? throw new ArgumentNullException(nameof(model))).PayloadTagId, value)
+            => Model = model;
+
+        internal ILTagUnknown(ulong tagId, byte[] value) : base(tagId, value) {
+        }
+
+        //        public override object AsJson => (object)Model?.ToJson(EncodedBytes) ?? Value;
         protected override byte[] FromBytes(byte[] bytes) => bytes;
 
         protected override byte[] ToBytes() => Value;

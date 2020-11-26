@@ -76,7 +76,7 @@ namespace InterlockLedger.Tags
                 mso.Position = 0;
                 var tagArray = ILTag.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
-                CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
+                CollectionAssert.AreEqual(arrayBytes, ((ILTagByteArray)tagArray).Value);
                 fbba.Remove();
                 Assert.IsTrue(File.Exists(fi.FullName), "Backing file should not have been deleted by calling Remove()");
             } finally {
@@ -141,9 +141,8 @@ namespace InterlockLedger.Tags
                 mso.Position = 0;
                 var tagArray = ILTag.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
-                CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
+                CollectionAssert.AreEqual(arrayBytes, ((ILTagByteArray) tagArray).Value);
                 var fbba2 = new FileBackedByteArray(fi);
-                CollectionAssert.AreEqual(prefixedArrayBytes, fbba2.EncodedBytes);
                 Assert.IsFalse(fbba2.NoRemoval, "Backing file should be removable");
                 Assert.AreEqual(arrayBytes.Length, fbba2.Length);
                 using (var s = fbba2.ReadingStream) {

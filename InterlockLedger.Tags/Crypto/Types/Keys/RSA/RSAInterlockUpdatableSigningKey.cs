@@ -61,7 +61,7 @@ namespace InterlockLedger.Tags
                     throw new ArgumentNullException(nameof(encrypt));
                 if (_nextKeyParameters != null) {
                     _keyParameters = _nextKeyParameters;
-                    _value.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes); _value.Value.PublicKey = NextPublicKey;
+                    _value.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes()); _value.Value.PublicKey = NextPublicKey;
                     _nextKeyParameters = null;
                     _value.SignaturesWithCurrentKey = 0;
                 } else {

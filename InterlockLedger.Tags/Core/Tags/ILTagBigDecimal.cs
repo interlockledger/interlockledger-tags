@@ -40,6 +40,7 @@ namespace InterlockLedger.Tags
         public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal) => throw new NotImplementedException();
 
         public override object AsJson => throw new NotSupportedException();
+        public override string Formatted => throw new NotSupportedException();
 
         public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
 

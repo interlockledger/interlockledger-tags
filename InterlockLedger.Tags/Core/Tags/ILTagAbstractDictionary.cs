@@ -40,9 +40,6 @@ namespace InterlockLedger.Tags
     {
         public T this[string key] => Value?[key];
 
-        public override bool Equals(object obj)
-            => obj is ILTag other && EncodedBytes.SequenceEqual(other.EncodedBytes);
-
         public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
         protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T> value) : base(tagId, value) {
