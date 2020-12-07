@@ -13,10 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>6.2.5</Version>
+      <Version>6.3.0</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Fix Code Scanning Alert: #CWE-327  #CWE-780  #security
-- Weak encryption: inadequate RSA padding</PackageReleaseNotes>
+      <PackageReleaseNotes>Never remove files behind FileBackedTags (consumers should take care of disposing temporary files)</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

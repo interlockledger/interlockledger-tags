@@ -51,7 +51,6 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(fileInfo));
             _fileInfo = fileInfo;
             Initialize(offset, length, fileInfo.Length);
-            NoRemoval = true;
         }
 
         public override object AsJson => null;
@@ -60,7 +59,6 @@ namespace InterlockLedger.Tags
         public override string Formatted => TagTypeName;
 
         public ulong Length { get; private set; }
-        public bool NoRemoval { get; private set; }
         public long Offset { get; private set; }
 
         public Stream ReadingStream =>
@@ -70,27 +68,18 @@ namespace InterlockLedger.Tags
                     ? throw new InvalidOperationException("Nothing to read here")
                     : new StreamSpan(FileInfo.OpenRead(), Offset, Length, closeWrappedStreamOnDispose: true);
 
-        public void Remove() {
-            if (!NoRemoval) {
-                FileInfo.Delete();
-                Length = 0;
-            }
-        }
-
         public override bool ValueIs<TV>(out TV value) {
             value = default;
             return false;
         }
 
-        protected FileBackedILTag(ulong tagId, FileInfo fileInfo, bool noRemoval) : this(tagId) {
+        protected FileBackedILTag(ulong tagId, FileInfo fileInfo) : this(tagId) {
             _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
-            NoRemoval = noRemoval;
             if (fileInfo.Exists)
                 Initialize(0, 0, fileInfo.Length);
         }
 
         protected FileBackedILTag(ulong tagId) : base(tagId, default) {
-            NoRemoval = true;
             Length = 0;
             Offset = 0;
         }
@@ -104,7 +93,6 @@ namespace InterlockLedger.Tags
                 await source.CopyToAsync(fileStream, fileSizeLimit, _bufferLength, cancellationToken).ConfigureAwait(false);
                 fileStream.Flush(flushToDisk: true);
             }
-            NoRemoval = noRemoval;
             Refresh();
         }
 
