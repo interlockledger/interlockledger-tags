@@ -81,11 +81,9 @@ namespace InterlockLedger.Tags
             return FromStream(s);
         }
 
-        public bool RegisterAsField(ITagRegistrar registrar) {
-            if (registrar is null)
-                throw new ArgumentNullException(nameof(registrar));
-            return registrar.RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload);
-        }
+        public bool RegisterAsField(ITagRegistrar registrar)
+            => registrar.Required(nameof(registrar))
+                        .RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload);
 
         public void ToStream(Stream s) {
             s.EncodeUShort(Version);    // Field index 0 //

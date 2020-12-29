@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
                 ? throw new ArgumentNullException(nameof(destinationType))
                 : value is null
                     ? throw new ArgumentNullException(nameof(value))
-                    : destinationType != typeof(string) || !(value is T type)
+                    : destinationType != typeof(string) || value is not T type
                         ? throw new InvalidOperationException($"Can only convert {typeof(T).Name} to string!!!")
                         : type.TextualRepresentation;
     }

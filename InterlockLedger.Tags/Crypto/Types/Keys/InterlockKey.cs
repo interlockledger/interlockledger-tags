@@ -44,14 +44,14 @@ namespace InterlockLedger.Tags
             : this(new InterlockKeyParts(purposes,
                 name,
                 description,
-                pubKey,
-                strength ?? pubKey?.Strength ?? throw new ArgumentNullException(nameof(pubKey)),
+                pubKey.Required(nameof(pubKey)),
+                strength ?? pubKey.Strength,
                 keyId,
                 permissions)) { }
 
         public InterlockKey(IBaseKey key)
             : this(new InterlockKeyParts(
-                (key ?? throw new ArgumentNullException(nameof(key))).Purposes,
+                key.Required(nameof(key)).Purposes,
                 key.Name,
                 key.Description,
                 key.PublicKey,
@@ -141,8 +141,8 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(name));
             Version = InterlockKeyVersion;
             Name = name;
-            Purposes = purposes ?? throw new ArgumentNullException(nameof(purposes));
-            PublicKey = pubKey ?? throw new ArgumentNullException(nameof(pubKey));
+            Purposes = purposes.Required(nameof(purposes));
+            PublicKey = pubKey.Required(nameof(pubKey));
             Description = description;
             Strength = strength;
             if (Actionable && permissions.None())

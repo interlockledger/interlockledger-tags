@@ -30,6 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -42,7 +44,7 @@ namespace InterlockLedger.Tags
 {
     public static class ObjectExtensions
     {
-        public static object AsNavigable(this object value)
+        public static object? AsNavigable(this object? value)
             => value switch
             {
                 null => null,
@@ -57,23 +59,22 @@ namespace InterlockLedger.Tags
 
         public static List<T> AsSingleList<T>(this T s) => s.AsSingle().ToList();
 
-        public static string PadLeft(this object value, int totalWidth)
-            => value?.ToString().PadLeft(totalWidth);
+        public static string? PadLeft(this object? value, int totalWidth)
+            => value?.ToString()?.PadLeft(totalWidth);
 
-        public static string PadRight(this object value, int totalWidth)
-            => value?.ToString().PadRight(totalWidth);
+        public static string? PadRight(this object? value, int totalWidth)
+            => value?.ToString()?.PadRight(totalWidth);
 
-        [SuppressMessage("Style", "RCS1196:Call extension method as instance method.", Justification = "Better clarity about reuse of method name")]
-        public static string WithDefault(this object value, string @default) => StringExtensions.WithDefault(value?.ToString(), @default);
+        public static T Required<T>([NotNullWhen(returnValue: true)] this T? value, string name) where T : class => value ?? throw new ArgumentException("Required", name);
 
-        private static bool IsPrimitive(object value) => value?.GetType().IsPrimitive ?? false;
+        public static string WithDefault(this object? value, string @default) => StringExtensions.WithDefault(value?.ToString(), @default);
 
-        private static object AsILTag(object o)
+        private static object? AsILTag(object? o)
             => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")
                 ? ILTag.DeserializeFromJson(Convert.ToUInt64(dict["TagId"], CultureInfo.InvariantCulture), dict["Value"])
                 : o;
 
-        private static object FromJsonElement(JsonElement jo) {
+        private static object? FromJsonElement(JsonElement jo) {
             switch (jo.ValueKind) {
             case JsonValueKind.False:
                 return false;
@@ -100,10 +101,12 @@ namespace InterlockLedger.Tags
             }
         }
 
-        private static Dictionary<string, object> ToDictionary(object value) {
-            var dictionary = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+        private static bool IsPrimitive(object? value) => value?.GetType().IsPrimitive ?? false;
+
+        private static Dictionary<string, object?> ToDictionary(object value) {
+            var dictionary = new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
             foreach (var p in value.GetType().GetProperties()) {
-                object propertyValue = p.GetValue(value, null);
+                object? propertyValue = p.GetValue(value, null);
                 dictionary[p.Name] = AsNavigable(propertyValue);
             }
             return dictionary;

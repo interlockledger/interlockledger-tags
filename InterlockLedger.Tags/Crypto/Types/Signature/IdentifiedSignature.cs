@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
         public const ushort ImplementedVersion = 1;
 
         public IdentifiedSignature(TagSignature signature, BaseKeyId id, TagPubKey publicKey) : this() {
-            Signature = signature ?? throw new ArgumentNullException(nameof(signature));
+            Signature = signature.Required(nameof(signature));
             SignerId = id ?? throw new System.ArgumentNullException(nameof(id));
             PublicKey = publicKey ?? throw new System.ArgumentNullException(nameof(publicKey));
         }

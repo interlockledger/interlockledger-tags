@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
@@ -41,21 +40,7 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public struct TagKeyParts : IEquatable<TagKeyParts>
-    {
-        public Algorithm Algorithm;
-        public byte[] Data;
-
-        public static bool operator !=(TagKeyParts left, TagKeyParts right) => !(left == right);
-
-        public static bool operator ==(TagKeyParts left, TagKeyParts right) => left.Equals(right);
-
-        public override bool Equals(object obj) => obj is TagKeyParts parts && Equals(parts);
-
-        public bool Equals(TagKeyParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
-
-        public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
-    }
+    public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 
     [TypeConverter(typeof(TagPubKeyConverter))]
     [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
@@ -68,13 +53,20 @@ namespace InterlockLedger.Tags
         public byte[] Data => Value.Data;
         public TagHash Hash => TagHash.HashSha256Of(Data);
         public virtual KeyStrength Strength => KeyStrength.Normal;
-        public string TextualRepresentation => ToString();
+        public string TextualRepresentation => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
+
+        public static bool operator !=(TagPubKey left, TagPubKey right) => !(left == right);
+
+        public static bool operator ==(TagPubKey left, TagPubKey right) => left?.Equals(right) ?? right is null;
 
         public static TagPubKey Resolve(X509Certificate2 certificate) {
             var RSA = certificate.GetRSAPublicKey();
             if (RSA != null)
                 return new TagPubRSAKey(RSA.ExportParameters(false));
-            throw new NotSupportedException("Only support RSA certificates for now!!!");
+            var ECDsa = certificate.GetECDsaPublicKey();
+            if (ECDsa == null)
+                throw new NotSupportedException("Only support RSA certificates for now!!!");
+            throw new NotSupportedException("Not yet supporting ECDsa certificates!");
         }
 
         public static TagPubKey Resolve(string textualRepresentation) {
@@ -83,9 +75,11 @@ namespace InterlockLedger.Tags
             var parts = textualRepresentation.Split('!', '#');
             if (parts.Length != 3 || (!parts[0].Equals("PubKey", StringComparison.OrdinalIgnoreCase)) || !Enum.TryParse(parts[2], out Algorithm algorithm))
                 throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation));
-            if (algorithm != Algorithm.RSA)
-                throw new NotSupportedException("Only support RSA certificates for now!!!");
-            return new TagPubRSAKey(parts[1].FromSafeBase64());
+            if (algorithm == Algorithm.RSA)
+                return new TagPubRSAKey(parts[1].FromSafeBase64());
+            if (algorithm == Algorithm.EcDSA)
+                throw new NotSupportedException("Not yet supporting ECDsa certificates!");
+            throw new NotSupportedException("Only support RSA certificates for now!!!");
         }
 
         public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
@@ -94,16 +88,11 @@ namespace InterlockLedger.Tags
 
         public bool Equals(TagPubKey other) => (other != null) && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 
-        public override int GetHashCode() {
-            var hashCode = 699340383;
-            hashCode = (hashCode * -1521134295) + Algorithm.GetHashCode();
-            hashCode = (hashCode * -1521134295) + Data.SafeGetHashCode();
-            return hashCode;
-        }
+        public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
 
         public TagPubKey ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation);
 
-        public override string ToString() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
+        public override string ToString() => TextualRepresentation;
 
         public virtual bool Verify(byte[] dataToVerify, TagSignature signature) => false;
 
@@ -112,14 +101,12 @@ namespace InterlockLedger.Tags
             return pubKey.Algorithm == Algorithm.RSA ? new TagPubRSAKey(pubKey.Data) : pubKey;
         }
 
-        protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts { Algorithm = algorithm, Data = data }) {
+        protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) {
         }
 
         protected override TagKeyParts FromBytes(byte[] bytes)
-            => FromBytesHelper(bytes, s => new TagKeyParts {
-                Algorithm = (Algorithm)s.BigEndianReadUShort(),
-                Data = s.ReadBytes(bytes.Length - sizeof(ushort))
-            });
+            => FromBytesHelper(bytes,
+                s => new TagKeyParts((Algorithm)s.BigEndianReadUShort(), s.ReadBytes(bytes.Length - sizeof(ushort))));
 
         protected override byte[] ToBytes()
             => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)Value.Algorithm).WriteBytes(Value.Data));
@@ -143,14 +130,13 @@ namespace InterlockLedger.Tags
             return base.ConvertFrom(context, culture, Value);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType) {
-            if (destinationType == null)
-                throw new ArgumentNullException(nameof(destinationType));
-            if (Value == null)
-                throw new ArgumentNullException(nameof(Value));
-            if (destinationType != typeof(string) || !(Value is TagPubKey))
-                throw new InvalidOperationException("Can only convert TagPubKey to string!!!");
-            return Value.ToString();
-        }
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
+            => destinationType == null
+                ? throw new ArgumentNullException(nameof(destinationType))
+                : Value == null
+                    ? throw new ArgumentNullException(nameof(Value))
+                    : destinationType != typeof(string) || !(Value is TagPubKey)
+                        ? throw new InvalidOperationException("Can only convert TagPubKey to string!!!")
+                        : Value.ToString();
     }
 }

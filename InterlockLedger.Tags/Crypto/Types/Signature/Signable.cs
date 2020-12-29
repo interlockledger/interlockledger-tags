@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -47,11 +46,8 @@ namespace InterlockLedger.Tags
 
         public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
-        public SignedValue<T> SignWith(ISigningContext context) {
-            if (context is null)
-                throw new ArgumentNullException(nameof(context));
-            return new SignedValue<T>((T)this, context.Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
-        }
+        public SignedValue<T> SignWith(ISigningContext context)
+            => new SignedValue<T>((T)this, context.Required(nameof(context)).Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
 
         protected Signable(ulong tagId, ushort version) : base(tagId, version) {
         }

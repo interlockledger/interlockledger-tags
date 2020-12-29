@@ -119,22 +119,14 @@ namespace InterlockLedger.Tags
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) {
-            if (value is string text) {
-                text = text.Trim();
-                return LimitedRange.Resolve(text);
-            }
-            return base.ConvertFrom(context, culture, value);
-        }
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            => value is string text
+                ? LimitedRange.Resolve(text.Trim())
+                : base.ConvertFrom(context, culture, value);
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
-            if (destinationType == null)
-                throw new ArgumentNullException(nameof(destinationType));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (destinationType != typeof(string) || !(value is LimitedRange))
-                throw new InvalidOperationException("Can only convert Range to string!!!");
-            return value.ToString();
-        }
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            => destinationType == typeof(string) && value is LimitedRange
+                ? value.ToString()
+                : throw new InvalidOperationException("Can only convert Range to string!!!");
     }
 }

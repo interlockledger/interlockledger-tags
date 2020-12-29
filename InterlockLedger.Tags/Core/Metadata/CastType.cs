@@ -30,13 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    [SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Well we need to make it clear that we are casting to an integer number")]
     public enum CastType : byte
     {
         None = 0,

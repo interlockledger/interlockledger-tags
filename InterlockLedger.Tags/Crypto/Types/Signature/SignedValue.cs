@@ -97,7 +97,7 @@ namespace InterlockLedger.Tags
             => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();
 
         private void Init(T signedContent, IEnumerable<IdentifiedSignature> signatures) {
-            SignedContent = signedContent ?? throw new ArgumentNullException(nameof(signedContent));
+            SignedContent = signedContent.Required(nameof(signedContent));
             Signatures = signatures;
             if (Signatures.None())
                 throw new InvalidDataException("At least one signature must be provided");

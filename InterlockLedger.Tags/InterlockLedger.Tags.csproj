@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
       <LangVersion>preview</LangVersion>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <Authors>Rafael Teixeira</Authors>
@@ -13,7 +13,7 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>6.3.0</Version>
+      <Version>6.3.1</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
       <PackageReleaseNotes>Never remove files behind FileBackedTags (consumers should take care of disposing temporary files)</PackageReleaseNotes>
   </PropertyGroup>

@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -44,11 +43,11 @@ namespace InterlockLedger.Tags
         }
 
         public ILTagUnknown(IDataModel model, Stream s)
-            : base((model ?? throw new ArgumentNullException(nameof(model))).PayloadTagId, s)
+            : base((model.Required(nameof(model))).PayloadTagId, s)
             => Model = model;
 
         public ILTagUnknown(IDataModel model, byte[] bytes)
-            : base((model ?? throw new ArgumentNullException(nameof(model))).PayloadTagId, bytes)
+            : base((model.Required(nameof(model))).PayloadTagId, bytes)
             => Model = model;
 
         public override object AsJson => (object)Model?.ToJson(EncodedBytes) ?? Value;

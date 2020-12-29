@@ -256,7 +256,7 @@ namespace InterlockLedger.Tags
 
         private static uint FromColorCode(string colorCode) {
             if (colorCode == null || (colorCode.Length != 9 && colorCode.Length != 7) || colorCode[0] != '#' ||
-                !uint.TryParse(colorCode.Substring(1), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var partial))
+                !uint.TryParse(colorCode[1..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var partial))
                 return Transparent.RGBA;
             if (colorCode.Length == 7)
                 partial = (partial << 8) + 255;
@@ -267,10 +267,7 @@ namespace InterlockLedger.Tags
 
         private static byte Invert(byte component) => (byte)(255 - component);
 
-#pragma warning disable S138 // Functions should not have too many lines of code
-
         private static void LazyInitKnownColors() {
-#pragma warning restore S138 // Functions should not have too many lines of code
             if (_knownColors == null) {
                 _knownColors = new Dictionary<uint, InterlockColor> {
                     [Transparent.RGBA] = Transparent,

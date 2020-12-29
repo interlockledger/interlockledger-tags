@@ -51,11 +51,7 @@ namespace InterlockLedger.Tags
 
         public abstract byte[] Decrypt(byte[] bytes);
 
-        public string PasswordFor(InterlockId id) {
-            if (id is null)
-                throw new ArgumentNullException(nameof(id));
-            return Convert.ToBase64String(Sign(id.EncodedBytes).Data);
-        }
+        public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required(nameof(id)).EncodedBytes).Data);
 
         public abstract TagSignature Sign(byte[] data);
 

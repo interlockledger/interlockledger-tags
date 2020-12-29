@@ -31,14 +31,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    [SuppressMessage("Design", "CA1027:Mark enums with FlagsAttribute", Justification = "This is not to be bit-ored")]
     public enum KeyPurpose : ulong
     {
         InvalidKey = 0,

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -45,6 +45,10 @@ namespace InterlockLedger.Tags
     [JsonConverter(typeof(JsonInterlockIdConverter))]
     public class InterlockId : ILTagExplicit<InterlockIdParts>, IEquatable<InterlockId>, IComparable<InterlockId>
     {
+        public static IEnumerable<string> AllTypes => InterlockIdParts.AllTypes;
+
+        public static HashAlgorithm DefaultAlgorithm => InterlockIdParts.DefaultAlgorithm;
+
         public static byte DefaultType {
             get => InterlockIdParts.DefaultType;
             set {
@@ -54,14 +58,12 @@ namespace InterlockLedger.Tags
             }
         }
 
+        public HashAlgorithm Algorithm => Value.Algorithm;
         public override object AsJson => TextualRepresentation;
+        public byte[] Data => Value.Data;
         public override string Formatted => ToString();
         public bool IsEmpty => Data.HasSameBytesAs(TagHash.Empty.Data);
         public string TextualRepresentation => ToString();
-        public static IEnumerable<string> AllTypes => InterlockIdParts.AllTypes;
-        public static HashAlgorithm DefaultAlgorithm => InterlockIdParts.DefaultAlgorithm;
-        public HashAlgorithm Algorithm => Value.Algorithm;
-        public byte[] Data => Value.Data;
         public byte Type => Value.Type;
 
         public static bool operator !=(InterlockId a, InterlockId b) => !(a == b);
@@ -97,7 +99,7 @@ namespace InterlockLedger.Tags
         protected InterlockId(string textualRepresentation) : this(new InterlockIdParts(textualRepresentation)) {
         }
 
-        protected InterlockId(byte type, TagHash hash) : this(type, hash?.Algorithm ?? throw new ArgumentNullException(nameof(hash)), hash.Data) {
+        protected InterlockId(byte type, TagHash hash) : this(type, hash.Required(nameof(hash)).Algorithm, hash.Data) {
         }
 
         protected InterlockId(byte type, HashAlgorithm algorithm, byte[] data) : this(new InterlockIdParts(algorithm, data, type)) {
@@ -136,12 +138,8 @@ namespace InterlockLedger.Tags
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-            if (destinationType == typeof(InstanceDescriptor)) {
-                return true;
-            }
-            return destinationType == typeof(string);
-        }
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) {
             if (Value is string text) {
@@ -151,15 +149,10 @@ namespace InterlockLedger.Tags
             return base.ConvertFrom(context, culture, Value);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType) {
-            if (destinationType == null)
-                throw new ArgumentNullException(nameof(destinationType));
-            if (Value == null)
-                throw new ArgumentNullException(nameof(Value));
-            if (destinationType != typeof(string) || !(Value is InterlockId))
-                throw new InvalidOperationException("Can only convert InterlockId to string!!!");
-            return Value.ToString();
-        }
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
+            => destinationType.Required(nameof(destinationType)) == typeof(string) && Value is InterlockId id
+                ? id.TextualRepresentation
+                : throw new InvalidOperationException("Can only convert InterlockId to string!!!");
     }
 
     public sealed class InterlockIdParts
@@ -182,7 +175,7 @@ namespace InterlockLedger.Tags
 
         internal InterlockIdParts(HashAlgorithm algorithm, byte[] data, byte type) {
             Algorithm = algorithm;
-            Data = data ?? throw new ArgumentNullException(nameof(data));
+            Data = data.Required(nameof(data));
             Type = type;
         }
 
@@ -206,17 +199,13 @@ namespace InterlockLedger.Tags
 
         internal static HashAlgorithm DefaultAlgorithm => _defaultAlgorithm;
 
-        internal static void RegisterResolver(byte type, string typeName, Func<InterlockIdParts, InterlockId> resolver) {
-            if (resolver is null)
-                throw new ArgumentNullException(nameof(resolver));
-            _knownTypes[type] = (typeName, resolver);
-        }
+        internal static void RegisterResolver(byte type, string typeName, Func<InterlockIdParts, InterlockId> resolver)
+            => _knownTypes[type] = (typeName, resolver.Required(nameof(resolver)));
 
-        internal InterlockId Resolve() {
-            if (_knownTypes.ContainsKey(Type))
-                return _knownTypes[Type].resolver(this);
-            throw new InvalidDataException($"Could not match this InterlockId type {Type}");
-        }
+        internal InterlockId Resolve()
+            => _knownTypes.ContainsKey(Type)
+                ? _knownTypes[Type].resolver(this)
+                : throw new InvalidDataException($"Could not match this InterlockId type {Type}");
 
         internal string ToFullString() => $"{_typePrefix}{_dataInfix}{_algorithmSuffix}";
 

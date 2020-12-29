@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags
         }
 
         public EnumerationDetails(string name, string description) {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name.Required(nameof(name));
             Description = description;
         }
 

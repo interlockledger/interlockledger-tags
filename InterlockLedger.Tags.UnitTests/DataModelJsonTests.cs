@@ -405,8 +405,8 @@ namespace InterlockLedger.Tags
             public JsonTestTaggedData(ushort version, ulong id, string name, string hidden, SomeEnumeration some = SomeEnumeration.None, params ulong[] values) {
                 Version = version;
                 Id = id;
-                Name = name ?? throw new ArgumentNullException(nameof(name));
-                Hidden = hidden ?? throw new ArgumentNullException(nameof(hidden));
+                Name = name.Required(nameof(name));
+                Hidden = hidden.Required(nameof(hidden));
                 SemanticVersion = new Version(1, 0, 1, 33);
                 AsPayload = new Payload<JsonTestTaggedData>(PayloadTagId, this);
                 Values = values;

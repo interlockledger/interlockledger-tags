@@ -37,8 +37,6 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-#pragma warning disable CA1062 // Validate arguments of public methods
-
     [TestFixture]
     public class EncryptedBlobTests
     {

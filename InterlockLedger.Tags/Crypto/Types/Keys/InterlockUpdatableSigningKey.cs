@@ -68,8 +68,8 @@ namespace InterlockLedger.Tags
         protected readonly InterlockUpdatableSigningKeyData _value;
 
         protected InterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, ITimeStamper timeStamper) {
-            _value = tag ?? throw new ArgumentNullException(nameof(tag));
-            _timeStamper = timeStamper ?? throw new ArgumentNullException(nameof(timeStamper));
+            _value = tag.Required(nameof(tag));
+            _timeStamper = timeStamper.Required(nameof(timeStamper));
             _value.LastSignatureTimeStamp = _timeStamper.Now;
         }
 

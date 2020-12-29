@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************************************************************************************************************/
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json.Serialization;
 
@@ -58,13 +57,11 @@ namespace InterlockLedger.Tags
 
         protected ILTagImplicit(ulong tagId, T value) : base(tagId) => Value = value;
 
-        [SuppressMessage("Usage", "CA2214:Do not call overridable methods in constructors", Justification = "We need it")]
         protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup = null) : base(alreadyDeserializedTagId) {
             setup?.Invoke(this);
             Value = DeserializeInner(s);
         }
 
-        [SuppressMessage("Usage", "CA2214:Do not call overridable methods in constructors", Justification = "We need it")]
         protected ILTagImplicit(ulong tagId, Stream s) : base(tagId) {
             ValidateTagId(s.ILIntDecode());
             Value = DeserializeInner(s);

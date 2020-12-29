@@ -84,7 +84,7 @@ namespace InterlockLedger.Tags
             if (HasDeserializer(id))
                 throw new ArgumentException($"Can't redefine deserializer for id: {id}", nameof(id));
             _deserializers[id] = (
-                deserializer ?? throw new ArgumentNullException(nameof(deserializer)),
+                deserializer.Required(nameof(deserializer)),
                 jsonDeserializer ?? NoJson
             );
         }

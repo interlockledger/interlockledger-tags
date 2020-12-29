@@ -30,15 +30,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
-
 namespace InterlockLedger.Tags
 {
     public class SigningContext : ISigningContext
     {
         public SigningContext(InterlockSigningKey key, ITimeStamper timeStamper) {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-            TimeStamper = timeStamper ?? throw new ArgumentNullException(nameof(timeStamper));
+            Key = key.Required(nameof(key));
+            TimeStamper = timeStamper.Required(nameof(timeStamper));
         }
 
         public ISigningKey Key { get; }

@@ -86,7 +86,7 @@ namespace InterlockLedger.Tags
         public AppPermissions ResolveFrom(string textualRepresentation) {
             if (string.IsNullOrWhiteSpace(textualRepresentation) || !Mask.IsMatch(textualRepresentation))
                 throw new ArgumentException($"Invalid textual representation '{textualRepresentation}'", nameof(textualRepresentation));
-            var parts = textualRepresentation.Substring(1).Split(',').AsOrderedUlongs();
+            var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
             AppId = parts.First();
             ActionIds = parts.Skip(1).ToArray();
             return this;

@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -39,7 +38,7 @@ namespace InterlockLedger.Tags
     {
         public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
 
-        public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo ?? throw new ArgumentNullException(nameof(fileInfo))) { }
+        public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo.Required(nameof(fileInfo))) { }
 
         public FileBackedByteArray() : base(ILTagId.ByteArray) { }
 

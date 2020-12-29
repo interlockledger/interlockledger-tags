@@ -35,10 +35,6 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-
-
-#pragma warning disable CA2000 // Dispose objects before losing scope
-
     [TestFixture]
     public class InterlockIdTests
     {

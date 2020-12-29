@@ -62,7 +62,7 @@ namespace InterlockLedger.Tags
                 ReaderId = id;
                 PublickKeyHash = publickKeyHash;
                 EncryptedKey = encryptedKey ?? throw new System.ArgumentNullException(nameof(encryptedKey));
-                EncryptedIV = encryptedIV ?? throw new ArgumentNullException(nameof(encryptedIV));
+                EncryptedIV = encryptedIV.Required(nameof(encryptedIV));
             }
 
             public static bool operator !=(Parts left, Parts right) => !(left == right);

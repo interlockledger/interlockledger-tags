@@ -146,7 +146,7 @@ namespace InterlockLedger.Tags
                 ulong FindKey(string value) {
                     try {
                         return Regex.IsMatch(value, @"^\?\d+$")
-                            ? ulong.Parse(value.Substring(1), CultureInfo.InvariantCulture)
+                            ? ulong.Parse(value[1..], CultureInfo.InvariantCulture)
                             : EnumerationDefinition.First(kp => kp.Value.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase)).Key;
                     } catch (Exception e) {
                         throw new InvalidDataException($"Value '{value}' is not valid for the enumeration for field [{Name}]", e);
@@ -274,7 +274,7 @@ namespace InterlockLedger.Tags
                 ElementTagId = s.DecodeNullableILInt(),
                 SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
                 Cast = s.HasBytes() ? (CastType?)s.DecodeNullableByte() : null,
-                SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
+                SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : 0),
                 Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
                 EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
                 EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,

@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
         }
 
         public StreamSpan(Stream s, long offset, ulong length, bool closeWrappedStreamOnDispose = false) {
-            _s = s ?? throw new ArgumentNullException(nameof(s));
+            _s = s.Required(nameof(s));
             _closeWrappedStreamOnDispose = closeWrappedStreamOnDispose;
             if (!s.CanRead)
                 throw new ArgumentException("original stream needs to be readable");

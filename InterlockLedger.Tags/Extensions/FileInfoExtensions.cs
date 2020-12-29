@@ -41,8 +41,8 @@ namespace InterlockLedger.Tags
         private class FbbaInputStream : FileStream
         {
             public FbbaInputStream(FileInfo fileInfo, Action<FileInfo> use) : base(fileInfo?.FullName, FileMode.CreateNew, FileAccess.Write) {
-                _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
-                _use = use ?? throw new ArgumentNullException(nameof(use));
+                _fileInfo = fileInfo.Required(nameof(fileInfo));
+                _use = use.Required(nameof(use));
             }
 
             protected override void Dispose(bool disposing) {

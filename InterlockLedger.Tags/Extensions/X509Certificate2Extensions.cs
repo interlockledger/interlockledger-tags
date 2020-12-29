@@ -41,28 +41,18 @@ namespace InterlockLedger.Tags
     public static class X509Certificate2Extensions
     {
         public static string FullName(this X509Certificate2 certificate)
-            => certificate is null
-                ? throw new ArgumentNullException(nameof(certificate))
-                : certificate.SubjectName.Format(false);
+            => certificate.Required(nameof(certificate)).SubjectName.Format(false);
 
         public static KeyStrength KeyStrengthGuess(this X509Certificate2 certificate)
-            => certificate is null
-                ? throw new ArgumentNullException(nameof(certificate))
-                : certificate.GetRSAPublicKey().KeyStrengthGuess();
+            => certificate.Required(nameof(certificate)).GetRSAPublicKey().KeyStrengthGuess();
 
         public static TagPubKey PubKey(this X509Certificate2 certificate)
-            => certificate is null
-                ? throw new ArgumentNullException(nameof(certificate))
-                : new TagPubRSAKey(certificate.GetRSAPublicKey().ExportParameters(false));
+            => TagPubKey.Resolve(certificate);
 
         public static string SimpleName(this X509Certificate2 certificate)
-            => certificate is null
-                ? throw new ArgumentNullException(nameof(certificate))
-                : certificate.FriendlyName.WithDefault(certificate.DottedName());
+            => certificate.Required(nameof(certificate)).FriendlyName.WithDefault(certificate.DottedName());
 
         private static string DottedName(this X509Certificate2 certificate)
-            => certificate is null
-                ? throw new ArgumentNullException(nameof(certificate))
-                : certificate.SubjectName.Name.Split(',').Select(part => part.Split('=').Last()).Reverse().JoinedBy(".");
+            => certificate.Required(nameof(certificate)).SubjectName.Name.Split(',').Select(part => part.Split('=').Last()).Reverse().JoinedBy(".");
     }
 }

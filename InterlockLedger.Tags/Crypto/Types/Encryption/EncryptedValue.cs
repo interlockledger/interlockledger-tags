@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(readers));
             byte[] key;
             byte[] iv;
-            (CipherText, key, iv) = author.Encrypt(cipher, payloadInClearText ?? throw new ArgumentNullException(nameof(payloadInClearText)));
+            (CipherText, key, iv) = author.Encrypt(cipher, payloadInClearText.Required(nameof(payloadInClearText)));
             ReadingKeys = BuildReadingKeys(readers, key, iv, author.Id.TextualRepresentation, author.PublicKey);
             Cipher = cipher;
         }

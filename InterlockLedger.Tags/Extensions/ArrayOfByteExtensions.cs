@@ -165,7 +165,7 @@ namespace InterlockLedger.Tags
             => ToSafeBase64(bytes.ToArray());
 
         public static string ToSafeBase64(this byte[] bytes)
-            => Convert.ToBase64String(bytes ?? throw new ArgumentNullException(nameof(bytes))).Trim('=').Replace('+', '-').Replace('/', '_');
+            => Convert.ToBase64String(bytes.Required(nameof(bytes))).Trim('=').Replace('+', '-').Replace('/', '_');
 
         public static string ToSafeBase64(this ReadOnlyMemory<byte> readOnlyBytes) // TODO try to not create an Array
             => ToSafeBase64(readOnlyBytes.ToArray());

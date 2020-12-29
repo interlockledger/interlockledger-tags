@@ -34,7 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -66,7 +65,6 @@ namespace InterlockLedger.Tags
         public override string Formatted => TextualRepresentation;
         public string TextualRepresentation => ToString();
 
-        [SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "SafeAny takes care")]
         public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
 
         public static TagHash HashSha256Of(byte[] data) => new TagHash(HashAlgorithm.SHA256, HashSha256(data));
@@ -92,11 +90,8 @@ namespace InterlockLedger.Tags
         internal TagHash(Stream s) : base(ILTagId.Hash, s) {
         }
 
-        internal static TagHash HashFrom(X509Certificate2 certificate) {
-            if (certificate is null)
-                throw new ArgumentNullException(nameof(certificate));
-            return new TagHash(HashAlgorithm.SHA1, certificate.GetCertHash());
-        }
+        internal static TagHash HashFrom(X509Certificate2 certificate)
+            => new TagHash(HashAlgorithm.SHA1, certificate.Required(nameof(certificate)).GetCertHash());
 
         protected override TagHashParts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => new TagHashParts {
@@ -135,23 +130,15 @@ namespace InterlockLedger.Tags
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) {
-            if (Value is string text) {
-                text = text.Trim();
-                return TagHash.From(text);
-            }
-            return base.ConvertFrom(context, culture, Value);
-        }
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value)
+            => Value is string text
+                ? TagHash.From(text.Trim())
+                : base.ConvertFrom(context, culture, Value);
 
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType) {
-            if (destinationType == null)
-                throw new ArgumentNullException(nameof(destinationType));
-            if (Value == null)
-                throw new ArgumentNullException(nameof(Value));
-            if (destinationType != typeof(string) || !(Value is TagHash))
-                throw new InvalidOperationException("Can only convert TagHash to string!!!");
-            return Value.ToString();
-        }
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
+            => destinationType == typeof(string) && Value is TagHash
+                ? Value.ToString()
+                : throw new InvalidOperationException("Can only convert TagHash to string!!!");
     }
 
     public class TagHashParts

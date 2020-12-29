@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
 
         public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
-            => new EncryptedBlob(value ?? throw new ArgumentNullException(nameof(value)));
+            => new EncryptedBlob(value.Required(nameof(value)));
 
         public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 

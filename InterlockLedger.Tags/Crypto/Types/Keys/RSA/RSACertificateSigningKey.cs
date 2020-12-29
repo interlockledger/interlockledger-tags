@@ -44,8 +44,8 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(data));
             if (data.EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
                 throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
-            _password = password ?? throw new ArgumentNullException(nameof(password));
-            _certificateBytes = certificateBytes ?? throw new ArgumentNullException(nameof(certificateBytes));
+            _password = password.Required(nameof(password));
+            _certificateBytes = certificateBytes.Required(nameof(certificateBytes));
         }
 
         public override byte[] AsSessionState {

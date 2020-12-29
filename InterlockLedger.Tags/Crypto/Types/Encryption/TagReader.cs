@@ -53,7 +53,7 @@ namespace InterlockLedger.Tags
                 if (string.IsNullOrWhiteSpace(id))
                     throw new ArgumentException("Must provide a non-empty id for this reader", nameof(id));
                 ReaderId = id;
-                PublicKey = publicKey ?? throw new ArgumentNullException(nameof(publicKey));
+                PublicKey = publicKey.Required(nameof(publicKey));
             }
 
             public static bool operator !=(Parts left, Parts right) => !(left == right);

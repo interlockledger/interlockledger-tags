@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -30,7 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.IO;
 using System.Text.Json.Serialization;
 
@@ -40,8 +39,7 @@ namespace InterlockLedger.Tags
     public class BaseKeyId : InterlockId
     {
         public static BaseKeyId OptionalResolve(Stream s) {
-            if (s is null)
-                throw new ArgumentNullException(nameof(s));
+            s.Required(nameof(s));
             return s.Position < s.Length ? Resolve(s) as BaseKeyId : null;
         }
 
@@ -53,7 +51,7 @@ namespace InterlockLedger.Tags
         protected BaseKeyId(string textualRepresentation) : base(textualRepresentation) {
         }
 
-        protected BaseKeyId(byte type, TagHash hash) : base(type, hash?.Algorithm ?? throw new ArgumentNullException(nameof(hash)), hash.Data) {
+        protected BaseKeyId(byte type, TagHash hash) : base(type, hash.Required(nameof(hash)).Algorithm, hash.Data) {
         }
 
         protected BaseKeyId(InterlockIdParts parts) : base(parts) {

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -29,24 +29,41 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
+#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace InterlockLedger.Tags
 {
-    public class SenderIdentity
+    public class SenderIdentity : IEquatable<SenderIdentity?>
     {
         public readonly BaseKeyId Id;
         public readonly TagPubKey PublicKey;
 
         public SenderIdentity(BaseKeyId id, TagPubKey publicKey) {
-            Id = id;
-            PublicKey = publicKey;
+            Id = id.Required(nameof(id));
+            PublicKey = publicKey.Required(nameof(publicKey));
+            _reader = new Lazy<TagReader>(() => new TagReader(Id.TextualRepresentation, PublicKey));
         }
 
         public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey()) { }
 
+        public TagReader AsReader => _reader.Value;
+
+        public static bool operator !=(SenderIdentity? left, SenderIdentity? right) => !(left == right);
+
+        public static bool operator ==(SenderIdentity? left, SenderIdentity? right) => left?.Equals(right) ?? right is null;
+
+        public override bool Equals(object? obj) => Equals(obj as SenderIdentity);
+
+        public bool Equals(SenderIdentity? other) => other != null && Id == other.Id && PublicKey == other.PublicKey;
+
+        public override int GetHashCode() => HashCode.Combine(Id, PublicKey);
+
         public override string ToString() => $"Sender {Id} with public key {PublicKey}";
+
+        private readonly Lazy<TagReader> _reader;
     }
 }

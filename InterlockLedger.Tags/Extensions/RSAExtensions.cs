@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -30,13 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
 
-using System;
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-#pragma warning disable S101 // Types should be named in PascalCase
-
     public static class RSAExtensions
     {
         //  enum KeyStrength
@@ -48,8 +45,9 @@ namespace InterlockLedger.Tags
         //  HyperStrong = 5,    // RSA 7172
         //  UltraStrong = 6     // RSA 8192
 
-        public static KeyStrength KeyStrengthGuess(this RSA key)
-            => key is null ? throw new ArgumentNullException(nameof(key)) : Guess(key.KeySize);
+        public static KeyStrength KeyStrengthGuess(this RSA key) => Guess(key.Required(nameof(key)).KeySize);
+
+        public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
 
         private static KeyStrength Guess(int size)
             => size <= 2048
@@ -65,7 +63,5 @@ namespace InterlockLedger.Tags
                                 : size <= 7172
                                     ? KeyStrength.HyperStrong
                                     : KeyStrength.UltraStrong;
-
-        public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
     }
 }

@@ -38,13 +38,10 @@ namespace InterlockLedger.Tags
 {
     public class AES256Engine : ISymmetricEngine
     {
-        public byte[] Decrypt(byte[] cipherData, byte[] key, byte[] iv) {
-            if (cipherData is null)
-                throw new ArgumentNullException(nameof(cipherData));
-            if (key is null)
-                throw new ArgumentNullException(nameof(key));
-            return Decrypt(cipherData, readHeader: _ => (key, iv));
-        }
+        public byte[] Decrypt(byte[] cipherData, byte[] key, byte[] iv)
+            => key is null
+                ? throw new ArgumentNullException(nameof(key))
+                : Decrypt(cipherData.Required(nameof(cipherData)), readHeader: _ => (key, iv));
 
         public byte[] Decrypt(byte[] cipherData, Func<MemoryStream, (byte[] key, byte[] iv)> readHeader) {
             if (cipherData is null)

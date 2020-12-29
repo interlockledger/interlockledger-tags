@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
     public class FileBackedILTag<T> : ILTagExplicitBase<T>
     {
         public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : this(tagId) {
-            _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
+            _fileInfo = fileInfo.Required(nameof(fileInfo));
             CopyFromAsync(source).Wait();
         }
 
@@ -74,7 +74,7 @@ namespace InterlockLedger.Tags
         }
 
         protected FileBackedILTag(ulong tagId, FileInfo fileInfo) : this(tagId) {
-            _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
+            _fileInfo = fileInfo.Required(nameof(fileInfo));
             if (fileInfo.Exists)
                 Initialize(0, 0, fileInfo.Length);
         }
