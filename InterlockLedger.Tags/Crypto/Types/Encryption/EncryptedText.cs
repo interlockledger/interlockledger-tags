@@ -36,30 +36,27 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class EncryptedBlob : VersionedValue<EncryptedBlob>
+    public class EncryptedText : VersionedValue<EncryptedText>
     {
-        public static readonly DataField FieldDefinition = new EncryptedBlob().FieldModel;
+        public static readonly DataField FieldDefinition = new EncryptedText().FieldModel;
 
-        public EncryptedBlob() : base(ILTagId.EncryptedBlob, EncryptedValue<ILTagByteArray>.CurrentVersion)
-            => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob);
+        public EncryptedText() : base(ILTagId.EncryptedText, EncryptedValue<ILTagString>.CurrentVersion)
+            => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText);
 
-        public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, ISigner author, IEnumerable<TagReader> readers) : this()
-            => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, new ILTagByteArray(blobInClearText), author, readers);
+        public EncryptedText(CipherAlgorithm cipher, string clearText, ISigner author, IEnumerable<TagReader> readers) : this()
+            => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText, cipher, new ILTagString(clearText), author, readers);
 
         public CipherAlgorithm Cipher => _encrypted.Cipher;
         public byte[] CipherText => _encrypted.CipherText;
         public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
-        protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
-        public override string TypeName => nameof(EncryptedBlob);
+        public override string TypeName => nameof(EncryptedText);
 
-        public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
-            => new EncryptedBlob(value.Required(nameof(value)));
+        public static EncryptedText Embed(EncryptedValue<ILTagString> value)
+            => new EncryptedText(value.Required(nameof(value)));
 
-        public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
+        public ILTagString Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
-        public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
-
-        public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
+        public string DecryptText(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
 
         protected override object AsJson {
             get {
@@ -68,16 +65,18 @@ namespace InterlockLedger.Tags
             }
         }
 
-        protected override string TypeDescription => "An array of bytes encrypted for some readers";
+        protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
+
+        protected override string TypeDescription => "A text encrypted for some readers";
 
         protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
 
         protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
 
-        protected override EncryptedBlob FromJson(object json) => new EncryptedBlob(_encrypted.FromJson(json));
+        protected override EncryptedText FromJson(object json) => new EncryptedText(_encrypted.FromJson(json));
 
-        private readonly EncryptedValue<ILTagByteArray> _encrypted;
+        private readonly EncryptedValue<ILTagString> _encrypted;
 
-        private EncryptedBlob(EncryptedValue<ILTagByteArray> encrypted) : base(ILTagId.EncryptedBlob, encrypted.Version) => _encrypted = encrypted;
+        private EncryptedText(EncryptedValue<ILTagString> encrypted) : base(ILTagId.EncryptedText, encrypted.Version) => _encrypted = encrypted;
     }
 }
