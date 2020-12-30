@@ -94,13 +94,13 @@ namespace InterlockLedger.Tags
             Assert.IsTrue(ae.Message.StartsWith(expectedMessageStart, StringComparison.Ordinal), $"Exception message doesn't start with {expectedMessageStart}");
         }
 
-        private void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
+        private static void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
             var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));
             var clear = tag.Decrypt(password);
             Assert.AreEqual(value, AsBool(clear));
         }
 
-        private byte[] SerializeAES256Encrypted(bool value, string password) {
+        private static byte[] SerializeAES256Encrypted(bool value, string password) {
             var result = new TestableAES256Encrypted(value ? ILTagBool.True : ILTagBool.False, password);
             var clear = result.Decrypt(password);
             Assert.AreEqual(value, AsBool(clear));

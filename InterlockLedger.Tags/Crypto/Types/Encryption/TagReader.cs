@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -36,23 +36,26 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class TagReader : ILTagExplicit<TagReader.Parts>
+    public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
     {
-        public TagReader(string id, TagPubKey publicKey) : base(ILTagId.Reader, new Parts(id, publicKey)) {
-        }
+        public TagReader(string name, TagPubKey publicKey) :
+            base(ILTagId.Reader, new Parts(name.Required(nameof(name)), publicKey.Required(nameof(publicKey)))) { }
 
-        public string Id => Value.ReaderId;
+        public TagReader(IIdentifiedPublicKey ipk) : this(ipk.Required(nameof(ipk)).Identifier, ipk.PublicKey) { }
+
+        BaseKeyId IIdentifiedPublicKey.Id { get; }
+        public string Name => Value.Name;
         public TagPubKey PublicKey => Value.PublicKey;
 
         public struct Parts : IEquatable<Parts>
         {
+            public readonly string Name;
             public readonly TagPubKey PublicKey;
-            public readonly string ReaderId;
 
-            public Parts(string id, TagPubKey publicKey) {
-                if (string.IsNullOrWhiteSpace(id))
-                    throw new ArgumentException("Must provide a non-empty id for this reader", nameof(id));
-                ReaderId = id;
+            public Parts(string name, TagPubKey publicKey) {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("Must provide a non-empty name for this reader", nameof(name));
+                Name = name;
                 PublicKey = publicKey.Required(nameof(publicKey));
             }
 
@@ -62,20 +65,20 @@ namespace InterlockLedger.Tags
 
             public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
 
-            public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && ReaderId == other.ReaderId;
+            public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && Name == other.Name;
 
-            public override int GetHashCode() => HashCode.Combine(PublicKey, ReaderId);
+            public override int GetHashCode() => HashCode.Combine(PublicKey, Name);
 
-            public override string ToString() => $"Reader {ReaderId} with public key {PublicKey}";
+            public override string ToString() => $"Reader '{Name}' with public key {PublicKey}";
         }
 
         internal TagReader(Stream s) : base(ILTagId.Reader, s) {
         }
 
-        protected override Parts FromBytes(byte[] bytes) =>
-            FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
+        protected override Parts FromBytes(byte[] bytes)
+            => FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
 
         protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.EncodeString(Value.ReaderId).EncodeTag(Value.PublicKey));
+            => ToBytesHelper(s => s.EncodeString(Value.Name).EncodeTag(Value.PublicKey));
     }
 }

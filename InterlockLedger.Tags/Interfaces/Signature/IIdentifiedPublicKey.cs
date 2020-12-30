@@ -29,19 +29,15 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ******************************************************************************************************************************/
+#nullable enable
 
 namespace InterlockLedger.Tags
 {
-    public interface ISigner : ISigningContext, IIdentifiedPublicKey
+    public interface IIdentifiedPublicKey
     {
-        Algorithm Algorithm { get; }
-        InterlockKey AsInterlockKey { get; }
-        KeyStrength Strength { get; }
-
-        TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
-
-        IdentifiedSignature SignWithId(byte[] data) => new IdentifiedSignature(Key.Sign(data), Id, PublicKey);
-
-        bool Supports(KeyPurpose purpose, ulong? appId = null);
+        BaseKeyId? Id { get; }
+        string Identifier => (Id?.TextualRepresentation).WithDefault(Name).WithDefault(PublicKey.Hash.TextualRepresentation);
+        string? Name { get; }
+        TagPubKey PublicKey { get; }
     }
 }

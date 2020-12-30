@@ -32,16 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace InterlockLedger.Tags
 {
-    public interface ISigner : ISigningContext, IIdentifiedPublicKey
+    public interface IEncryptor
     {
-        Algorithm Algorithm { get; }
-        InterlockKey AsInterlockKey { get; }
-        KeyStrength Strength { get; }
-
-        TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
-
-        IdentifiedSignature SignWithId(byte[] data) => new IdentifiedSignature(Key.Sign(data), Id, PublicKey);
-
-        bool Supports(KeyPurpose purpose, ulong? appId = null);
+        (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag;
+        (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText);
     }
 }

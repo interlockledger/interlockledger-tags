@@ -35,7 +35,7 @@ using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-    public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHasher, IReader
+    public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHasher, IReader, IEncryptor
     {
         public static readonly TestFakeSigner FixedKeysInstance = new TestFakeSigner(generateEmptySignatures: false);
         public static readonly TestFakeSigner Instance = new TestFakeSigner(generateEmptySignatures: true);

@@ -43,8 +43,8 @@ namespace InterlockLedger.Tags
         public EncryptedText() : base(ILTagId.EncryptedText, EncryptedValue<ILTagString>.CurrentVersion)
             => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText);
 
-        public EncryptedText(CipherAlgorithm cipher, string clearText, ISigner author, IEnumerable<TagReader> readers) : this()
-            => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText, cipher, new ILTagString(clearText), author, readers);
+        public EncryptedText(CipherAlgorithm cipher, string clearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
+            => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText, cipher, encryptor, new ILTagString(clearText), author, readers);
 
         public CipherAlgorithm Cipher => _encrypted.Cipher;
         public byte[] CipherText => _encrypted.CipherText;

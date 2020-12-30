@@ -177,7 +177,7 @@ namespace InterlockLedger.Tags
                         16, 248, 8,
         }, TestName = "SerializeEncryptedBlob")]
         public byte[] SerializeEncryptedBlob(CipherAlgorithm algorithm, byte[] data) {
-            var encodedBytes = new EncryptedBlob(algorithm, data, TestFakeSigner.FixedKeysInstance, Array.Empty<TagReader>()).AsPayload.EncodedBytes;
+            var encodedBytes = new EncryptedBlob(algorithm, data, TestFakeSigner.FixedKeysInstance, TestFakeSigner.FixedKeysInstance, Array.Empty<TagReader>()).AsPayload.EncodedBytes;
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes.PartOf(124);
         }

@@ -37,20 +37,21 @@ using System.Security.Claims;
 
 namespace InterlockLedger.Tags
 {
-    public class SenderIdentity : IEquatable<SenderIdentity?>
+    public class SenderIdentity : IEquatable<SenderIdentity?>, IIdentifiedPublicKey
     {
-        public readonly BaseKeyId Id;
-        public readonly TagPubKey PublicKey;
-
-        public SenderIdentity(BaseKeyId id, TagPubKey publicKey) {
+        public SenderIdentity(BaseKeyId id, TagPubKey publicKey, string? name) {
             Id = id.Required(nameof(id));
             PublicKey = publicKey.Required(nameof(publicKey));
+            Name = name;
             _reader = new Lazy<TagReader>(() => new TagReader(Id.TextualRepresentation, PublicKey));
         }
 
-        public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey()) { }
+        public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey(), claims.Name()) { }
 
         public TagReader AsReader => _reader.Value;
+        public BaseKeyId Id { get; }
+        public string? Name { get; }
+        public TagPubKey PublicKey { get; }
 
         public static bool operator !=(SenderIdentity? left, SenderIdentity? right) => !(left == right);
 

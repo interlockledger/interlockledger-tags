@@ -1,5 +1,5 @@
 /******************************************************************************************************************************
- 
+
 Copyright (c) 2018-2020 InterlockLedger Network
 All rights reserved.
 
@@ -43,15 +43,15 @@ namespace InterlockLedger.Tags
 
         public EncryptedValue(ulong tagId) => TagId = tagId;
 
-        public EncryptedValue(ulong tagId, CipherAlgorithm cipher, T payloadInClearText, ISigner author, IEnumerable<TagReader> readers) : this(tagId) {
+        public EncryptedValue(ulong tagId, CipherAlgorithm cipher, IEncryptor encryptor, T payloadInClearText, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this(tagId) {
             if (author is null)
                 throw new ArgumentNullException(nameof(author));
             if (readers is null)
                 throw new ArgumentNullException(nameof(readers));
             byte[] key;
             byte[] iv;
-            (CipherText, key, iv) = author.Encrypt(cipher, payloadInClearText.Required(nameof(payloadInClearText)));
-            ReadingKeys = BuildReadingKeys(readers, key, iv, author.Id.TextualRepresentation, author.PublicKey);
+            (CipherText, key, iv) = encryptor.Encrypt(cipher, payloadInClearText.Required(nameof(payloadInClearText)));
+            ReadingKeys = BuildReadingKeys(readers, key, iv, author.Identifier, author.PublicKey);
             Cipher = cipher;
         }
 
@@ -103,7 +103,7 @@ namespace InterlockLedger.Tags
         private static TagReadingKey[] BuildReadingKeys(IEnumerable<TagReader> readers, byte[] symmetricKey, byte[] IV, string id, TagPubKey publicKey) {
             var readingKeys = new List<TagReadingKey> { BuildReadingKey(symmetricKey, IV, id, publicKey) };
             foreach (var reader in readers)
-                readingKeys.Add(BuildReadingKey(symmetricKey, IV, reader.Id, reader.PublicKey));
+                readingKeys.Add(BuildReadingKey(symmetricKey, IV, reader.Name, reader.PublicKey));
             return readingKeys.ToArray();
         }
     }
