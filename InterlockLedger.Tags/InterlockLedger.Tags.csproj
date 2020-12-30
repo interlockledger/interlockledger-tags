@@ -13,7 +13,7 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>6.4.0</Version>
+      <Version>6.4.1</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
       <PackageReleaseNotes>New EncryptedText tag</PackageReleaseNotes>
   </PropertyGroup>

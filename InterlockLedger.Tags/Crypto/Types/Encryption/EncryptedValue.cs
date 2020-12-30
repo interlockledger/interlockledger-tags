@@ -84,7 +84,7 @@ namespace InterlockLedger.Tags
                 throw new ArgumentNullException(nameof(reader));
             if (findEngine is null)
                 throw new ArgumentNullException(nameof(findEngine));
-            var readingKey = ReadingKeys.FirstOrDefault(rk => rk.PublickKeyHash == reader.PublickKeyHash && rk.ReaderId == reader.Id);
+            var readingKey = ReadingKeys.FirstOrDefault(rk => rk.PublicKeyHash == reader.PublicKeyHash && rk.ReaderId == reader.Id);
             if (readingKey is null)
                 return null;
             (byte[] key, byte[] iv) = reader.OpenKeyAndIV(readingKey.EncryptedKey, readingKey.EncryptedIV);

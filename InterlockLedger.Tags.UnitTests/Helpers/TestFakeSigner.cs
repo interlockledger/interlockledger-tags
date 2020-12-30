@@ -54,7 +54,7 @@ namespace InterlockLedger.Tags
 
         public DateTimeOffset Now => KnownTimeStamp;
 
-        public TagHash PublickKeyHash => PublicKey?.Hash;
+        public TagHash PublicKeyHash => PublicKey?.Hash;
 
         public TagHash Session => TagHash.Empty;
 

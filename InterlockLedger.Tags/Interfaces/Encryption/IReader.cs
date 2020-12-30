@@ -35,7 +35,7 @@ namespace InterlockLedger.Tags
     public interface IReader
     {
         string Id { get; }
-        TagHash PublickKeyHash { get; }
+        TagHash PublicKeyHash { get; }
 
         (byte[] key, byte[] iv) OpenKeyAndIV(byte[] encryptedKey, byte[] encryptedIV);
     }
