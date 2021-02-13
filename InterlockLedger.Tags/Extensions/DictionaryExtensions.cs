@@ -30,25 +30,19 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace InterlockLedger.Tags
 {
     public static class DictionaryExtensions
     {
-        public static readonly StringComparer CaseIgnoringComparer = StringComparer.Create(CultureInfo.InvariantCulture, true);
 
         public static Dictionary<string, T> AddIf<T>(this Dictionary<string, T> dictionary, bool add, string key, T value) {
             if (add)
                 dictionary?.Add(key, value);
             return dictionary;
         }
-
-        public static Dictionary<string, T> CaseIgnoring<T>(this Dictionary<string, T> dictionary)
-            => new Dictionary<string, T>(dictionary, CaseIgnoringComparer);
 
         internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary oldEnumeration, EnumerationDictionary newEnumeration)
             => oldEnumeration.None() || oldEnumeration.EqualTo(newEnumeration?.Take(oldEnumeration.Count));

@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -34,7 +34,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json;
@@ -45,8 +44,7 @@ namespace InterlockLedger.Tags
     public static class ObjectExtensions
     {
         public static object? AsNavigable(this object? value)
-            => value switch
-            {
+            => value switch {
                 null => null,
                 string s => s,
                 IJsonCustomized o => o,
@@ -54,7 +52,6 @@ namespace InterlockLedger.Tags
                 IEnum items => items.AsList<object>(),
                 _ => IsPrimitive(value) ? value : AsILTag(ToDictionary(value))
             };
-
 
         private static object? AsILTag(object? o)
             => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")
