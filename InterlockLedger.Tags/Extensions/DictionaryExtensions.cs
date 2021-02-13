@@ -38,12 +38,6 @@ namespace InterlockLedger.Tags
     public static class DictionaryExtensions
     {
 
-        public static Dictionary<string, T> AddIf<T>(this Dictionary<string, T> dictionary, bool add, string key, T value) {
-            if (add)
-                dictionary?.Add(key, value);
-            return dictionary;
-        }
-
         internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary oldEnumeration, EnumerationDictionary newEnumeration)
             => oldEnumeration.None() || oldEnumeration.EqualTo(newEnumeration?.Take(oldEnumeration.Count));
     }

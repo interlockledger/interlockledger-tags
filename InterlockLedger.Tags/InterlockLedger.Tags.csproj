@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>8.0.1</Version>
+      <Version>8.0.4</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Fix some ambiguities with InterlockLedger.Commons lib</PackageReleaseNotes>
+      <PackageReleaseNotes>Fix some more ambiguities with InterlockLedger.Commons lib</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

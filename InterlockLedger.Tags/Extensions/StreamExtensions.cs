@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,10 +30,7 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Buffers;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
@@ -41,13 +38,29 @@ namespace InterlockLedger.Tags
     public static partial class StreamExtensions
     {
         public static async Task<byte[]> BuildPayloadBytesAsync(this Stream s, ulong tagId) {
-            var bytes = await ReadAllBytesAsync(s).ConfigureAwait(false);
+            var bytes = await s.ReadAllBytesAsync().ConfigureAwait(false);
             using var ms = new MemoryStream();
             ms.ILIntEncode(tagId);
             ms.ILIntEncode((ulong)bytes.Length);
             ms.WriteBytes(bytes);
             ms.Position = 0;
             return await ms.ReadAllBytesAsync().ConfigureAwait(false);
+        }
+
+        public static BaseKeyId DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
+
+        public static OwnerId DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
+
+        public static Stream EncodeInterlockId(this Stream s, InterlockId value) => s.EncodeTag(value);
+
+        /*
+
+        public static async Task<byte[]> ReadAllBytesAsync(this Stream s) {
+            if (s == null)
+                throw new ArgumentNullException(nameof(s));
+            using var buffer = new MemoryStream();
+            await s.CopyToAsync(buffer).ConfigureAwait(false);
+            return buffer.ToArray();
         }
 
         public static async Task CopyToAsync(this Stream source, Stream destination, long fileSizeLimit, int bufferSize, CancellationToken cancellationToken) {
@@ -77,21 +90,7 @@ namespace InterlockLedger.Tags
             }
         }
 
-        public static BaseKeyId DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
-
-        public static OwnerId DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
-
-        public static Stream EncodeInterlockId(this Stream s, InterlockId value) => s.EncodeTag(value);
-
         public static bool HasBytes(this Stream s) => !(s is null) && s.CanSeek && s.Position < s.Length;
-
-        public static async Task<byte[]> ReadAllBytesAsync(this Stream s) {
-            if (s == null)
-                throw new ArgumentNullException(nameof(s));
-            using var buffer = new MemoryStream();
-            await s.CopyToAsync(buffer).ConfigureAwait(false);
-            return buffer.ToArray();
-        }
 
         public static byte[] ReadBytes(this Stream s, int length) {
             if (s is null || length <= 0)
@@ -168,6 +167,6 @@ namespace InterlockLedger.Tags
                 Thread.Sleep(100);
             }
             throw new TooFewBytesException();
-        }
+        }*/
     }
 }
