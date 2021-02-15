@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
 
     [TypeConverter(typeof(TagPubKeyConverter))]
     [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
-    public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, IJsonCustom<TagPubKey>
+    public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
     {
         public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) {
         }

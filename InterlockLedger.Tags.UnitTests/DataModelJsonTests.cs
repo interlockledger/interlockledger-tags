@@ -35,7 +35,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using InterlockLedger.Tags;
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags

@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(InterlockColorConverter))]
     [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
-    public struct InterlockColor : IJsonCustom<InterlockColor>, IEquatable<InterlockColor>
+    public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockColor>
     {
         public static readonly InterlockColor AliceBlue = new InterlockColor(240, 248, 255, "AliceBlue");
         public static readonly InterlockColor AntiqueWhite = new InterlockColor(250, 235, 215, "AntiqueWhite");

@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
     [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
-    public class ILTagRange : ILTagExplicit<LimitedRange>, IJsonCustom<ILTagRange>, IEquatable<ILTagRange>
+    public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEquatable<ILTagRange>
     {
         public ILTagRange() : this(new LimitedRange()) {
         }

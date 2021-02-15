@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
     [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
-    public struct AppPermissions : IJsonCustom<AppPermissions>, IEquatable<AppPermissions>
+    public struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissions>
     {
         public static readonly Regex Mask = new Regex(@"^#[0-9]+(,[0-9]+)*$");
 

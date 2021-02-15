@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
     [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
-    public class ILTagVersion : ILTagExplicit<Version>, IJsonCustom<ILTagVersion>, IEquatable<ILTagVersion>
+    public class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
     {
         public ILTagVersion() : this(new Version()) {
         }

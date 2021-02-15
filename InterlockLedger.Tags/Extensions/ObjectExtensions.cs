@@ -48,7 +48,7 @@ namespace InterlockLedger.Tags
             {
                 null => null,
                 string s => s,
-                IJsonCustomized o => o,
+                ITextual o => o,
                 JsonElement jo => AsILTag(FromJsonElement(jo)),
                 IEnum items => items.AsList<object>(),
                 _ => IsPrimitive(value) ? value : AsILTag(ToDictionary(value))

@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<EnumerationItems>))]
     [JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
-    public class EnumerationItems : IJsonCustom<EnumerationItems>
+    public class EnumerationItems : ITextual<EnumerationItems>
     {
         public EnumerationItems() { }
 

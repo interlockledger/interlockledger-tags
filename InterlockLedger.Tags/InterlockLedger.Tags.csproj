@@ -6,16 +6,16 @@
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <Authors>Rafael Teixeira</Authors>
       <Company>InterlockLedger Network</Company>
-      <Copyright>Copyright (c) 2018-2020 InterlockLedger Network</Copyright>
+      <Copyright>Copyright (c) 2018-2021 InterlockLedger Network</Copyright>
       <Description>This library implements the basic TLV/JSON encoding/decoding for core types.</Description>
       <PackageLicenseFile>LICENSE</PackageLicenseFile>
       <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>8.0.4</Version>
+      <Version>8.0.5</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Fix some more ambiguities with InterlockLedger.Commons lib</PackageReleaseNotes>
+      <PackageReleaseNotes>Upgrade to il2-commons 1.2.1</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,7 +36,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="InterlockLedger.Commons" Version="1.1.1" />
+    <PackageReference Include="InterlockLedger.Commons" Version="1.2.1" />
     <PackageReference Include="InterlockLedger.Tags.ILInt" Version="3.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
       <PrivateAssets>all</PrivateAssets>

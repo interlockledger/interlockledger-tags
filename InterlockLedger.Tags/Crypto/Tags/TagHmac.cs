@@ -38,7 +38,7 @@ using System.Text.Json.Serialization;
 namespace InterlockLedger.Tags
 {
     [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
-    public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, IJsonCustom<TagHmac>
+    public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, ITextual<TagHmac>
     {
         public TagHmac() : base(ILTagId.Hmac, null) {
         }
