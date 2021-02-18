@@ -44,7 +44,8 @@ namespace InterlockLedger.Tags
     public static class ObjectExtensions
     {
         public static object? AsNavigable(this object? value)
-            => value switch {
+            => value switch
+            {
                 null => null,
                 string s => s,
                 ITextual o => o,

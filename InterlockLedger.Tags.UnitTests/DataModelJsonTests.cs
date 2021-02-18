@@ -416,7 +416,8 @@ namespace InterlockLedger.Tags
             }
 
             [JsonIgnore]
-            public object AsJson => Version switch {
+            public object AsJson => Version switch
+            {
                 0 => AsJsonV0(),
                 1 => AsJsonV1(),
                 2 => AsJsonV2(),

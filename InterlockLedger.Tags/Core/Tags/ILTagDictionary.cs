@@ -57,7 +57,8 @@ namespace InterlockLedger.Tags
         protected override void EncodeValue(Stream s, T value) => s.EncodeTag(value);
 
         private static Dictionary<string, T> Elicit(object opaqueValue)
-            => opaqueValue switch {
+            => opaqueValue switch
+            {
                 Dictionary<string, T> dict => dict,
                 Dictionary<string, object> odict => odict.ToDictionary(p => p.Key, pp => (T)pp.Value.AsNavigable()),
                 _ => new Dictionary<string, T>()
