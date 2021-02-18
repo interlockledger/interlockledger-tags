@@ -36,6 +36,6 @@ namespace InterlockLedger.Tags
 {
     public static class ClaimsIdentityExtensions
     {
-        public static SenderIdentity Sender(this ClaimsIdentity identity) => new SenderIdentity(identity?.Claims);
+        public static SenderIdentity Sender(this ClaimsIdentity identity) => new(identity?.Claims);
     }
 }

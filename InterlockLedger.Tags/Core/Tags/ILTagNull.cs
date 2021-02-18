@@ -36,7 +36,7 @@ namespace InterlockLedger.Tags
 {
     public sealed class ILTagNull : ILTag
     {
-        public static readonly ILTagNull Instance = new ILTagNull();
+        public static readonly ILTagNull Instance = new();
 
         public override object AsJson => null;
 

@@ -66,7 +66,7 @@ namespace InterlockLedger.Tags
             public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
 
             public ulong Index { get; set; }
-            public EnumerationDetails Shorter => new EnumerationDetails { Name = Name, Description = Description };
+            public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
 
             public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
 
@@ -85,7 +85,7 @@ namespace InterlockLedger.Tags
             private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
         }
 
-        private readonly List<FullEnumerationDetails> _details = new List<FullEnumerationDetails>();
+        private readonly List<FullEnumerationDetails> _details = new();
 
         private static IEnumerable<FullEnumerationDetails> ConvertFromDictionary(Dictionary<ulong, EnumerationDetails> values)
             => values.Select(p => p.Value.ToFull(p.Key));
@@ -100,6 +100,6 @@ namespace InterlockLedger.Tags
             return this;
         }
 
-        private EnumerationDictionary ToDictionary() => new EnumerationDictionary(_details.ToDictionary(d => d.Index, dd => dd.Shorter));
+        private EnumerationDictionary ToDictionary() => new(_details.ToDictionary(d => d.Index, dd => dd.Shorter));
     }
 }

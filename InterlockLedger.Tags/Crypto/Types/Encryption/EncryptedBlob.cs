@@ -53,7 +53,7 @@ namespace InterlockLedger.Tags
         public override string TypeName => nameof(EncryptedBlob);
 
         public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
-            => new EncryptedBlob(value.Required(nameof(value)));
+            => new(value.Required(nameof(value)));
 
         public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
@@ -74,7 +74,7 @@ namespace InterlockLedger.Tags
 
         protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
 
-        protected override EncryptedBlob FromJson(object json) => new EncryptedBlob(_encrypted.FromJson(json));
+        protected override EncryptedBlob FromJson(object json) => new(_encrypted.FromJson(json));
 
         private readonly EncryptedValue<ILTagByteArray> _encrypted;
 

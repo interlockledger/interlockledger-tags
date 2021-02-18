@@ -218,7 +218,7 @@ namespace InterlockLedger.Tags
         private const char _suffixSeparator = '#';
 
         private static readonly Dictionary<byte, (string typeName, Func<InterlockIdParts, InterlockId> resolver)> _knownTypes =
-            new Dictionary<byte, (string typeName, Func<InterlockIdParts, InterlockId> resolver)>();
+            new();
 
         private string _algorithmSuffix => $"{_suffixSeparator}{Algorithm}";
         private string _conditionalAlgorithmSuffix => Algorithm == _defaultAlgorithm ? string.Empty : _algorithmSuffix;

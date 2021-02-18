@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
     [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
     public struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissions>
     {
-        public static readonly Regex Mask = new Regex(@"^#[0-9]+(,[0-9]+)*$");
+        public static readonly Regex Mask = new(@"^#[0-9]+(,[0-9]+)*$");
 
         public IEnumerable<ulong> ActionIds;
 
@@ -58,7 +58,7 @@ namespace InterlockLedger.Tags
         }
 
         [JsonIgnore]
-        public Tag AsTag => new Tag(this);
+        public Tag AsTag => new(this);
 
         [JsonIgnore]
         public string Formatted {

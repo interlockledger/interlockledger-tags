@@ -62,7 +62,7 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
 
-        public ILTagRange ResolveFrom(string textualRepresentation) => new ILTagRange(LimitedRange.Resolve(textualRepresentation));
+        public ILTagRange ResolveFrom(string textualRepresentation) => new(LimitedRange.Resolve(textualRepresentation));
 
         internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
         }

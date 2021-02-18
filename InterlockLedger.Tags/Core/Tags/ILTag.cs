@@ -121,7 +121,7 @@ namespace InterlockLedger.Tags
         protected abstract void SerializeInner(Stream s);
 
         private static readonly Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> _deserializers
-            = new Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> {
+            = new() {
                 [ILTagId.Null] = (_ => ILTagNull.Instance, _ => ILTagNull.Instance),
                 [ILTagId.Bool] = (s => s.ReadSingleByte() != 0 ? ILTagBool.True : ILTagBool.False, o => (bool)o ? ILTagBool.True : ILTagBool.False),
                 [ILTagId.Int8] = (s => new ILTagInt8(s, ILTagId.Int8), o => new ILTagInt8(Convert.ToSByte(o, CultureInfo.InvariantCulture))),

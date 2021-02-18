@@ -187,7 +187,7 @@ namespace InterlockLedger.Tags
             set => _firstAppId = value;
         }
 
-        internal ILTagArrayOfILTag<ILTagILInt> PurposesAsILInts => new ILTagArrayOfILTag<ILTagILInt>(AsILInts(Purposes));
+        internal ILTagArrayOfILTag<ILTagILInt> PurposesAsILInts => new(AsILInts(Purposes));
 
         internal ulong[] PurposesAsUlongs {
             get => AsUlongs(Purposes);

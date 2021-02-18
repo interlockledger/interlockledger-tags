@@ -38,8 +38,8 @@ namespace InterlockLedger.Tags
 {
     public sealed class ILTagBool : ILTagImplicit<bool>
     {
-        public static readonly ILTagBool False = new ILTagBool(false);
-        public static readonly ILTagBool True = new ILTagBool(true);
+        public static readonly ILTagBool False = new(false);
+        public static readonly ILTagBool True = new(true);
 
         public override string Formatted => Value.ToString(CultureInfo.InvariantCulture);
 

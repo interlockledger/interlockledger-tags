@@ -41,6 +41,6 @@ namespace InterlockLedger.Tags
 
         public static TagHash HashOf(this string s) => TagHash.HashSha256Of(s.UTF8Bytes());
 
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { AllowTrailingCommas = true, WriteIndented = true };
+        private static readonly JsonSerializerOptions _jsonOptions = new() { AllowTrailingCommas = true, WriteIndented = true };
     }
 }

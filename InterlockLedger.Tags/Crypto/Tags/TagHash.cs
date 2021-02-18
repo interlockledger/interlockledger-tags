@@ -40,7 +40,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
-using InterlockLedger.Tags;
 
 namespace InterlockLedger.Tags
 {
@@ -48,7 +47,7 @@ namespace InterlockLedger.Tags
     [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
     public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
     {
-        public static readonly TagHash Empty = new TagHash(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
+        public static readonly TagHash Empty = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
 
         public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) {
         }
@@ -67,7 +66,7 @@ namespace InterlockLedger.Tags
 
         public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
 
-        public static TagHash HashSha256Of(byte[] data) => new TagHash(HashAlgorithm.SHA256, HashSha256(data));
+        public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
 
         public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
 
@@ -83,7 +82,7 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
 
-        public TagHash ResolveFrom(string textualRepresentation) => new TagHash(textualRepresentation);
+        public TagHash ResolveFrom(string textualRepresentation) => new(textualRepresentation);
 
         public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
 
@@ -91,7 +90,7 @@ namespace InterlockLedger.Tags
         }
 
         internal static TagHash HashFrom(X509Certificate2 certificate)
-            => new TagHash(HashAlgorithm.SHA1, certificate.Required(nameof(certificate)).GetCertHash());
+            => new(HashAlgorithm.SHA1, certificate.Required(nameof(certificate)).GetCertHash());
 
         protected override TagHashParts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => new TagHashParts {

@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
 
         public string TextualRepresentation => Value.ToString();
 
-        public static ILTagVersion FromJson(object o) => new ILTagVersion(new Version((string)o));
+        public static ILTagVersion FromJson(object o) => new(new Version((string)o));
 
         public static bool operator !=(ILTagVersion left, ILTagVersion right) => !(left == right);
 
@@ -64,7 +64,7 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
 
-        public ILTagVersion ResolveFrom(string textualRepresentation) => new ILTagVersion(Version.Parse(textualRepresentation));
+        public ILTagVersion ResolveFrom(string textualRepresentation) => new(Version.Parse(textualRepresentation));
 
         internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
         }

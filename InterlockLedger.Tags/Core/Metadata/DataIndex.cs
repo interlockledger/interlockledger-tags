@@ -98,7 +98,7 @@ namespace InterlockLedger.Tags
             return elements;
         }
 
-        private static DataIndexElement FromParts(string[] parts) => new DataIndexElement {
+        private static DataIndexElement FromParts(string[] parts) => new() {
             FieldPath = parts[0],
             DescendingOrder = parts.Length > 1 && parts[1] == "-",
             Function = parts.Length > 2 ? parts[2].TrimToNull() : null

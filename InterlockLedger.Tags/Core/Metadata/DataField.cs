@@ -103,8 +103,7 @@ namespace InterlockLedger.Tags
         public static ulong AsNumber(ILTag value)
             => value is null
                 ? throw new ArgumentNullException(nameof(value))
-                : (value.TagId switch
-                {
+                : (value.TagId switch {
                     2 => (ulong)((ILTagInt8)value).Value,
                     3 => ((ILTagUInt8)value).Value,
                     4 => (ulong)((ILTagInt16)value).Value,
@@ -117,8 +116,7 @@ namespace InterlockLedger.Tags
                     _ => throw new InvalidCastException("Not an integral numeric ILTag"),
                 });
 
-        public static ILTag AsNumericTag(ulong tagId, ulong value) => tagId switch
-        {
+        public static ILTag AsNumericTag(ulong tagId, ulong value) => tagId switch {
             2 => new ILTagInt8((sbyte)value),
             3 => new ILTagUInt8((byte)value),
             4 => new ILTagInt16((short)value),
@@ -227,7 +225,7 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => $"{Name} #{TagId} {EnumerationDefinition?.Values.JoinedBy(",")}";
 
-        public DataField WithName(string newName) => new DataField(this) {
+        public DataField WithName(string newName) => new(this) {
             Name = newName.ValidateNonEmpty(nameof(newName))
         };
 
@@ -313,7 +311,7 @@ namespace InterlockLedger.Tags
 
             public Triplet(ulong value, string name, string description) : base(name, description) => Value = value;
 
-            public Tag AsTag => new Tag(this);
+            public Tag AsTag => new(this);
 
             public class Tag : ILTagExplicit<Triplet>
             {

@@ -43,7 +43,7 @@ namespace InterlockLedger.Tags
         public TagCertificate(Stream s) : base(ILTagId.Certificate, s) {
         }
 
-        protected override X509Certificate2 FromBytes(byte[] bytes) => new X509Certificate2(bytes);
+        protected override X509Certificate2 FromBytes(byte[] bytes) => new(bytes);
 
         protected override byte[] ToBytes() => Value.RawData;
     }

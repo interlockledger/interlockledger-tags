@@ -84,7 +84,7 @@ namespace InterlockLedger.Tags
         public InterlockUpdatableSigningKeyData(InterlockUpdatableSigningKeyParts parts) : base(ILTagId.InterlockUpdatableSigningKey, parts) {
         }
 
-        public InterlockKey AsInterlockKey => new InterlockKey(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
+        public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
         public DateTimeOffset LastSignatureTimeStamp { get => Value.LastSignatureTimeStamp; internal set => Value.LastSignatureTimeStamp = value; }
         public ulong SignaturesWithCurrentKey { get => Value.SignaturesWithCurrentKey; internal set => Value.SignaturesWithCurrentKey = value; }
         public string Description => Value.Description;

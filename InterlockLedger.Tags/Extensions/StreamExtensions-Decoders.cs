@@ -137,6 +137,6 @@ namespace InterlockLedger.Tags
         public static Version DecodeVersion(this Stream s)
             => s.Decode<ILTagVersion>().Value;
 
-        private static T? NullableIfDefault<T>(T value) where T : struct => value.Equals(default(T)) ? (T?)null : value;
+        private static T? NullableIfDefault<T>(T value) where T : struct => value.Equals(default(T)) ? null : value;
     }
 }

@@ -67,7 +67,7 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() => ToString().GetHashCode(StringComparison.InvariantCulture);
 
-        public TagHmac ResolveFrom(string textualRepresentation) => new TagHmac(textualRepresentation);
+        public TagHmac ResolveFrom(string textualRepresentation) => new(textualRepresentation);
 
         public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
 

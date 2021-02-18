@@ -89,7 +89,7 @@ namespace InterlockLedger.Tags
         public InterlockSigningKeyData(InterlockSigningKeyParts parts) : base(ILTagId.InterlockSigningKey, parts) {
         }
 
-        public InterlockKey AsInterlockKey => new InterlockKey(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
+        public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
         public string Description => Value.Description;
         public byte[] Encrypted => Value.Encrypted;
         public EncryptedContentType EncryptedContentType => Value.EncryptedContentType;

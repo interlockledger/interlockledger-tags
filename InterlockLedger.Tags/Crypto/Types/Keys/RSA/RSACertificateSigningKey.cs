@@ -72,7 +72,7 @@ namespace InterlockLedger.Tags
             return rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1);
         }
 
-        public override TagSignature Sign(byte[] data) => new TagSignature(Algorithm.RSA, HashAndSign(data));
+        public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, HashAndSign(data));
 
         private readonly byte[] _certificateBytes;
         private readonly string _password;

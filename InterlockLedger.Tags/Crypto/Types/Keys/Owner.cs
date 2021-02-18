@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags
 {
     public abstract class Owner : ISigningKey, IPasswordProvider
     {
-        public InterlockKey AsInterlockKey => new InterlockKey(this);
+        public InterlockKey AsInterlockKey => new(this);
         public TagPubKey PublicKey { get; protected set; }
         public string Description { get; protected set; }
         public string Email { get; protected set; }

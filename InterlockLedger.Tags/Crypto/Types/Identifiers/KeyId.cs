@@ -45,7 +45,7 @@ namespace InterlockLedger.Tags
 
         public KeyId(InterlockIdParts parts) : base(parts) => CheckType(_keyId);
 
-        public static KeyId Resolve(X509Certificate2 certificate) => new KeyId(TagHash.HashFrom(certificate));
+        public static KeyId Resolve(X509Certificate2 certificate) => new(TagHash.HashFrom(certificate));
 
         internal static void RegisterResolver() => RegisterResolver(_keyId, _typeName, (parts) => new KeyId(parts));
 

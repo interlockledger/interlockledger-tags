@@ -111,7 +111,7 @@ namespace InterlockLedger.Tags
             protected override byte[] ToBytes() => ToBytesHelper(Value.ToStream);
         }
 
-        protected static readonly DataField VersionField = new DataField(nameof(Version), ILTagId.UInt16);
+        protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);
 
         protected VersionedValue(ulong tagId, ushort version) {
             _tagId = tagId;

@@ -36,7 +36,7 @@ namespace InterlockLedger.Tags
 {
     public class SigningKeyUpdatingPolicy
     {
-        public static readonly SigningKeyUpdatingPolicy Defaults = new SigningKeyUpdatingPolicy(
+        public static readonly SigningKeyUpdatingPolicy Defaults = new(
             maxSignaturesWithTheSameKey: 8,
             maxAgeOfSignatureKey: TimeSpan.FromDays(7)
         );

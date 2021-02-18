@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         public override string TypeName => nameof(EncryptedText);
 
         public static EncryptedText Embed(EncryptedValue<ILTagString> value)
-            => new EncryptedText(value.Required(nameof(value)));
+            => new(value.Required(nameof(value)));
 
         public ILTagString Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
@@ -73,7 +73,7 @@ namespace InterlockLedger.Tags
 
         protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
 
-        protected override EncryptedText FromJson(object json) => new EncryptedText(_encrypted.FromJson(json));
+        protected override EncryptedText FromJson(object json) => new(_encrypted.FromJson(json));
 
         private readonly EncryptedValue<ILTagString> _encrypted;
 

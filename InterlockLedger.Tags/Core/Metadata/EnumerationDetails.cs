@@ -55,6 +55,6 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => $"{Name}:{Description}";
 
-        internal EnumerationItems.FullEnumerationDetails ToFull(ulong index) => new EnumerationItems.FullEnumerationDetails { Index = index, Description = Description, Name = Name };
+        internal EnumerationItems.FullEnumerationDetails ToFull(ulong index) => new() { Index = index, Description = Description, Name = Name };
     }
 }
