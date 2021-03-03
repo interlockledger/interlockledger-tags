@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>8.0.5</Version>
+      <Version>8.0.6</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Upgrade to il2-commons 1.2.1</PackageReleaseNotes>
+      <PackageReleaseNotes>Upgrade to il2-commons 1.2.2</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,7 +36,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="InterlockLedger.Commons" Version="1.2.1" />
+    <PackageReference Include="InterlockLedger.Commons" Version="1.2.2" />
     <PackageReference Include="InterlockLedger.Tags.ILInt" Version="3.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
       <PrivateAssets>all</PrivateAssets>

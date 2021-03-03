@@ -264,7 +264,7 @@ namespace InterlockLedger.Tags
                     DataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
                     Indexes = s.DecodeTagArray<ILTagDataIndex>()?.Select(t => t.Value),
                     PayloadName = s.DecodeString(),
-                    Version = s.HasBytes() ? s.DecodeUShort() : 1,
+                    Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
                     Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null
                 };
             });

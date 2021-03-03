@@ -274,7 +274,7 @@ namespace InterlockLedger.Tags
                 ElementTagId = s.DecodeNullableILInt(),
                 SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
                 Cast = s.HasBytes() ? (CastType?)s.DecodeNullableByte() : null,
-                SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : 0),
+                SerializationVersion = (serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0),
                 Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
                 EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
                 EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,
