@@ -57,8 +57,7 @@ namespace InterlockLedger.Tags
         protected override void SerializeValueToStream(Stream s) => s.WriteBytes(Value);
 
         private static byte[] Elicit(object opaqueValue)
-            => opaqueValue switch
-            {
+            => opaqueValue switch {
                 byte[] value => value,
                 string s => Convert.FromBase64String(s),
                 _ => Array.Empty<byte>()
