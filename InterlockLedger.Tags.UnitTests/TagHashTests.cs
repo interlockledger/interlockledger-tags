@@ -57,7 +57,6 @@ namespace InterlockLedger.Tags
         [TestCase("#SHA256", HashAlgorithm.SHA256, new byte[] { })]
         public void NewTagHashFromString(string textual, HashAlgorithm algorithm, byte[] data) {
             DoAsserts(algorithm, data, new TagHash(textual));
-            DoAsserts(algorithm, data, new TagHash().ResolveFrom(textual));
 
             static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHash tag) {
                 Assert.AreEqual(ILTagId.Hash, tag.TagId);

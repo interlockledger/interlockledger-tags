@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
             TestTwiceWith(new AppPermissions(0, null));
             TestTwiceWith(new AppPermissions(1, 100));
             TestTwiceWith(new AppPermissions(2, 100, 101));
-            var ap = new AppPermissions().ResolveFrom("#3,1,2,3");
+            var ap = new AppPermissions("#3,1,2,3");
             Assert.AreEqual("#3,1,2,3", ap.TextualRepresentation);
             TestTwiceWith(ap);
             TestTwiceWith(new AppPermissions(4, 100, 4, 101, 3));

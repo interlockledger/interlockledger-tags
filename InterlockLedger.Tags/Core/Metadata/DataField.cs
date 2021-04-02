@@ -45,7 +45,7 @@ namespace InterlockLedger.Tags
         public const ushort CurrentVersion = 5;
 
         public DataField(string name, ulong tagId, string description = null) : this() {
-            name.ValidateNonEmpty(nameof(name));
+            name.Required(nameof(name));
             Description = description.TrimToNull();
             Name = name;
             TagId = tagId;
@@ -226,7 +226,7 @@ namespace InterlockLedger.Tags
         public override string ToString() => $"{Name} #{TagId} {EnumerationDefinition?.Values.JoinedBy(",")}";
 
         public DataField WithName(string newName) => new(this) {
-            Name = newName.ValidateNonEmpty(nameof(newName))
+            Name = newName.Required(nameof(newName))
         };
 
         internal bool? IsOptional_Deprecated;

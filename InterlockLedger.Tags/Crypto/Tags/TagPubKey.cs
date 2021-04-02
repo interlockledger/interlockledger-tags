@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -52,6 +52,8 @@ namespace InterlockLedger.Tags
         public Algorithm Algorithm => Value.Algorithm;
         public byte[] Data => Value.Data;
         public TagHash Hash => TagHash.HashSha256Of(Data);
+        public bool IsEmpty { get; }
+        public bool IsInvalid { get; }
         public virtual KeyStrength Strength => KeyStrength.Normal;
         public string TextualRepresentation => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
 
@@ -78,7 +80,7 @@ namespace InterlockLedger.Tags
             if (algorithm == Algorithm.RSA)
                 return new TagPubRSAKey(parts[1].FromSafeBase64());
             if (algorithm == Algorithm.EcDSA)
-                throw new NotSupportedException("Not yet supporting ECDsa certificates!");
+                throw new NotSupportedException("Not yet supporting EcDSA certificates!");
             throw new NotSupportedException("Only support RSA certificates for now!!!");
         }
 
@@ -89,8 +91,6 @@ namespace InterlockLedger.Tags
         public bool Equals(TagPubKey other) => (other != null) && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 
         public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
-
-        public TagPubKey ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation);
 
         public override string ToString() => TextualRepresentation;
 

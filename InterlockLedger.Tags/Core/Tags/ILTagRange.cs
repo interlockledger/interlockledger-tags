@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -48,8 +48,13 @@ namespace InterlockLedger.Tags
         public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) {
         }
 
+        public ILTagRange(string textualRepresentation) : base(ILTagId.Range, new LimitedRange(textualRepresentation)) {
+        }
+
         public override object AsJson => this;
         public override string Formatted => TextualRepresentation;
+        public bool IsEmpty => Value.IsEmpty;
+        public bool IsInvalid => Value.IsInvalid;
         public string TextualRepresentation => Value.TextualRepresentation;
 
         public static bool operator !=(ILTagRange left, ILTagRange right) => !(left == right);
@@ -61,8 +66,6 @@ namespace InterlockLedger.Tags
         public bool Equals(ILTagRange other) => other != null && TextualRepresentation == other.TextualRepresentation;
 
         public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
-
-        public ILTagRange ResolveFrom(string textualRepresentation) => new(LimitedRange.Resolve(textualRepresentation));
 
         internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
         }

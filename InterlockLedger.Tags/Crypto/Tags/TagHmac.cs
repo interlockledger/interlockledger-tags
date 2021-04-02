@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -52,6 +52,8 @@ namespace InterlockLedger.Tags
         public HashAlgorithm Algorithm => Value?.Algorithm ?? HashAlgorithm.SHA256;
         public byte[] Data => Value?.Data;
         public override string Formatted => ToString();
+        public bool IsEmpty { get; }
+        public bool IsInvalid { get; }
         public string TextualRepresentation => ToString();
 
         public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
@@ -66,8 +68,6 @@ namespace InterlockLedger.Tags
         public override bool Equals(object obj) => Equals(obj as TagHmac);
 
         public override int GetHashCode() => ToString().GetHashCode(StringComparison.InvariantCulture);
-
-        public TagHmac ResolveFrom(string textualRepresentation) => new(textualRepresentation);
 
         public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
 

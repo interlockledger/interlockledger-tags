@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -201,10 +201,23 @@ namespace InterlockLedger.Tags
             Name = name ?? ToColorCode(r, g, b, a);
         }
 
+        public InterlockColor(string textualRepresentation) {
+            var color = FromText(textualRepresentation);
+            R = color.R;
+            G = color.G;
+            B = color.B;
+            A = color.A;
+            Name = color.Name;
+        }
+
         public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
 
         [JsonIgnore]
         public string AsCSS => Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
+
+        public bool IsEmpty => false;
+
+        public bool IsInvalid => false;
 
         [JsonIgnore]
         public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
@@ -235,8 +248,6 @@ namespace InterlockLedger.Tags
         public bool Equals(InterlockColor other) => other.RGBA == RGBA;
 
         public override int GetHashCode() => (int)RGBA;
-
-        public InterlockColor ResolveFrom(string textualRepresentation) => FromText(textualRepresentation);
 
         public override string ToString() => Name;
 

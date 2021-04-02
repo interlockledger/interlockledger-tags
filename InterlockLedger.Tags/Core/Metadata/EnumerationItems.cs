@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -45,10 +45,19 @@ namespace InterlockLedger.Tags
     {
         public EnumerationItems() { }
 
+        public EnumerationItems(string textualRepresentation) {
+            var items = textualRepresentation.Safe()
+                                             .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
+                                             .Select(t => new FullEnumerationDetails(t));
+            _details.AddRange(items);
+        }
+
         public EnumerationItems(Dictionary<ulong, EnumerationDetails> values) => _ = Resolve(values, ConvertFromDictionary);
 
         [JsonIgnore]
         public bool IsEmpty => _details.None();
+
+        public bool IsInvalid { get; }
 
         [JsonIgnore]
         public string TextualRepresentation => IsEmpty ? null : $"{_detailSeparator}" + _details.JoinedBy($"{_detailSeparator}");

@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -62,6 +62,8 @@ namespace InterlockLedger.Tags
         public override object AsJson => TextualRepresentation;
         public byte[] Data => Value.Data;
         public override string Formatted => TextualRepresentation;
+        public bool IsEmpty => Equals(Empty);
+        public bool IsInvalid { get; }
         public string TextualRepresentation => ToString();
 
         public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
@@ -81,8 +83,6 @@ namespace InterlockLedger.Tags
         public bool Equals(TagHash other) => !(other is null) && Algorithm == other.Algorithm && DataEquals(other.Data);
 
         public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
-
-        public TagHash ResolveFrom(string textualRepresentation) => new(textualRepresentation);
 
         public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
 

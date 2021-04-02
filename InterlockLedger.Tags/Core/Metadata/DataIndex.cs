@@ -48,7 +48,7 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public string ElementsAsString {
             get => Elements?.JoinedBy("|");
-            set => Elements = DataIndexElement.ParseList(value.ValidateNonEmpty(nameof(ElementsAsString)));
+            set => Elements = DataIndexElement.ParseList(value.Required(nameof(ElementsAsString)));
         }
 
         public bool IsUnique { get; set; }

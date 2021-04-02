@@ -57,7 +57,6 @@ namespace InterlockLedger.Tags
         [TestCase("#HMAC-SHA256", HashAlgorithm.SHA256, new byte[] { })]
         public void NewTagHmacFromString(string textual, HashAlgorithm algorithm, byte[] data) {
             DoAsserts(algorithm, data, new TagHmac(textual));
-            DoAsserts(algorithm, data, new TagHmac().ResolveFrom(textual));
 
             static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHmac tag) {
                 Assert.AreEqual(ILTagId.Hmac, tag.TagId);

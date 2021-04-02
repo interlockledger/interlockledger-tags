@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -48,8 +48,14 @@ namespace InterlockLedger.Tags
         public ILTagVersion(Version version) : base(ILTagId.Version, version) {
         }
 
-        public override object AsJson => this;
+        public ILTagVersion(string textualRepresentation) : base(ILTagId.Version, Version.Parse(textualRepresentation)) {
+        }
 
+        public override object AsJson => TextualRepresentation;
+
+        public bool IsEmpty => Value is null;
+
+        public bool IsInvalid => false;
         public string TextualRepresentation => Value.ToString();
 
         public static ILTagVersion FromJson(object o) => new(new Version((string)o));
@@ -63,8 +69,6 @@ namespace InterlockLedger.Tags
         public bool Equals(ILTagVersion other) => other != null && TextualRepresentation == other.TextualRepresentation;
 
         public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
-
-        public ILTagVersion ResolveFrom(string textualRepresentation) => new(Version.Parse(textualRepresentation));
 
         internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
         }

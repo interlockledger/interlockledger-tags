@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>8.0.7</Version>
+      <Version>8.0.8</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Upgrade to il2-tags-ilint 3.0.1</PackageReleaseNotes>
+      <PackageReleaseNotes>Upgrade to il2-tags-ilint 3.0.3/InterlockLedger.Commons 1.2.4</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,8 +36,8 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="InterlockLedger.Commons" Version="1.2.2" />
-    <PackageReference Include="InterlockLedger.Tags.ILInt" Version="3.0.1" />
+    <PackageReference Include="InterlockLedger.Commons" Version="1.2.4" />
+    <PackageReference Include="InterlockLedger.Tags.ILInt" Version="3.0.3" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

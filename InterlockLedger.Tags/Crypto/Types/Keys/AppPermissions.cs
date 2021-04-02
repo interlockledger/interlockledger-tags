@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -57,6 +57,14 @@ namespace InterlockLedger.Tags
             ActionIds = actionIds ?? Array.Empty<ulong>();
         }
 
+        public AppPermissions(string textualRepresentation) {
+            if (string.IsNullOrWhiteSpace(textualRepresentation) || !Mask.IsMatch(textualRepresentation))
+                throw new ArgumentException($"Invalid textual representation '{textualRepresentation}'", nameof(textualRepresentation));
+            var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
+            AppId = parts.First();
+            ActionIds = parts.Skip(1).ToArray();
+        }
+
         [JsonIgnore]
         public Tag AsTag => new(this);
 
@@ -67,6 +75,10 @@ namespace InterlockLedger.Tags
                 return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
             }
         }
+
+        public bool IsEmpty => AppId == 0 && ActionIds.None();
+
+        public bool IsInvalid => false;
 
         [JsonIgnore]
         public string TextualRepresentation => $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
@@ -82,15 +94,6 @@ namespace InterlockLedger.Tags
         public override bool Equals(object obj) => obj is AppPermissions other && Equals(other);
 
         public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
-
-        public AppPermissions ResolveFrom(string textualRepresentation) {
-            if (string.IsNullOrWhiteSpace(textualRepresentation) || !Mask.IsMatch(textualRepresentation))
-                throw new ArgumentException($"Invalid textual representation '{textualRepresentation}'", nameof(textualRepresentation));
-            var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
-            AppId = parts.First();
-            ActionIds = parts.Skip(1).ToArray();
-            return this;
-        }
 
         public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
 

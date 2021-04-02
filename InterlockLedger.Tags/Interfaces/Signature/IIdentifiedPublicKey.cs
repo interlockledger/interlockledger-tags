@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags
     public interface IIdentifiedPublicKey
     {
         BaseKeyId? Id { get; }
-        string Identifier => (Id?.TextualRepresentation).WithDefault(Name).WithDefault(PublicKey.Hash.TextualRepresentation);
+        string Identifier => (Id?.TextualRepresentation).WithDefault(Name!).WithDefault(PublicKey.Hash.TextualRepresentation);
         string? Name { get; }
         TagPubKey PublicKey { get; }
     }
