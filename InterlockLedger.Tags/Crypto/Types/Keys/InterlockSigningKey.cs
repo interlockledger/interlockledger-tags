@@ -81,7 +81,7 @@ namespace InterlockLedger.Tags
         }
     }
 
-    public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData
+    public class InterlockSigningKeyData : ILTagExplicitFullBytes<InterlockSigningKeyParts>, IInterlockKeySecretData
     {
         public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
             : this(new InterlockSigningKeyParts(purposes, permissions, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }

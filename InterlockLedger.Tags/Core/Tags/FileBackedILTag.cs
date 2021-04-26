@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -39,7 +39,7 @@ using System.Threading.Tasks;
 namespace InterlockLedger.Tags
 {
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class FileBackedILTag<T> : ILTagExplicitBase<T>
+    public class FileBackedILTag<T> : ILTagExplicit<T>
     {
         public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : this(tagId) {
             _fileInfo = fileInfo.Required(nameof(fileInfo));

@@ -38,7 +38,7 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public class InterlockKey : ILTagExplicit<InterlockKeyParts>, IEquatable<InterlockKey>, IBaseKey
+    public class InterlockKey : ILTagExplicitFullBytes<InterlockKeyParts>, IEquatable<InterlockKey>, IBaseKey
     {
         public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
             : this(new InterlockKeyParts(purposes,

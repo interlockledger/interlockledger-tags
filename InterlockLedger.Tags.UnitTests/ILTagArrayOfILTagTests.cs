@@ -155,7 +155,7 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(encodedBytes, newEncodedBytes);
         }
 
-        private class TestTagOfOneByte : ILTagExplicit<byte>
+        private class TestTagOfOneByte : ILTagExplicitFullBytes<byte>
         {
             public TestTagOfOneByte(ulong tagId, Stream s) : base(tagId, s) {
             }

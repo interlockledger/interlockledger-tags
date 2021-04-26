@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -44,10 +44,8 @@ namespace InterlockLedger.Tags
 
         internal ILTagUInt64(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.UInt64) => ValidateTagId(alreadyDeserializedTagId);
 
-        protected override ulong DeserializeInner(Stream s)
-            => s.BigEndianReadULong();
+        protected override ulong DeserializeInner(Stream s) => s.BigEndianReadULong();
 
-        protected override void SerializeInner(Stream s)
-            => s.BigEndianWriteULong(Value);
+        protected override void SerializeInner(Stream s) => s.BigEndianWriteULong(Value);
     }
 }

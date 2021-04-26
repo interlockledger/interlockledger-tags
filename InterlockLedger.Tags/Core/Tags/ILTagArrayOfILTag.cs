@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -64,26 +64,23 @@ namespace InterlockLedger.Tags
         protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s) {
         }
 
-        protected override T[] FromBytes(byte[] bytes) =>
-           FromBytesHelper(bytes, s => {
-               var length = (int)s.ILIntDecode();
-               var result = new T[length];
-               for (var i = 0; i < length; i++) {
-                   result[i] = _decoder(s);
-               }
-               return result;
-           });
+        protected override T[] DeserializeValueFromStream(Stream s, ulong totalLength) {
+            if (totalLength == 0)
+                return null; 
+            var length = (int)s.ILIntDecode();
+            var result = new T[length];
+            for (var i = 0; i < length; i++) {
+                result[i] = _decoder(s);
+            }
+            return result;
+        }
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => {
-                if (Value != null) {
-                    s.ILIntEncode((ulong)Value.Length);
-                    foreach (var tag in Value)
-                        s.EncodeTag(tag);
-                }
-            });
+        protected override ulong GetValueEncodedLength() => (ulong)((_innerBytes ??= ToBytes())?.Length ?? 0);
+
+        protected override void SerializeValueToStream(Stream s) => s.WriteBytes(_innerBytes ??= ToBytes());
 
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
+        private byte[] _innerBytes;
 
         private static T AllowNull(ILTag tag) => tag.IsNull ? default : (T)tag;
 
@@ -108,6 +105,15 @@ namespace InterlockLedger.Tags
         }
 
         private static void SetDecoder(ILTag it, Func<Stream, T> decoder) => ((ILTagArrayOfILTag<T>)it)._decoder = decoder;
+
+        private byte[] ToBytes()
+            => ToBytesHelper(s => {
+                if (Value != null) {
+                    s.ILIntEncode((ulong)Value.Length);
+                    foreach (var tag in Value)
+                        s.EncodeTag(tag);
+                }
+            });
 
         private class JsonRepresentation
         {

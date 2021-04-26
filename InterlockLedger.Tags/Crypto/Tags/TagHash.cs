@@ -45,7 +45,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TagHashConverter))]
     [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
-    public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
+    public sealed class TagHash : ILTagExplicitFullBytes<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
     {
         public static readonly TagHash Empty = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
 

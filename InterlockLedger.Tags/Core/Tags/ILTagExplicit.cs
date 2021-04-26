@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -32,36 +32,41 @@
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-
-    public abstract class ILTagExplicit<T> : ILTagExplicitBase<T>
+    public abstract class ILTagExplicit<T> : ILTagImplicit<T>
     {
+        public const int MaxEncodedValueLength = int.MaxValue / 16;
+
+        [JsonIgnore]
+        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength();
+
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
         protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
-            : base(alreadyDeserializedTagId, s, setup) {
+            : base(s, alreadyDeserializedTagId, setup) {
         }
 
-        protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
-            if (bytes == null || bytes.Length == 0)
-                return default;
-            if (deserialize == null) {
-                throw new ArgumentNullException(nameof(deserialize));
-            }
-            using var s = new MemoryStream(bytes);
-            return deserialize(s);
+        protected sealed override T DeserializeInner(Stream s) {
+            _valueLength = s.ILIntDecode();
+            return DeserializeValueFromStream(s, _valueLength.Value);
         }
 
-        protected sealed override T DeserializeValueFromStream(Stream s, ulong length)
-            => FromBytes(s.ReadBytes((int)length));
+        protected abstract T DeserializeValueFromStream(Stream s, ulong length);
 
-        protected abstract T FromBytes(byte[] bytes);
+        protected abstract ulong GetValueEncodedLength();
 
-        protected sealed override void SerializeValueToStream(Stream s) => s.WriteBytes(ToBytes());
-        protected override ulong GetValueEncodedLength() => (ulong)(ToBytes()?.Length ?? 0);
-        protected abstract byte[] ToBytes();
+        protected sealed override void SerializeInner(Stream s) {
+            s.ILIntEncode(EncodedValueLength);
+            if (EncodedValueLength > 0)
+                SerializeValueToStream(s);
+        }
+
+        protected abstract void SerializeValueToStream(Stream s);
+
+        private ulong? _valueLength;
     }
 }

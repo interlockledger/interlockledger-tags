@@ -105,7 +105,7 @@ namespace InterlockLedger.Tags
         };
     }
 
-    public class ILTagDataIndex : ILTagExplicit<DataIndex>
+    public class ILTagDataIndex : ILTagExplicitFullBytes<DataIndex>
     {
         public ILTagDataIndex(DataIndex index) : base(ILTagId.DataIndex, index) {
         }

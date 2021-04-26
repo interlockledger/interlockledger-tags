@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -44,6 +44,5 @@ namespace InterlockLedger.Tags
         public FileBackedByteArray() : base(ILTagId.ByteArray) { }
 
         public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
-
     }
 }

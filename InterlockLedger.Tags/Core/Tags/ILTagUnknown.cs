@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -35,7 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagUnknown : ILTagExplicit<byte[]>
+    public class ILTagUnknown : ILTagExplicitFullBytes<byte[]>
     {
         public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
         }

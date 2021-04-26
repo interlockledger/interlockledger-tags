@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -40,6 +40,7 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => null;
 
+        public override byte[] EncodedBytes { get; } = new byte[] { (byte)ILTagId.Null };
         public override string Formatted => "null";
 
         public override bool ValueIs<TV>(out TV value) {
@@ -47,10 +48,8 @@ namespace InterlockLedger.Tags
             return false;
         }
 
-        protected override void SerializeInner(Stream s) {
-        }
+        public override Stream SerializeInto(Stream s) => s.ILIntEncode(ILTagId.Null);
 
-        private ILTagNull() : base(ILTagId.Null) {
-        }
+        private ILTagNull() : base(ILTagId.Null) { }
     }
 }

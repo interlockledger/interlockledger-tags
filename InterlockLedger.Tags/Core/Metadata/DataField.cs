@@ -253,7 +253,7 @@ namespace InterlockLedger.Tags
         private bool CompareEnumeration(DataField other) => EnumerationDefinition.EquivalentTo(other.EnumerationDefinition);
     }
 
-    public class ILTagDataField : ILTagExplicit<DataField>
+    public class ILTagDataField : ILTagExplicitFullBytes<DataField>
     {
         public ILTagDataField(DataField field) : base(ILTagId.DataField, field) {
         }
@@ -313,7 +313,7 @@ namespace InterlockLedger.Tags
 
             public Tag AsTag => new(this);
 
-            public class Tag : ILTagExplicit<Triplet>
+            public class Tag : ILTagExplicitFullBytes<Triplet>
             {
                 public Tag(Triplet v) : base(0, v) {
                 }

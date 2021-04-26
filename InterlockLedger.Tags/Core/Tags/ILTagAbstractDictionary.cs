@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -36,7 +36,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T>> where T : class
+    public abstract class ILTagAbstractDictionary<T> : ILTagExplicitFullBytes<Dictionary<string, T>> where T : class
     {
         public T this[string key] => Value?[key];
 

@@ -35,7 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class Payload<T> : ILTagExplicit<T>, IVersion, INamed where T : IRecordData<T>, new()
+    public class Payload<T> : ILTagExplicitFullBytes<T>, IVersion, INamed where T : IRecordData<T>, new()
     {
         public Payload(ulong tagId, T jsonTestTaggedData) : base(tagId, jsonTestTaggedData) {
         }

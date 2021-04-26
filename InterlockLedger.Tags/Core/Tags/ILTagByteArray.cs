@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -35,8 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-
-    public class ILTagByteArray : ILTagExplicitBase<byte[]>
+    public class ILTagByteArray : ILTagExplicit<byte[]>
     {
         public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
         }

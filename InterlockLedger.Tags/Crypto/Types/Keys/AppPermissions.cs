@@ -99,7 +99,7 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => TextualRepresentation;
 
-        public class Tag : ILTagExplicit<AppPermissions>
+        public class Tag : ILTagExplicitFullBytes<AppPermissions>
         {
             public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
             }

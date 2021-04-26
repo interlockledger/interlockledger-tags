@@ -36,7 +36,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
+    public class TagReader : ILTagExplicitFullBytes<TagReader.Parts>, IIdentifiedPublicKey
     {
         public TagReader(string name, TagPubKey publicKey) :
             base(ILTagId.Reader, new Parts(name.Required(nameof(name)), publicKey.Required(nameof(publicKey)))) { }

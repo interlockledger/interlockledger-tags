@@ -91,7 +91,7 @@ namespace InterlockLedger.Tags
             EncodeRemainingStateTo(s);
         }
 
-        public class Payload : ILTagExplicit<T>, IVersion, INamed
+        public class Payload : ILTagExplicitFullBytes<T>, IVersion, INamed
         {
             public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => ValidateTagId(Value.TagId);
 

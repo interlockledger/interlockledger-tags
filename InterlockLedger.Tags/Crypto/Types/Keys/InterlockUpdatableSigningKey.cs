@@ -76,7 +76,7 @@ namespace InterlockLedger.Tags
         public IdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     }
 
-    public sealed class InterlockUpdatableSigningKeyData : ILTagExplicit<InterlockUpdatableSigningKeyParts>, IInterlockKeySecretData
+    public sealed class InterlockUpdatableSigningKeyData : ILTagExplicitFullBytes<InterlockUpdatableSigningKeyParts>, IInterlockKeySecretData
     {
         public InterlockUpdatableSigningKeyData(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, DateTimeOffset creationTime, string description = null, BaseKeyId keyId = null)
             : this(new InterlockUpdatableSigningKeyParts(purposes, name, encrypted, pubKey, description, strength, keyId)) => LastSignatureTimeStamp = creationTime;

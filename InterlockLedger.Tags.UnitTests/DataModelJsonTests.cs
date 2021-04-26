@@ -454,7 +454,7 @@ namespace InterlockLedger.Tags
                     s.EncodeByte((byte)Enumeration);
             }
 
-            public class Reference : ILTagExplicit<Reference.Data>
+            public class Reference : ILTagExplicitFullBytes<Reference.Data>
             {
                 public Reference(ulong id, string name) : base(DataTagId, new Data(id, name)) {
                 }

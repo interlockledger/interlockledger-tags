@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -32,43 +32,39 @@
 
 using System;
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagExplicitBase<T> : ILTagImplicit<T>
+    public abstract class ILTagExplicitFullBytes<T> : ILTagExplicit<T>
     {
-        public const int MaxEncodedValueLength = int.MaxValue / 16;
-
-        [JsonIgnore]
-        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength();
-
-        protected ILTagExplicitBase(ulong tagId, T value) : base(tagId, value) {
+        protected ILTagExplicitFullBytes(ulong tagId, T value) : base(tagId, value) {
         }
 
-        protected ILTagExplicitBase(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
-            : base(s, alreadyDeserializedTagId, setup) {
+        protected ILTagExplicitFullBytes(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
+            : base(alreadyDeserializedTagId, s, setup) {
         }
 
-        protected sealed override T DeserializeInner(Stream s) {
-            _valueLength = s.ILIntDecode();
-            return _valueLength > MaxEncodedValueLength
-                ? throw new InvalidOperationException($"This content is too large to deserialize: {_valueLength} bytes")
-                : DeserializeValueFromStream(s, _valueLength.Value);
+        protected sealed override bool NonFullBytes => false;
+
+        protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
+            if (bytes == null || bytes.Length == 0)
+                return default;
+            if (deserialize == null) {
+                throw new ArgumentNullException(nameof(deserialize));
+            }
+            using var s = new MemoryStream(bytes);
+            return deserialize(s);
         }
 
-        protected abstract T DeserializeValueFromStream(Stream s, ulong length);
+        protected sealed override T DeserializeValueFromStream(Stream s, ulong length)
+            => FromBytes(s.ReadBytes((int)length));
 
-        protected abstract ulong GetValueEncodedLength();
+        protected abstract T FromBytes(byte[] bytes);
 
-        protected sealed override void SerializeInner(Stream s) {
-            s.ILIntEncode(EncodedValueLength);
-            if (EncodedValueLength > 0)
-                SerializeValueToStream(s);
-        }
+        protected override ulong GetValueEncodedLength() => (ulong)(ToBytes()?.Length ?? 0);
 
-        protected abstract void SerializeValueToStream(Stream s);
+        protected sealed override void SerializeValueToStream(Stream s) => s.WriteBytes(ToBytes());
 
-        private ulong? _valueLength;
+        protected abstract byte[] ToBytes();
     }
 }

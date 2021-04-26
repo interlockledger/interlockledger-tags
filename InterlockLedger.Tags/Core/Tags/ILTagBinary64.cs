@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -41,8 +41,9 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => throw new NotSupportedException();
 
-        public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
+        public override byte[] EncodedBytes => throw new NotImplementedException();
 
-        protected override void SerializeInner(Stream s) => s.ILIntEncode(0);
+        public override Stream SerializeInto(Stream s) => throw new NotImplementedException();
+        public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
     }
 }

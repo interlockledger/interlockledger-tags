@@ -43,7 +43,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(InterlockIdConverter))]
     [JsonConverter(typeof(JsonInterlockIdConverter))]
-    public class InterlockId : ILTagExplicit<InterlockIdParts>, IEquatable<InterlockId>, IComparable<InterlockId>
+    public class InterlockId : ILTagExplicitFullBytes<InterlockIdParts>, IEquatable<InterlockId>, IComparable<InterlockId>
     {
         public static IEnumerable<string> AllTypes => InterlockIdParts.AllTypes;
 

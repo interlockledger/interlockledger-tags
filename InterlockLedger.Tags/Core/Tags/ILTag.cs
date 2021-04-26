@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -44,10 +44,10 @@ namespace InterlockLedger.Tags
         public abstract object AsJson { get; }
 
         [JsonIgnore]
-        public byte[] EncodedBytes => SerializeToByteArray();
+        public abstract byte[] EncodedBytes { get; }
 
         [JsonIgnore]
-        public virtual string Formatted => EncodedBytes.ToSafeBase64();
+        public virtual string Formatted => "?";
 
         [JsonIgnore]
         public bool IsNull => TagId == ILTagId.Null;
@@ -101,24 +101,18 @@ namespace InterlockLedger.Tags
 
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
-        public Stream SerializeInto(Stream s) {
-            if (s is null) return s;
-            try {
-                s.ILIntEncode(TagId);
-                SerializeInner(s);
-            } finally {
-                s.Flush();
-            }
-            return s;
-        }
+        public abstract Stream SerializeInto(Stream s);
 
         public override string ToString() => GetType().Name + $"#{TagId}:" + Formatted;
+
+        public void ValidateTagId(ulong decodedTagId) {
+            if (decodedTagId != TagId)
+                throw new InvalidDataException($"This is not an {GetType().Name}");
+        }
 
         public abstract bool ValueIs<TV>(out TV value);
 
         protected ILTag(ulong tagId) => TagId = tagId;
-
-        protected abstract void SerializeInner(Stream s);
 
         private static readonly Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> _deserializers
             = new() {
@@ -170,12 +164,5 @@ namespace InterlockLedger.Tags
                 [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),
                 [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),
             };
-
-        private byte[] SerializeToByteArray() {
-            using var stream = new MemoryStream();
-            SerializeInto(stream);
-            stream.Flush();
-            return stream.GetBuffer().PartOf((int)stream.Length);
-        }
     }
 }

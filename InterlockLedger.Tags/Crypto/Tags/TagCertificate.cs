@@ -35,7 +35,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags
 {
-    public class TagCertificate : ILTagExplicit<X509Certificate2>
+    public class TagCertificate : ILTagExplicitFullBytes<X509Certificate2>
     {
         public TagCertificate(X509Certificate2 value) : base(ILTagId.Certificate, value) {
         }

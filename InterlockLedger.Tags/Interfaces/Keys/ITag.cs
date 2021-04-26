@@ -35,7 +35,7 @@ namespace InterlockLedger.Tags
     public interface ITag
     {
         object AsJson { get; }
-        byte[] EncodedBytes { get; }
         ulong TagId { get; }
+        byte[] EncodedBytes { get; }
     }
 }

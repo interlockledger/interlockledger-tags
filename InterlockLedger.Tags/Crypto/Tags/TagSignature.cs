@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     }
 
-    public class TagSignature : ILTagExplicit<TagSignatureParts>
+    public class TagSignature : ILTagExplicitFullBytes<TagSignatureParts>
     {
         public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts { Algorithm = algorithm, Data = data }) {
         }

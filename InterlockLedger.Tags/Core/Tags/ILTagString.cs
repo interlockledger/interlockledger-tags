@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -36,7 +36,7 @@ using System.Text;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagString : ILTagExplicit<string>
+    public class ILTagString : ILTagExplicitFullBytes<string>
     {
         public ILTagString(string value) : base(ILTagId.String, value) {
         }

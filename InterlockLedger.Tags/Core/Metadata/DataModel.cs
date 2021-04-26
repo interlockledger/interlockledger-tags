@@ -247,7 +247,7 @@ namespace InterlockLedger.Tags
         private static ushort ToUInt16(object fieldValue) => Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
     }
 
-    public class ILTagDataModel : ILTagExplicit<DataModel>
+    public class ILTagDataModel : ILTagExplicitFullBytes<DataModel>
     {
         public ILTagDataModel(DataModel model) : base(ILTagId.DataModel, model) {
         }
