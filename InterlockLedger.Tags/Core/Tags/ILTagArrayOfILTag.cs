@@ -66,7 +66,7 @@ namespace InterlockLedger.Tags
 
         protected override T[] DeserializeValueFromStream(Stream s, ulong totalLength) {
             if (totalLength == 0)
-                return null; 
+                return null;
             var length = (int)s.ILIntDecode();
             var result = new T[length];
             for (var i = 0; i < length; i++) {
