@@ -38,7 +38,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagArrayOfILTag<T> : ILTagExplicit<T[]> where T : ILTag
+    public class ILTagArrayOfILTag<T> : ExplicitLengthTag<T[]> where T : ILTag
     {
         public ILTagArrayOfILTag(IEnumerable<T> value) : base(ILTagId.ILTagArray, value?.ToArray()) {
         }
@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
 
         public T this[int i] => Value?[i];
 
-        public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagImplicit<TV> tv ? tv.Value : default);
+        public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ImplicitLengthTag<TV> tv ? tv.Value : default);
 
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
         }
@@ -75,9 +75,9 @@ namespace InterlockLedger.Tags
             return result;
         }
 
-        protected override ulong GetValueEncodedLength() => (ulong)((_innerBytes ??= ToBytes())?.Length ?? 0);
+        protected override ulong GetValueEncodedLength(T[] value) => (ulong)((_innerBytes ??= ToBytes(value))?.Length ?? 0);
 
-        protected override void SerializeValueToStream(Stream s) => s.WriteBytes(_innerBytes ??= ToBytes());
+        protected override void SerializeValueToStream(Stream s, T[] value) => s.WriteBytes(_innerBytes ??= ToBytes(value));
 
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
         private byte[] _innerBytes;
@@ -106,11 +106,11 @@ namespace InterlockLedger.Tags
 
         private static void SetDecoder(ILTag it, Func<Stream, T> decoder) => ((ILTagArrayOfILTag<T>)it)._decoder = decoder;
 
-        private byte[] ToBytes()
+        private static byte[] ToBytes(T[] value)
             => ToBytesHelper(s => {
-                if (Value != null) {
-                    s.ILIntEncode((ulong)Value.Length);
-                    foreach (var tag in Value)
+                if (value != null) {
+                    s.ILIntEncode((ulong)value.Length);
+                    foreach (var tag in value)
                         s.EncodeTag(tag);
                 }
             });

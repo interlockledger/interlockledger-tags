@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -35,7 +35,7 @@ using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-    public class TagPublicRSAParameters : ILTagExplicitFullBytes<RSAParameters>
+    public class TagPublicRSAParameters : ILTagExplicit<RSAParameters>
     {
         public TagPublicRSAParameters(RSAParameters parameters) : base(ILTagId.PublicRSAParameters, parameters) {
         }
@@ -48,6 +48,8 @@ namespace InterlockLedger.Tags
             Exponent = s.DecodeByteArray()
         });
 
-        protected override byte[] ToBytes() => ToBytesHelper(s => s.EncodeByteArray(Value.Modulus).EncodeByteArray(Value.Exponent));
+        protected override byte[] ToBytes(RSAParameters value) => ToBytesHelper(s =>
+            s.EncodeByteArray(value.Modulus)
+             .EncodeByteArray(value.Exponent));
     }
 }

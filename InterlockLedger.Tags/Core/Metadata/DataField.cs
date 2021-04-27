@@ -253,7 +253,7 @@ namespace InterlockLedger.Tags
         private bool CompareEnumeration(DataField other) => EnumerationDefinition.EquivalentTo(other.EnumerationDefinition);
     }
 
-    public class ILTagDataField : ILTagExplicitFullBytes<DataField>
+    public class ILTagDataField : ILTagExplicit<DataField>
     {
         public ILTagDataField(DataField field) : base(ILTagId.DataField, field) {
         }
@@ -280,21 +280,21 @@ namespace InterlockLedger.Tags
             });
         }
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(DataField value)
             => ToBytesHelper(s => {
-                s.EncodeUShort(Value.Version);
-                s.EncodeILInt(Value.TagId);
-                s.EncodeString(Value.Name);
+                s.EncodeUShort(value.Version);
+                s.EncodeILInt(value.TagId);
+                s.EncodeString(value.Name);
                 s.EncodeBool(false);
-                s.EncodeBool(Value.IsOpaque.GetValueOrDefault());
-                s.EncodeILInt(Value.ElementTagId.GetValueOrDefault());
-                s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
-                s.EncodeByte((byte)Value.Cast.GetValueOrDefault());
-                s.EncodeUShort(Value.SerializationVersion);
-                s.EncodeString(Value.Description);
-                EncodeEnumeration(s, Value.EnumerationDefinition);
-                s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
-                s.EncodeBool(Value.IsDeprecated.GetValueOrDefault());
+                s.EncodeBool(value.IsOpaque.GetValueOrDefault());
+                s.EncodeILInt(value.ElementTagId.GetValueOrDefault());
+                s.EncodeTagArray(value.SubDataFields?.Select(df => new ILTagDataField(df)));
+                s.EncodeByte((byte)value.Cast.GetValueOrDefault());
+                s.EncodeUShort(value.SerializationVersion);
+                s.EncodeString(value.Description);
+                EncodeEnumeration(s, value.EnumerationDefinition);
+                s.EncodeBool(value.EnumerationAsFlags.GetValueOrDefault());
+                s.EncodeBool(value.IsDeprecated.GetValueOrDefault());
             });
 
         private static EnumerationDictionary DecodeEnumeration(Stream s) {
@@ -313,7 +313,7 @@ namespace InterlockLedger.Tags
 
             public Tag AsTag => new(this);
 
-            public class Tag : ILTagExplicitFullBytes<Triplet>
+            public class Tag : ILTagExplicit<Triplet>
             {
                 public Tag(Triplet v) : base(0, v) {
                 }
@@ -321,12 +321,13 @@ namespace InterlockLedger.Tags
                 public Tag(Stream s) : base(s.DecodeTagId(), s) {
                 }
 
-                protected override Triplet FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
+                protected override Triplet FromBytes(byte[] bytes) => FromBytesHelper(bytes,
+                    s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
 
-                protected override byte[] ToBytes() => ToBytesHelper(s => {
-                    s.EncodeILInt(Value.Value);
-                    s.EncodeString(Value.Name);
-                    s.EncodeString(Value.Description);
+                protected override byte[] ToBytes(Triplet value) => ToBytesHelper(s => {
+                    s.EncodeILInt(value.Value);
+                    s.EncodeString(value.Name);
+                    s.EncodeString(value.Description);
                 });
             }
         }

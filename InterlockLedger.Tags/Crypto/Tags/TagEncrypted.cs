@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         public override int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
     }
 
-    public class TagEncrypted : ILTagExplicitFullBytes<TagEncryptedParts>
+    public class TagEncrypted : ILTagExplicit<TagEncryptedParts>
     {
         public TagEncrypted(CipherAlgorithm algorithm, byte[] data) :
             base(ILTagId.Encrypted, new TagEncryptedParts { Algorithm = algorithm, CipherData = data }) {
@@ -71,7 +71,7 @@ namespace InterlockLedger.Tags
                 CipherData = s.DecodeByteArray(),
             });
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)Algorithm).EncodeByteArray(CipherData));
+        protected override byte[] ToBytes(TagEncryptedParts value)
+            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).EncodeByteArray(value.CipherData));
     }
 }

@@ -38,7 +38,7 @@ using System.Text.Json.Serialization;
 namespace InterlockLedger.Tags
 {
     [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
-    public sealed class TagHmac : ILTagExplicitFullBytes<TagHashParts>, IEquatable<TagHmac>, ITextual<TagHmac>
+    public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, ITextual<TagHmac>
     {
         public TagHmac() : base(ILTagId.Hmac, null) {
         }
@@ -80,8 +80,8 @@ namespace InterlockLedger.Tags
                 Data = s.ReadBytes(bytes.Length - sizeof(ushort))
             });
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)Value.Algorithm).WriteBytes(Value.Data));
+        protected override byte[] ToBytes(TagHashParts value)
+            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
 
         private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
 

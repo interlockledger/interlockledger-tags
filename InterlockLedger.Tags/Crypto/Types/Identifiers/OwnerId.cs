@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
 
         public OwnerId(TagHash hash) : base(TypeId, hash) { }
 
-        public OwnerId(InterlockIdParts parts) : base(parts) => CheckType(TypeId);
+        public OwnerId(Parts parts) : base(parts) => CheckType(TypeId);
 
         public string AsBase64 => Value.Data.ToSafeBase64();
 

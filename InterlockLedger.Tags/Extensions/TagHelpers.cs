@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag
             => convert == null ? throw new ArgumentNullException(nameof(convert)) : new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
 
-        public static ILTagArrayOfILTag<ILTagExplicit<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagExplicit<T>> convert)
-            => ToTagArray<T, ILTagExplicit<T>>(list, convert);
+        public static ILTagArrayOfILTag<ExplicitLengthTag<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ExplicitLengthTag<T>> convert)
+            => ToTagArray<T, ExplicitLengthTag<T>>(list, convert);
     }
 }

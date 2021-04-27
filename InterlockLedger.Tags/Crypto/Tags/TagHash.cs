@@ -45,7 +45,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TagHashConverter))]
     [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
-    public sealed class TagHash : ILTagExplicitFullBytes<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
+    public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
     {
         public static readonly TagHash Empty = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
 
@@ -98,8 +98,8 @@ namespace InterlockLedger.Tags
                 Data = s.ReadBytes(bytes.Length - sizeof(ushort))
             });
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)Value.Algorithm).WriteBytes(Value.Data));
+        protected override byte[] ToBytes(TagHashParts value)
+            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
 
         private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 

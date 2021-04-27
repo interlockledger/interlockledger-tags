@@ -39,7 +39,7 @@ using System.Threading.Tasks;
 namespace InterlockLedger.Tags
 {
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class FileBackedILTag<T> : ILTagExplicit<T>
+    public class FileBackedILTag<T> : ExplicitLengthTag<T>
     {
         public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : this(tagId) {
             _fileInfo = fileInfo.Required(nameof(fileInfo));
@@ -98,14 +98,14 @@ namespace InterlockLedger.Tags
 
         protected override T DeserializeValueFromStream(Stream s, ulong length) => default;
 
-        protected override ulong GetValueEncodedLength() => Length;
+        protected override ulong GetValueEncodedLength(T Value) => Length;
 
         protected void Refresh() {
             FileInfo.Refresh();
             Initialize(0, 0, FileInfo.Length);
         }
 
-        protected override void SerializeValueToStream(Stream s) {
+        protected override void SerializeValueToStream(Stream s, T Value) {
             using var fileStream = FileInfo.OpenRead();
             using var streamSlice = new StreamSpan(fileStream, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);

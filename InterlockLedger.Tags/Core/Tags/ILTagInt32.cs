@@ -34,7 +34,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagInt32 : ILTagImplicit<int>
+    public class ILTagInt32 : ImplicitLengthTag<int>
     {
         public ILTagInt32(int value) : base(ILTagId.Int32, value) {
         }
@@ -44,10 +44,8 @@ namespace InterlockLedger.Tags
 
         internal ILTagInt32(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.Int32) => ValidateTagId(alreadyDeserializedTagId);
 
-        protected override int DeserializeInner(Stream s)
-            => s.BigEndianReadInt();
+        protected override int DeserializeInner(Stream s) => s.BigEndianReadInt();
 
-        protected override void SerializeInner(Stream s)
-            => s.BigEndianWriteInt(Value);
+        protected override void SerializeInner(Stream s, int value) => s.BigEndianWriteInt(value);
     }
 }

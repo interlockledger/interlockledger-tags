@@ -36,7 +36,7 @@ using System.Text;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagString : ILTagExplicitFullBytes<string>
+    public class ILTagString : ILTagExplicit<string>
     {
         public ILTagString(string value) : base(ILTagId.String, value) {
         }
@@ -48,6 +48,6 @@ namespace InterlockLedger.Tags
 
         protected override string FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
 
-        protected override byte[] ToBytes() => Value?.UTF8Bytes();
+        protected override byte[] ToBytes(string value) => value?.UTF8Bytes();
     }
 }

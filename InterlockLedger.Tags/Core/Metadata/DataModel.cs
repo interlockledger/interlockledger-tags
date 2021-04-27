@@ -247,7 +247,7 @@ namespace InterlockLedger.Tags
         private static ushort ToUInt16(object fieldValue) => Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
     }
 
-    public class ILTagDataModel : ILTagExplicitFullBytes<DataModel>
+    public class ILTagDataModel : ILTagExplicit<DataModel>
     {
         public ILTagDataModel(DataModel model) : base(ILTagId.DataModel, model) {
         }
@@ -269,15 +269,15 @@ namespace InterlockLedger.Tags
                 };
             });
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(DataModel value)
             => ToBytesHelper(s => {
-                s.EncodeILInt(Value.PayloadTagId);
+                s.EncodeILInt(value.PayloadTagId);
                 s.EncodeILInt(0); // deprecated field
-                s.EncodeTagArray(Value.DataFields?.Select(df => new ILTagDataField(df)));
-                s.EncodeTagArray(Value.Indexes?.Select(index => new ILTagDataIndex(index)));
-                s.EncodeString(Value.PayloadName);
-                s.EncodeUShort(Value.Version);
-                s.EncodeString(Value.Description.TrimToNull());
+                s.EncodeTagArray(value.DataFields?.Select(df => new ILTagDataField(df)));
+                s.EncodeTagArray(value.Indexes?.Select(index => new ILTagDataIndex(index)));
+                s.EncodeString(value.PayloadName);
+                s.EncodeUShort(value.Version);
+                s.EncodeString(value.Description.TrimToNull());
             });
     }
 }

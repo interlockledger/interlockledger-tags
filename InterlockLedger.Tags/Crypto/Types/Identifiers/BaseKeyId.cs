@@ -55,7 +55,7 @@ namespace InterlockLedger.Tags
         protected BaseKeyId(byte type, TagHash hash) : base(type, hash.Required(nameof(hash)).Algorithm, hash.Data) {
         }
 
-        protected BaseKeyId(InterlockIdParts parts) : base(parts) {
+        protected BaseKeyId(Parts parts) : base(parts) {
         }
     }
 }

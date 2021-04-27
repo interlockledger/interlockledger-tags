@@ -43,7 +43,7 @@ namespace InterlockLedger.Tags
         public KeyId(TagHash hash) : base(_keyId, hash) {
         }
 
-        public KeyId(InterlockIdParts parts) : base(parts) => CheckType(_keyId);
+        public KeyId(Parts parts) : base(parts) => CheckType(_keyId);
 
         public static KeyId Resolve(X509Certificate2 certificate) => new(TagHash.HashFrom(certificate));
 

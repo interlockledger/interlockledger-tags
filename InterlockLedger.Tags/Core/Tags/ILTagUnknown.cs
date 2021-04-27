@@ -35,7 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagUnknown : ILTagExplicitFullBytes<byte[]>
+    public class ILTagUnknown : ILTagExplicit<byte[]>
     {
         public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
         }
@@ -57,6 +57,6 @@ namespace InterlockLedger.Tags
 
         protected override byte[] FromBytes(byte[] bytes) => bytes;
 
-        protected override byte[] ToBytes() => Value;
+        protected override byte[] ToBytes(byte[] value) => value;
     }
 }

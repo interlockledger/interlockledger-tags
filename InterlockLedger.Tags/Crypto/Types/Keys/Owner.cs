@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
         public BaseKeyId Id { get; protected set; }
         public string Name { get; protected set; }
         public OwnerId OwnerId => (OwnerId)Id;
-        public IEnumerable<AppPermissions> Permissions { get; } = InterlockKeyParts.NoPermissions;
+        public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
         public KeyPurpose[] Purposes => keyPurposes;
         public Algorithm SignAlgorithm { get; protected set; }
         public KeyStrength Strength { get; protected set; }

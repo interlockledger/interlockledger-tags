@@ -81,7 +81,7 @@ namespace InterlockLedger.Tags
         }
     }
 
-    public class InterlockSigningKeyData : ILTagExplicitFullBytes<InterlockSigningKeyParts>, IInterlockKeySecretData
+    public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData
     {
         public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
             : this(new InterlockSigningKeyParts(purposes, permissions, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }
@@ -139,25 +139,25 @@ namespace InterlockLedger.Tags
                 return result;
             });
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(InterlockSigningKeyParts value)
             => ToBytesHelper(s => {
-                s.EncodeUShort(Value.Version);              // Field index 0 //
-                s.EncodeString(Value.Name);                 // Field index 1 //
-                s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
-                s.EncodeInterlockId(Value.Id);              // Field index 3 //
-                s.EncodeInterlockId(Value.Identity);        // Field index 4 //
-                s.EncodeString(Value.Description);          // Field index 5 //
-                s.EncodeTag(Value.PublicKey);               // Field index 6 //
-                s.EncodeByteArray(Value.Encrypted);         // Field index 7 //
-                s.EncodeILInt(Value.FirstAppId);            // Field index 8 //
-                s.EncodeILInt((ulong)Value.Strength);       // Field index 9 //
-                s.EncodeILIntArray(Value.FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
-                s.EncodeILInt((ulong)Value.EncryptedContentType); // Field index 11 - since version 5
-                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
+                s.EncodeUShort(value.Version);              // Field index 0 //
+                s.EncodeString(value.Name);                 // Field index 1 //
+                s.EncodeILIntArray(value.PurposesAsUlongs); // Field index 2 //
+                s.EncodeInterlockId(value.Id);              // Field index 3 //
+                s.EncodeInterlockId(value.Identity);        // Field index 4 //
+                s.EncodeString(value.Description);          // Field index 5 //
+                s.EncodeTag(value.PublicKey);               // Field index 6 //
+                s.EncodeByteArray(value.Encrypted);         // Field index 7 //
+                s.EncodeILInt(value.FirstAppId);            // Field index 8 //
+                s.EncodeILInt((ulong)value.Strength);       // Field index 9 //
+                s.EncodeILIntArray(value.FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
+                s.EncodeILInt((ulong)value.EncryptedContentType); // Field index 11 - since version 5
+                s.EncodeTagArray(value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
             });
     }
 
-    public class InterlockSigningKeyParts : InterlockKeyParts
+    public class InterlockSigningKeyParts : InterlockKey.Parts
     {
         public const ushort InterlockSigningKeyVersion = 0x0006;
         public byte[] Encrypted;

@@ -51,7 +51,7 @@ namespace InterlockLedger.Tags
             var tag = s.DecodeTag();
             return tag.IsNull
                 ? null
-                : tag is ILTagExplicit<T> t
+                : tag is ExplicitLengthTag<T> t
                     ? t.Value
                     : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
         }
@@ -59,11 +59,11 @@ namespace InterlockLedger.Tags
         public static T[] DecodeArray<T>(this Stream s) where T : class, ITaggableOf<T> {
             var tagId = s.DecodeTagId();
             return tagId == ILTagId.ILTagArray
-                ? (new ILTagArrayOfILTag<ILTagExplicit<T>>(s).Value?.Select(element => element.Value).ToArray())
-                : throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagExplicit<T>>).Name}");
+                ? (new ILTagArrayOfILTag<ExplicitLengthTag<T>>(s).Value?.Select(element => element.Value).ToArray())
+                : throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ExplicitLengthTag<T>>).Name}");
         }
 
-        public static T[] DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where TT : ILTagExplicit<T> {
+        public static T[] DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where TT : ExplicitLengthTag<T> {
             var tagId = s.DecodeTagId();
             return tagId == ILTagId.ILTagArray
                 ? (new ILTagArrayOfILTag<TT>(s, decoder).Value?.Select(element => element.Value).ToArray())

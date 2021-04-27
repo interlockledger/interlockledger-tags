@@ -105,7 +105,7 @@ namespace InterlockLedger.Tags
         };
     }
 
-    public class ILTagDataIndex : ILTagExplicitFullBytes<DataIndex>
+    public class ILTagDataIndex : ILTagExplicit<DataIndex>
     {
         public ILTagDataIndex(DataIndex index) : base(ILTagId.DataIndex, index) {
         }
@@ -120,11 +120,11 @@ namespace InterlockLedger.Tags
                 ElementsAsString = s.DecodeString(),
             });
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(DataIndex value)
              => ToBytesHelper(s => {
-                 s.EncodeString(Value.Name);
-                 s.EncodeBool(Value.IsUnique);
-                 s.EncodeString(Value.ElementsAsString);
+                 s.EncodeString(value.Name);
+                 s.EncodeBool(value.IsUnique);
+                 s.EncodeString(value.ElementsAsString);
              });
     }
 }

@@ -36,7 +36,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class TagReadingKey : ILTagExplicitFullBytes<TagReadingKey.Parts>
+    public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
     {
         public TagReadingKey(string id, TagHash publicKeyHash, byte[] encryptedKey, byte[] encryptedIV)
             : base(ILTagId.ReadingKey, new Parts(id, publicKeyHash, encryptedKey, encryptedIV)) {
@@ -84,7 +84,10 @@ namespace InterlockLedger.Tags
         protected override Parts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagHash>(), s.DecodeByteArray(), s.DecodeByteArray()));
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.EncodeString(ReaderId).EncodeTag(PublicKeyHash).EncodeByteArray(EncryptedKey).EncodeByteArray(EncryptedIV));
+        protected override byte[] ToBytes(Parts value)
+            => ToBytesHelper(s => s.EncodeString(value.ReaderId)
+                                   .EncodeTag(value.PublicKeyHash)
+                                   .EncodeByteArray(value.EncryptedKey)
+                                   .EncodeByteArray(value.EncryptedIV));
     }
 }

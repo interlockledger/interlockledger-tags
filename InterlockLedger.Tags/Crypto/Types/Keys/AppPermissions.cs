@@ -99,7 +99,7 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => TextualRepresentation;
 
-        public class Tag : ILTagExplicitFullBytes<AppPermissions>
+        public class Tag : ILTagExplicit<AppPermissions>
         {
             public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
             }
@@ -111,7 +111,8 @@ namespace InterlockLedger.Tags
                 s => new AppPermissions(s.DecodeILInt(), s.DecodeILIntArray())
             );
 
-            protected override byte[] ToBytes() => ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
+            protected override byte[] ToBytes(AppPermissions value)
+                => ToBytesHelper(s => s.EncodeILInt(value.AppId).EncodeILIntArray(value.ActionIds));
         }
 
         private bool _noActions => ActionIds.None();

@@ -36,7 +36,7 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagImplicit<T> : ILTag
+    public abstract class ImplicitLengthTag<T> : ILTag
     {
         [JsonIgnore]
         public override object AsJson => Value;
@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
             if (s is null) return s;
             try {
                 s.ILIntEncode(TagId);
-                SerializeInner(s);
+                SerializeInner(s, Value);
             } finally {
                 s.Flush();
             }
@@ -69,28 +69,28 @@ namespace InterlockLedger.Tags
         //protected ILTagImplicit() : base(0) {
         //}
 
-        protected ILTagImplicit(ulong tagId, T value) : base(tagId) {
+        protected ImplicitLengthTag(ulong tagId, T value) : base(tagId) {
             Value = value;
             _encodedBytes = NonFullBytes ? _throwIfCalled : new(ToBytes);
         }
 
-        protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup) : base(alreadyDeserializedTagId) {
+        protected ImplicitLengthTag(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup) : base(alreadyDeserializedTagId) {
             setup?.Invoke(this);
             Value = DeserializeInner(s);
             _encodedBytes = NonFullBytes ? _throwIfCalled : new(ToBytes);
         }
 
-        protected ILTagImplicit(Stream s, ulong alreadyDeserializedTagId) : this(s, alreadyDeserializedTagId, setup: null) {
+        protected ImplicitLengthTag(Stream s, ulong alreadyDeserializedTagId) : this(s, alreadyDeserializedTagId, setup: null) {
         }
 
-        protected ILTagImplicit(ulong tagId, Stream s) : this(s, tagId, setup: t => ValidateTagId(t, s)) {
+        protected ImplicitLengthTag(ulong tagId, Stream s) : this(s, tagId, setup: t => ValidateTagId(t, s)) {
         }
 
         protected virtual bool NonFullBytes { get; }
 
         protected abstract T DeserializeInner(Stream s);
 
-        protected abstract void SerializeInner(Stream s);
+        protected abstract void SerializeInner(Stream s, T value);
 
         private static readonly Lazy<byte[]> _throwIfCalled = new(() => throw new InvalidOperationException("Should never call EncodedBytes for this tag type"));
         private readonly Lazy<byte[]> _encodedBytes;

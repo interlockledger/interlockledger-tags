@@ -36,7 +36,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public sealed class ILTagBool : ILTagImplicit<bool>
+    public sealed class ILTagBool : ImplicitLengthTag<bool>
     {
         public static readonly ILTagBool False = new(false);
         public static readonly ILTagBool True = new(true);
@@ -49,7 +49,7 @@ namespace InterlockLedger.Tags
 
         protected override bool DeserializeInner(Stream s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
-        protected override void SerializeInner(Stream s) => s.WriteByte((byte)(Value ? 1 : 0));
+        protected override void SerializeInner(Stream s, bool value) => s.WriteByte((byte)(value ? 1 : 0));
 
         private ILTagBool(bool value) : base(ILTagId.Bool, value) {
         }

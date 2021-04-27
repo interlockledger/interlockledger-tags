@@ -36,31 +36,26 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagILInt : ILTagImplicit<ulong>, IEquatable<ILTagILInt>
+    public class ILTagILInt : ImplicitLengthTag<ulong>, IEquatable<ILTagILInt>
     {
         public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
         }
 
         public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
 
-        public override bool Equals(object obj)
-                    => Equals(obj as ILTagILInt);
+        public override bool Equals(object obj) => Equals(obj as ILTagILInt);
 
-        public bool Equals(ILTagILInt other)
-            => other != null && Value == other.Value;
+        public bool Equals(ILTagILInt other) => other != null && Value == other.Value;
 
-        public override int GetHashCode()
-            => -1937169414 + Value.GetHashCode();
+        public override int GetHashCode() => -1937169414 + Value.GetHashCode();
 
         internal ILTagILInt(Stream s) : base(ILTagId.ILInt, s) {
         }
 
         internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.ILInt) => ValidateTagId(alreadyDeserializedTagId);
 
-        protected override ulong DeserializeInner(Stream s)
-            => s.ILIntDecode();
+        protected override ulong DeserializeInner(Stream s) => s.ILIntDecode();
 
-        protected override void SerializeInner(Stream s)
-            => s.ILIntEncode(Value);
+        protected override void SerializeInner(Stream s, ulong value) => s.ILIntEncode(value);
     }
 }

@@ -34,7 +34,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagUInt64 : ILTagImplicit<ulong>
+    public class ILTagUInt64 : ImplicitLengthTag<ulong>
     {
         public ILTagUInt64(ulong value) : base(ILTagId.UInt64, value) {
         }
@@ -46,6 +46,6 @@ namespace InterlockLedger.Tags
 
         protected override ulong DeserializeInner(Stream s) => s.BigEndianReadULong();
 
-        protected override void SerializeInner(Stream s) => s.BigEndianWriteULong(Value);
+        protected override void SerializeInner(Stream s, ulong value) => s.BigEndianWriteULong(value);
     }
 }

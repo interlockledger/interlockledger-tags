@@ -72,7 +72,7 @@ namespace InterlockLedger.Tags
         private static KeyStrength DecodeStrength(Stream s) => (KeyStrength)(s.HasBytes() ? s.DecodeILInt() : 0);
     }
 
-    public class TagRSAParameters : ILTagExplicitFullBytes<KeyParameters>, IKeyParameters
+    public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
     {
         public TagRSAParameters(RSAParameters parameters, KeyStrength strength) : base(ILTagId.RSAParameters, new KeyParameters(parameters, strength)) {
         }
@@ -91,6 +91,6 @@ namespace InterlockLedger.Tags
 
         protected override KeyParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new KeyParameters(s));
 
-        protected override byte[] ToBytes() => ToBytesHelper(s => Value.EncodeTo(s));
+        protected override byte[] ToBytes(KeyParameters value) => ToBytesHelper(s => value.EncodeTo(s));
     }
 }

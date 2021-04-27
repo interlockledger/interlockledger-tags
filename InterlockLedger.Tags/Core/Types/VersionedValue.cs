@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
         public Payload AsPayload => _payload.Value;
 
         [JsonIgnore]
-        public ILTagExplicit<T> AsTag => AsPayload;
+        public ExplicitLengthTag<T> AsTag => AsPayload;
 
         [JsonIgnore]
         public byte[] EncodedBytes => AsPayload.EncodedBytes;
@@ -91,7 +91,7 @@ namespace InterlockLedger.Tags
             EncodeRemainingStateTo(s);
         }
 
-        public class Payload : ILTagExplicitFullBytes<T>, IVersion, INamed
+        public class Payload : ILTagExplicit<T>, IVersion, INamed
         {
             public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => ValidateTagId(Value.TagId);
 
@@ -108,7 +108,7 @@ namespace InterlockLedger.Tags
 
             protected override T FromBytes(byte[] bytes) => FromBytesHelper(bytes, new T().FromStream);
 
-            protected override byte[] ToBytes() => ToBytesHelper(Value.ToStream);
+            protected override byte[] ToBytes(T Value) => ToBytesHelper(Value.ToStream);
         }
 
         protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);

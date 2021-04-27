@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
     [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
-    public class ILTagVersion : ILTagExplicitFullBytes<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
+    public class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
     {
         public ILTagVersion() : this(new Version()) {
         }
@@ -76,8 +76,8 @@ namespace InterlockLedger.Tags
         protected override Version FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.BigEndianWriteInt(Value.Major).BigEndianWriteInt(Value.Minor).BigEndianWriteInt(Value.Build).BigEndianWriteInt(Value.Revision));
+        protected override byte[] ToBytes(Version value)
+            => ToBytesHelper(s => s.BigEndianWriteInt(value.Major).BigEndianWriteInt(value.Minor).BigEndianWriteInt(value.Build).BigEndianWriteInt(value.Revision));
 
         private static Version Build(int major, int minor, int build, int revision)
             => revision >= 0

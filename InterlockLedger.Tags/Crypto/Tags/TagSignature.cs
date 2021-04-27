@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     }
 
-    public class TagSignature : ILTagExplicitFullBytes<TagSignatureParts>
+    public class TagSignature : ILTagExplicit<TagSignatureParts>
     {
         public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts { Algorithm = algorithm, Data = data }) {
         }
@@ -70,7 +70,7 @@ namespace InterlockLedger.Tags
                 Data = s.ReadBytes(bytes.Length - sizeof(ushort))
             });
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)Value.Algorithm).WriteBytes(Value.Data));
+        protected override byte[] ToBytes(TagSignatureParts value)
+            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
     }
 }

@@ -39,7 +39,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagArrayOfILInt : ILTagExplicitFullBytes<ulong[]>
+    public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
     {
         public ILTagArrayOfILInt(object opaqueValue) : this(Elicit(opaqueValue)) {
         }
@@ -62,10 +62,10 @@ namespace InterlockLedger.Tags
                return result;
            });
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(ulong[] value)
             => ToBytesHelper(s => {
-                s.ILIntEncode((ulong)Value.Length);
-                foreach (var ilint in Value)
+                s.ILIntEncode((ulong)value.Length);
+                foreach (var ilint in value)
                     s.ILIntEncode(ilint);
             });
 

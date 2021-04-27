@@ -36,7 +36,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagAbstractDictionary<T> : ILTagExplicitFullBytes<Dictionary<string, T>> where T : class
+    public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T>> where T : class
     {
         public T this[string key] => Value?[key];
 
@@ -65,11 +65,11 @@ namespace InterlockLedger.Tags
                 return result;
             });
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(Dictionary<string, T> value)
             => ToBytesHelper(s => {
-                if (Value != null) {
-                    s.ILIntEncode((ulong)Value.Count);
-                    foreach (var pair in Value) {
+                if (value != null) {
+                    s.ILIntEncode((ulong)value.Count);
+                    foreach (var pair in value) {
                         s.EncodeString(pair.Key);
                         EncodeValue(s, pair.Value);
                     }

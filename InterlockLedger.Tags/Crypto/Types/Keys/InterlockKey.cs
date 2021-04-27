@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -38,10 +38,10 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public class InterlockKey : ILTagExplicitFullBytes<InterlockKeyParts>, IEquatable<InterlockKey>, IBaseKey
+    public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<InterlockKey>, IBaseKey
     {
         public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
-            : this(new InterlockKeyParts(purposes,
+            : this(new Parts(purposes,
                 name,
                 description,
                 pubKey.Required(nameof(pubKey)),
@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
                 permissions)) { }
 
         public InterlockKey(IBaseKey key)
-            : this(new InterlockKeyParts(
+            : this(new Parts(
                 key.Required(nameof(key)).Purposes,
                 key.Name,
                 key.Description,
@@ -87,13 +87,96 @@ namespace InterlockLedger.Tags
 -- Version: {Version}
 {Value}";
 
+        public class Parts
+        {
+            public const ushort InterlockKeyVersion = 0x0004;
+
+            public Parts() {
+            }
+
+            public Parts(KeyPurpose[] purposes, string name, string description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId, IEnumerable<AppPermissions> permissions) {
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentNullException(nameof(name));
+                Version = InterlockKeyVersion;
+                Name = name;
+                Purposes = purposes.Required(nameof(purposes));
+                PublicKey = pubKey.Required(nameof(pubKey));
+                Description = description;
+                Strength = strength;
+                if (Actionable && permissions.None())
+                    Purposes = Purposes.Where(pu => pu != KeyPurpose.Action).ToArray(); // Remove Action Purpose
+                Permissions = permissions;
+                Identity = new KeyId(TagHash.HashSha256Of(_hashable));
+                Id = keyId ?? Identity;
+            }
+
+            [JsonIgnore]
+            public bool Actionable => Purposes?.Contains(KeyPurpose.Action) ?? false;
+
+            public string Description { get; set; }
+            public BaseKeyId Id { get; set; }
+            public BaseKeyId Identity { get; set; }
+            public string Name { get; set; }
+            public IEnumerable<AppPermissions> Permissions { get; set; } = NoPermissions;
+            public TagPubKey PublicKey { get; set; }
+            public KeyPurpose[] Purposes { get; set; }
+            public KeyStrength Strength { get; set; }
+            public ushort Version { get; set; }
+
+            public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
+
+            public override string ToString() =>
+            $@"-- Key '{Name}' - {Description}
+++ Id: {Id}
+++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
+++ with purposes: {_displayablePurposes}  {GetPermissions(Environment.NewLine + "++++ ", formatter: (p => p.Formatted)).ToLowerInvariant()}
+++ from: {Identity}
+++ with strength {Strength}";
+
+            internal static AppPermissions[] NoPermissions = Array.Empty<AppPermissions>();
+
+            internal IEnumerable<ulong> FirstActions {
+                get => Permissions.FirstOrDefault().ActionIds ?? Array.Empty<ulong>();
+                set => Permissions = new AppPermissions(_firstAppId, value).ToEnumerable();
+            }
+
+            internal ulong FirstAppId {
+                get => Permissions.FirstOrDefault().AppId;
+                set => _firstAppId = value;
+            }
+
+            internal ILTagArrayOfILTag<ILTagILInt> PurposesAsILInts => new(AsILInts(Purposes));
+
+            internal ulong[] PurposesAsUlongs {
+                get => AsUlongs(Purposes);
+                set => Purposes = value?.Select(u => (KeyPurpose)u).ToArray();
+            }
+
+            private ulong _firstAppId;
+
+            private string _displayablePurposes => Purposes.ToStringAsList();
+
+            private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+
+            private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
+
+            private static ulong[] AsUlongs(KeyPurpose[] purposes) => purposes?.Select(p => (ulong)p).ToArray();
+
+            private string GetPermissions(string separator, Func<AppPermissions, string> formatter = null, string firstSep = null)
+                => Actionable
+                    ? Permissions.None()
+                        ? "No actions"
+                        : $"{firstSep ?? separator}{Permissions.JoinedBy(separator, formatter)}"
+                    : string.Empty;
+        }
+
         internal InterlockKey(Stream s) : base(ILTagId.InterlockKey, s) {
         }
 
-        protected override InterlockKeyParts FromBytes(byte[] bytes) =>
+        protected override Parts FromBytes(byte[] bytes) =>
             FromBytesHelper(bytes, s => {
                 var version = s.DecodeUShort();
-                var result = new InterlockKeyParts {
+                var result = new Parts {
                     Version = version,                                // Field index 0 //
                     Name = s.DecodeString(),                          // Field index 1 //
                     PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
@@ -110,105 +193,22 @@ namespace InterlockLedger.Tags
                 return result;
             });
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(Parts value)
             => ToBytesHelper(s => {
-                s.EncodeUShort(Value.Version);              // Field index 0 //
-                s.EncodeString(Value.Name);                 // Field index 1 //
-                s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
-                s.EncodeInterlockId(Value.Id);              // Field index 3 //
-                s.EncodeInterlockId(Value.Identity);        // Field index 4 //
-                s.EncodeString(Value.Description);          // Field index 5 //
-                s.EncodeTag(Value.PublicKey);               // Field index 6 //
-                s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
-                s.EncodeILInt((ulong)Value.Strength);       // Field index 8 //
-                s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
-                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
+                s.EncodeUShort(value.Version);              // Field index 0 //
+                s.EncodeString(value.Name);                 // Field index 1 //
+                s.EncodeILIntArray(value.PurposesAsUlongs); // Field index 2 //
+                s.EncodeInterlockId(value.Id);              // Field index 3 //
+                s.EncodeInterlockId(value.Identity);        // Field index 4 //
+                s.EncodeString(value.Description);          // Field index 5 //
+                s.EncodeTag(value.PublicKey);               // Field index 6 //
+                s.EncodeILInt(value.FirstAppId);            // Field index 7 //
+                s.EncodeILInt((ulong)value.Strength);       // Field index 8 //
+                s.EncodeILIntArray(value.FirstActions);     // Field index 9 - since version 3 //
+                s.EncodeTagArray(value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
             });
 
-        private InterlockKey(InterlockKeyParts parts) : base(ILTagId.InterlockKey, parts) {
+        private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {
         }
-    }
-
-    public class InterlockKeyParts
-    {
-        public const ushort InterlockKeyVersion = 0x0004;
-
-        public InterlockKeyParts() {
-        }
-
-        public InterlockKeyParts(KeyPurpose[] purposes, string name, string description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId, IEnumerable<AppPermissions> permissions) {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentNullException(nameof(name));
-            Version = InterlockKeyVersion;
-            Name = name;
-            Purposes = purposes.Required(nameof(purposes));
-            PublicKey = pubKey.Required(nameof(pubKey));
-            Description = description;
-            Strength = strength;
-            if (Actionable && permissions.None())
-                Purposes = Purposes.Where(pu => pu != KeyPurpose.Action).ToArray(); // Remove Action Purpose
-            Permissions = permissions;
-            Identity = new KeyId(TagHash.HashSha256Of(_hashable));
-            Id = keyId ?? Identity;
-        }
-
-        [JsonIgnore]
-        public bool Actionable => Purposes?.Contains(KeyPurpose.Action) ?? false;
-
-        public string Description { get; set; }
-        public BaseKeyId Id { get; set; }
-        public BaseKeyId Identity { get; set; }
-        public string Name { get; set; }
-        public IEnumerable<AppPermissions> Permissions { get; set; } = NoPermissions;
-        public TagPubKey PublicKey { get; set; }
-        public KeyPurpose[] Purposes { get; set; }
-        public KeyStrength Strength { get; set; }
-        public ushort Version { get; set; }
-
-        public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
-
-        public override string ToString() =>
-        $@"-- Key '{Name}' - {Description}
-++ Id: {Id}
-++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
-++ with purposes: {_displayablePurposes}  {GetPermissions(Environment.NewLine + "++++ ", formatter: (p => p.Formatted)).ToLowerInvariant()}
-++ from: {Identity}
-++ with strength {Strength}";
-
-        internal static AppPermissions[] NoPermissions = Array.Empty<AppPermissions>();
-
-        internal IEnumerable<ulong> FirstActions {
-            get => Permissions.FirstOrDefault().ActionIds ?? Array.Empty<ulong>();
-            set => Permissions = new AppPermissions(_firstAppId, value).ToEnumerable();
-        }
-
-        internal ulong FirstAppId {
-            get => Permissions.FirstOrDefault().AppId;
-            set => _firstAppId = value;
-        }
-
-        internal ILTagArrayOfILTag<ILTagILInt> PurposesAsILInts => new(AsILInts(Purposes));
-
-        internal ulong[] PurposesAsUlongs {
-            get => AsUlongs(Purposes);
-            set => Purposes = value?.Select(u => (KeyPurpose)u).ToArray();
-        }
-
-        private ulong _firstAppId;
-
-        private string _displayablePurposes => Purposes.ToStringAsList();
-
-        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
-
-        private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
-
-        private static ulong[] AsUlongs(KeyPurpose[] purposes) => purposes?.Select(p => (ulong)p).ToArray();
-
-        private string GetPermissions(string separator, Func<AppPermissions, string> formatter = null, string firstSep = null)
-            => Actionable
-                ? Permissions.None()
-                    ? "No actions"
-                    : $"{firstSep ?? separator}{Permissions.JoinedBy(separator, formatter)}"
-                : string.Empty;
     }
 }

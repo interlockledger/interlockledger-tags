@@ -36,7 +36,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class TagReader : ILTagExplicitFullBytes<TagReader.Parts>, IIdentifiedPublicKey
+    public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
     {
         public TagReader(string name, TagPubKey publicKey) :
             base(ILTagId.Reader, new Parts(name.Required(nameof(name)), publicKey.Required(nameof(publicKey)))) { }
@@ -78,7 +78,7 @@ namespace InterlockLedger.Tags
         protected override Parts FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.EncodeString(Value.Name).EncodeTag(Value.PublicKey));
+        protected override byte[] ToBytes(Parts value)
+            => ToBytesHelper(s => s.EncodeString(value.Name).EncodeTag(value.PublicKey));
     }
 }

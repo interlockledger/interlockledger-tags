@@ -44,7 +44,7 @@ namespace InterlockLedger.Tags
 
     [TypeConverter(typeof(TagPubKeyConverter))]
     [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
-    public class TagPubKey : ILTagExplicitFullBytes<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
+    public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
     {
         public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) {
         }
@@ -108,8 +108,8 @@ namespace InterlockLedger.Tags
             => FromBytesHelper(bytes,
                 s => new TagKeyParts((Algorithm)s.BigEndianReadUShort(), s.ReadBytes(bytes.Length - sizeof(ushort))));
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)Value.Algorithm).WriteBytes(Value.Data));
+        protected override byte[] ToBytes(TagKeyParts value)
+            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
 
         private TagPubKey(Stream s) : base(ILTagId.PubKey, s) {
         }

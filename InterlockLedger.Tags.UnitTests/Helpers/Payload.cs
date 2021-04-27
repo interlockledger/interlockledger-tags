@@ -35,7 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class Payload<T> : ILTagExplicitFullBytes<T>, IVersion, INamed where T : IRecordData<T>, new()
+    public class Payload<T> : ILTagExplicit<T>, IVersion, INamed where T : IRecordData<T>, new()
     {
         public Payload(ulong tagId, T jsonTestTaggedData) : base(tagId, jsonTestTaggedData) {
         }
@@ -52,7 +52,7 @@ namespace InterlockLedger.Tags
         protected override T FromBytes(byte[] bytes)
            => FromBytesHelper(bytes, s => TryBuildFrom(() => new T().FromStream(s)));
 
-        protected override byte[] ToBytes()
+        protected override byte[] ToBytes(T Value)
             => ToBytesHelper(s => Value.ToStream(s));
 
         private static TR TryBuildFrom<TR>(Func<TR> func) {

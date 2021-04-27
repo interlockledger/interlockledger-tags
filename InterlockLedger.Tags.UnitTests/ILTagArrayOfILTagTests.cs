@@ -132,7 +132,7 @@ namespace InterlockLedger.Tags
             return list.ToArray();
         }
 
-        private static void CompareArrays<T, TT>(T[] array, ILTag[] value) where T : ILTagImplicit<TT> {
+        private static void CompareArrays<T, TT>(T[] array, ILTag[] value) where T : ImplicitLengthTag<TT> {
             if (array == null)
                 Assert.IsNull(value);
             else {
@@ -155,14 +155,14 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(encodedBytes, newEncodedBytes);
         }
 
-        private class TestTagOfOneByte : ILTagExplicitFullBytes<byte>
+        private class TestTagOfOneByte : ILTagExplicit<byte>
         {
             public TestTagOfOneByte(ulong tagId, Stream s) : base(tagId, s) {
             }
 
             protected override byte FromBytes(byte[] bytes) => bytes?.FirstOrDefault() ?? 0;
 
-            protected override byte[] ToBytes() => new byte[] { Value };
+            protected override byte[] ToBytes(byte Value) => new byte[] { Value };
         }
     }
 }

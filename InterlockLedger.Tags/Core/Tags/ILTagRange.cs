@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags
 {
     [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
     [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
-    public class ILTagRange : ILTagExplicitFullBytes<LimitedRange>, ITextual<ILTagRange>, IEquatable<ILTagRange>
+    public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEquatable<ILTagRange>
     {
         public ILTagRange() : this(new LimitedRange()) {
         }
@@ -73,7 +73,7 @@ namespace InterlockLedger.Tags
         protected override LimitedRange FromBytes(byte[] bytes)
             => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
 
-        protected override byte[] ToBytes()
-            => ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
+        protected override byte[] ToBytes(LimitedRange value)
+            => ToBytesHelper(s => s.ILIntEncode(value.Start).BigEndianWriteUShort(value.Count));
     }
 }

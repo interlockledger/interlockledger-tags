@@ -43,7 +43,7 @@ namespace InterlockLedger.Tags
             => s.EncodeTag(value?.AsILTag);
 
         public static Stream EncodeArray<T>(this Stream s, IEnumerable<T> values) where T : class, ITaggableOf<T>
-            => s.EncodeTag(new ILTagArrayOfILTag<ILTagExplicit<T>>(values?.Select(v => v.AsTag).ToArray()));
+            => s.EncodeTag(new ILTagArrayOfILTag<ExplicitLengthTag<T>>(values?.Select(v => v.AsTag).ToArray()));
 
         public static Stream EncodeBool(this Stream s, bool value)
             => s.EncodeTag(value ? ILTagBool.True : ILTagBool.False);
