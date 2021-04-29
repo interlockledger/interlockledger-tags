@@ -72,6 +72,6 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(TagEncryptedParts value)
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).EncodeByteArray(value.CipherData));
+            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).EncodeByteArray(value.CipherData));
     }
 }

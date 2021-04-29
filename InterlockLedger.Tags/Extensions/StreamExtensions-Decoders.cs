@@ -118,7 +118,7 @@ namespace InterlockLedger.Tags
         }
 
         public static ILTag DecodeTag(this Stream s)
-            => ILTag.DeserializeFrom(s);
+            => TagProvider.DeserializeFrom(s);
 
         public static T[] DecodeTagArray<T>(this Stream s) where T : ILTag {
             var tagId = s.DecodeTagId();

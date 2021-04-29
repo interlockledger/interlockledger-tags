@@ -140,7 +140,7 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(InterlockSigningKeyParts value)
-            => ToBytesHelper(s => {
+            => TagHelpers.ToBytesHelper(s => {
                 s.EncodeUShort(value.Version);              // Field index 0 //
                 s.EncodeString(value.Name);                 // Field index 1 //
                 s.EncodeILIntArray(value.PurposesAsUlongs); // Field index 2 //

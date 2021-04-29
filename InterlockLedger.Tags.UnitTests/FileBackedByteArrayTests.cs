@@ -73,7 +73,7 @@ namespace InterlockLedger.Tags
                 Assert.IsNull(fbba.Value);
                 using var mso = SerializeInto(fbba, prefixedArrayBytes);
                 mso.Position = 0;
-                var tagArray = ILTag.DeserializeFrom(mso);
+                var tagArray = TagProvider.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
                 CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
             } finally {
@@ -135,7 +135,7 @@ namespace InterlockLedger.Tags
                 Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
                 using var mso = SerializeInto(fbba, prefixedArrayBytes);
                 mso.Position = 0;
-                var tagArray = ILTag.DeserializeFrom(mso);
+                var tagArray = TagProvider.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
                 CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
                 var fbba2 = new FileBackedByteArray(fi);

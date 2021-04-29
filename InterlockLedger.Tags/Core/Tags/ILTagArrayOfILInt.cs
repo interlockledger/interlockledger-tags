@@ -63,7 +63,7 @@ namespace InterlockLedger.Tags
            });
 
         protected override byte[] ToBytes(ulong[] value)
-            => ToBytesHelper(s => {
+            => TagHelpers.ToBytesHelper(s => {
                 s.ILIntEncode((ulong)value.Length);
                 foreach (var ilint in value)
                     s.ILIntEncode(ilint);

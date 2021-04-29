@@ -56,7 +56,7 @@ namespace InterlockLedger.Tags
             CheckMissingPassword(password);
             var decrypted = Decrypt(_encrypted.CipherData, (st) => ReadHeader(password, st));
             using var s = new MemoryStream(decrypted);
-            return ILTag.DeserializeFrom(s) as T;
+            return TagProvider.DeserializeFrom(s) as T;
         }
 
         protected AES256Encrypted(T value, string password, byte[] key, byte[] iv) {

@@ -77,7 +77,7 @@ namespace InterlockLedger.Tags
             => FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
 
         protected override byte[] ToBytes(Version value)
-            => ToBytesHelper(s => s.BigEndianWriteInt(value.Major).BigEndianWriteInt(value.Minor).BigEndianWriteInt(value.Build).BigEndianWriteInt(value.Revision));
+            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(value.Major).BigEndianWriteInt(value.Minor).BigEndianWriteInt(value.Build).BigEndianWriteInt(value.Revision));
 
         private static Version Build(int major, int minor, int build, int revision)
             => revision >= 0

@@ -109,7 +109,7 @@ namespace InterlockLedger.Tags
                 s => new TagKeyParts((Algorithm)s.BigEndianReadUShort(), s.ReadBytes(bytes.Length - sizeof(ushort))));
 
         protected override byte[] ToBytes(TagKeyParts value)
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
+            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
 
         private TagPubKey(Stream s) : base(ILTagId.PubKey, s) {
         }

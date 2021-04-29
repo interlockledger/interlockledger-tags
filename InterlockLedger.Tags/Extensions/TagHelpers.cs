@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags
 {
     public static class TagHelpers
     {
-        public static ILTag Decoded(this byte[] buffer) => ILTag.DeserializeFrom(buffer);
+        public static ILTag Decoded(this byte[] buffer) => TagProvider.DeserializeFrom(buffer);
 
         public static byte[] ToBytesHelper(Action<Stream> serialize) {
             if (serialize == null)

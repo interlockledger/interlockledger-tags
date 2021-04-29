@@ -134,7 +134,7 @@ namespace InterlockLedger.Tags
 
         private static ILTag DecodePartial(ulong tagId, Span<byte> bytes, ref ulong offset) {
             using var ms = new MemoryStream(bytes.ToArray(), (int)offset, bytes.Length - (int)offset);
-            var tag = ILTag.DeserializeFrom(ms);
+            var tag = TagProvider.DeserializeFrom(ms);
             if (tag.TagId != tagId && !tag.Traits.IsNull)
                 throw new InvalidOperationException($"Expecting tagId {tagId} but came {tag.TagId}");
             offset += (ulong)ms.Position;
@@ -152,8 +152,8 @@ namespace InterlockLedger.Tags
             try {
                 return field.IsEnumeration && fieldValue is string value
                     ? field.EnumerationFromString(value)
-                    : ILTag.HasDeserializer(field.TagId)
-                        ? ILTag.DeserializeFromJson(field.TagId, fieldValue)
+                    : TagProvider.HasDeserializer(field.TagId)
+                        ? TagProvider.DeserializeFromJson(field.TagId, fieldValue)
                         : DeserializePartialFromJson(field, fieldValue);
             } catch (Exception e) {
                 throw new InvalidOperationException($"Could not deserialize from json field {field.Name} of type {field.TagId}\r\nfrom {fieldValue}", e);
@@ -270,7 +270,7 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(DataModel value)
-            => ToBytesHelper(s => {
+            => TagHelpers.ToBytesHelper(s => {
                 s.EncodeILInt(value.PayloadTagId);
                 s.EncodeILInt(0); // deprecated field
                 s.EncodeTagArray(value.DataFields?.Select(df => new ILTagDataField(df)));

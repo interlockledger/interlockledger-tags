@@ -121,7 +121,7 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(DataIndex value)
-             => ToBytesHelper(s => {
+             => TagHelpers.ToBytesHelper(s => {
                  s.EncodeString(value.Name);
                  s.EncodeBool(value.IsUnique);
                  s.EncodeString(value.ElementsAsString);

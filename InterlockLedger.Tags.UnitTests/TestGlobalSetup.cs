@@ -46,8 +46,8 @@ namespace InterlockLedger.Tags
         }
 
         bool ITagRegistrar.RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer) {
-            if (!ILTag.HasDeserializer(tagId))
-                ILTag.RegisterDeserializer(tagId, deserializer, jsonDeserializer);
+            if (!TagProvider.HasDeserializer(tagId))
+                TagProvider.RegisterDeserializer(tagId, deserializer, jsonDeserializer);
             return true;
         }
     }

@@ -53,7 +53,7 @@ namespace InterlockLedger.Tags
            => FromBytesHelper(bytes, s => TryBuildFrom(() => new T().FromStream(s)));
 
         protected override byte[] ToBytes(T Value)
-            => ToBytesHelper(s => Value.ToStream(s));
+            => TagHelpers.ToBytesHelper(s => Value.ToStream(s));
 
         private static TR TryBuildFrom<TR>(Func<TR> func) {
             try {

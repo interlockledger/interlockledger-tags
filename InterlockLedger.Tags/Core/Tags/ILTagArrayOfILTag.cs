@@ -95,7 +95,7 @@ namespace InterlockLedger.Tags
                                 throw new InvalidCastException($"Value in Array is a tag {tag.TagId} != {elementTagId}");
                             list.Add((T)tag);
                         } else {
-                            list.Add(DeserializeFromJson(elementTagId, item) as T);
+                            list.Add(TagProvider.DeserializeFromJson(elementTagId, item) as T);
                         }
                     }
                     return list.ToArray();
@@ -107,7 +107,7 @@ namespace InterlockLedger.Tags
         private static void SetDecoder(ILTag it, Func<Stream, T> decoder) => ((ILTagArrayOfILTag<T>)it)._decoder = decoder;
 
         private static byte[] ToBytes(T[] value)
-            => ToBytesHelper(s => {
+            => TagHelpers.ToBytesHelper(s => {
                 if (value != null) {
                     s.ILIntEncode((ulong)value.Length);
                     foreach (var tag in value)

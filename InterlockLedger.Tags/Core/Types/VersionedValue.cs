@@ -108,7 +108,7 @@ namespace InterlockLedger.Tags
 
             protected override T FromBytes(byte[] bytes) => FromBytesHelper(bytes, new T().FromStream);
 
-            protected override byte[] ToBytes(T Value) => ToBytesHelper(Value.ToStream);
+            protected override byte[] ToBytes(T Value) => TagHelpers.ToBytesHelper(Value.ToStream);
         }
 
         protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);

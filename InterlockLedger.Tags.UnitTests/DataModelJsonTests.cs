@@ -481,7 +481,7 @@ namespace InterlockLedger.Tags
                 protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()));
 
                 protected override byte[] ToBytes(Data value)
-                    => ToBytesHelper(s => s.EncodeILInt(value.Id).EncodeString(value.Name));
+                    => TagHelpers.ToBytesHelper(s => s.EncodeILInt(value.Id).EncodeString(value.Name));
             }
 
             private ILTagArrayOfILTag<ILTagRange> _taggedRanges => new ILTagArrayOfILTag<ILTagRange>(Ranges.Select(r => new ILTagRange(r)));

@@ -57,7 +57,7 @@ namespace InterlockLedger.Tags
         [TestCase("false", TestName = "BoolFromJsonFalse", ExpectedResult = false)]
         public bool BoolFrom(string json) {
             var payload = json.DeserializeJson();
-            var tag = ILTag.DeserializeFromJson(ILTagId.Bool, payload);
+            var tag = TagProvider.DeserializeFromJson(ILTagId.Bool, payload);
             Assert.IsInstanceOf<ILTagBool>(tag);
             Assert.AreEqual(payload, tag.AsJson);
             return ((ILTagBool)tag).Value;
@@ -123,7 +123,7 @@ namespace InterlockLedger.Tags
         [TestCase("-127", TestName = "Int8FromJsonMinus127", ExpectedResult = (sbyte)-127)]
         public sbyte Int8From(string json) {
             var payload = json.DeserializeJson();
-            var tag = ILTag.DeserializeFromJson(ILTagId.Int8, payload);
+            var tag = TagProvider.DeserializeFromJson(ILTagId.Int8, payload);
             Assert.IsInstanceOf<ILTagInt8>(tag);
             Assert.AreEqual(payload, tag.AsJson);
             return ((ILTagInt8)tag).Value;
@@ -134,7 +134,7 @@ namespace InterlockLedger.Tags
         [TestCase("1024", TestName = "Int8FromJson1024Throws")]
         public void Int8FromThrows(string json) {
             var payload = json.DeserializeJson();
-            Assert.Throws<OverflowException>(() => ILTag.DeserializeFromJson(ILTagId.Int8, payload));
+            Assert.Throws<OverflowException>(() => TagProvider.DeserializeFromJson(ILTagId.Int8, payload));
         }
 
         [Test]
@@ -178,10 +178,10 @@ namespace InterlockLedger.Tags
         [TestCase("null", TestName = "NullFromJsonStringLiteralNull")]
         public void NullFrom(string json) {
             var payload = json.DeserializeJson();
-            var tag = ILTag.DeserializeFromJson(ILTagId.Null, payload);
+            var tag = TagProvider.DeserializeFromJson(ILTagId.Null, payload);
             Assert.IsInstanceOf<ILTagNull>(tag);
             Assert.AreEqual(payload, tag.AsJson);
-            var tag2 = ILTag.DeserializeFromJson(ILTagId.Version, payload);
+            var tag2 = TagProvider.DeserializeFromJson(ILTagId.Version, payload);
             Assert.IsInstanceOf<ILTagNull>(tag2);
         }
 
@@ -189,7 +189,7 @@ namespace InterlockLedger.Tags
         [TestCase("\"\"", TestName = "TagStringFromEmpty")]
         public void StringFrom(string json) {
             var payload = json.DeserializeJson();
-            var tag = ILTag.DeserializeFromJson(ILTagId.String, payload);
+            var tag = TagProvider.DeserializeFromJson(ILTagId.String, payload);
             Assert.AreEqual(payload, tag.AsJson);
             Assert.IsInstanceOf<ILTagString>(tag);
         }
@@ -205,8 +205,8 @@ namespace InterlockLedger.Tags
         [TestCase("true")]
         public void ThrowFromUnsupportedTag(string json) {
             var payload = json.DeserializeJson();
-            Assert.Throws<ArgumentException>(() => ILTag.DeserializeFromJson(ulong.MaxValue, payload));
-            Assert.Throws<InvalidOperationException>(() => ILTag.DeserializeFromJson(ILTagId.BigInteger, payload));
+            Assert.Throws<ArgumentException>(() => TagProvider.DeserializeFromJson(ulong.MaxValue, payload));
+            Assert.Throws<InvalidOperationException>(() => TagProvider.DeserializeFromJson(ILTagId.BigInteger, payload));
         }
 
         [TestCase("0", TestName = "UInt8FromJson0", ExpectedResult = (byte)0)]
@@ -214,7 +214,7 @@ namespace InterlockLedger.Tags
         [TestCase("255", TestName = "UInt8FromJson255", ExpectedResult = (byte)255)]
         public byte UInt8From(string json) {
             var payload = json.DeserializeJson();
-            var tag = ILTag.DeserializeFromJson(ILTagId.UInt8, payload);
+            var tag = TagProvider.DeserializeFromJson(ILTagId.UInt8, payload);
             Assert.IsInstanceOf<ILTagUInt8>(tag);
             Assert.AreEqual(payload, tag.AsJson);
             return ((ILTagUInt8)tag).Value;
@@ -225,7 +225,7 @@ namespace InterlockLedger.Tags
         [TestCase("1024", TestName = "UInt8FromJson1024Throws")]
         public void UInt8FromThrows(string json) {
             var payload = json.DeserializeJson();
-            Assert.Throws<OverflowException>(() => ILTag.DeserializeFromJson(ILTagId.UInt8, payload));
+            Assert.Throws<OverflowException>(() => TagProvider.DeserializeFromJson(ILTagId.UInt8, payload));
         }
 
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions {

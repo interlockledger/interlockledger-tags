@@ -281,7 +281,7 @@ namespace InterlockLedger.Tags
         }
 
         protected override byte[] ToBytes(DataField value)
-            => ToBytesHelper(s => {
+            => TagHelpers.ToBytesHelper(s => {
                 s.EncodeUShort(value.Version);
                 s.EncodeILInt(value.TagId);
                 s.EncodeString(value.Name);
@@ -324,7 +324,7 @@ namespace InterlockLedger.Tags
                 protected override Triplet FromBytes(byte[] bytes) => FromBytesHelper(bytes,
                     s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
 
-                protected override byte[] ToBytes(Triplet value) => ToBytesHelper(s => {
+                protected override byte[] ToBytes(Triplet value) => TagHelpers.ToBytesHelper(s => {
                     s.EncodeILInt(value.Value);
                     s.EncodeString(value.Name);
                     s.EncodeString(value.Description);

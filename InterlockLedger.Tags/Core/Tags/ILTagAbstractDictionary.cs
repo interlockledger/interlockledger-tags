@@ -66,7 +66,7 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(Dictionary<string, T> value)
-            => ToBytesHelper(s => {
+            => TagHelpers.ToBytesHelper(s => {
                 if (value != null) {
                     s.ILIntEncode((ulong)value.Count);
                     foreach (var pair in value) {

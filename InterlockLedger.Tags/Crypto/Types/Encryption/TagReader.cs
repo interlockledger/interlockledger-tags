@@ -79,6 +79,6 @@ namespace InterlockLedger.Tags
             => FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
 
         protected override byte[] ToBytes(Parts value)
-            => ToBytesHelper(s => s.EncodeString(value.Name).EncodeTag(value.PublicKey));
+            => TagHelpers.ToBytesHelper(s => s.EncodeString(value.Name).EncodeTag(value.PublicKey));
     }
 }

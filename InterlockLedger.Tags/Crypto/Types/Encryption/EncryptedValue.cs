@@ -76,7 +76,7 @@ namespace InterlockLedger.Tags
 
         public T Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
             byte[] clearText = DecryptRaw(reader, findEngine);
-            return clearText is null ? null : ILTag.DeserializeFrom(clearText) as T;
+            return clearText is null ? null : TagProvider.DeserializeFrom(clearText) as T;
         }
 
         public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {

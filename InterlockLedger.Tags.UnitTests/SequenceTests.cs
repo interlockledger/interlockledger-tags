@@ -87,7 +87,7 @@ namespace InterlockLedger.Tags
             var json = JsonSerializer.Serialize(jsonModel, ILTagDictionaryTests.JsonOptions);
             TestContext.WriteLine(json);
             var parsedJson = JsonSerializer.Deserialize<List<object>>(json);
-            var backSeq = ILTag.DeserializeFromJson(ILTagId.Sequence, parsedJson);
+            var backSeq = TagProvider.DeserializeFromJson(ILTagId.Sequence, parsedJson);
             Assert.IsTrue(seq.Equals(backSeq));
         }
 

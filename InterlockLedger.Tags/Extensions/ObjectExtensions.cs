@@ -55,7 +55,7 @@ namespace InterlockLedger.Tags
 
         private static object? AsILTag(object? o)
             => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")
-                ? ILTag.DeserializeFromJson(Convert.ToUInt64(dict["TagId"], CultureInfo.InvariantCulture), dict["Value"])
+                ? TagProvider.DeserializeFromJson(Convert.ToUInt64(dict["TagId"], CultureInfo.InvariantCulture), dict["Value"])
                 : o;
 
         private static object? FromJsonElement(JsonElement jo) {

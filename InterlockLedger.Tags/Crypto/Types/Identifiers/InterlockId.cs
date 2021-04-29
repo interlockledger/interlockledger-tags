@@ -209,7 +209,7 @@ namespace InterlockLedger.Tags
 
         protected override Parts FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Parts(s, bytes.Length));
 
-        protected override byte[] ToBytes(Parts value) => ToBytesHelper(s => value.ToStream(s));
+        protected override byte[] ToBytes(Parts value) => TagHelpers.ToBytesHelper(s => value.ToStream(s));
 
         private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 

@@ -111,7 +111,7 @@ namespace InterlockLedger.Tags
             var json = JsonSerializer.Serialize(jsonModel, JsonOptions);
             TestContext.WriteLine(json);
             var parsedJson = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-            var backDict = ILTag.DeserializeFromJson(ILTagId.Dictionary, parsedJson);
+            var backDict = TagProvider.DeserializeFromJson(ILTagId.Dictionary, parsedJson);
             Assert.IsTrue(dict.Equals(backDict));
         }
 
@@ -122,7 +122,7 @@ namespace InterlockLedger.Tags
             var json = JsonSerializer.Serialize(jsonModel, JsonOptions);
             TestContext.WriteLine(json);
             var parsedJson = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-            var backDict = ILTag.DeserializeFromJson(ILTagId.StringDictionary, parsedJson);
+            var backDict = TagProvider.DeserializeFromJson(ILTagId.StringDictionary, parsedJson);
             Assert.IsTrue(dict.Equals(backDict));
         }
 

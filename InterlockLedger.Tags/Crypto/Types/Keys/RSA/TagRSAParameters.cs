@@ -91,6 +91,6 @@ namespace InterlockLedger.Tags
 
         protected override KeyParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new KeyParameters(s));
 
-        protected override byte[] ToBytes(KeyParameters value) => ToBytesHelper(s => value.EncodeTo(s));
+        protected override byte[] ToBytes(KeyParameters value) => TagHelpers.ToBytesHelper(s => value.EncodeTo(s));
     }
 }

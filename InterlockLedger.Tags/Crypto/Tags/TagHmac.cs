@@ -81,7 +81,7 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(TagHashParts value)
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
+            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
 
         private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
 

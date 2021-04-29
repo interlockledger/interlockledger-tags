@@ -48,7 +48,7 @@ namespace InterlockLedger.Tags
             Exponent = s.DecodeByteArray()
         });
 
-        protected override byte[] ToBytes(RSAParameters value) => ToBytesHelper(s =>
+        protected override byte[] ToBytes(RSAParameters value) => TagHelpers.ToBytesHelper(s =>
             s.EncodeByteArray(value.Modulus)
              .EncodeByteArray(value.Exponent));
     }

@@ -99,7 +99,7 @@ namespace InterlockLedger.Tags
             });
 
         protected override byte[] ToBytes(TagHashParts value)
-            => ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
+            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(value.Data));
 
         private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 
