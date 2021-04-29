@@ -41,9 +41,6 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => throw new NotSupportedException();
 
-        public override byte[] EncodedBytes => throw new NotImplementedException();
-
         public override Stream SerializeInto(Stream s) => throw new NotImplementedException();
-        public override bool ValueIs<TV>(out TV value) => throw new NotImplementedException();
     }
 }

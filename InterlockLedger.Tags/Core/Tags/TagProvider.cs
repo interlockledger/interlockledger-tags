@@ -80,6 +80,7 @@ namespace InterlockLedger.Tags
                     RegisterDeserializer(id, deserializer, jsonDeserializer);
         }
 
+        public static void ValidateTagId(ITag t, Stream s) => t.ValidateTagId(s.ILIntDecode());
 
         private static readonly Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> _deserializers
         = new() {

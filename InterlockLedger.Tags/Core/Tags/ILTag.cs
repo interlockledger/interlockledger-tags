@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+using System;
 using System.IO;
 using System.Text.Json.Serialization;
 
@@ -41,13 +42,12 @@ namespace InterlockLedger.Tags
         public abstract object AsJson { get; }
 
         [JsonIgnore]
-        public abstract byte[] EncodedBytes { get; }
+        public byte[] EncodedBytes => _encodedBytes.Value;
 
         [JsonIgnore]
         public virtual string Formatted => "?";
 
         public ulong TagId { get; set; }
-
         public ITag Traits => this;
 
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
@@ -56,10 +56,25 @@ namespace InterlockLedger.Tags
 
         public override string ToString() => GetType().Name + $"#{TagId}:" + Formatted;
 
-        public abstract bool ValueIs<TV>(out TV value);
+        public virtual bool ValueIs<TV>(out TV value) {
+            value = default;
+            return false;
+        }
 
-        protected ILTag(ulong tagId) => TagId = tagId;
+        protected ILTag(ulong tagId) {
+            TagId = tagId;
+            _encodedBytes = NonFullBytes ? _throwIfCalled : new(ToBytes);
+        }
 
+        protected virtual bool NonFullBytes { get; }
+        private static readonly Lazy<byte[]> _throwIfCalled = new(() => throw new InvalidOperationException("Should never call EncodedBytes for this tag type"));
+        private readonly Lazy<byte[]> _encodedBytes;
 
+        private byte[] ToBytes() {
+            using var stream = new MemoryStream();
+            SerializeInto(stream);
+            stream.Flush();
+            return stream.ToArray();
+        }
     }
 }

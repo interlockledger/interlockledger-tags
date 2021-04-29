@@ -41,9 +41,6 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public override object AsJson => Value;
 
-        [JsonIgnore]
-        public override byte[] EncodedBytes => _encodedBytes.Value;
-
         public T Value { get; set; }
 
         public sealed override Stream SerializeInto(Stream s) {
@@ -71,37 +68,21 @@ namespace InterlockLedger.Tags
 
         protected ImplicitLengthTag(ulong tagId, T value) : base(tagId) {
             Value = value;
-            _encodedBytes = NonFullBytes ? _throwIfCalled : new(ToBytes);
         }
 
         protected ImplicitLengthTag(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup) : base(alreadyDeserializedTagId) {
             setup?.Invoke(this);
             Value = DeserializeInner(s);
-            _encodedBytes = NonFullBytes ? _throwIfCalled : new(ToBytes);
         }
 
         protected ImplicitLengthTag(Stream s, ulong alreadyDeserializedTagId) : this(s, alreadyDeserializedTagId, setup: null) {
         }
 
-        protected ImplicitLengthTag(ulong tagId, Stream s) : this(s, tagId, setup: t => ValidateTagId(t, s)) {
+        protected ImplicitLengthTag(ulong tagId, Stream s) : this(s, tagId, setup: t => TagProvider.ValidateTagId(t, s)) {
         }
-
-        protected virtual bool NonFullBytes { get; }
 
         protected abstract T DeserializeInner(Stream s);
 
         protected abstract void SerializeInner(Stream s, T value);
-
-        private static readonly Lazy<byte[]> _throwIfCalled = new(() => throw new InvalidOperationException("Should never call EncodedBytes for this tag type"));
-        private readonly Lazy<byte[]> _encodedBytes;
-
-        private static void ValidateTagId(ITag t, Stream s) => t.ValidateTagId(s.ILIntDecode());
-
-        private byte[] ToBytes() {
-            using var stream = new MemoryStream();
-            SerializeInto(stream);
-            stream.Flush();
-            return stream.ToArray();
-        }
     }
 }

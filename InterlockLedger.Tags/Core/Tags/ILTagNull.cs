@@ -40,13 +40,7 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => null;
 
-        public override byte[] EncodedBytes { get; } = new byte[] { (byte)ILTagId.Null };
         public override string Formatted => "null";
-
-        public override bool ValueIs<TV>(out TV value) {
-            value = default;
-            return false;
-        }
 
         public override Stream SerializeInto(Stream s) => s.ILIntEncode(ILTagId.Null);
 
