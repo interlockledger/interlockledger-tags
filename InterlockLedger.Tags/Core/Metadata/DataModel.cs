@@ -135,7 +135,7 @@ namespace InterlockLedger.Tags
         private static ILTag DecodePartial(ulong tagId, Span<byte> bytes, ref ulong offset) {
             using var ms = new MemoryStream(bytes.ToArray(), (int)offset, bytes.Length - (int)offset);
             var tag = ILTag.DeserializeFrom(ms);
-            if (tag.TagId != tagId && !tag.IsNull)
+            if (tag.TagId != tagId && !tag.Traits.IsNull)
                 throw new InvalidOperationException($"Expecting tagId {tagId} but came {tag.TagId}");
             offset += (ulong)ms.Position;
             return tag;
@@ -233,7 +233,7 @@ namespace InterlockLedger.Tags
                     json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
                 } else {
                     var value = DecodePartial(field.TagId, bytes, ref offset);
-                    json[field.Name] = field.IsEnumeration && !value.IsNull ? field.EnumerationToString(value) : value.AsJson;
+                    json[field.Name] = field.IsEnumeration && !value.Traits.IsNull ? field.EnumerationToString(value) : value.AsJson;
                     if (isVersioned && firstField && field.IsVersion)
                         version = (ushort)value.AsJson;
                 }

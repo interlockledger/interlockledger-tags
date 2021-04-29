@@ -95,7 +95,7 @@ namespace InterlockLedger.Tags
         private static readonly Lazy<byte[]> _throwIfCalled = new(() => throw new InvalidOperationException("Should never call EncodedBytes for this tag type"));
         private readonly Lazy<byte[]> _encodedBytes;
 
-        private static void ValidateTagId(ILTag t, Stream s) => t.ValidateTagId(s.ILIntDecode());
+        private static void ValidateTagId(ITag t, Stream s) => t.ValidateTagId(s.ILIntDecode());
 
         private byte[] ToBytes() {
             using var stream = new MemoryStream();

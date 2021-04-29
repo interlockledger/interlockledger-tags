@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,12 +30,26 @@
 //
 // ******************************************************************************************************************************
 
+using System.IO;
+
 namespace InterlockLedger.Tags
 {
     public interface ITag
     {
         object AsJson { get; }
-        ulong TagId { get; }
         byte[] EncodedBytes { get; }
+        bool IsNull => TagId == ILTagId.Null;
+        ulong TagId { get; }
+
+        T As<T>() where T : ITag => this is T tag ? tag : throw new InvalidDataException($"Not an {typeof(T).Name}");
+
+        Stream SerializeInto(Stream s);
+
+        void ValidateTagId(ulong decodedTagId) {
+            if (decodedTagId != TagId)
+                throw new InvalidDataException($"This is not an {GetType().Name}");
+        }
+
+        bool ValueIs<TV>(out TV value);
     }
 }

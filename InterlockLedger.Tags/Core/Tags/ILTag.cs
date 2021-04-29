@@ -49,10 +49,9 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public virtual string Formatted => "?";
 
-        [JsonIgnore]
-        public bool IsNull => TagId == ILTagId.Null;
-
         public ulong TagId { get; set; }
+
+        public ITag Traits => this;
 
         public static ILTag DeserializeFrom(Stream s) {
             if (s.HasBytes()) {
@@ -97,18 +96,11 @@ namespace InterlockLedger.Tags
 
         public static byte[] ToBytesHelper(Action<Stream> serialize) => TagHelpers.ToBytesHelper(serialize);
 
-        public T As<T>() where T : ILTag => this as T ?? throw new InvalidDataException($"Not an {typeof(T).Name}");
-
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
         public abstract Stream SerializeInto(Stream s);
 
         public override string ToString() => GetType().Name + $"#{TagId}:" + Formatted;
-
-        public void ValidateTagId(ulong decodedTagId) {
-            if (decodedTagId != TagId)
-                throw new InvalidDataException($"This is not an {GetType().Name}");
-        }
 
         public abstract bool ValueIs<TV>(out TV value);
 

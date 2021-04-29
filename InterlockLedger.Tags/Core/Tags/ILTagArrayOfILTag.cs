@@ -82,7 +82,7 @@ namespace InterlockLedger.Tags
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
         private byte[] _innerBytes;
 
-        private static T AllowNull(ILTag tag) => tag.IsNull ? default : (T)tag;
+        private static T AllowNull(ILTag tag) => tag.Traits.IsNull ? default : (T)tag;
 
         private static T[] Elicit(object o) {
             if (o is Dictionary<string, object> dictionary) {

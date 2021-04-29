@@ -151,7 +151,7 @@ namespace InterlockLedger.Tags
 
         [TestCase(new byte[] { 0 }, ExpectedResult = true)]
         public bool IsNull(byte[] bytes) {
-            var tag = ILTag.DeserializeFrom(new MemoryStream(bytes));
+            ITag tag = ILTag.DeserializeFrom(new MemoryStream(bytes));
             return tag.IsNull && !tag.ValueIs<object>(out _);
         }
 

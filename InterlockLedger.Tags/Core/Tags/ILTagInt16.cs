@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags
         public ILTagInt16(Stream s) : base(ILTagId.Int16, s) {
         }
 
-        internal ILTagInt16(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.Int16) => ValidateTagId(alreadyDeserializedTagId);
+        internal ILTagInt16(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.Int16) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
         protected override short DeserializeInner(Stream s) => s.BigEndianReadShort();
 

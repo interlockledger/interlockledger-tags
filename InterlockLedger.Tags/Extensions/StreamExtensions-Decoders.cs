@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
     {
         public static T Decode<T>(this Stream s) where T : ILTag {
             var tag = s.DecodeTag();
-            return tag.IsNull
+            return tag.Traits.IsNull
                 ? null
                 : tag as T
                     ?? throw new InvalidDataException($"Not a {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
@@ -49,7 +49,7 @@ namespace InterlockLedger.Tags
 
         public static T DecodeAny<T>(this Stream s) where T : class, ITaggable {
             var tag = s.DecodeTag();
-            return tag.IsNull
+            return tag.Traits.IsNull
                 ? null
                 : tag is ExplicitLengthTag<T> t
                     ? t.Value
