@@ -40,6 +40,7 @@ namespace InterlockLedger.Tags
     {
         object AsJson { get; }
         byte[] EncodedBytes { get; }
+        string Formatted { get; }
         bool IsNull => TagId == ILTagId.Null;
         ulong TagId { get; }
 
