@@ -132,7 +132,7 @@ namespace InterlockLedger.Tags
             return list.ToArray();
         }
 
-        private static void CompareArrays<T, TT>(T[] array, ILTag[] value) where T : ImplicitLengthTag<TT> {
+        private static void CompareArrays<T, TT>(T[] array, ILTag[] value) where T : ILTagOf<TT> {
             if (array == null)
                 Assert.IsNull(value);
             else {

@@ -36,37 +36,52 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ExplicitLengthTag<T> : ImplicitLengthTag<T>
+    public abstract class ILTagOf<T> : ILTag
     {
-        public const int MaxEncodedValueLength = int.MaxValue / 16;
-
         [JsonIgnore]
-        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength(Value);
+        public override object AsJson => Value;
 
-        protected ExplicitLengthTag(ulong tagId, T value) : base(tagId, value) {
+        public T Value { get; set; }
+
+        public sealed override Stream SerializeInto(Stream s) {
+            if (s is null) return s;
+            try {
+                s.ILIntEncode(TagId);
+                SerializeInner(s, Value);
+            } finally {
+                s.Flush();
+            }
+            return s;
         }
 
-        protected ExplicitLengthTag(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
-            : base(s, alreadyDeserializedTagId, setup) {
+        public override bool ValueIs<TV>(out TV value) {
+            if (Value is TV tvalue) {
+                value = tvalue;
+                return true;
+            }
+            value = default;
+            return false;
         }
 
-        protected sealed override T DeserializeInner(Stream s) {
-            _valueLength = s.ILIntDecode();
-            return DeserializeValueFromStream(s, _valueLength.Value);
+        protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
+
+        protected ILTagOf(Stream s, ulong alreadyDeserializedTagId, Action<ITag> setup) : base(alreadyDeserializedTagId) {
+            setup?.Invoke(this);
+            Value = DeserializeInner(s);
         }
 
-        protected abstract T DeserializeValueFromStream(Stream s, ulong length);
-
-        protected abstract ulong GetValueEncodedLength(T Value);
-
-        protected sealed override void SerializeInner(Stream s, T value) {
-            s.ILIntEncode(EncodedValueLength);
-            if (EncodedValueLength > 0)
-                SerializeValueToStream(s, value);
+        protected ILTagOf(Stream s, ulong alreadyDeserializedTagId) : this(s, alreadyDeserializedTagId, setup: null) {
         }
 
-        protected abstract void SerializeValueToStream(Stream s, T Value);
+        protected ILTagOf(ulong tagId, Stream s) : this(s, tagId, setup: t => t.ValidateTagId(s.ILIntDecode())) {
+        }
 
-        private ulong? _valueLength;
+        protected abstract T DeserializeInner(Stream s);
+
+        protected abstract T DeserializeValueFromStream(StreamSpan s);
+
+        protected abstract void SerializeInner(Stream s, T value);
+
+        protected abstract void SerializeValueToStream(Stream s, T value);
     }
 }

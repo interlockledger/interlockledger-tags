@@ -38,7 +38,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagArrayOfILTag<T> : ExplicitLengthTag<T[]> where T : ILTag
+    public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
     {
         public ILTagArrayOfILTag(IEnumerable<T> value) : base(ILTagId.ILTagArray, value?.ToArray()) {
         }
@@ -50,7 +50,7 @@ namespace InterlockLedger.Tags
 
         public T this[int i] => Value?[i];
 
-        public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ImplicitLengthTag<TV> tv ? tv.Value : default);
+        public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
 
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
         }
@@ -64,8 +64,8 @@ namespace InterlockLedger.Tags
         protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s) {
         }
 
-        protected override T[] DeserializeValueFromStream(Stream s, ulong totalLength) {
-            if (totalLength == 0)
+        protected override T[] DeserializeValueFromStream(StreamSpan s) {
+            if (s.Length == 0)
                 return null;
             var length = (int)s.ILIntDecode();
             var result = new T[length];
@@ -104,7 +104,7 @@ namespace InterlockLedger.Tags
             return Array.Empty<T>();
         }
 
-        private static void SetDecoder(ILTag it, Func<Stream, T> decoder) => ((ILTagArrayOfILTag<T>)it)._decoder = decoder;
+        private static void SetDecoder(ITag it, Func<Stream, T> decoder) => ((ILTagArrayOfILTag<T>)it)._decoder = decoder;
 
         private static byte[] ToBytes(T[] value)
             => TagHelpers.ToBytesHelper(s => {

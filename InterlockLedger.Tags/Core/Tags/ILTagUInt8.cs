@@ -34,18 +34,15 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagUInt8 : ImplicitLengthTag<byte>
+    public class ILTagUInt8 : ILTagOfImplicit<byte>
     {
         public ILTagUInt8(byte value) : base(ILTagId.UInt8, value) {
         }
 
-        public ILTagUInt8(Stream s) : base(ILTagId.UInt8, s) {
-        }
-
         internal ILTagUInt8(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.UInt8) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override byte DeserializeInner(Stream s) => s.ReadSingleByte();
+        protected override byte DeserializeValueFromStream(StreamSpan s) => s.ReadSingleByte();
 
-        protected override void SerializeInner(Stream s, byte value) => s.WriteSingleByte(value);
+        protected override void SerializeValueToStream(Stream s, byte value) => s.WriteSingleByte(value);
     }
 }

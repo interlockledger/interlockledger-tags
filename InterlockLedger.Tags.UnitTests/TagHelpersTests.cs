@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -51,7 +51,7 @@ namespace InterlockLedger.Tags
             var bytes = TagHelpers.ToBytesHelper((s) => s.EncodeILInt(23));
             Assert.IsNotNull(bytes);
             Assert.That(tag.EncodedBytes, Is.EquivalentTo(bytes));
-            var e = Assert.Throws<ArgumentNullException>(() => TagHelpers.ToBytesHelper(null));
+            var e = Assert.Throws<ArgumentException>(() => TagHelpers.ToBytesHelper(null));
             Assert.AreEqual("serialize", e.ParamName);
         }
 
@@ -62,7 +62,7 @@ namespace InterlockLedger.Tags
             Assert.IsNotNull(tagArray);
             Assert.AreEqual(data.Length, tagArray.Value.Length);
             Assert.That(tagArray.GetValues<string>(), Is.EquivalentTo(data));
-            var e = Assert.Throws<ArgumentNullException>(() => data.ToTagArrayFrom(null));
+            var e = Assert.Throws<ArgumentException>(() => data.ToTagArrayFrom(null));
             Assert.AreEqual("convert", e.ParamName);
         }
 
@@ -73,7 +73,7 @@ namespace InterlockLedger.Tags
             Assert.IsNotNull(tagArray);
             Assert.AreEqual(data.Length, tagArray.Value.Length);
             Assert.That(tagArray.GetValues<ulong>(), Is.EquivalentTo(data));
-            var e = Assert.Throws<ArgumentNullException>(() => data.ToTagArray<ulong, ILTagILInt>(null));
+            var e = Assert.Throws<ArgumentException>(() => data.ToTagArray<ulong, ILTagILInt>(null));
             Assert.AreEqual("convert", e.ParamName);
         }
     }

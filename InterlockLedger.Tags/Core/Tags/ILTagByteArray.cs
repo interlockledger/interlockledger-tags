@@ -35,7 +35,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagByteArray : ExplicitLengthTag<byte[]>
+    public class ILTagByteArray : ILTagOfExplicit<byte[]>
     {
         public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
         }
@@ -49,7 +49,7 @@ namespace InterlockLedger.Tags
         internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
         }
 
-        protected override byte[] DeserializeValueFromStream(Stream s, ulong length) => s.ReadBytes((int)length);
+        protected override byte[] DeserializeValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
 
         protected override ulong GetValueEncodedLength(byte[] value) => (ulong)(value?.Length ?? 0);
 

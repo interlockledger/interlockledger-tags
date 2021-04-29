@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace InterlockLedger.Tags
@@ -42,6 +44,8 @@ namespace InterlockLedger.Tags
         ulong TagId { get; }
 
         T As<T>() where T : ITag => this is T tag ? tag : throw new InvalidDataException($"Not an {typeof(T).Name}");
+
+        List<ArraySegment<byte>> AsSegments() => new() { new ArraySegment<byte>(EncodedBytes) };
 
         Stream SerializeInto(Stream s);
 

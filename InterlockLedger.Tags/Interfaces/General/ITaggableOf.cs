@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -34,6 +34,6 @@ namespace InterlockLedger.Tags
 {
     public interface ITaggableOf<T> : ITaggable where T : class, ITaggableOf<T>
     {
-        ExplicitLengthTag<T> AsTag { get; }
+        ILTagOfExplicit<T> AsTag { get; }
     }
 }

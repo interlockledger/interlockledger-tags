@@ -170,7 +170,7 @@ namespace InterlockLedger.Tags
             return dict;
         }
 
-        private static void CompareDicts<T, TT>(Dictionary<string, T> dict, Dictionary<string, T> value) where T : ImplicitLengthTag<TT> {
+        private static void CompareDicts<T, TT>(Dictionary<string, T> dict, Dictionary<string, T> value) where T : ILTagOf<TT> {
             if (dict == null)
                 Assert.IsNull(value);
             else {

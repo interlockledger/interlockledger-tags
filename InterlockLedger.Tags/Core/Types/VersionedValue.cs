@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
         public Payload AsPayload => _payload.Value;
 
         [JsonIgnore]
-        public ExplicitLengthTag<T> AsTag => AsPayload;
+        public ILTagOfExplicit<T> AsTag => AsPayload;
 
         [JsonIgnore]
         public byte[] EncodedBytes => AsPayload.EncodedBytes;

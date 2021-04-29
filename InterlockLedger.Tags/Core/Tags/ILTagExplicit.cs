@@ -35,12 +35,12 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagExplicit<T> : ExplicitLengthTag<T>
+    public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>
     {
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
-        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ILTag> setup = null)
+        protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
             : base(alreadyDeserializedTagId, s, setup) {
         }
 
@@ -56,8 +56,8 @@ namespace InterlockLedger.Tags
             return deserialize(s);
         }
 
-        protected sealed override T DeserializeValueFromStream(Stream s, ulong length)
-            => FromBytes(s.ReadBytes((int)length));
+        protected sealed override T DeserializeValueFromStream(StreamSpan s)
+            => FromBytes(s.ReadAllBytesAsync().Result);
 
         protected abstract T FromBytes(byte[] bytes);
 

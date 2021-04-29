@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -36,53 +36,33 @@ using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ImplicitLengthTag<T> : ILTag
+    public abstract class ILTagOfExplicit<T> : ILTagOf<T>
     {
+        public const int MaxEncodedValueLength = int.MaxValue / 16;
+
         [JsonIgnore]
-        public override object AsJson => Value;
+        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength(Value);
 
-        public T Value { get; set; }
+        protected ulong? _valueLength;
 
-        public sealed override Stream SerializeInto(Stream s) {
-            if (s is null) return s;
-            try {
-                s.ILIntEncode(TagId);
-                SerializeInner(s, Value);
-            } finally {
-                s.Flush();
-            }
-            return s;
+        protected ILTagOfExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
-        public override bool ValueIs<TV>(out TV value) {
-            if (Value is TV tvalue) {
-                value = tvalue;
-                return true;
-            }
-            value = default;
-            return false;
+        protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
+            : base(s, alreadyDeserializedTagId, setup) {
         }
 
-        //protected ILTagImplicit() : base(0) {
-        //}
-
-        protected ImplicitLengthTag(ulong tagId, T value) : base(tagId) {
-            Value = value;
+        protected sealed override T DeserializeInner(Stream s) {
+            _valueLength = s.ILIntDecode();
+            return DeserializeValueFromStream(new StreamSpan(s, _valueLength.Value));
         }
 
-        protected ImplicitLengthTag(Stream s, ulong alreadyDeserializedTagId, Action<ILTag> setup) : base(alreadyDeserializedTagId) {
-            setup?.Invoke(this);
-            Value = DeserializeInner(s);
+        protected abstract ulong GetValueEncodedLength(T value);
+
+        protected sealed override void SerializeInner(Stream s, T value) {
+            s.ILIntEncode(EncodedValueLength);
+            if (EncodedValueLength > 0)
+                SerializeValueToStream(s, value);
         }
-
-        protected ImplicitLengthTag(Stream s, ulong alreadyDeserializedTagId) : this(s, alreadyDeserializedTagId, setup: null) {
-        }
-
-        protected ImplicitLengthTag(ulong tagId, Stream s) : this(s, tagId, setup: t => TagProvider.ValidateTagId(t, s)) {
-        }
-
-        protected abstract T DeserializeInner(Stream s);
-
-        protected abstract void SerializeInner(Stream s, T value);
     }
 }

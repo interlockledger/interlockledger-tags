@@ -36,7 +36,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public sealed class ILTagBool : ImplicitLengthTag<bool>
+    public sealed class ILTagBool : ILTagOfImplicit<bool>
     {
         public static readonly ILTagBool False = new(false);
         public static readonly ILTagBool True = new(true);
@@ -47,9 +47,9 @@ namespace InterlockLedger.Tags
 
         public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
 
-        protected override bool DeserializeInner(Stream s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
+        protected override bool DeserializeValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
-        protected override void SerializeInner(Stream s, bool value) => s.WriteByte((byte)(value ? 1 : 0));
+        protected override void SerializeValueToStream(Stream s, bool value) => s.WriteByte((byte)(value ? 1 : 0));
 
         private ILTagBool(bool value) : base(ILTagId.Bool, value) {
         }

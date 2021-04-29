@@ -36,7 +36,7 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagILInt : ImplicitLengthTag<ulong>, IEquatable<ILTagILInt>
+    public class ILTagILInt : ILTagOfImplicit<ulong>, IEquatable<ILTagILInt>
     {
         public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
         }
@@ -49,13 +49,10 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() => -1937169414 + Value.GetHashCode();
 
-        internal ILTagILInt(Stream s) : base(ILTagId.ILInt, s) {
-        }
+        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.ILInt) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.ILInt) =>Traits.ValidateTagId(alreadyDeserializedTagId);
+        protected override ulong DeserializeValueFromStream(StreamSpan s) => s.ILIntDecode();
 
-        protected override ulong DeserializeInner(Stream s) => s.ILIntDecode();
-
-        protected override void SerializeInner(Stream s, ulong value) => s.ILIntEncode(value);
+        protected override void SerializeValueToStream(Stream s, ulong value) => s.ILIntEncode(value);
     }
 }

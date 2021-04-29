@@ -1,5 +1,5 @@
-// ******************************************************************************************************************************
-//  
+﻿// ******************************************************************************************************************************
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,16 +30,20 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
+using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public static class ITagExtensions
+    public abstract class ILTagOfImplicit<T> : ILTagOf<T>
     {
-        public static List<ArraySegment<byte>> AsSegments(this ITag tag)
-            => tag is null
-                ? throw new ArgumentNullException(nameof(tag))
-                : new List<ArraySegment<byte>> { new ArraySegment<byte>(tag.EncodedBytes) };
+        protected ILTagOfImplicit(ulong tagId, T value) : base(tagId, value) {
+        }
+
+        protected ILTagOfImplicit(Stream s, ulong alreadyDeserializedTagId) : base(s, alreadyDeserializedTagId) {
+        }
+
+        protected sealed override T DeserializeInner(Stream s) => DeserializeValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
+
+        protected sealed override void SerializeInner(Stream s, T value) => SerializeValueToStream(s, value);
     }
 }
