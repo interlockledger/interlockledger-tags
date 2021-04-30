@@ -91,7 +91,7 @@ namespace InterlockLedger.Tags
             EncodeRemainingStateTo(s);
         }
 
-        public class Payload : ILTagExplicit<T>, IVersion, INamed
+        public class Payload : ILTagOfExplicit<T>, IVersion, INamed
         {
             public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => Traits.ValidateTagId(Value.TagId);
 
@@ -106,9 +106,11 @@ namespace InterlockLedger.Tags
             internal Payload(T Value) : base(Value.TagId, Value) {
             }
 
-            protected override T FromBytes(byte[] bytes) => FromBytesHelper(bytes, new T().FromStream);
+            protected sealed override T DeserializeValueFromStream(StreamSpan s) => new T().FromStream(s);
 
-            protected override byte[] ToBytes(T Value) => TagHelpers.ToBytesHelper(Value.ToStream);
+            protected sealed override void SerializeValueToStream(Stream s, T value) => value.ToStream(s);
+
+            protected sealed override ulong ValueEncodedLength(T value) => value.EncodedLength;
         }
 
         protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);
@@ -130,6 +132,7 @@ namespace InterlockLedger.Tags
 
         protected abstract object AsJson { get; }
 
+        protected virtual ulong EncodedLength => _encodedLength ??= (ulong)TagHelpers.ToBytesHelper(ToStream).Length;
         protected virtual DataIndex[] PayloadIndexes => Array.Empty<DataIndex>();
 
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
@@ -143,11 +146,9 @@ namespace InterlockLedger.Tags
         protected abstract T FromJson(object json);
 
         private readonly Lazy<DataField> _fieldModel;
-
         private readonly Lazy<Payload> _payload;
-
         private readonly Lazy<DataModel> _payloadDataModel;
-
         private readonly ulong _tagId;
+        private ulong? _encodedLength;
     }
 }

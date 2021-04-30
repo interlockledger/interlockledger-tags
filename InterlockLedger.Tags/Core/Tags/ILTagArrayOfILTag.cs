@@ -75,7 +75,7 @@ namespace InterlockLedger.Tags
             return result;
         }
 
-        protected override ulong GetValueEncodedLength(T[] value) => (ulong)((_innerBytes ??= ToBytes(value))?.Length ?? 0);
+        protected override ulong ValueEncodedLength(T[] value) => (ulong)((_innerBytes ??= ToBytes(value))?.Length ?? 0);
 
         protected override void SerializeValueToStream(Stream s, T[] value) => s.WriteBytes(_innerBytes ??= ToBytes(value));
 

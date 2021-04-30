@@ -98,7 +98,7 @@ namespace InterlockLedger.Tags
 
         protected override T DeserializeValueFromStream(StreamSpan s) => default;
 
-        protected override ulong GetValueEncodedLength(T Value) => Length;
+        protected override ulong ValueEncodedLength(T Value) => Length;
 
         protected void Refresh() {
             FileInfo.Refresh();

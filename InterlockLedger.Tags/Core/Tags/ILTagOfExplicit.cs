@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags
         public const int MaxEncodedValueLength = int.MaxValue / 16;
 
         [JsonIgnore]
-        public ulong EncodedValueLength => _valueLength ??= GetValueEncodedLength(Value);
+        public ulong EncodedValueLength => _valueLength ??= ValueEncodedLength(Value);
 
         protected ulong? _valueLength;
 
@@ -57,7 +57,7 @@ namespace InterlockLedger.Tags
             return DeserializeValueFromStream(new StreamSpan(s, _valueLength.Value));
         }
 
-        protected abstract ulong GetValueEncodedLength(T value);
+        protected abstract ulong ValueEncodedLength(T value);
 
         protected sealed override void SerializeInner(Stream s, T value) {
             s.ILIntEncode(EncodedValueLength);

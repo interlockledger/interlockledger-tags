@@ -51,7 +51,7 @@ namespace InterlockLedger.Tags
 
         protected override byte[] DeserializeValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
 
-        protected override ulong GetValueEncodedLength(byte[] value) => (ulong)(value?.Length ?? 0);
+        protected override ulong ValueEncodedLength(byte[] value) => (ulong)(value?.Length ?? 0);
 
         protected override void SerializeValueToStream(Stream s, byte[] value) => s.WriteBytes(value);
 
