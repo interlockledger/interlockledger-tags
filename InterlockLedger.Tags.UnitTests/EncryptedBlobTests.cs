@@ -195,7 +195,7 @@ namespace InterlockLedger.Tags
             return encodedBytes.PartOf(124);
         }
 
- 
+
         [Test]
         public void ValidateFieldDefinition() {
             var fd = EncryptedBlob.FieldDefinition;
