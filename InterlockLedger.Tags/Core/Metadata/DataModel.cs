@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -172,13 +172,11 @@ namespace InterlockLedger.Tags
 
             byte[] JsonToBytes(Dictionary<string, object> json, IEnumerable<DataField> dataFields) {
                 const ushort minVersion = 0;
-                var tags = new List<ITag>();
+                var tags = new List<ILTag>();
                 ushort version = minVersion;
                 bool isVersioned = IsVersioned(dataFields);
                 ScanFieldsToTags(ExtractVersion());
-                return tags.SafeAny(t => t is not IMemoryBackedTag)
-                    ? throw new InvalidDataException("Some tags aren't memory backed to try to convert to a byte array")
-                    : AppendRemainingBytes(tags.Cast<IMemoryBackedTag>().Select(t => t.EncodedBytes).SelectMany(b => b).ToArray());
+                return AppendRemainingBytes(tags.Select(t => t.ToEncodedBytes()).SelectMany(b => b).ToArray());
                 IEnumerable<DataField> ExtractVersion() {
                     if (!isVersioned) return dataFields;
                     if (json.TryGetValue(dataFields.First().Name, out var fieldValue)) {

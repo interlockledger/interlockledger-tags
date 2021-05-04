@@ -38,12 +38,6 @@ using NUnit.Framework;
 namespace InterlockLedger.Tags
 {
 
-    public static class ILTagExtensions
-    {
-        public static byte[] ToEncodedBytes(this ILTag payload)
-         => payload is IMemoryBackedTag tag ? tag.EncodedBytes : TagHelpers.ToBytesHelper(s => s.EncodeTag(payload));
-
-    }
 
     [TestFixture]
     public class EncryptedBlobTests
