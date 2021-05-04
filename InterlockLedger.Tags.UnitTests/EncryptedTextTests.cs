@@ -126,7 +126,11 @@ namespace InterlockLedger.Tags
                         16, 248, 8,
         }, TestName = "SerializeEncryptedText")]
         public byte[] SerializeEncryptedText(CipherAlgorithm algorithm, string clearText) {
-            var encodedBytes = new EncryptedText(algorithm, clearText, TestFakeSigner.FixedKeysInstance, TestFakeSigner.FixedKeysInstance, Array.Empty<TagReader>()).AsPayload.EncodedBytes;
+            var encodedBytes = new EncryptedText(algorithm,
+                                                 clearText,
+                                                 TestFakeSigner.FixedKeysInstance,
+                                                 TestFakeSigner.FixedKeysInstance,
+                                                 Array.Empty<TagReader>()).AsPayload.ToEncodedBytes();
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes.PartOf(124);
         }

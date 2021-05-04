@@ -65,7 +65,7 @@ namespace InterlockLedger.Tags
             CheckMissingPassword(password);
             if (password.Length < 6)
                 throw new ArgumentException($"Password '{password}' is too weak!!!", nameof(password));
-            (byte[] cipherData, _, _) = Encrypt(value.EncodedBytes, (s, _key, _iv) => WriteHeader(password, s, _key, _iv), key, iv);
+            (byte[] cipherData, _, _) = Encrypt(value.OpenReadingStream(), (s, _key, _iv) => WriteHeader(password, s, _key, _iv), key, iv);
             _encrypted = new TagEncrypted(CipherAlgorithm.AES256, cipherData);
         }
 

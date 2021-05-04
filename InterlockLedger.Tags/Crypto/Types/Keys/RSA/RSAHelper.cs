@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -74,21 +74,32 @@ namespace InterlockLedger.Tags
                 }
         }
 
-        public static byte[] HashAndSignBytes(byte[] dataToSign, RSAParameters key) {
+        public static byte[] HashAndSign(byte[] data, RSAParameters parameters) {
             int retries = _maxRetries;
             while (true)
                 try {
-                    using var RSAalg = new RSACryptoServiceProvider();
-                    using var hasher = new SHA256CryptoServiceProvider();
-                    RSAalg.ImportParameters(key);
-                    return RSAalg.SignData(dataToSign, hasher);
+                    using var RSAalg = OpenProvider(parameters);
+                    return RSAalg.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
                         throw new InterlockLedgerCryptographicException($"Failed to sign data with current parameters after {_maxRetries} retries", e);
                 }
         }
 
-        public static bool Verify(byte[] dataToVerify, TagSignature signature, RSAParameters parameters) {
+        public static byte[] HashAndSignBytes<T>(T dataToSign, RSAParameters parameters) where T : Signable<T>, new() {
+            int retries = _maxRetries;
+            while (true)
+                try {
+                    using var RSAalg = OpenProvider(parameters);
+                    using var dataStream = dataToSign.OpenReadingStream();
+                    return RSAalg.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                } catch (CryptographicException e) {
+                    if (retries-- <= 0)
+                        throw new InterlockLedgerCryptographicException($"Failed to sign data with current parameters after {_maxRetries} retries", e);
+                }
+        }
+
+        public static bool Verify<T>(T dataToVerify, TagSignature signature, RSAParameters parameters) where T : Signable<T>, new() {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
             try {
@@ -96,15 +107,20 @@ namespace InterlockLedger.Tags
                     throw new InvalidDataException($"Signature uses different algorithm {signature.Algorithm} from this RSA key!");
                 if (parameters.Exponent == null || parameters.Modulus == null)
                     throw new InvalidDataException($"This RSA key is not properly configured to be able to verify a signature!");
-                using var RSAalg = new RSACryptoServiceProvider();
-                RSAalg.ImportParameters(parameters);
-                using var hasher = new SHA256CryptoServiceProvider();
-                return RSAalg.VerifyData(dataToVerify, hasher, signature.Data);
+                using var RSAalg = OpenProvider(parameters);
+                using var dataStream = dataToVerify.OpenReadingStream();
+                return RSAalg.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             } catch (CryptographicException e) {
                 throw new InterlockLedgerCryptographicException("Failed to verify data with current parameters and signature", e);
             }
         }
 
         private const int _maxRetries = 3;
+
+        private static RSACryptoServiceProvider OpenProvider(RSAParameters parameters) {
+            var RSAalg = new RSACryptoServiceProvider();
+            RSAalg.ImportParameters(parameters);
+            return RSAalg;
+        }
     }
 }

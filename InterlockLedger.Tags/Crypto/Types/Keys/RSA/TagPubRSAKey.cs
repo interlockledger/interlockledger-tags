@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -52,7 +52,8 @@ namespace InterlockLedger.Tags
 
         public override byte[] Encrypt(byte[] bytes) => RSAHelper.Encrypt(bytes, Parameters);
 
-        public override bool Verify(byte[] dataToVerify, TagSignature signature) => RSAHelper.Verify(dataToVerify, signature, Parameters);
+        public override bool Verify<T>(T data, TagSignature signature)
+            => RSAHelper.Verify(data, signature, Parameters);
 
         internal TagPubRSAKey(byte[] data) : base(Algorithm.RSA, data) => Parameters = DecodeParameters(Data);
 
@@ -63,6 +64,7 @@ namespace InterlockLedger.Tags
             return s.Decode<TagPublicRSAParameters>().Value;
         }
 
-        private static byte[] EncodeParameters(RSAParameters parameters) => new TagPublicRSAParameters(parameters).EncodedBytes;
+        private static byte[] EncodeParameters(RSAParameters parameters)
+            => new TagPublicRSAParameters(parameters).EncodedBytes;
     }
 }

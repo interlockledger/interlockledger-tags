@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -48,8 +48,19 @@ namespace InterlockLedger.Tags
 
         public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(_value.Strength);
 
-        public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null) {
-            var signatureData = RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters);
+        public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null)
+            => Update(encrypt, RSAHelper.HashAndSign(data, _keyParameters.Value.Parameters));
+
+        public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null)
+            => Update(encrypt, RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
+
+        private bool _destroyKeysAfterSigning;
+
+        private TagRSAParameters _keyParameters;
+
+        private TagRSAParameters _nextKeyParameters;
+
+        private TagSignature Update(Func<byte[], byte[]> encrypt, byte[] signatureData) {
             if (_destroyKeysAfterSigning) {
                 _keyParameters = null;
                 _nextKeyParameters = null;
@@ -71,9 +82,5 @@ namespace InterlockLedger.Tags
             }
             return new TagSignature(Algorithm.RSA, signatureData);
         }
-
-        private bool _destroyKeysAfterSigning;
-        private TagRSAParameters _keyParameters;
-        private TagRSAParameters _nextKeyParameters;
     }
 }

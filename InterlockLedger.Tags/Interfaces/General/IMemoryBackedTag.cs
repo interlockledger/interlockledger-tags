@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,32 +31,14 @@
 // ******************************************************************************************************************************
 
 using System;
-using System.IO;
-using System.Linq;
-using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace InterlockLedger.Tags
 {
-    [TestFixture]
-    public class SignableTests
+    public interface IMemoryBackedTag : ITag
     {
-        [TestCase(32ul, new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
-        public void NewSignableFromStream(ulong ilint, byte[] bytes) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<TestSignable.Payload>();
-            Assert.AreEqual(TestSignable.FieldTagId, tag.TagId);
-            Assert.AreEqual(ilint, tag.Value.SomeILInt);
-            Assert.IsTrue(tag.ValueIs<ISignable>(out _));
-            Assert.AreEqual(new TestSignable().FieldModel, tag.Value.FieldModel);
-            Assert.AreEqual(2, tag.Value.FieldModel.SubDataFields.SafeCount());
-            Assert.AreEqual(nameof(TestSignable.SomeILInt), tag.Value.FieldModel.SubDataFields.Last().Name);
-        }
+        byte[] EncodedBytes { get; }
 
-        [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
-        public byte[] SerializeSignable(ulong someILInt) {
-            var encodedBytes = new TestSignable(someILInt).AsPayload.ToEncodedBytes();
-            TestContext.WriteLine(encodedBytes.AsLiteral());
-            return encodedBytes;
-        }
+        List<ArraySegment<byte>> AsSegments() => new() { new ArraySegment<byte>(EncodedBytes) };
     }
 }

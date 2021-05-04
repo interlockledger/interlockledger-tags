@@ -31,30 +31,33 @@
 // ******************************************************************************************************************************
 
 using System;
-using System.Collections.Generic;
-using System.IO;
+using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-    public interface ITag
+    [TestFixture]
+    public class IEnumerableOfExtensionsTests
     {
-        object AsJson { get; }
-        byte[] EncodedBytes { get; }
-        string Formatted { get; }
-        bool IsNull => TagId == ILTagId.Null;
-        ulong TagId { get; }
-
-        T As<T>() where T : ITag => this is T tag ? tag : throw new InvalidDataException($"Not an {typeof(T).Name}");
-
-        List<ArraySegment<byte>> AsSegments() => new() { new ArraySegment<byte>(EncodedBytes) };
-
-        Stream SerializeInto(Stream s);
-
-        void ValidateTagId(ulong decodedTagId) {
-            if (decodedTagId != TagId)
-                throw new InvalidDataException($"This is not an {GetType().Name}");
+        [Test]
+        public void ToTagArrayFromTest() {
+            var data = new string[] { "1", "2", "3", "5", "7", "11" };
+            var tagArray = data.ToTagArrayFrom(v => new ILTagString(v));
+            Assert.IsNotNull(tagArray);
+            Assert.AreEqual(data.Length, tagArray.Value.Length);
+            Assert.That(tagArray.GetValues<string>(), Is.EquivalentTo(data));
+            var e = Assert.Throws<ArgumentException>(() => data.ToTagArrayFrom(null));
+            Assert.AreEqual("convert", e.ParamName);
         }
 
-        bool ValueIs<TV>(out TV value);
+        [Test]
+        public void ToTagArrayTest() {
+            var data = new ulong[] { 1, 2, 3, 5, 7, 11 };
+            var tagArray = data.ToTagArray(v => new ILTagILInt(v));
+            Assert.IsNotNull(tagArray);
+            Assert.AreEqual(data.Length, tagArray.Value.Length);
+            Assert.That(tagArray.GetValues<ulong>(), Is.EquivalentTo(data));
+            var e = Assert.Throws<ArgumentException>(() => data.ToTagArray<ulong, ILTagILInt>(null));
+            Assert.AreEqual("convert", e.ParamName);
+        }
     }
 }

@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -48,7 +48,7 @@ namespace InterlockLedger.Tags
         public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
         public SignedValue<T> SignWith(ISigningContext context)
-            => new((T)this, context.Required(nameof(context)).Key.SignWithId(AsPayload.EncodedBytes).AsSingle());
+            => new((T)this, context.Required(nameof(context)).Key.SignWithId((T)this).AsSingle());
 
         protected Signable(ulong tagId, ushort version) : base(tagId, version) {
         }

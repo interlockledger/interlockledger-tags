@@ -79,6 +79,8 @@ namespace InterlockLedger.Tags
                 return RSAInterlockSigningKey.FromSessionState(bytes);
             } catch { return null; }
         }
+
+        public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
     }
 
     public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData

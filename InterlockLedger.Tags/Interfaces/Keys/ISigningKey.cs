@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -40,6 +40,8 @@ namespace InterlockLedger.Tags
 
         TagSignature Sign(byte[] data);
 
-        IdentifiedSignature SignWithId(byte[] data) => new(Sign(data), Id, PublicKey);
+        TagSignature Sign<T>(T data) where T : Signable<T>, new();
+
+        IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), Id, PublicKey);
     }
 }

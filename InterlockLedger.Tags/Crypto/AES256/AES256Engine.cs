@@ -79,6 +79,21 @@ namespace InterlockLedger.Tags
             }
             return (ms.ToArray(), algorithm.Key, algorithm.IV);
         }
+        public (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream,
+                                                                  Action<MemoryStream, byte[], byte[]> writeHeader = null,
+                                                                  byte[] key = null,
+                                                                  byte[] iv = null) {
+            using var algorithm = BuildAlgorithm(key, iv);
+            if (clearDataStream is null)
+                throw new ArgumentNullException(nameof(clearDataStream));
+            using var ms = new MemoryStream();
+            writeHeader?.Invoke(ms, algorithm.Key, algorithm.IV);
+            using (var cs = new CryptoStream(ms, algorithm.CreateEncryptor(), CryptoStreamMode.Write)) {
+                clearDataStream.CopyTo(cs);
+                cs.Close();
+            }
+            return (ms.ToArray(), algorithm.Key, algorithm.IV);
+        }
 
         private static SymmetricAlgorithm BuildAlgorithm(byte[] key, byte[] iv) {
             var AES = new RijndaelManaged {

@@ -192,7 +192,7 @@ namespace InterlockLedger.Tags
                     var dictValue = dict[key];
                     var valueValue = value[key];
                     Assert.AreEqual(dictValue.TagId, valueValue.TagId);
-                    Assert.AreEqual(dictValue.EncodedBytes, valueValue.EncodedBytes);
+                    Assert.AreEqual(dictValue.ToEncodedBytes(), valueValue.ToEncodedBytes());
                 }
             }
         }

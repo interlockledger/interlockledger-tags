@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,29 +31,17 @@
 // ******************************************************************************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace InterlockLedger.Tags
 {
     public static class TagHelpers
     {
-        public static ILTag Decoded(this byte[] buffer) => TagProvider.DeserializeFrom(buffer);
-
         public static byte[] ToBytesHelper(Action<Stream> serialize) {
             serialize.Required(nameof(serialize));
             using var s = new MemoryStream();
             serialize(s);
             return s.ToArray();
         }
-
-        public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag {
-            convert.Required(nameof(convert));
-            return new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
-        }
-
-        public static ILTagArrayOfILTag<ILTagOf<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagOf<T>> convert)
-            => ToTagArray(list, convert);
     }
 }

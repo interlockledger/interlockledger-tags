@@ -41,8 +41,8 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public abstract object AsJson { get; }
 
-        [JsonIgnore]
-        public byte[] EncodedBytes => _encodedBytes.Value;
+        //[JsonIgnore]
+        //public byte[] EncodedBytes => _encodedBytes.Value;
 
         [JsonIgnore]
         public virtual string Formatted => "?";
@@ -68,7 +68,7 @@ namespace InterlockLedger.Tags
 
         protected virtual bool NonFullBytes { get; }
         private static readonly Lazy<byte[]> _throwIfCalled = new(() => throw new InvalidOperationException("Should never call EncodedBytes for this tag type"));
-        private readonly Lazy<byte[]> _encodedBytes;
+        protected readonly Lazy<byte[]> _encodedBytes;
 
         private byte[] ToBytes() {
             using var stream = new MemoryStream();
@@ -76,5 +76,7 @@ namespace InterlockLedger.Tags
             stream.Flush();
             return stream.ToArray();
         }
+
+        public abstract Stream OpenReadingStream();
     }
 }

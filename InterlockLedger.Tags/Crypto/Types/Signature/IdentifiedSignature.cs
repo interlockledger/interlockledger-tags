@@ -56,7 +56,7 @@ namespace InterlockLedger.Tags
 
         public override string TypeName => nameof(IdentifiedSignature);
 
-        public bool Verify(byte[] data) => PublicKey.Verify(data, Signature);
+        public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
 
         protected override object AsJson => new { TagId, Version, Signature, SignerId, PublicKey };
 

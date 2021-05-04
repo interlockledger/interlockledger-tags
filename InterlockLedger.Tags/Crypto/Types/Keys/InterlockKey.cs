@@ -145,7 +145,7 @@ namespace InterlockLedger.Tags
                 set => _firstAppId = value;
             }
 
-            internal ILTagArrayOfILTag<ILTagILInt> PurposesAsILInts => new(AsILInts(Purposes));
+            internal ILTagArrayOfILInt PurposesAsILInts => new(AsILInts(Purposes));
 
             internal ulong[] PurposesAsUlongs {
                 get => AsUlongs(Purposes);
@@ -156,7 +156,8 @@ namespace InterlockLedger.Tags
 
             private string _displayablePurposes => Purposes.ToStringAsList();
 
-            private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+            private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes())
+                .Append(PurposesAsILInts.EncodedBytes);
 
             private static ILTagILInt[] AsILInts(KeyPurpose[] purposes) => purposes?.Select(p => new ILTagILInt((ulong)p)).ToArray();
 

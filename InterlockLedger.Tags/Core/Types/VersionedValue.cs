@@ -50,9 +50,6 @@ namespace InterlockLedger.Tags
         public ILTagOfExplicit<T> AsTag => AsPayload;
 
         [JsonIgnore]
-        public byte[] EncodedBytes => AsPayload.EncodedBytes;
-
-        [JsonIgnore]
         public DataField FieldModel => _fieldModel.Value;
 
         [JsonIgnore]
@@ -82,9 +79,11 @@ namespace InterlockLedger.Tags
             return FromStream(s);
         }
 
+        public Stream OpenReadingStream() => AsPayload.OpenReadingStream();
+
         public bool RegisterAsField(ITagRegistrar registrar)
             => registrar.Required(nameof(registrar))
-                        .RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload);
+                .RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload);
 
         public void ToStream(Stream s) {
             s.EncodeUShort(Version);    // Field index 0 //
@@ -100,6 +99,14 @@ namespace InterlockLedger.Tags
             public ushort Version => Value.Version;
 
             public T FromJson(object o) => new T().FromJson(o);
+
+            public override Stream OpenReadingStream() {
+                var s = new MemoryStream();
+                s.EncodeTag(this);
+                s.Flush();
+                s.Position = 0;
+                return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
+            }
 
             public override string ToString() => Value.ToString();
 

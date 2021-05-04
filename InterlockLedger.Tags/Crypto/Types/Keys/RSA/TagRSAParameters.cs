@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -72,7 +72,7 @@ namespace InterlockLedger.Tags
         private static KeyStrength DecodeStrength(Stream s) => (KeyStrength)(s.HasBytes() ? s.DecodeILInt() : 0);
     }
 
-    public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
+    public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters, IMemoryBackedTag
     {
         public TagRSAParameters(RSAParameters parameters, KeyStrength strength) : base(ILTagId.RSAParameters, new KeyParameters(parameters, strength)) {
         }

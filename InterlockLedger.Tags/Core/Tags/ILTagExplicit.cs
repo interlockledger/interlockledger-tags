@@ -32,16 +32,22 @@
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>
+    public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>, IMemoryBackedTag
     {
+        [JsonIgnore]
+        public byte[] EncodedBytes => _encodedBytes.Value;
+
+        public sealed override Stream OpenReadingStream() => new MemoryStream(EncodedBytes, writable: false);
+
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
         protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
-            : base(alreadyDeserializedTagId, s, setup) {
+                : base(alreadyDeserializedTagId, s, setup) {
         }
 
         protected sealed override bool NonFullBytes => false;
@@ -61,10 +67,10 @@ namespace InterlockLedger.Tags
 
         protected abstract T FromBytes(byte[] bytes);
 
-        protected override ulong ValueEncodedLength(T value) => (ulong)(ToBytes(value)?.Length ?? 0);
-
         protected sealed override void SerializeValueToStream(Stream s, T value) => s.WriteBytes(ToBytes(value));
 
         protected abstract byte[] ToBytes(T Value);
+
+        protected override ulong ValueEncodedLength(T value) => (ulong)(ToBytes(value)?.Length ?? 0);
     }
 }

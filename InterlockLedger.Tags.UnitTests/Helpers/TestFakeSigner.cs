@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -46,6 +46,9 @@ namespace InterlockLedger.Tags
 
         public TagPubKey EmergencyPublicKey => PublicKey;
 
+        string IReader.Id => Id.TextualRepresentation;
+        BaseKeyId IUpdatingSigner.Identity => Id;
+        public ISigningKey Key => this;
         public DateTimeOffset LastSignatureTimeStamp => KnownTimeStamp;
 
         public TagPubKey NextPublicKey => PublicKey;
@@ -59,17 +62,16 @@ namespace InterlockLedger.Tags
         public TagHash Session => TagHash.Empty;
 
         public ulong SignaturesWithCurrentKey => 14;
-
-        string IReader.Id => Id.TextualRepresentation;
-
-        BaseKeyId IUpdatingSigner.Identity => Id;
+        public ITimeStamper TimeStamper => this;
 
         public override byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _rsaParameters);
 
         public IUpdatingSigner DestroyKeys() => this;
 
         public (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag
-            => EncryptRaw(cipher, clearText?.EncodedBytes);
+            => cipher != CipherAlgorithm.AES256
+                ? throw new InvalidOperationException("Only AES256 is valid for now")
+                : new AES256Engine().Encrypt(clearText.OpenReadingStream(), key: _fakeCipherKey, iv: _fakeCipherIV);
 
         public (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText)
             => cipher != CipherAlgorithm.AES256
@@ -88,9 +90,12 @@ namespace InterlockLedger.Tags
         }
 
         public TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA)
-            => new TagSignature(Algorithm.RSA, _generateEmptySignatures ? Array.Empty<byte>() : RSAHelper.HashAndSignBytes(data, _rsaParameters));
+            => new TagSignature(Algorithm.RSA, _generateEmptySignatures ? Array.Empty<byte>() : RSAHelper.HashAndSign(data, _rsaParameters));
 
         public override TagSignature Sign(byte[] data) => Sign(data, KeyPurpose.Action);
+
+        public override TagSignature Sign<T>(T data)
+            => new TagSignature(Algorithm.RSA, _generateEmptySignatures ? Array.Empty<byte>() : RSAHelper.HashAndSignBytes(data, _rsaParameters));
 
         public bool Supports(KeyPurpose purpose, ulong? appId = null) => true;
 
@@ -162,9 +167,5 @@ namespace InterlockLedger.Tags
             _generateEmptySignatures = generateEmptySignatures;
             PublicKey = new TagPubRSAKey(_rsaParameters);
         }
-
-        public ISigningKey Key => this;
-        public ITimeStamper TimeStamper => this;
-
     }
 }

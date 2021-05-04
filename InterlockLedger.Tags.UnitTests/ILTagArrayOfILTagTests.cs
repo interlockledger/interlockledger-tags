@@ -55,7 +55,7 @@ namespace InterlockLedger.Tags
             var expectedBytes = new byte[] { 21, 6, 3, 10, 1, 0, 10, 3 };
             var array = new ILTagILInt[] { new ILTagILInt(1), null, new ILTagILInt(3) };
             var compound = new ILTagArrayOfILTag<ILTagILInt>(array);
-            byte[] encodedBytes = compound.EncodedBytes;
+            byte[] encodedBytes = compound.ToEncodedBytes();
             Assert.AreEqual(expectedBytes, encodedBytes);
             using var ms = new MemoryStream(encodedBytes);
             var value = ms.DecodeTagArray<ILTagILInt>();
@@ -113,7 +113,7 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Arrays_with_Two_Bytes")]
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize_Two_Arrays_with_One_and_Three_Bytes")]
         public byte[] SerializeILTagILTagArray(byte[] bytes, byte[] splits)
-            => new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).EncodedBytes;
+            => new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).ToEncodedBytes();
 
         private static ILTagByteArray[] BuildArrayOfArrays(byte[] bytes, byte[] splits) {
             if (bytes == null)
@@ -147,11 +147,11 @@ namespace InterlockLedger.Tags
 
         private static void GuaranteeBijectiveBehavior(ILTagBool[] array) {
             var ilarray = new ILTagArrayOfILTag<ILTagBool>(array);
-            var encodedBytes = ilarray.EncodedBytes;
+            var encodedBytes = ilarray.ToEncodedBytes();
             using var ms = new MemoryStream(encodedBytes);
             var value = ms.DecodeTagArray<ILTagBool>();
             CompareArrays<ILTagBool, bool>(array, value);
-            var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes;
+            var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).ToEncodedBytes();
             Assert.AreEqual(encodedBytes, newEncodedBytes);
         }
 

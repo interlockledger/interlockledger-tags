@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -38,13 +38,13 @@ namespace InterlockLedger.Tags
     public abstract class Owner : ISigningKey, IPasswordProvider
     {
         public InterlockKey AsInterlockKey => new(this);
-        public TagPubKey PublicKey { get; protected set; }
         public string Description { get; protected set; }
         public string Email { get; protected set; }
         public BaseKeyId Id { get; protected set; }
         public string Name { get; protected set; }
         public OwnerId OwnerId => (OwnerId)Id;
         public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
+        public TagPubKey PublicKey { get; protected set; }
         public KeyPurpose[] Purposes => keyPurposes;
         public Algorithm SignAlgorithm { get; protected set; }
         public KeyStrength Strength { get; protected set; }
@@ -54,6 +54,8 @@ namespace InterlockLedger.Tags
         public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required(nameof(id)).EncodedBytes).Data);
 
         public abstract TagSignature Sign(byte[] data);
+
+        public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
 
         public string ToListing() => $"'{Name}' {Id}";
 

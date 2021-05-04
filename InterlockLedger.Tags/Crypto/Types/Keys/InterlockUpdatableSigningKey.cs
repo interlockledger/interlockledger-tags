@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -38,17 +38,17 @@ namespace InterlockLedger.Tags
 {
     public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     {
-        public TagPubKey PublicKey => _value.PublicKey;
-        public abstract TagPubKey NextPublicKey { get; }
-        public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
-        public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public string Description => _value.Description;
         public byte[] EncodedBytes => _value.EncodedBytes;
         public BaseKeyId Id => _value.Id;
         public BaseKeyId Identity => _value.Identity;
         public DateTimeOffset LastSignatureTimeStamp => _value.LastSignatureTimeStamp;
         public string Name => _value.Name;
+        public abstract TagPubKey NextPublicKey { get; }
+        public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
+        public TagPubKey PublicKey => _value.PublicKey;
         public KeyPurpose[] Purposes => _value.Purposes;
+        public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
         public ulong SignaturesWithCurrentKey => _value.SignaturesWithCurrentKey;
         public KeyStrength Strength => _value.Strength;
 
@@ -60,7 +60,13 @@ namespace InterlockLedger.Tags
 
         public TagSignature Sign(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
 
+        public TagSignature Sign<T>(T data) where T : Signable<T>, new() => throw new InvalidOperationException("Can't sign without possibly updating the key");
+
+        public abstract TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null) where T : Signable<T>, new();
+
         public abstract TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null);
+
+        public IdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
 
         public string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
 
@@ -72,8 +78,6 @@ namespace InterlockLedger.Tags
             _timeStamper = timeStamper.Required(nameof(timeStamper));
             _value.LastSignatureTimeStamp = _timeStamper.Now;
         }
-
-        public IdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     }
 
     public sealed class InterlockUpdatableSigningKeyData : ILTagExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData
@@ -85,16 +89,16 @@ namespace InterlockLedger.Tags
         }
 
         public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
-        public DateTimeOffset LastSignatureTimeStamp { get => Value.LastSignatureTimeStamp; internal set => Value.LastSignatureTimeStamp = value; }
-        public ulong SignaturesWithCurrentKey { get => Value.SignaturesWithCurrentKey; internal set => Value.SignaturesWithCurrentKey = value; }
         public string Description => Value.Description;
         byte[] IInterlockKeySecretData.Encrypted => Value.Encrypted;
         EncryptedContentType IInterlockKeySecretData.EncryptedContentType => EncryptedContentType.EncryptedKey;
         public BaseKeyId Id => Value.Id;
         public BaseKeyId Identity => Value.Identity;
+        public DateTimeOffset LastSignatureTimeStamp { get => Value.LastSignatureTimeStamp; internal set => Value.LastSignatureTimeStamp = value; }
         public string Name => Value.Name;
         public TagPubKey PublicKey => Value.PublicKey;
         public KeyPurpose[] Purposes => Value.Purposes;
+        public ulong SignaturesWithCurrentKey { get => Value.SignaturesWithCurrentKey; internal set => Value.SignaturesWithCurrentKey = value; }
         public KeyStrength Strength => Value.Strength;
         public ushort Version => Value.Version;
 
@@ -108,6 +112,25 @@ namespace InterlockLedger.Tags
         public override string ToString() => $@"InterlockUpdatableSigningKey
 -- Version: {Version}
 {Value}";
+
+        public class UpdatableParts : InterlockKey.Parts
+        {
+            public const ushort InterlockUpdatableSigningKeyVersion = 0x0001;
+            public byte[] Encrypted;
+            public DateTimeOffset LastSignatureTimeStamp;
+            public ulong SignaturesWithCurrentKey;
+
+            public UpdatableParts() {
+            }
+
+            public UpdatableParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, BaseKeyId keyId)
+                : base(purposes, name, description, pubKey, strength, keyId, null) {
+                Version = InterlockUpdatableSigningKeyVersion;
+                Encrypted = encrypted;
+                LastSignatureTimeStamp = DateTimeOffsetExtensions.TimeZero;
+                SignaturesWithCurrentKey = 0;
+            }
+        }
 
         internal InterlockUpdatableSigningKeyData(Stream s) : base(ILTagId.InterlockUpdatableSigningKey, s) {
         }
@@ -144,25 +167,5 @@ namespace InterlockLedger.Tags
                 s.EncodeILInt(value.SignaturesWithCurrentKey); // Field index 9 //
                 s.EncodeILInt((ulong)value.Strength);       // Field index 10 //
             });
-
-
-        public class UpdatableParts : InterlockKey.Parts
-        {
-            public const ushort InterlockUpdatableSigningKeyVersion = 0x0001;
-            public byte[] Encrypted;
-            public DateTimeOffset LastSignatureTimeStamp;
-            public ulong SignaturesWithCurrentKey;
-
-            public UpdatableParts() {
-            }
-
-            public UpdatableParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, BaseKeyId keyId)
-                : base(purposes, name, description, pubKey, strength, keyId, null) {
-                Version = InterlockUpdatableSigningKeyVersion;
-                Encrypted = encrypted;
-                LastSignatureTimeStamp = DateTimeOffsetExtensions.TimeZero;
-                SignaturesWithCurrentKey = 0;
-            }
-        }
     }
 }

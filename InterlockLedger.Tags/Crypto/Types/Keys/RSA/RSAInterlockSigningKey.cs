@@ -64,7 +64,9 @@ namespace InterlockLedger.Tags
 
         public override byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters.Value.Parameters);
 
-        public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
+        public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSign(data, _keyParameters.Value.Parameters));
+        public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
+
 
         private readonly TagRSAParameters _keyParameters;
 

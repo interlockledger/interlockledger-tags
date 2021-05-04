@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -46,7 +46,7 @@ namespace InterlockLedger.Tags
 
         public ulong ContentTagId => SignedContent.TagId;
 
-        public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent.AsILTag.EncodedBytes);
+        public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent);
 
         public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
 
@@ -57,8 +57,7 @@ namespace InterlockLedger.Tags
         public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey) {
             if (SignedContent is null || Signatures.None())
                 return false;
-            byte[] encodedBytes = SignedContent.AsILTag.EncodedBytes;
-            return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(encodedBytes));
+            return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(SignedContent));
         }
 
         internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
@@ -92,8 +91,8 @@ namespace InterlockLedger.Tags
 
         protected override SignedValue<T> FromJson(object json) => throw new NotImplementedException();
 
-        private IEnumerable<IdentifiedSignature> FailedSignaturesFor(byte[] encodedBytes)
-            => Signatures.Where(sig => !sig.Verify(encodedBytes)).ToArray();
+        private IEnumerable<IdentifiedSignature> FailedSignaturesFor(T data)
+            => Signatures.Where(sig => !sig.Verify(data)).ToArray();
 
         private void Init(T signedContent, IEnumerable<IdentifiedSignature> signatures) {
             SignedContent = signedContent.Required(nameof(signedContent));

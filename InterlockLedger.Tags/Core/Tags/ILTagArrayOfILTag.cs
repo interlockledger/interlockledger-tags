@@ -52,6 +52,9 @@ namespace InterlockLedger.Tags
 
         public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
 
+        // TODO: do better than _innerBytes
+        public override Stream OpenReadingStream() => new ReadonlyTagStream(TagId, _innerBytes ??= ToBytes(Value));
+
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
         }
 
@@ -75,9 +78,9 @@ namespace InterlockLedger.Tags
             return result;
         }
 
-        protected override ulong ValueEncodedLength(T[] value) => (ulong)((_innerBytes ??= ToBytes(value))?.Length ?? 0);
-
         protected override void SerializeValueToStream(Stream s, T[] value) => s.WriteBytes(_innerBytes ??= ToBytes(value));
+
+        protected override ulong ValueEncodedLength(T[] value) => (ulong)((_innerBytes ??= ToBytes(value))?.Length ?? 0);
 
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
         private byte[] _innerBytes;

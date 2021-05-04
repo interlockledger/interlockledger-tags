@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,32 +31,19 @@
 // ******************************************************************************************************************************
 
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-    [TestFixture]
-    public class SignableTests
+    public static class IEnumerableOfExtensions
     {
-        [TestCase(32ul, new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
-        public void NewSignableFromStream(ulong ilint, byte[] bytes) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<TestSignable.Payload>();
-            Assert.AreEqual(TestSignable.FieldTagId, tag.TagId);
-            Assert.AreEqual(ilint, tag.Value.SomeILInt);
-            Assert.IsTrue(tag.ValueIs<ISignable>(out _));
-            Assert.AreEqual(new TestSignable().FieldModel, tag.Value.FieldModel);
-            Assert.AreEqual(2, tag.Value.FieldModel.SubDataFields.SafeCount());
-            Assert.AreEqual(nameof(TestSignable.SomeILInt), tag.Value.FieldModel.SubDataFields.Last().Name);
+        public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag {
+            convert.Required(nameof(convert));
+            return new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
         }
 
-        [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
-        public byte[] SerializeSignable(ulong someILInt) {
-            var encodedBytes = new TestSignable(someILInt).AsPayload.ToEncodedBytes();
-            TestContext.WriteLine(encodedBytes.AsLiteral());
-            return encodedBytes;
-        }
+        public static ILTagArrayOfILTag<ILTagOf<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagOf<T>> convert)
+            => ToTagArray(list, convert);
     }
 }

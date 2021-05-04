@@ -44,5 +44,6 @@ namespace InterlockLedger.Tags
         void GenerateNextKeys();
 
         TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null);
+        TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null) where T : Signable<T>, new();
     }
 }

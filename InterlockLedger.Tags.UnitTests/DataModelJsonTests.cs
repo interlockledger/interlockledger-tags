@@ -275,7 +275,7 @@ namespace InterlockLedger.Tags
 
         private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
             var tag = JsonTestTaggedData.Model.FromJson(json);
-            byte[] encodedBytes = tag?.EncodedBytes;
+            byte[] encodedBytes = (tag as IMemoryBackedTag)?.EncodedBytes;
             TestContext.WriteLine("===== Expected");
             TestContext.WriteLine(expectedBytes.WithCommas());
             TestContext.WriteLine("===== Actual");
@@ -284,7 +284,7 @@ namespace InterlockLedger.Tags
         }
 
         private static void ToFromBaseTest(ILTag data, Func<string, string> adjustExpected = null) {
-            var encodedBytes = data.EncodedBytes;
+            var encodedBytes = (data as IMemoryBackedTag)?.EncodedBytes;
             var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
             var expected = JsonSerializer.Serialize(data.AsJson, _options);
             if (adjustExpected != null)
@@ -298,7 +298,7 @@ namespace InterlockLedger.Tags
             Assert.AreEqual(expected, actual);
             var backFrom = JsonTestTaggedData.Model.FromNavigable(modelJson);
             Assert.IsInstanceOf<ILTag>(backFrom);
-            Assert.AreEqual(encodedBytes, backFrom.EncodedBytes);
+            Assert.AreEqual(encodedBytes, backFrom.ToEncodedBytes());
         }
 
         private class JsonTestTaggedData : IRecordData<JsonTestTaggedData>

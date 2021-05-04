@@ -42,6 +42,8 @@ namespace InterlockLedger.Tags
 
         public override string Formatted => "null";
 
+        public override Stream OpenReadingStream() => new MemoryStream(_encodedBytes.Value, writable: false);
+
         public override Stream SerializeInto(Stream s) => s.ILIntEncode(ILTagId.Null);
 
         private ILTagNull() : base(ILTagId.Null) { }

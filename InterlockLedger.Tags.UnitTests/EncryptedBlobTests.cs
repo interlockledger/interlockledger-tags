@@ -37,6 +37,14 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
+
+    public static class ILTagExtensions
+    {
+        public static byte[] ToEncodedBytes(this ILTag payload)
+         => payload is IMemoryBackedTag tag ? tag.EncodedBytes : TagHelpers.ToBytesHelper(s => s.EncodeTag(payload));
+
+    }
+
     [TestFixture]
     public class EncryptedBlobTests
     {
@@ -177,11 +185,17 @@ namespace InterlockLedger.Tags
                         16, 248, 8,
         }, TestName = "SerializeEncryptedBlob")]
         public byte[] SerializeEncryptedBlob(CipherAlgorithm algorithm, byte[] data) {
-            var encodedBytes = new EncryptedBlob(algorithm, data, TestFakeSigner.FixedKeysInstance, TestFakeSigner.FixedKeysInstance, Array.Empty<TagReader>()).AsPayload.EncodedBytes;
+            var payload = new EncryptedBlob(algorithm,
+                                            data,
+                                            TestFakeSigner.FixedKeysInstance,
+                                            TestFakeSigner.FixedKeysInstance,
+                                            Array.Empty<TagReader>()).AsPayload;
+            byte[] encodedBytes = payload.ToEncodedBytes();
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes.PartOf(124);
         }
 
+ 
         [Test]
         public void ValidateFieldDefinition() {
             var fd = EncryptedBlob.FieldDefinition;

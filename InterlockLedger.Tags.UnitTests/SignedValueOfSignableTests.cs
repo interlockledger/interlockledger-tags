@@ -144,7 +144,7 @@ namespace InterlockLedger.Tags
         })]
         public byte[] SerializeSignedValueOfSignable(ulong someILInt) {
             var signedValue = new TestSignable(someILInt).SignWith(TestFakeSigner.FixedKeysInstance);
-            var encodedBytes = signedValue.EncodedBytes;
+            var encodedBytes = signedValue.AsPayload.ToEncodedBytes();
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes;
         }

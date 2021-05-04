@@ -147,7 +147,7 @@ namespace InterlockLedger.Tags
         }
 
         [Test]
-        public void ILTagNullInstanceBytes() => Assert.ByVal(ILTagNull.Instance.EncodedBytes, Is.EquivalentTo(new byte[] { 0 }));
+        public void ILTagNullInstanceBytes() => Assert.ByVal(ILTagNull.Instance.ToEncodedBytes(), Is.EquivalentTo(new byte[] { 0 }));
 
         [TestCase(new byte[] { 0 }, ExpectedResult = true)]
         public bool IsNull(byte[] bytes) {
@@ -165,7 +165,7 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[0], ExpectedResult = new byte[] { 16, 0 }, TestName = "SerializeILTagByteArray")]
         [TestCase(new byte[] { 2 }, ExpectedResult = new byte[] { 16, 1, 2 }, TestName = "SerializeILTagByteArray_2")]
         [TestCase(new byte[] { 1, 2, 3 }, ExpectedResult = new byte[] { 16, 3, 1, 2, 3 }, TestName = "SerializeILTagByteArray_1_2_3")]
-        public byte[] SerializeILTagByteArray(byte[] bytes) => new ILTagByteArray(bytes).EncodedBytes;
+        public byte[] SerializeILTagByteArray(byte[] bytes) => new ILTagByteArray(bytes).ToEncodedBytes();
 
         [TestCase(null, ExpectedResult = new byte[] { 17, 0 }, TestName = "SerializeILTagString_null")]
         [TestCase("", ExpectedResult = new byte[] { 17, 0 }, TestName = "SerializeILTagString_empty")]

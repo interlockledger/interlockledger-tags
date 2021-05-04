@@ -68,6 +68,8 @@ namespace InterlockLedger.Tags
                     ? throw new InvalidOperationException("Nothing to read here")
                     : new StreamSpan(FileInfo.OpenRead(), Offset, Length, closeWrappedStreamOnDispose: true);
 
+        public override Stream OpenReadingStream() => ReadingStream;
+
         public override bool ValueIs<TV>(out TV value) {
             value = default;
             return false;
@@ -98,8 +100,6 @@ namespace InterlockLedger.Tags
 
         protected override T DeserializeValueFromStream(StreamSpan s) => default;
 
-        protected override ulong ValueEncodedLength(T Value) => Length;
-
         protected void Refresh() {
             FileInfo.Refresh();
             Initialize(0, 0, FileInfo.Length);
@@ -110,6 +110,8 @@ namespace InterlockLedger.Tags
             using var streamSlice = new StreamSpan(fileStream, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);
         }
+
+        protected override ulong ValueEncodedLength(T Value) => Length;
 
         private const int _bufferLength = 16 * 1024;
         private readonly FileInfo _fileInfo;
