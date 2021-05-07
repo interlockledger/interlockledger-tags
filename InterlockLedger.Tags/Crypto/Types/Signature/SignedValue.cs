@@ -54,11 +54,11 @@ namespace InterlockLedger.Tags
 
         public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
 
-        public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey) {
-            if (SignedContent is null || Signatures.None())
-                return false;
-            return Signatures.Any(sig => sig.SignerId == validSigner && sig.PublicKey == validPubKey && sig.Verify(SignedContent));
-        }
+        public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey)
+            => SignedContent is not null
+            && Signatures.Safe().Any(sig => sig.SignerId == validSigner
+                                            && sig.PublicKey == validPubKey
+                                            && sig.Verify(SignedContent));
 
         internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
             => Init(signedContent, s.DecodeArray<IdentifiedSignature>());

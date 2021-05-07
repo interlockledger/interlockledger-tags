@@ -30,19 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-
 namespace InterlockLedger.Tags
 {
-
-    public static class TagHelpers
+    public static class ILTagExtensions
     {
-        public static byte[] ToBytesHelper(Action<Stream> serialize) {
-            serialize.Required(nameof(serialize));
-            using var s = new MemoryStream();
-            serialize(s);
-            return s.ToArray();
-        }
+        public static byte[] ToEncodedBytes(this ILTag ilTag)
+         => ilTag is IMemoryBackedTag tag ? tag.EncodedBytes : TagHelpers.ToBytesHelper(s => s.EncodeTag(ilTag));
+
     }
 }
