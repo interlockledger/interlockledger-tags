@@ -108,7 +108,7 @@ namespace InterlockLedger.Tags
             return tagId == ILTagId.Sequence ? new ILTagSequence(s).Value : throw new InvalidDataException($"Not a {nameof(ILTagSequence)}");
         }
 
-        public static string DecodeString(this Stream s) => s.Decode<ILTagString>().Value;
+        public static string DecodeString(this Stream s) => s.Decode<ILTagString>()?.Value;
 
         public static Dictionary<string, string> DecodeStringDictionary(this Stream s) {
             var tagId = s.DecodeTagId();

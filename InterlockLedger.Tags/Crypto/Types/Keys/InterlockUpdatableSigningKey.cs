@@ -33,24 +33,25 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
     public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     {
-        public string Description => _value.Description;
-        public byte[] EncodedBytes => _value.EncodedBytes;
-        public BaseKeyId Id => _value.Id;
-        public BaseKeyId Identity => _value.Identity;
-        public DateTimeOffset LastSignatureTimeStamp => _value.LastSignatureTimeStamp;
-        public string Name => _value.Name;
+        public string Description => _data.Description;
+        public byte[] EncodedBytes => _data.EncodedBytes;
+        public BaseKeyId Id => _data.Id;
+        public BaseKeyId Identity => _data.Identity;
+        public DateTimeOffset LastSignatureTimeStamp => _data.LastSignatureTimeStamp;
+        public string Name => _data.Name;
         public abstract TagPubKey NextPublicKey { get; }
         public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
-        public TagPubKey PublicKey => _value.PublicKey;
-        public KeyPurpose[] Purposes => _value.Purposes;
-        public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
-        public ulong SignaturesWithCurrentKey => _value.SignaturesWithCurrentKey;
-        public KeyStrength Strength => _value.Strength;
+        public TagPubKey PublicKey => _data.PublicKey;
+        public KeyPurpose[] Purposes => _data.Purposes;
+        public Algorithm SignAlgorithm => _data.PublicKey.Algorithm;
+        public ulong SignaturesWithCurrentKey => _data.SignaturesWithCurrentKey;
+        public KeyStrength Strength => _data.Strength;
 
         public byte[] Decrypt(byte[] bytes) => throw new InvalidOperationException("Updatable keys can't decrypt");
 
@@ -71,16 +72,16 @@ namespace InterlockLedger.Tags
         public string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
 
         protected readonly ITimeStamper _timeStamper;
-        protected readonly InterlockUpdatableSigningKeyData _value;
+        protected readonly InterlockUpdatableSigningKeyData _data;
 
         protected InterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, ITimeStamper timeStamper) {
-            _value = tag.Required(nameof(tag));
+            _data = tag.Required(nameof(tag));
             _timeStamper = timeStamper.Required(nameof(timeStamper));
-            _value.LastSignatureTimeStamp = _timeStamper.Now;
+            _data.LastSignatureTimeStamp = _timeStamper.Now;
         }
     }
 
-    public sealed class InterlockUpdatableSigningKeyData : ILTagExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData
+    public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData
     {
         public InterlockUpdatableSigningKeyData(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, DateTimeOffset creationTime, string description = null, BaseKeyId keyId = null)
             : this(new UpdatableParts(purposes, name, encrypted, pubKey, description, strength, keyId)) => LastSignatureTimeStamp = creationTime;
@@ -90,6 +91,10 @@ namespace InterlockLedger.Tags
 
         public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
         public string Description => Value.Description;
+
+        [JsonIgnore]
+        public byte[] EncodedBytes => _currentBytes ??= TagHelpers.ToBytesHelper(s => SerializeInto(s));
+
         byte[] IInterlockKeySecretData.Encrypted => Value.Encrypted;
         EncryptedContentType IInterlockKeySecretData.EncryptedContentType => EncryptedContentType.EncryptedKey;
         public BaseKeyId Id => Value.Id;
@@ -106,6 +111,10 @@ namespace InterlockLedger.Tags
             using var stream = new MemoryStream(bytes);
             return stream.Decode<InterlockUpdatableSigningKeyData>();
         }
+
+        public void InvalidateBytes() => _currentBytes = null;
+
+        public override Stream OpenReadingStream() => new MemoryStream(EncodedBytes, writable: false);
 
         public string ToShortString() => $"InterlockUpdatableSigningKey '{Name}' by {Identity}";
 
@@ -135,37 +144,41 @@ namespace InterlockLedger.Tags
         internal InterlockUpdatableSigningKeyData(Stream s) : base(ILTagId.InterlockUpdatableSigningKey, s) {
         }
 
-        protected override UpdatableParts FromBytes(byte[] Value) =>
-            FromBytesHelper(Value, s => {
-                var version = s.DecodeUShort();
-                return new UpdatableParts {
-                    Version = version,                                // Field index 0 //
-                    Name = s.DecodeString(),                          // Field index 1 //
-                    PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
-                    Id = s.Decode<KeyId>(),                           // Field index 3 //
-                    Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
-                    Description = s.DecodeString(),                   // Field index 5 //
-                    PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
-                    Encrypted = s.DecodeByteArray(),                  // Field index 7 //
-                    LastSignatureTimeStamp = s.DecodeDateTimeOffset(),// Field index 8 //
-                    SignaturesWithCurrentKey = s.DecodeILInt(),       // Field index 9 //
-                    Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 10 //
-                };
-            });
+        protected override UpdatableParts DeserializeValueFromStream(StreamSpan s) {
+            var version = s.DecodeUShort();
+            return new UpdatableParts {
+                Version = version,                                // Field index 0 //
+                Name = s.DecodeString(),                          // Field index 1 //
+                PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
+                Id = s.Decode<KeyId>(),                           // Field index 3 //
+                Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
+                Description = s.DecodeString(),                   // Field index 5 //
+                PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
+                Encrypted = s.DecodeByteArray(),                  // Field index 7 //
+                LastSignatureTimeStamp = s.DecodeDateTimeOffset(),// Field index 8 //
+                SignaturesWithCurrentKey = s.DecodeILInt(),       // Field index 9 //
+                Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 10 //
+            };
+        }
 
-        protected override byte[] ToBytes(UpdatableParts value)
-            => TagHelpers.ToBytesHelper(s => {
-                s.EncodeUShort(value.Version);              // Field index 0 //
-                s.EncodeString(value.Name);                 // Field index 1 //
-                s.EncodeILIntArray(value.PurposesAsUlongs); // Field index 2 //
-                s.EncodeInterlockId(value.Id);              // Field index 3 //
-                s.EncodeInterlockId(value.Identity);        // Field index 4 //
-                s.EncodeString(value.Description);          // Field index 5 //
-                s.EncodeTag(value.PublicKey);               // Field index 6 //
-                s.EncodeByteArray(value.Encrypted);         // Field index 7 //
-                s.EncodeDateTimeOffset(value.LastSignatureTimeStamp); // Field index 8 //
-                s.EncodeILInt(value.SignaturesWithCurrentKey); // Field index 9 //
-                s.EncodeILInt((ulong)value.Strength);       // Field index 10 //
-            });
+        protected override void SerializeValueToStream(Stream s, UpdatableParts value) {
+            s.EncodeUShort(value.Version);                          // Field index 0 //
+            s.EncodeString(value.Name);                             // Field index 1 //
+            s.EncodeILIntArray(value.PurposesAsUlongs);             // Field index 2 //
+            s.EncodeInterlockId(value.Id);                          // Field index 3 //
+            s.EncodeInterlockId(value.Identity);                    // Field index 4 //
+            s.EncodeString(value.Description);                      // Field index 5 //
+            s.EncodeTag(value.PublicKey);                           // Field index 6 //
+            s.EncodeByteArray(value.Encrypted);                     // Field index 7 //
+            s.EncodeDateTimeOffset(value.LastSignatureTimeStamp);   // Field index 8 //
+            s.EncodeILInt(value.SignaturesWithCurrentKey);          // Field index 9 //
+            s.EncodeILInt((ulong)value.Strength);                   // Field index 10 //
+        }
+
+        protected override ulong ValueEncodedLength(UpdatableParts value) => (ulong)(ToBytes(value)?.Length ?? 0);
+
+        private byte[] _currentBytes;
+
+        private byte[] ToBytes(UpdatableParts value) => TagHelpers.ToBytesHelper(s => SerializeValueToStream(s, value));
     }
 }

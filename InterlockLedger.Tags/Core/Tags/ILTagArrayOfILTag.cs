@@ -43,9 +43,6 @@ namespace InterlockLedger.Tags
         public ILTagArrayOfILTag(IEnumerable<T> value) : base(ILTagId.ILTagArray, value?.ToArray()) {
         }
 
-        public ILTagArrayOfILTag(object json) : base(ILTagId.ILTagArray, Elicit(json)) {
-        }
-
         public override object AsJson => new JsonRepresentation(Value).AsNavigable();
 
         public T this[int i] => Value?[i];
@@ -60,6 +57,8 @@ namespace InterlockLedger.Tags
 
         internal ILTagArrayOfILTag(Stream s, Func<Stream, T> decoder) : base(ILTagId.ILTagArray, s, (it) => SetDecoder(it, decoder)) {
         }
+
+        internal static ILTagArrayOfILTag<T> FromJson(object json) => new(Elicit(json));
 
         protected ILTagArrayOfILTag(ulong tagId, T[] Value) : base(tagId, Value) {
         }

@@ -46,7 +46,7 @@ namespace InterlockLedger.Tags
 
         public override void DestroyKeys() => _destroyKeysAfterSigning = true;
 
-        public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(_value.Strength);
+        public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(_data.Strength);
 
         public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null)
             => Update(encrypt, RSAHelper.HashAndSign(data, _keyParameters.Value.Parameters));
@@ -57,29 +57,30 @@ namespace InterlockLedger.Tags
         private bool _destroyKeysAfterSigning;
 
         private TagRSAParameters _keyParameters;
-
         private TagRSAParameters _nextKeyParameters;
 
         private TagSignature Update(Func<byte[], byte[]> encrypt, byte[] signatureData) {
             if (_destroyKeysAfterSigning) {
                 _keyParameters = null;
                 _nextKeyParameters = null;
-                _value.Value.Encrypted = null;
-                _value.Value.PublicKey = null;
+                _data.Value.Encrypted = null;
+                _data.Value.PublicKey = null;
             } else {
                 var encryptionHandler = encrypt;
                 if (encryptionHandler == null)
                     throw new ArgumentNullException(nameof(encrypt));
                 if (_nextKeyParameters != null) {
                     _keyParameters = _nextKeyParameters;
-                    _value.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes); _value.Value.PublicKey = NextPublicKey;
+                    _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
+                    _data.Value.PublicKey = NextPublicKey;
                     _nextKeyParameters = null;
-                    _value.SignaturesWithCurrentKey = 0;
+                    _data.SignaturesWithCurrentKey = 0;
                 } else {
-                    _value.SignaturesWithCurrentKey++;
+                    _data.SignaturesWithCurrentKey++;
                 }
-                _value.LastSignatureTimeStamp = _timeStamper.Now;
+                _data.LastSignatureTimeStamp = _timeStamper.Now;
             }
+            _data.InvalidateBytes();
             return new TagSignature(Algorithm.RSA, signatureData);
         }
     }

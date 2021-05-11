@@ -41,9 +41,6 @@ namespace InterlockLedger.Tags
         [JsonIgnore]
         public abstract object AsJson { get; }
 
-        //[JsonIgnore]
-        //public byte[] EncodedBytes => _encodedBytes.Value;
-
         [JsonIgnore]
         public virtual string Formatted => "?";
 
