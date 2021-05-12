@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>9.0.3</Version>
+      <Version>9.0.4</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Fix problems with ILTagArrayOfILInt/ILTagArrayOfILTag</PackageReleaseNotes>
+      <PackageReleaseNotes>Fix problems with Signature Verification of a simple array of bytes</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

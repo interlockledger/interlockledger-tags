@@ -95,6 +95,7 @@ namespace InterlockLedger.Tags
         public override string ToString() => TextualRepresentation;
 
         public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
+        public virtual bool Verify(byte[] data, TagSignature signature) => false;
 
         internal static TagPubKey Resolve(Stream s) {
             var pubKey = new TagPubKey(s);

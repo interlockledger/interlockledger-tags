@@ -67,12 +67,10 @@ namespace InterlockLedger.Tags
 
         public abstract TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null);
 
-        public IdentifiedSignature SignWithId(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
-
         public string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
 
-        protected readonly ITimeStamper _timeStamper;
         protected readonly InterlockUpdatableSigningKeyData _data;
+        protected readonly ITimeStamper _timeStamper;
 
         protected InterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, ITimeStamper timeStamper) {
             _data = tag.Required(nameof(tag));

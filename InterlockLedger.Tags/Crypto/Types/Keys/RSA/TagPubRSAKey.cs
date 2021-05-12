@@ -55,6 +55,9 @@ namespace InterlockLedger.Tags
         public override bool Verify<T>(T data, TagSignature signature)
             => RSAHelper.Verify(data, signature, Parameters);
 
+        public override bool Verify(byte[] data, TagSignature signature)
+            => RSAHelper.Verify(data, signature, Parameters);
+
         internal TagPubRSAKey(byte[] data) : base(Algorithm.RSA, data) => Parameters = DecodeParameters(Data);
 
         private static RSAParameters DecodeParameters(byte[] bytes) {
