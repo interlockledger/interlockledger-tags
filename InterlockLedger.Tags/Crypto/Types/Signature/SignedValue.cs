@@ -102,5 +102,7 @@ namespace InterlockLedger.Tags
             if (FailedSignatures.SafeAny())
                 throw new InvalidDataException("Some signatures don't match the payload");
         }
+
+        public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
     }
 }

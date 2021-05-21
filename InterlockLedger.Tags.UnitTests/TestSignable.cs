@@ -48,6 +48,9 @@ namespace InterlockLedger.Tags
 
         public ulong SomeILInt { get; private set; }
         public override string TypeName => nameof(TestSignable);
+
+        public override string Formatted => throw new NotImplementedException();
+
         protected override object AsJson => new { TagId, Version, SomeILInt };
 
         protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {

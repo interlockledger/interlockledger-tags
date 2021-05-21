@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -48,6 +48,7 @@ namespace InterlockLedger.Tags
 
         public CipherAlgorithm Cipher => _encrypted.Cipher;
         public byte[] CipherText => _encrypted.CipherText;
+        public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
         public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
         public override string TypeName => nameof(EncryptedText);
 

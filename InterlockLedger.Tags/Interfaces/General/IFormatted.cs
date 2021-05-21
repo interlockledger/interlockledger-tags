@@ -30,59 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Text.Json.Serialization;
-
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagOf<T> : ILTag
+    public interface IFormatted
     {
-        [JsonIgnore]
-        public override object AsJson => Value;
-
-        public override string Formatted => Value is IFormatted v ? v.Formatted : "??";
-        public T Value { get; set; }
-
-        public sealed override Stream SerializeInto(Stream s) {
-            if (s is null) return s;
-            try {
-                s.ILIntEncode(TagId);
-                SerializeInner(s, Value);
-            } finally {
-                s.Flush();
-            }
-            return s;
-        }
-
-        public override bool ValueIs<TV>(out TV value) {
-            if (Value is TV tvalue) {
-                value = tvalue;
-                return true;
-            }
-            value = default;
-            return false;
-        }
-
-        protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
-
-        protected ILTagOf(Stream s, ulong alreadyDeserializedTagId, Action<ITag> setup) : base(alreadyDeserializedTagId) {
-            setup?.Invoke(this);
-            Value = DeserializeInner(s);
-        }
-
-        protected ILTagOf(Stream s, ulong alreadyDeserializedTagId) : this(s, alreadyDeserializedTagId, setup: null) {
-        }
-
-        protected ILTagOf(ulong tagId, Stream s) : this(s, tagId, setup: t => t.ValidateTagId(s.ILIntDecode())) {
-        }
-
-        protected abstract T DeserializeInner(Stream s);
-
-        protected abstract T DeserializeValueFromStream(StreamSpan s);
-
-        protected abstract void SerializeInner(Stream s, T value);
-
-        protected abstract void SerializeValueToStream(Stream s, T value);
+        string Formatted { get; }
     }
 }

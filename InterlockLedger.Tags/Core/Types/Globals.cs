@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
             DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
         };
 
-        public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, new()
+        public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, IFormatted, new()
             => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
     }
 }

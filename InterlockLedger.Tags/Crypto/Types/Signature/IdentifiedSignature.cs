@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -36,21 +36,23 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class IdentifiedSignature : VersionedValue<IdentifiedSignature>
+    public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     {
         public const string Description = "A signature identified with the signerId and the corresponding PublickKey";
         public const ushort ImplementedVersion = 1;
 
         public IdentifiedSignature(TagSignature signature, BaseKeyId id, TagPubKey publicKey) : this() {
             Signature = signature.Required(nameof(signature));
-            SignerId = id ?? throw new System.ArgumentNullException(nameof(id));
-            PublicKey = publicKey ?? throw new System.ArgumentNullException(nameof(publicKey));
+            SignerId = id.Required(nameof(id));
+            PublicKey = publicKey.Required(nameof(publicKey));
         }
 
         public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
         }
 
+        public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
         public TagPubKey PublicKey { get; set; }
+
         public TagSignature Signature { get; set; }
         public BaseKeyId SignerId { get; set; }
 

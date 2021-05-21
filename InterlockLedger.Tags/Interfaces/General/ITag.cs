@@ -35,10 +35,10 @@ using System.IO;
 namespace InterlockLedger.Tags
 {
 
-    public interface ITag
+    public interface ITag : IFormatted
     {
         object AsJson { get; }
-        string Formatted { get; }
+
         bool IsNull => TagId == ILTagId.Null;
         ulong TagId { get; }
 
