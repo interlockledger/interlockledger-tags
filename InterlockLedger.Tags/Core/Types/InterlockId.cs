@@ -125,11 +125,16 @@ namespace InterlockLedger.Tags
                     var parts = textualRepresentation.Split(_suffixSeparator);
                     return (parts[0], algorithm: parts.Length < 2 ? _defaultAlgorithm : ToHashAlgorithm(parts[1]));
                 }
-                (string strippedOfSuffix, var algorithm) = ParseSuffix(NormalizePrefix(textualRepresentation));
+                (string strippedOfSuffix, var algorithm) = ParseSuffix(textualRepresentation);
                 var parts = strippedOfSuffix.Split(_prefixSeparator);
                 Algorithm = algorithm;
-                Data = parts[1].FromSafeBase64();
-                Type = ToType(parts[0]);
+                if (parts.Length == 1) {
+                    Data = parts[0].FromSafeBase64();
+                    Type = DefaultType;
+                } else {
+                    Data = parts[1].FromSafeBase64();
+                    Type = ToType(parts[0]);
+                }
             }
 
             internal Parts(Stream s, int length) => FromStream(s, length);
@@ -166,8 +171,6 @@ namespace InterlockLedger.Tags
             private string _typePrefix => BuildTypePrefix(Type);
 
             private static string BuildTypePrefix(byte type) => $"{ToTypeName(type)}{_prefixSeparator}";
-
-            private static string NormalizePrefix(string s) => s.Contains(_prefixSeparator, StringComparison.InvariantCulture) ? s : $"{BuildTypePrefix(DefaultType)}{s}";
 
             private static byte ToType(string prefix) => _knownTypes.First(t => t.Value.typeName.Equals(prefix.Trim(), StringComparison.InvariantCultureIgnoreCase)).Key;
 
