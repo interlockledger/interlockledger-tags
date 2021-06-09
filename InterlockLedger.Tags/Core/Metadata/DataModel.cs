@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace InterlockLedger.Tags
 {
@@ -67,7 +68,8 @@ namespace InterlockLedger.Tags
 
         public ILTag FromJson(object o) => FromNavigable(o.AsNavigable() as Dictionary<string, object>);
 
-        public ILTag FromNavigable(Dictionary<string, object> json) => FromPartialNavigable(json, PayloadTagId, DataFields, this);
+        public ILTag FromNavigable(Dictionary<string, object> json)
+            => FromPartialNavigable(json, PayloadTagId, DataFields, this);
 
         public override int GetHashCode()
             => HashCode.Combine(DataFields,
@@ -150,6 +152,10 @@ namespace InterlockLedger.Tags
 
         private static ILTag DeserializeItem(DataField field, object fieldValue) {
             try {
+                if (fieldValue is JsonElement je) {
+                    fieldValue = FromJsonElement(field, je);
+
+                }
                 return field.IsEnumeration && fieldValue is string value
                     ? field.EnumerationFromString(value)
                     : TagProvider.HasDeserializer(field.TagId)
@@ -157,6 +163,40 @@ namespace InterlockLedger.Tags
                         : DeserializePartialFromJson(field, fieldValue);
             } catch (Exception e) {
                 throw new InvalidOperationException($"Could not deserialize from json field {field.Name} of type {field.TagId}\r\nfrom {fieldValue}", e);
+            }
+
+            static object FromJsonElement(DataField field, JsonElement je) {
+                return FromJsonElement(je, field.TagId, field.IsArray);
+
+                static object ToTypedArray(ulong tagId, JsonElement.ArrayEnumerator items)
+                    => tagId switch {
+                        ILTagId.ILIntArray => items.Select(item => item.GetUInt64()).ToArray(),
+                        ILTagId.Sequence => items.Select(item => TagProvider.DeserializeFromJson(item.GetProperty("TagId").GetUInt64(), item.GetProperty("Value"))),
+                        _ => throw new NotSupportedException()
+                    };
+
+                static object ToArray(ulong elementTagId, JsonElement items)
+                    => items.EnumerateArray().Select(item => TagProvider.DeserializeFromJson(elementTagId, FromJsonElement(item, elementTagId, false))).ToArray();
+
+                static Dictionary<string, JsonElement> ToDictionary(JsonElement je)
+                    => je.EnumerateObject().ToDictionary(prop => prop.Name, prop => prop.Value);
+
+                static object FromJsonElement(JsonElement je, ulong tagId, bool isArray)
+                    => je.ValueKind switch {
+                        JsonValueKind.Number => tagId.In(ILTagId.Int8, ILTagId.Int16, ILTagId.Int32, ILTagId.Int64)
+                                                    ? je.GetInt64()
+                                                    : je.GetUInt64(),
+                        JsonValueKind.Undefined => null,
+                        JsonValueKind.Object => isArray
+                                                    ? ToArray(je.GetProperty("ElementTagId").GetUInt64(), je.GetProperty("Elements"))
+                                                    : ToDictionary(je),
+                        JsonValueKind.Array => ToTypedArray(tagId, je.EnumerateArray()),
+                        JsonValueKind.String => je.GetString(),
+                        JsonValueKind.True => true,
+                        JsonValueKind.False => false,
+                        JsonValueKind.Null => null,
+                        _ => throw new NotSupportedException()
+                    };
             }
         }
 
@@ -189,7 +229,12 @@ namespace InterlockLedger.Tags
                 byte[] AppendRemainingBytes(byte[] tagsAsBytes) {
                     if (json.ContainsKey("_RemainingBytes_")) {
                         var bytesValues = json["_RemainingBytes_"];
-                        var remainingBytes = bytesValues is string ? Convert.FromBase64String(bytesValues as string) : (byte[])bytesValues;
+                        var remainingBytes = bytesValues switch {
+                            string st => Convert.FromBase64String(st),
+                            JsonElement je when je.ValueKind == JsonValueKind.String => je.GetBytesFromBase64(),
+                            byte[] b => b,
+                            _ => throw new NotSupportedException()
+                        };
                         return tagsAsBytes.SafeConcat(remainingBytes).ToArray();
                     }
                     return tagsAsBytes;
@@ -243,7 +288,12 @@ namespace InterlockLedger.Tags
             return json;
         }
 
-        private static ushort ToUInt16(object fieldValue) => Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture);
+        private static ushort ToUInt16(object fieldValue)
+            => fieldValue switch {
+                IConvertible => Convert.ToUInt16(fieldValue, CultureInfo.InvariantCulture),
+                JsonElement je when je.ValueKind == JsonValueKind.Number => je.GetUInt16(),
+                _ => throw new InvalidDataException($"Not a number! {fieldValue}")
+            };
     }
 
     public class ILTagDataModel : ILTagExplicit<DataModel>

@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -294,11 +295,21 @@ namespace InterlockLedger.Tags
             TestContext.WriteLine(expected);
             TestContext.WriteLine("===== Actual");
             TestContext.WriteLine(actual);
-            TestContext.WriteLine(encodedBytes.WithCommas());
             Assert.AreEqual(expected, actual);
+            TestContext.WriteLine("===== Initial EncodedBytes");
+            TestContext.WriteLine(encodedBytes.WithCommas());
             var backFrom = JsonTestTaggedData.Model.FromNavigable(modelJson);
             Assert.IsInstanceOf<ILTag>(backFrom);
-            Assert.AreEqual(encodedBytes, backFrom.ToEncodedBytes());
+            byte[] backFromEncodedBytes = backFrom.ToEncodedBytes();
+            TestContext.WriteLine("===== Back EncodedBytes");
+            TestContext.WriteLine(backFromEncodedBytes.WithCommas());
+            Assert.AreEqual(encodedBytes, backFromEncodedBytes, "Bytes back from modelJson did not match");
+            var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object>>(actual));
+            Assert.IsInstanceOf<ILTag>(parsedFrom);
+            byte[] parsedFromEncodedBytes = parsedFrom.ToEncodedBytes();
+            TestContext.WriteLine("===== Parsed EncodedBytes");
+            TestContext.WriteLine(parsedFromEncodedBytes.WithCommas());
+            //Assert.AreEqual(encodedBytes, parsedFromEncodedBytes, "Bytes parsed from json did not match");
         }
 
         private class JsonTestTaggedData : IRecordData<JsonTestTaggedData>

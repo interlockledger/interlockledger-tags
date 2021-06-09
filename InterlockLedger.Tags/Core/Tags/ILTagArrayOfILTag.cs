@@ -40,25 +40,14 @@ namespace InterlockLedger.Tags
 {
     public class ILTagArrayOfILTag<T> : ILTagOfSimple<T[]> where T : ILTag
     {
-        public ILTagArrayOfILTag(IEnumerable<T> value) : base(ILTagId.ILTagArray, value?.ToArray()) {
-            if (Value.SafeAny()) {
-                using var ms = new MemoryStream();
-                ms.ILIntEncode((ulong)Value.Length);
-                foreach (var tag in Value)
-                    ms.EncodeTag(tag);
-                _innerBytes = ms.ToArray();
-            } else {
-                _innerBytes = Array.Empty<byte>();
-            }
-        }
+        public ILTagArrayOfILTag(IEnumerable<T> value) : this(ILTagId.ILTagArray, value?.ToArray()) { }
 
-        public override object AsJson => Value.None() ? null : new JsonRepresentation(Value);
-
+        public override object AsJson => Value is null ? null : new JsonRepresentation(Value);
         public T this[int i] => Value?[i];
 
         public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
 
-        public override Stream OpenReadingStream() => new ReadonlyTagStream(TagId, _innerBytes);
+        public override Stream OpenReadingStream() => new ReadonlyTagStream(TagId, _valueAsBytes);
 
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s, null) {
         }
@@ -67,60 +56,82 @@ namespace InterlockLedger.Tags
             base(ILTagId.ILTagArray, s, (it) => { ((ILTagArrayOfILTag<T>)it)._decoder = decoder; }) { }
 
         internal static ILTagArrayOfILTag<T> FromJson(object json) {
-            return new(Elicit(json));
+            return new(json switch {
+                Dictionary<string, object> dictionary => FromDictionary(dictionary),
+                JsonRepresentation jr => jr.ToArray(),
+                _ => Array.Empty<T>(),
+            });
 
-            static T[] Elicit(object o) {
-                if (o is Dictionary<string, object> dictionary) {
-                    var elementTagId = Convert.ToUInt64(dictionary[nameof(JsonRepresentation.ElementTagId)], CultureInfo.InvariantCulture);
-                    if (dictionary[nameof(JsonRepresentation.Elements)] is IEnumerable<object> elements) {
-                        var list = new List<T>();
-                        foreach (var item in elements) {
-                            if (item is ILTag tag) {
-                                if (tag.TagId != elementTagId || !(tag is T))
-                                    throw new InvalidCastException($"Value in Array is a tag {tag.TagId} != {elementTagId}");
-                                list.Add((T)tag);
-                            } else {
-                                list.Add(TagProvider.DeserializeFromJson(elementTagId, item) as T);
-                            }
+            static T[] FromDictionary(Dictionary<string, object> dictionary) {
+                var elementTagId = Convert.ToUInt64(dictionary[nameof(JsonRepresentation.ElementTagId)], CultureInfo.InvariantCulture);
+                if (dictionary[nameof(JsonRepresentation.Elements)] is IEnumerable<object> elements) {
+                    var list = new List<T>();
+                    foreach (var item in elements) {
+                        if (item is ILTag tag) {
+                            if (tag.TagId != elementTagId || !(tag is T))
+                                throw new InvalidCastException($"Value in Array is a tag {tag.TagId} != {elementTagId}");
+                            list.Add((T)tag);
+                        } else {
+                            list.Add(TagProvider.DeserializeFromJson(elementTagId, item) as T);
                         }
-                        return list.ToArray();
                     }
+                    return list.ToArray();
                 }
                 return Array.Empty<T>();
             }
         }
 
-        protected ILTagArrayOfILTag(ulong tagId, T[] Value) : base(tagId, Value) {
-        }
+        private protected ILTagArrayOfILTag(ulong tagId, T[] Value) : base(tagId, Value)
+            => _valueAsBytes = (Value?.Length) switch {
+                null => null,
+                0 => _emptyArrayBytes,
+                _ => EncodeArray(Value),
+            };
 
-        protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s) {
+        private protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s, null) {
         }
 
         protected override T[] DeserializeInner(Stream s) {
-            var valueSize = s.DecodeILInt();
-            if (valueSize > int.MaxValue)
+            var valueBytesCount = s.ILIntDecode();
+            if (valueBytesCount > int.MaxValue)
                 throw new InvalidDataException("Array is too big to deserialize");
-            _innerBytes = s.ReadExactly((int)valueSize);
-            if (valueSize == 0)
+            if (valueBytesCount == 0) {
+                _valueAsBytes = null;
                 return null;
-            using var ms = new MemoryStream(_innerBytes, writable: false);
-            var length = (int)ms.ILIntDecode();
-            var result = new T[length];
-            for (var i = 0; i < length; i++) {
-                result[i] = _decoder(ms);
             }
-            return result;
+            _valueAsBytes = s.ReadExactly((int)valueBytesCount);
+            using var ms = new MemoryStream(_valueAsBytes, writable: false);
+            var arrayLength = (int)ms.ILIntDecode();
+            var array = new T[arrayLength];
+            for (var i = 0; i < arrayLength; i++) {
+                array[i] = _decoder(ms);
+            }
+            return array;
         }
 
         protected override void SerializeInner(Stream s) {
-            s.EncodeILInt((ulong)_innerBytes.Length);
-            s.WriteBytes(_innerBytes);
+            if (_valueAsBytes is null)
+                s.ILIntEncode(0);
+            else {
+                s.ILIntEncode((ulong)_valueAsBytes.Length);
+                if (_valueAsBytes.Length > 0)
+                    s.WriteBytes(_valueAsBytes);
+            }
         }
 
+        private static readonly byte[] _emptyArrayBytes = new byte[] { 0 };
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
-        private byte[] _innerBytes;
+        private byte[] _valueAsBytes;
 
         private static T AllowNull(ILTag tag) => tag.Traits.IsNull ? default : (T)tag;
+
+        private static byte[] EncodeArray(T[] array) {
+            var ms = new MemoryStream();
+            ms.ILIntEncode((ulong)array.Length);
+            foreach (var tag in array)
+                ms.EncodeTag(tag);
+            return ms.ToArray();
+        }
 
         private class JsonRepresentation
         {
@@ -130,7 +141,12 @@ namespace InterlockLedger.Tags
             }
 
             public object[] Elements { get; set; }
+
             public ulong ElementTagId { get; set; }
+
+            public T[] ToArray() => Elements.Select(item => item is T ? item : TagProvider.DeserializeFromJson(ElementTagId, item))
+                                            .Cast<T>()
+                                            .ToArray();
         }
     }
 }
