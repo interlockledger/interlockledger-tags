@@ -50,6 +50,6 @@ namespace InterlockLedger.Tags
 
         protected sealed override T DeserializeInner(Stream s) => DeserializeValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
 
-        protected sealed override void SerializeInner(Stream s, T value) => SerializeValueToStream(s, value);
+        protected sealed override void SerializeInner(Stream s) => SerializeValueToStream(s, Value);
     }
 }

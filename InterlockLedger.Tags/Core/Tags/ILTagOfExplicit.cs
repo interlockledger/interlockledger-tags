@@ -57,10 +57,10 @@ namespace InterlockLedger.Tags
             return DeserializeValueFromStream(new StreamSpan(s, _valueLength.Value));
         }
 
-        protected sealed override void SerializeInner(Stream s, T value) {
+        protected sealed override void SerializeInner(Stream s) {
             s.ILIntEncode(EncodedValueLength);
             if (EncodedValueLength > 0)
-                SerializeValueToStream(s, value);
+                SerializeValueToStream(s, Value);
         }
 
         protected abstract ulong ValueEncodedLength(T value);

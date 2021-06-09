@@ -73,17 +73,18 @@ namespace InterlockLedger.Tags
         internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
         }
 
-        protected override Version FromBytes(byte[] bytes)
-            => FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
+        protected override Version FromBytes(byte[] bytes) {
+            return FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
+
+            static Version Build(int major, int minor, int build, int revision)
+                => revision >= 0
+                    ? new Version(major, minor, build, revision)
+                    : build >= 0
+                        ? new Version(major, minor, build)
+                        : new Version(major, minor);
+        }
 
         protected override byte[] ToBytes(Version value)
             => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(value.Major).BigEndianWriteInt(value.Minor).BigEndianWriteInt(value.Build).BigEndianWriteInt(value.Revision));
-
-        private static Version Build(int major, int minor, int build, int revision)
-            => revision >= 0
-                ? new Version(major, minor, build, revision)
-                : build >= 0
-                    ? new Version(major, minor, build)
-                    : new Version(major, minor);
     }
 }
