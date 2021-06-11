@@ -64,11 +64,9 @@ namespace InterlockLedger.Tags
         public Stream ReadingStream =>
             Length == 0
                 ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
-                : !FileInfo.Exists || FileInfo.Length == 0
-                    ? throw new InvalidOperationException("Nothing to read here")
-                    : new StreamSpan(FileInfo.OpenRead(), Offset, Length, closeWrappedStreamOnDispose: true);
+                : _contentStream;
 
-        public override Stream OpenReadingStream() => ReadingStream;
+        public override Stream OpenReadingStream() => new TagStream(TagId, _contentStream);
 
         public override bool ValueIs<TV>(out TV value) {
             value = default;
@@ -86,7 +84,11 @@ namespace InterlockLedger.Tags
             Offset = 0;
         }
 
+        protected override bool KeepEncodedBytesInMemory => false;
+
         protected string TagTypeName => $"{GetType().Name}#{TagId}";
+
+        protected override ulong CalcValueLength() => Length;
 
         protected async Task CopyFromAsync(Stream source, long fileSizeLimit = 0, bool noRemoval = false, CancellationToken cancellationToken = default) {
             if (source is null)
@@ -98,23 +100,28 @@ namespace InterlockLedger.Tags
             Refresh();
         }
 
-        protected override T DeserializeValueFromStream(StreamSpan s) => default;
-
         protected void Refresh() {
             FileInfo.Refresh();
             Initialize(0, 0, FileInfo.Length);
         }
 
-        protected override void SerializeValueToStream(Stream s, T Value) {
+        protected override T ValueFromStream(StreamSpan s) => default;
+
+        protected override void ValueToStream(Stream s) {
             using var fileStream = FileInfo.OpenRead();
             using var streamSlice = new StreamSpan(fileStream, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);
         }
 
-        protected override ulong ValueEncodedLength(T Value) => Length;
-
         private const int _bufferLength = 16 * 1024;
+
         private readonly FileInfo _fileInfo;
+
+        private StreamSpan _contentStream
+            => !FileInfo.Exists || FileInfo.Length == 0
+                ? throw new InvalidOperationException("Nothing to read here")
+                : new StreamSpan(FileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete)
+                    , Offset, Length, closeWrappedStreamOnDispose: true);
 
         private string GetDebuggerDisplay() => $"{TagTypeName}: {_fileInfo?.FullName ?? "?"}[{Offset}:{Length}]";
 
@@ -127,6 +134,82 @@ namespace InterlockLedger.Tags
                 : length >= long.MaxValue || (offset + (long)length) > fileLength
                     ? throw new ArgumentOutOfRangeException(nameof(length))
                     : length;
+        }
+
+        private class TagStream : Stream
+        {
+            public TagStream(ulong tagId, StreamSpan stream) {
+                _stream = stream.Required(nameof(stream));
+                _tagId = tagId.AsILInt();
+                _contentLength = ((ulong)_stream.Length).AsILInt();
+                _length = _tagId.Length + _contentLength.Length + _stream.Length;
+                _position = 0;
+            }
+
+            public override bool CanRead => true;
+
+            public override bool CanSeek => false;
+
+            public override bool CanWrite => false;
+
+            public override long Length => _length;
+
+            public override long Position { get => _position; set => throw new NotSupportedException(); }
+
+            public override void Flush() { }
+
+            public override int Read(byte[] buffer, int offset, int count) {
+                if (_position >= _length)
+                    return 0;
+                buffer.Required(nameof(buffer));
+                if (offset < 0 || offset >= buffer.Length)
+                    throw new ArgumentOutOfRangeException(nameof(offset));
+                if (count < 0 || offset + count > buffer.Length)
+                    throw new ArgumentOutOfRangeException(nameof(count));
+                int howMany = 0;
+                int tagIdLength = _tagId.Length;
+                int prefixLength = tagIdLength + _contentLength.Length;
+                while (count > 0) {
+                    if (_position < tagIdLength) {
+                        buffer[offset++] = _tagId[_position++];
+                        howMany++;
+                        count--;
+                    } else if (_position < prefixLength) {
+                        buffer[offset++] = _contentLength[_position++ - tagIdLength];
+                        howMany++;
+                        count--;
+                    } else {
+                        long start = _position - prefixLength;
+                        if (_position >= _length)
+                            break;
+                        _stream.Seek(start, SeekOrigin.Begin);
+                        int bytesRead = _stream.Read(buffer, offset, count);
+                        if (bytesRead > 0) {
+                            howMany += bytesRead;
+                            _position += bytesRead;
+                            count -= bytesRead;
+                        }
+                    }
+                }
+                return howMany;
+            }
+
+            public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+            public override void SetLength(long value) => throw new NotSupportedException();
+
+            public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+            protected override void Dispose(bool disposing) {
+                base.Dispose(disposing);
+                _stream.Dispose();
+            }
+
+            private readonly byte[] _contentLength;
+            private readonly long _length;
+            private readonly StreamSpan _stream;
+            private readonly byte[] _tagId;
+            private long _position;
         }
     }
 }

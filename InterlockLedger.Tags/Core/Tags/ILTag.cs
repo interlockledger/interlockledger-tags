@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.IO;
 using System.Text.Json.Serialization;
 
@@ -42,38 +41,65 @@ namespace InterlockLedger.Tags
         public abstract object AsJson { get; }
 
         [JsonIgnore]
+        public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
+
+        [JsonIgnore]
         public virtual string Formatted => "?";
 
         public ulong TagId { get; set; }
+
+        [JsonIgnore]
         public ITag Traits => this;
 
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
-        public abstract Stream SerializeInto(Stream s);
+        public void Changed() => _encodedBytes = null;
 
-        public override string ToString() => GetType().Name + $"#{TagId}:" + Formatted;
+        public virtual Stream OpenReadingStream() {
+            if (KeepEncodedBytesInMemory)
+                return new MemoryStream(EncodedBytes, writable: false);
+            var s = BuildTempStream();
+            s.ILIntEncode(TagId);
+            SerializeInner(s);
+            s.Flush();
+            s.Position = 0;
+            return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
+        }
+
+        public Stream SerializeInto(Stream s) {
+            if (s is not null) {
+                try {
+                    OpenReadingStream().CopyTo(s);
+                } finally {
+                    s.Flush();
+                }
+            }
+            return s;
+        }
+
+        public override string ToString() => GetType().Name + $"#{TagId}: " + Formatted;
 
         public virtual bool ValueIs<TV>(out TV value) {
             value = default;
             return false;
         }
 
-        protected ILTag(ulong tagId) {
-            TagId = tagId;
-            _encodedBytes = NonFullBytes ? _throwIfCalled : new(ToBytes);
-        }
+        protected ILTag(ulong tagId) => TagId = tagId;
 
-        protected virtual bool NonFullBytes { get; }
-        private static readonly Lazy<byte[]> _throwIfCalled = new(() => throw new InvalidOperationException("Should never call EncodedBytes for this tag type"));
-        protected readonly Lazy<byte[]> _encodedBytes;
+        protected virtual bool KeepEncodedBytesInMemory => true;
+
+        protected virtual Stream BuildTempStream() => new MemoryStream();
+
+        protected abstract void SerializeInner(Stream s);
+
+        private byte[] _encodedBytes;
 
         private byte[] ToBytes() {
             using var stream = new MemoryStream();
-            SerializeInto(stream);
+            stream.ILIntEncode(TagId);
+            SerializeInner(stream);
             stream.Flush();
             return stream.ToArray();
         }
-
-        public abstract Stream OpenReadingStream();
     }
 }

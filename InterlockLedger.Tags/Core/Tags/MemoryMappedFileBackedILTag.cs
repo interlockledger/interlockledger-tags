@@ -66,14 +66,14 @@ namespace InterlockLedger.Tags
 
         protected string TagTypeName => $"{GetType().Name}#{TagId}";
 
-        protected override T DeserializeValueFromStream(StreamSpan s) => default;
+        protected override T ValueFromStream(StreamSpan s) => default;
 
-        protected override void SerializeValueToStream(Stream s, T Value) {
+        protected override void ValueToStream(Stream s) {
             using var streamSlice = new StreamSpan(_mmvs, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);
         }
 
-        protected override ulong ValueEncodedLength(T Value) => Length;
+        protected override ulong CalcValueLength() => Length;
 
         private const int _bufferLength = 16 * 1024;
         private readonly MemoryMappedViewStream _mmvs;

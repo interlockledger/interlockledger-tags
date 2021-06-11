@@ -276,7 +276,7 @@ namespace InterlockLedger.Tags
 
         private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
             var tag = JsonTestTaggedData.Model.FromJson(json);
-            byte[] encodedBytes = (tag as IMemoryBackedTag)?.EncodedBytes;
+            byte[] encodedBytes = tag.EncodedBytes;
             TestContext.WriteLine("===== Expected");
             TestContext.WriteLine(expectedBytes.WithCommas());
             TestContext.WriteLine("===== Actual");
@@ -285,7 +285,7 @@ namespace InterlockLedger.Tags
         }
 
         private static void ToFromBaseTest(ILTag data, Func<string, string> adjustExpected = null) {
-            var encodedBytes = (data as IMemoryBackedTag)?.EncodedBytes;
+            var encodedBytes = data.EncodedBytes;
             var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
             var expected = JsonSerializer.Serialize(data.AsJson, _options);
             if (adjustExpected != null)
@@ -300,13 +300,13 @@ namespace InterlockLedger.Tags
             TestContext.WriteLine(encodedBytes.WithCommas());
             var backFrom = JsonTestTaggedData.Model.FromNavigable(modelJson);
             Assert.IsInstanceOf<ILTag>(backFrom);
-            byte[] backFromEncodedBytes = backFrom.ToEncodedBytes();
+            byte[] backFromEncodedBytes = backFrom.EncodedBytes;
             TestContext.WriteLine("===== Back EncodedBytes");
             TestContext.WriteLine(backFromEncodedBytes.WithCommas());
             Assert.AreEqual(encodedBytes, backFromEncodedBytes, "Bytes back from modelJson did not match");
             var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object>>(actual));
             Assert.IsInstanceOf<ILTag>(parsedFrom);
-            byte[] parsedFromEncodedBytes = parsedFrom.ToEncodedBytes();
+            byte[] parsedFromEncodedBytes = parsedFrom.EncodedBytes;
             TestContext.WriteLine("===== Parsed EncodedBytes");
             TestContext.WriteLine(parsedFromEncodedBytes.WithCommas());
             //Assert.AreEqual(encodedBytes, parsedFromEncodedBytes, "Bytes parsed from json did not match");
@@ -492,7 +492,7 @@ namespace InterlockLedger.Tags
                 protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()));
 
                 protected override byte[] ToBytes(Data value)
-                    => TagHelpers.ToBytesHelper(s => s.EncodeILInt(value.Id).EncodeString(value.Name));
+                    => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value.Id).EncodeString(Value.Name));
             }
 
             private ILTagArrayOfILTag<ILTagRange> _taggedRanges => new ILTagArrayOfILTag<ILTagRange>(Ranges.Select(r => new ILTagRange(r)));

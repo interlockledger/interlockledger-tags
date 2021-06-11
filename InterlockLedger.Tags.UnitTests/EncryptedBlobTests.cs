@@ -184,7 +184,7 @@ namespace InterlockLedger.Tags
                                             TestFakeSigner.FixedKeysInstance,
                                             TestFakeSigner.FixedKeysInstance,
                                             Array.Empty<TagReader>()).AsPayload;
-            byte[] encodedBytes = payload.ToEncodedBytes();
+            byte[] encodedBytes = payload.EncodedBytes;
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes.PartOf(124);
         }

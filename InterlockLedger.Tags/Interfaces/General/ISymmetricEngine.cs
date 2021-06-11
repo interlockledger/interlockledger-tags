@@ -45,5 +45,6 @@ namespace InterlockLedger.Tags
                                                            Action<MemoryStream, byte[], byte[]> writeHeader = null,
                                                            byte[] key = null,
                                                            byte[] iv = null);
+        (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream, Action<MemoryStream, byte[], byte[]> writeHeader = null, byte[] key = null, byte[] iv = null);
     }
 }

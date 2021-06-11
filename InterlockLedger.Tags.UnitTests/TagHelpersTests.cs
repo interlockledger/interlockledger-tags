@@ -35,13 +35,12 @@ using NUnit.Framework;
 
 namespace InterlockLedger.Tags
 {
-
     [TestFixture]
     public class TagHelpersTests
     {
         [Test]
         public void ToBytesHelperTest() {
-            IMemoryBackedTag tag = new ILTagILInt(23);
+            var tag = new ILTagILInt(23);
             var bytes = TagHelpers.ToBytesHelper((s) => s.EncodeILInt(23));
             Assert.IsNotNull(bytes);
             Assert.That(tag.EncodedBytes, Is.EquivalentTo(bytes));

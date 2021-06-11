@@ -29,23 +29,47 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
+#nullable enable
 
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagOf<T> : ILTagOfSimple<T>
+    public abstract class ILTagOf<T> : ILTag
     {
-        protected ILTagOf(ulong tagId, T value) : base(tagId, value) { }
+        [JsonIgnore]
+#pragma warning disable CS8603 // Possible null reference return.
+        public override object AsJson => Value;
+#pragma warning restore CS8603 // Possible null reference return.
 
-        protected ILTagOf(Stream s, ulong alreadyDeserializedTagId, Action<ITag> setup) : base(alreadyDeserializedTagId, s, setup) { }
+        public override string Formatted => Value is IFormatted v ? v.Formatted : Value?.ToString() ?? "??";
 
-        protected ILTagOf(Stream s, ulong alreadyDeserializedTagId) : base(alreadyDeserializedTagId, s, setup: null) { }
+        public T Value { get; set; }
 
+        public override bool ValueIs<TV>(out TV value) {
+            if (Value is TV tvalue) {
+                value = tvalue;
+                return true;
+            }
+#pragma warning disable CS8601 // Possible null reference assignment.
+            value = default;
+#pragma warning restore CS8601 // Possible null reference assignment.
+            return false;
+        }
 
-        protected abstract T DeserializeValueFromStream(StreamSpan s);
+        protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
 
-        protected abstract void SerializeValueToStream(Stream s, T value);
+        protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
+            setup?.Invoke(this);
+            Value = DeserializeInner(s);
+        }
+
+        protected abstract T DeserializeInner(Stream s);
+
+        protected abstract T ValueFromStream(StreamSpan s);
+
+        protected abstract void ValueToStream(Stream s);
     }
 }

@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,10 +46,13 @@ namespace InterlockLedger.Tags
         public ILTag AsILTag => AsPayload;
 
         [JsonIgnore]
-        public Payload AsPayload => _payload.Value;
+        public abstract object AsJson { get; }
 
         [JsonIgnore]
-        public ILTagOfExplicit<T> AsTag => AsPayload;
+        public Payload AsPayload => _payload ??= new Payload((T)this);
+
+        [JsonIgnore]
+        public ILTagOf<T> AsTag => AsPayload;
 
         [JsonIgnore]
         public DataField FieldModel => _fieldModel.Value;
@@ -56,14 +61,21 @@ namespace InterlockLedger.Tags
         public abstract string Formatted { get; }
 
         [JsonIgnore]
+        public virtual bool KeepEncodedBytesInMemory => true;
+
+        [JsonIgnore]
         public DataModel PayloadDataModel => _payloadDataModel.Value;
 
-        public ulong TagId { get => _tagId; set { if (value != 0 && value != _tagId) throw new InvalidDataException($"Invalid value for TagId: {_tagId}"); } }
+        public ulong TagId { get; }
 
         [JsonIgnore]
         public abstract string TypeName { get; }
 
         public ushort Version { get; set; }
+
+        public void Changed() => _payload = null;
+
+        public abstract T FromJson(object json);
 
         public T FromStream(Stream s) {
             Version = s.DecodeUShort(); // Field index 0 //
@@ -74,8 +86,8 @@ namespace InterlockLedger.Tags
         public T FromUnknown(ILTagUnknown unknown) {
             if (unknown is null)
                 throw new ArgumentNullException(nameof(unknown));
-            if (unknown.TagId != _tagId)
-                throw new InvalidCastException($"Wrong tagId! Expecting {_tagId} but came {unknown.TagId}");
+            if (unknown.TagId != TagId)
+                throw new InvalidCastException($"Wrong tagId! Expecting {TagId} but came {unknown.TagId}");
             if (unknown.Value.None())
                 throw new ArgumentException("Empty tagged value not expected!", nameof(unknown));
             using var s = new MemoryStream(unknown.Value);
@@ -86,7 +98,7 @@ namespace InterlockLedger.Tags
 
         public bool RegisterAsField(ITagRegistrar registrar)
             => registrar.Required(nameof(registrar))
-                .RegisterILTag(_tagId, s => new Payload(_tagId, s), o => new T().FromJson(o).AsPayload);
+                .RegisterILTag(TagId, s => new Payload(TagId, s), o => new T().FromJson(o).AsPayload);
 
         public void ToStream(Stream s) {
             s.EncodeUShort(Version);    // Field index 0 //
@@ -98,37 +110,29 @@ namespace InterlockLedger.Tags
             public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => Traits.ValidateTagId(Value.TagId);
 
             public override object AsJson => Value.AsJson;
+            protected override bool KeepEncodedBytesInMemory => Value.KeepEncodedBytesInMemory;
             public string TypeName => typeof(T).Name;
             public ushort Version => Value.Version;
 
-            public T FromJson(object o) => new T().FromJson(o);
-
-            public override Stream OpenReadingStream() {
-                var s = new MemoryStream();
-                s.EncodeTag(this);
-                s.Flush();
-                s.Position = 0;
-                return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
-            }
-
-            public override string ToString() => Value.ToString();
+            public override string ToString() => Value?.ToString() ?? "?";
 
             internal Payload(T Value) : base(Value.TagId, Value) {
             }
 
-            protected sealed override T DeserializeValueFromStream(StreamSpan s) => new T().FromStream(s);
+            protected ulong? _valueLength;
 
-            protected sealed override void SerializeValueToStream(Stream s, T value) => value.ToStream(s);
+            protected override ulong CalcValueLength() => Value.CalcValueLength();
 
-            protected sealed override ulong ValueEncodedLength(T value) => value.EncodedLength;
+            protected override T ValueFromStream(StreamSpan s) => new T().FromStream(s);
+
+            protected override void ValueToStream(Stream s) => Value.ToStream(s);
         }
 
         protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);
 
         protected VersionedValue(ulong tagId, ushort version) {
-            _tagId = tagId;
+            TagId = tagId;
             Version = version;
-            _payload = new Lazy<Payload>(() => new Payload((T)this));
             _fieldModel = new Lazy<DataField>(() => new DataField(TypeName, TagId, TypeDescription) {
                 SubDataFields = VersionField.AppendedOf(RemainingStateFields)
             });
@@ -140,25 +144,27 @@ namespace InterlockLedger.Tags
             });
         }
 
-        protected abstract object AsJson { get; }
-
-        protected virtual ulong EncodedLength => _encodedLength ??= (ulong)TagHelpers.ToBytesHelper(ToStream).Length;
         protected virtual DataIndex[] PayloadIndexes => Array.Empty<DataIndex>();
 
         protected abstract IEnumerable<DataField> RemainingStateFields { get; }
 
         protected abstract string TypeDescription { get; }
 
+        protected virtual Stream BuildTempStream() => new MemoryStream();
+
+        protected virtual ulong CalcValueLength() {
+            using var stream = new MemoryStream();
+            ToStream(stream);
+            stream.Flush();
+            return (ulong)stream.Length;
+        }
+
         protected abstract void DecodeRemainingStateFrom(Stream s);
 
         protected abstract void EncodeRemainingStateTo(Stream s);
 
-        protected abstract T FromJson(object json);
-
         private readonly Lazy<DataField> _fieldModel;
-        private readonly Lazy<Payload> _payload;
         private readonly Lazy<DataModel> _payloadDataModel;
-        private readonly ulong _tagId;
-        private ulong? _encodedLength;
+        private Payload? _payload;
     }
 }

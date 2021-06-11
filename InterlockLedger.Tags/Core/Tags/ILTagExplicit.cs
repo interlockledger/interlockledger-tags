@@ -32,17 +32,11 @@
 
 using System;
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>, IMemoryBackedTag
+    public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>
     {
-        [JsonIgnore]
-        public byte[] EncodedBytes => _encodedBytes.Value;
-
-        public sealed override Stream OpenReadingStream() => new MemoryStream(EncodedBytes, writable: false);
-
         protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
@@ -50,27 +44,24 @@ namespace InterlockLedger.Tags
                 : base(alreadyDeserializedTagId, s, setup) {
         }
 
-        protected sealed override bool NonFullBytes => false;
+        protected sealed override bool KeepEncodedBytesInMemory => true;
 
         protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
             if (bytes == null || bytes.Length == 0)
                 return default;
-            if (deserialize == null) {
-                throw new ArgumentNullException(nameof(deserialize));
-            }
-            using var s = new MemoryStream(bytes);
+            deserialize.Required(nameof(deserialize));
+            using var s = new MemoryStream(bytes, writable: false);
             return deserialize(s);
         }
 
-        protected sealed override T DeserializeValueFromStream(StreamSpan s)
-            => FromBytes(s.ReadAllBytesAsync().Result);
+        protected sealed override T ValueFromStream(StreamSpan s) => FromBytes(s.ReadAllBytesAsync().Result);
 
         protected abstract T FromBytes(byte[] bytes);
 
-        protected sealed override void SerializeValueToStream(Stream s, T value) => s.WriteBytes(ToBytes(value));
+        protected sealed override void ValueToStream(Stream s) => s.WriteBytes(ToBytes(Value));
 
         protected abstract byte[] ToBytes(T Value);
 
-        protected override ulong ValueEncodedLength(T value) => (ulong)(ToBytes(value)?.Length ?? 0);
+        protected override ulong CalcValueLength() => (ulong)(ToBytes(Value)?.Length ?? 0);
     }
 }

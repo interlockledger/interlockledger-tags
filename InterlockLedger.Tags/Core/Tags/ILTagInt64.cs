@@ -39,12 +39,10 @@ namespace InterlockLedger.Tags
         public ILTagInt64(long value) : base(ILTagId.Int64, value) {
         }
 
-        internal ILTagInt64(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.Int64) => Traits.ValidateTagId(alreadyDeserializedTagId);
+        internal ILTagInt64(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int64, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override long DeserializeValueFromStream(StreamSpan s)
-            => s.BigEndianReadLong();
+        protected override long ValueFromStream(StreamSpan s) => s.BigEndianReadLong();
 
-        protected override void SerializeValueToStream(Stream s, long value)
-            => s.BigEndianWriteLong(value);
+        protected override void ValueToStream(Stream s) => s.BigEndianWriteLong(Value);
     }
 }

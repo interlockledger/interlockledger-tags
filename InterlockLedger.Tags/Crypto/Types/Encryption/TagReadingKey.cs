@@ -85,9 +85,9 @@ namespace InterlockLedger.Tags
             FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagHash>(), s.DecodeByteArray(), s.DecodeByteArray()));
 
         protected override byte[] ToBytes(Parts value)
-            => TagHelpers.ToBytesHelper(s => s.EncodeString(value.ReaderId)
-                                   .EncodeTag(value.PublicKeyHash)
-                                   .EncodeByteArray(value.EncryptedKey)
-                                   .EncodeByteArray(value.EncryptedIV));
+            => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.ReaderId)
+                                   .EncodeTag(Value.PublicKeyHash)
+                                   .EncodeByteArray(Value.EncryptedKey)
+                                   .EncodeByteArray(Value.EncryptedIV));
     }
 }

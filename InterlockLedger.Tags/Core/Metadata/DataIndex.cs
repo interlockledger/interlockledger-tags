@@ -122,9 +122,9 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes(DataIndex value)
              => TagHelpers.ToBytesHelper(s => {
-                 s.EncodeString(value.Name);
-                 s.EncodeBool(value.IsUnique);
-                 s.EncodeString(value.ElementsAsString);
+                 s.EncodeString(Value.Name);
+                 s.EncodeBool(Value.IsUnique);
+                 s.EncodeString(Value.ElementsAsString);
              });
     }
 }

@@ -41,28 +41,35 @@ namespace InterlockLedger.Tags
         public const int MaxEncodedValueLength = int.MaxValue / 16;
 
         [JsonIgnore]
-        public ulong EncodedValueLength => _valueLength ??= ValueEncodedLength(Value);
-
-        protected ulong? _valueLength;
+        public ulong ValueLength => _valueLength ??= CalcValueLength();
 
         protected ILTagOfExplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
         protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
-            : base(s, alreadyDeserializedTagId, setup) {
+            : base(alreadyDeserializedTagId, s, setup) {
+        }
+
+        protected virtual ulong CalcValueLength() {
+            using var stream = new MemoryStream();
+            ValueToStream(stream);
+            stream.Flush();
+            return (ulong)stream.ToArray().Length;
         }
 
         protected sealed override T DeserializeInner(Stream s) {
             _valueLength = s.ILIntDecode();
-            return DeserializeValueFromStream(new StreamSpan(s, _valueLength.Value));
+            return (_valueLength <= int.MaxValue || !KeepEncodedBytesInMemory)
+                ? ValueFromStream(new StreamSpan(s, _valueLength.Value))
+                : throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
         }
 
         protected sealed override void SerializeInner(Stream s) {
-            s.ILIntEncode(EncodedValueLength);
-            if (EncodedValueLength > 0)
-                SerializeValueToStream(s, Value);
+            s.ILIntEncode(ValueLength);
+            if (ValueLength > 0)
+                ValueToStream(s);
         }
 
-        protected abstract ulong ValueEncodedLength(T value);
+        private ulong? _valueLength;
     }
 }

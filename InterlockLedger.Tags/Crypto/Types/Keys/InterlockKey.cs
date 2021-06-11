@@ -194,17 +194,17 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes(Parts value)
             => TagHelpers.ToBytesHelper(s => {
-                s.EncodeUShort(value.Version);              // Field index 0 //
-                s.EncodeString(value.Name);                 // Field index 1 //
-                s.EncodeILIntArray(value.PurposesAsUlongs); // Field index 2 //
-                s.EncodeInterlockId(value.Id);              // Field index 3 //
-                s.EncodeInterlockId(value.Identity);        // Field index 4 //
-                s.EncodeString(value.Description);          // Field index 5 //
-                s.EncodeTag(value.PublicKey);               // Field index 6 //
-                s.EncodeILInt(value.FirstAppId);            // Field index 7 //
+                s.EncodeUShort(Value.Version);              // Field index 0 //
+                s.EncodeString(Value.Name);                 // Field index 1 //
+                s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
+                s.EncodeInterlockId(Value.Id);              // Field index 3 //
+                s.EncodeInterlockId(Value.Identity);        // Field index 4 //
+                s.EncodeString(Value.Description);          // Field index 5 //
+                s.EncodeTag(Value.PublicKey);               // Field index 6 //
+                s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
                 s.EncodeILInt((ulong)value.Strength);       // Field index 8 //
-                s.EncodeILIntArray(value.FirstActions);     // Field index 9 - since version 3 //
-                s.EncodeTagArray(value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
+                s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
+                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
             });
 
         private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {

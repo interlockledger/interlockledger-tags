@@ -112,7 +112,7 @@ namespace InterlockLedger.Tags
             );
 
             protected override byte[] ToBytes(AppPermissions value)
-                => TagHelpers.ToBytesHelper(s => s.EncodeILInt(value.AppId).EncodeILIntArray(value.ActionIds));
+                => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
         }
 
         private bool _noActions => ActionIds.None();

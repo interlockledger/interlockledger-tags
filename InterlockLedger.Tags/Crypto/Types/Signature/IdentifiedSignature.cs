@@ -50,6 +50,7 @@ namespace InterlockLedger.Tags
         public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
         }
 
+        public override object AsJson => new { TagId, Version, Signature, SignerId, PublicKey };
         public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
         public TagPubKey PublicKey { get; set; }
 
@@ -58,9 +59,9 @@ namespace InterlockLedger.Tags
 
         public override string TypeName => nameof(IdentifiedSignature);
 
-        public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
+        public override IdentifiedSignature FromJson(object json) => throw new NotImplementedException();
 
-        protected override object AsJson => new { TagId, Version, Signature, SignerId, PublicKey };
+        public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
 
         protected override IEnumerable<DataField> RemainingStateFields => _remainingDataFields;
 
@@ -77,8 +78,6 @@ namespace InterlockLedger.Tags
             s.EncodeTag(SignerId);
             s.EncodeTag(PublicKey);
         }
-
-        protected override IdentifiedSignature FromJson(object json) => throw new NotImplementedException();
 
         private static readonly DataField[] _remainingDataFields = new DataField[] {
             new DataField { Name = nameof(Signature), TagId = ILTagId.Signature },

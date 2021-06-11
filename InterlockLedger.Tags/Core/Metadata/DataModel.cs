@@ -154,7 +154,6 @@ namespace InterlockLedger.Tags
             try {
                 if (fieldValue is JsonElement je) {
                     fieldValue = FromJsonElement(field, je);
-
                 }
                 return field.IsEnumeration && fieldValue is string value
                     ? field.EnumerationFromString(value)
@@ -216,7 +215,7 @@ namespace InterlockLedger.Tags
                 ushort version = minVersion;
                 bool isVersioned = IsVersioned(dataFields);
                 ScanFieldsToTags(ExtractVersion());
-                return AppendRemainingBytes(tags.Select(t => t.ToEncodedBytes()).SelectMany(b => b).ToArray());
+                return AppendRemainingBytes(tags.Select(t => t.EncodedBytes).SelectMany(b => b).ToArray());
                 IEnumerable<DataField> ExtractVersion() {
                     if (!isVersioned) return dataFields;
                     if (json.TryGetValue(dataFields.First().Name, out var fieldValue)) {
@@ -320,13 +319,13 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes(DataModel value)
             => TagHelpers.ToBytesHelper(s => {
-                s.EncodeILInt(value.PayloadTagId);
+                s.EncodeILInt(Value.PayloadTagId);
                 s.EncodeILInt(0); // deprecated field
-                s.EncodeTagArray(value.DataFields?.Select(df => new ILTagDataField(df)));
-                s.EncodeTagArray(value.Indexes?.Select(index => new ILTagDataIndex(index)));
-                s.EncodeString(value.PayloadName);
-                s.EncodeUShort(value.Version);
-                s.EncodeString(value.Description.TrimToNull());
+                s.EncodeTagArray(Value.DataFields?.Select(df => new ILTagDataField(df)));
+                s.EncodeTagArray(Value.Indexes?.Select(index => new ILTagDataIndex(index)));
+                s.EncodeString(Value.PayloadName);
+                s.EncodeUShort(Value.Version);
+                s.EncodeString(Value.Description.TrimToNull());
             });
     }
 }

@@ -74,6 +74,6 @@ namespace InterlockLedger.Tags
             => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
 
         protected override byte[] ToBytes(LimitedRange value)
-            => TagHelpers.ToBytesHelper(s => s.ILIntEncode(value.Start).BigEndianWriteUShort(value.Count));
+            => TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
     }
 }

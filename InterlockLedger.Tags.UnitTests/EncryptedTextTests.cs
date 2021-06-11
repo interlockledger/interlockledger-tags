@@ -130,7 +130,7 @@ namespace InterlockLedger.Tags
                                                  clearText,
                                                  TestFakeSigner.FixedKeysInstance,
                                                  TestFakeSigner.FixedKeysInstance,
-                                                 Array.Empty<TagReader>()).AsPayload.ToEncodedBytes();
+                                                 Array.Empty<TagReader>()).AsPayload.EncodedBytes;
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes.PartOf(124);
         }

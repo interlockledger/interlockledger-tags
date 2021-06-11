@@ -38,7 +38,7 @@ using System.Linq;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagArrayOfILTag<T> : ILTagOfSimple<T[]> where T : ILTag
+    public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
     {
         public ILTagArrayOfILTag(IEnumerable<T> value) : this(ILTagId.ILTagArray, value?.ToArray()) { }
 
@@ -46,8 +46,6 @@ namespace InterlockLedger.Tags
         public T this[int i] => Value?[i];
 
         public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
-
-        public override Stream OpenReadingStream() => new ReadonlyTagStream(TagId, _valueAsBytes);
 
         internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s, null) {
         }
@@ -81,57 +79,34 @@ namespace InterlockLedger.Tags
             }
         }
 
-        private protected ILTagArrayOfILTag(ulong tagId, T[] Value) : base(tagId, Value)
-            => _valueAsBytes = (Value?.Length) switch {
-                null => null,
-                0 => _emptyArrayBytes,
-                _ => EncodeArray(Value),
-            };
+        private protected ILTagArrayOfILTag(ulong tagId, T[] Value) : base(tagId, Value) { }
 
         private protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s, null) {
         }
 
-        protected override T[] DeserializeInner(Stream s) {
-            var valueBytesCount = s.ILIntDecode();
-            if (valueBytesCount > int.MaxValue)
-                throw new InvalidDataException("Array is too big to deserialize");
-            if (valueBytesCount == 0) {
-                _valueAsBytes = null;
-                return null;
-            }
-            _valueAsBytes = s.ReadExactly((int)valueBytesCount);
-            using var ms = new MemoryStream(_valueAsBytes, writable: false);
-            var arrayLength = (int)ms.ILIntDecode();
-            var array = new T[arrayLength];
-            for (var i = 0; i < arrayLength; i++) {
-                array[i] = _decoder(ms);
-            }
-            return array;
+        protected override T[] ValueFromStream(StreamSpan s) {
+            if (s.HasBytes()) {
+                var arrayLength = (int)s.ILIntDecode();
+                var array = new T[arrayLength];
+                for (var i = 0; i < arrayLength; i++) {
+                    array[i] = _decoder(s);
+                }
+                return array;
+            };
+            return null;
         }
 
-        protected override void SerializeInner(Stream s) {
-            if (_valueAsBytes is null)
-                s.ILIntEncode(0);
-            else {
-                s.ILIntEncode((ulong)_valueAsBytes.Length);
-                if (_valueAsBytes.Length > 0)
-                    s.WriteBytes(_valueAsBytes);
+        protected override void ValueToStream(Stream s) {
+            if (Value is not null) {
+                s.ILIntEncode((ulong)Value.Length);
+                foreach (var tag in Value)
+                    s.EncodeTag(tag);
             }
         }
 
-        private static readonly byte[] _emptyArrayBytes = new byte[] { 0 };
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
-        private byte[] _valueAsBytes;
 
         private static T AllowNull(ILTag tag) => tag.Traits.IsNull ? default : (T)tag;
-
-        private static byte[] EncodeArray(T[] array) {
-            var ms = new MemoryStream();
-            ms.ILIntEncode((ulong)array.Length);
-            foreach (var tag in array)
-                ms.EncodeTag(tag);
-            return ms.ToArray();
-        }
 
         private class JsonRepresentation
         {

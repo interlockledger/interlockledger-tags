@@ -47,9 +47,9 @@ namespace InterlockLedger.Tags
 
         public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
 
-        protected override bool DeserializeValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
+        protected override bool ValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
-        protected override void SerializeValueToStream(Stream s, bool value) => s.WriteByte((byte)(value ? 1 : 0));
+        protected override void ValueToStream(Stream s) => s.WriteByte((byte)(Value ? 1 : 0));
 
         private ILTagBool(bool value) : base(ILTagId.Bool, value) {
         }

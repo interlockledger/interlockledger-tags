@@ -44,15 +44,25 @@ namespace InterlockLedger.Tags
         public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
         }
 
+        public override object AsJson => new {
+            TagId,
+            ContentTagId,
+            SignedContent = SignedContent.AsILTag.AsJson,
+            Signatures = Signatures.AsJsonArray()
+        };
+
         public ulong ContentTagId => SignedContent.TagId;
 
         public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent);
 
+        public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
         public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
 
         public T SignedContent { get; private set; }
 
         public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
+
+        public override SignedValue<T> FromJson(object json) => throw new NotSupportedException();
 
         public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey)
             => SignedContent is not null
@@ -65,13 +75,6 @@ namespace InterlockLedger.Tags
 
         internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
             => Init(signedContent, signatures);
-
-        protected override object AsJson => new {
-            TagId,
-            ContentTagId,
-            SignedContent = SignedContent.AsILTag.AsJson,
-            Signatures = Signatures.AsJsonArray()
-        };
 
         protected override IEnumerable<DataField> RemainingStateFields =>
             new T().FieldModel?.WithName(nameof(SignedContent))
@@ -89,8 +92,6 @@ namespace InterlockLedger.Tags
 
         protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
 
-        protected override SignedValue<T> FromJson(object json) => throw new NotImplementedException();
-
         private IEnumerable<IdentifiedSignature> FailedSignaturesFor(T data)
             => Signatures.Where(sig => !sig.Verify(data)).ToArray();
 
@@ -102,7 +103,5 @@ namespace InterlockLedger.Tags
             if (FailedSignatures.SafeAny())
                 throw new InvalidDataException("Some signatures don't match the payload");
         }
-
-        public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
     }
 }

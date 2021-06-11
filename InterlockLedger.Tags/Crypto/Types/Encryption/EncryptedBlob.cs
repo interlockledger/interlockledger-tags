@@ -46,11 +46,17 @@ namespace InterlockLedger.Tags
         public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
             => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, encryptor, new ILTagByteArray(blobInClearText), author, readers);
 
+        public override object AsJson {
+            get {
+                _encrypted.Version = Version;
+                return _encrypted.AsJson;
+            }
+        }
+
         public CipherAlgorithm Cipher => _encrypted.Cipher;
         public byte[] CipherText => _encrypted.CipherText;
         public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
         public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
-        protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
         public override string TypeName => nameof(EncryptedBlob);
 
         public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
@@ -62,20 +68,14 @@ namespace InterlockLedger.Tags
 
         public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
 
-        protected override object AsJson {
-            get {
-                _encrypted.Version = Version;
-                return _encrypted.AsJson;
-            }
-        }
+        public override EncryptedBlob FromJson(object json) => new(_encrypted.FromJson(json));
 
+        protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
         protected override string TypeDescription => "An array of bytes encrypted for some readers";
 
         protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
 
         protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
-
-        protected override EncryptedBlob FromJson(object json) => new(_encrypted.FromJson(json));
 
         private readonly EncryptedValue<ILTagByteArray> _encrypted;
 

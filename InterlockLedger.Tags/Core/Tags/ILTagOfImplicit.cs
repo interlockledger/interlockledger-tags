@@ -31,25 +31,19 @@
 // ******************************************************************************************************************************
 
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
-    public abstract class ILTagOfImplicit<T> : ILTagOf<T>, IMemoryBackedTag
+    public abstract class ILTagOfImplicit<T> : ILTagOf<T>
     {
-        [JsonIgnore]
-        public byte[] EncodedBytes => _encodedBytes.Value;
-
-        public override sealed Stream OpenReadingStream() => new MemoryStream(EncodedBytes, writable: false);
-
         protected ILTagOfImplicit(ulong tagId, T value) : base(tagId, value) {
         }
 
-        protected ILTagOfImplicit(Stream s, ulong alreadyDeserializedTagId) : base(s, alreadyDeserializedTagId) {
+        protected ILTagOfImplicit(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
         }
 
-        protected sealed override T DeserializeInner(Stream s) => DeserializeValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
+        protected sealed override T DeserializeInner(Stream s) => ValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
 
-        protected sealed override void SerializeInner(Stream s) => SerializeValueToStream(s, Value);
+        protected sealed override void SerializeInner(Stream s) => ValueToStream(s);
     }
 }

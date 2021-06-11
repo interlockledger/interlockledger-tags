@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -68,31 +68,16 @@ namespace InterlockLedger.Tags
                                                                   Action<MemoryStream, byte[], byte[]> writeHeader = null,
                                                                   byte[] key = null,
                                                                   byte[] iv = null) {
-            using var algorithm = BuildAlgorithm(key, iv);
-            if (clearData is null)
-                throw new ArgumentNullException(nameof(clearData));
-            using var ms = new MemoryStream();
-            writeHeader?.Invoke(ms, algorithm.Key, algorithm.IV);
-            using (var cs = new CryptoStream(ms, algorithm.CreateEncryptor(), CryptoStreamMode.Write)) {
-                cs.Write(clearData, 0, clearData.Length);
-                cs.Close();
-            }
-            return (ms.ToArray(), algorithm.Key, algorithm.IV);
+            clearData.Required(nameof(clearData));
+            return EncryptInner(writeHeader, key, iv, (cs) => cs.Write(clearData, 0, clearData.Length));
         }
+
         public (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream,
                                                                   Action<MemoryStream, byte[], byte[]> writeHeader = null,
                                                                   byte[] key = null,
                                                                   byte[] iv = null) {
-            using var algorithm = BuildAlgorithm(key, iv);
-            if (clearDataStream is null)
-                throw new ArgumentNullException(nameof(clearDataStream));
-            using var ms = new MemoryStream();
-            writeHeader?.Invoke(ms, algorithm.Key, algorithm.IV);
-            using (var cs = new CryptoStream(ms, algorithm.CreateEncryptor(), CryptoStreamMode.Write)) {
-                clearDataStream.CopyTo(cs);
-                cs.Close();
-            }
-            return (ms.ToArray(), algorithm.Key, algorithm.IV);
+            clearDataStream.Required(nameof(clearDataStream));
+            return EncryptInner(writeHeader, key, iv, (cs) => clearDataStream.CopyTo(cs));
         }
 
         private static SymmetricAlgorithm BuildAlgorithm(byte[] key, byte[] iv) {
@@ -111,6 +96,17 @@ namespace InterlockLedger.Tags
             else
                 AES.Key = key;
             return AES;
+        }
+
+        private static (byte[] cipherData, byte[] key, byte[] iv) EncryptInner(Action<MemoryStream, byte[], byte[]> writeHeader, byte[] key, byte[] iv, Action<CryptoStream> writeTo) {
+            using var algorithm = BuildAlgorithm(key, iv);
+            using var ms = new MemoryStream();
+            writeHeader?.Invoke(ms, algorithm.Key, algorithm.IV);
+            using (var cs = new CryptoStream(ms, algorithm.CreateEncryptor(), CryptoStreamMode.Write)) {
+                writeTo(cs);
+                cs.Close();
+            }
+            return (ms.ToArray(), algorithm.Key, algorithm.IV);
         }
     }
 }

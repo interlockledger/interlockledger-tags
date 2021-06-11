@@ -34,6 +34,6 @@ namespace InterlockLedger.Tags
 {
     public interface ITaggableOf<T> : ITaggable where T : class, ITaggableOf<T>
     {
-        ILTagOfExplicit<T> AsTag { get; }
+        ILTagOf<T> AsTag { get; }
     }
 }

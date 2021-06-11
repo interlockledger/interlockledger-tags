@@ -46,16 +46,14 @@ namespace InterlockLedger.Tags
         public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
         }
 
-        public override Stream OpenReadingStream() => new ReadonlyTagStream(TagId, Value);
-
         internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
         }
 
-        protected override byte[] DeserializeValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
+        protected override byte[] ValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
 
-        protected override void SerializeValueToStream(Stream s, byte[] value) => s.WriteBytes(value);
+        protected override void ValueToStream(Stream s) => s.WriteBytes(Value);
 
-        protected override ulong ValueEncodedLength(byte[] value) => (ulong)(value?.Length ?? 0);
+        protected override ulong CalcValueLength() => (ulong)(Value?.Length ?? 0);
 
         private static byte[] Elicit(object opaqueValue)
             => opaqueValue switch {

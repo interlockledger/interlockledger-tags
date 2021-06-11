@@ -80,7 +80,7 @@ namespace InterlockLedger.Tags
                 }
                 _data.LastSignatureTimeStamp = _timeStamper.Now;
             }
-            _data.InvalidateBytes();
+            _data.Changed();
             return new TagSignature(Algorithm.RSA, signatureData);
         }
     }

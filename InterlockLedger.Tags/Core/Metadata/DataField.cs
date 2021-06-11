@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -100,19 +100,19 @@ namespace InterlockLedger.Tags
 
         public ushort Version { get; set; }
 
-        public static ulong AsNumber(ILTag value)
-            => value is null
-                ? throw new ArgumentNullException(nameof(value))
-                : (value.TagId switch {
-                    2 => (ulong)((ILTagInt8)value).Value,
-                    3 => ((ILTagUInt8)value).Value,
-                    4 => (ulong)((ILTagInt16)value).Value,
-                    5 => ((ILTagUInt16)value).Value,
-                    6 => (ulong)((ILTagInt32)value).Value,
-                    7 => ((ILTagUInt32)value).Value,
-                    8 => (ulong)((ILTagInt64)value).Value,
-                    9 => ((ILTagUInt64)value).Value,
-                    10 => ((ILTagILInt)value).Value,
+        public static ulong AsNumber(ILTag tag)
+            => tag is null
+                ? throw new ArgumentNullException(nameof(tag))
+                : (tag.TagId switch {
+                    2 => (ulong)((ILTagInt8)tag).Value,
+                    3 => ((ILTagUInt8)tag).Value,
+                    4 => (ulong)((ILTagInt16)tag).Value,
+                    5 => ((ILTagUInt16)tag).Value,
+                    6 => (ulong)((ILTagInt32)tag).Value,
+                    7 => ((ILTagUInt32)tag).Value,
+                    8 => (ulong)((ILTagInt64)tag).Value,
+                    9 => ((ILTagUInt64)tag).Value,
+                    10 => ((ILTagILInt)tag).Value,
                     _ => throw new InvalidCastException("Not an integral numeric ILTag"),
                 });
 
@@ -282,19 +282,19 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ToBytes(DataField value)
             => TagHelpers.ToBytesHelper(s => {
-                s.EncodeUShort(value.Version);
-                s.EncodeILInt(value.TagId);
-                s.EncodeString(value.Name);
+                s.EncodeUShort(Value.Version);
+                s.EncodeILInt(Value.TagId);
+                s.EncodeString(Value.Name);
                 s.EncodeBool(false);
-                s.EncodeBool(value.IsOpaque.GetValueOrDefault());
-                s.EncodeILInt(value.ElementTagId.GetValueOrDefault());
-                s.EncodeTagArray(value.SubDataFields?.Select(df => new ILTagDataField(df)));
+                s.EncodeBool(Value.IsOpaque.GetValueOrDefault());
+                s.EncodeILInt(Value.ElementTagId.GetValueOrDefault());
+                s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
                 s.EncodeByte((byte)value.Cast.GetValueOrDefault());
-                s.EncodeUShort(value.SerializationVersion);
-                s.EncodeString(value.Description);
+                s.EncodeUShort(Value.SerializationVersion);
+                s.EncodeString(Value.Description);
                 EncodeEnumeration(s, value.EnumerationDefinition);
-                s.EncodeBool(value.EnumerationAsFlags.GetValueOrDefault());
-                s.EncodeBool(value.IsDeprecated.GetValueOrDefault());
+                s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
+                s.EncodeBool(Value.IsDeprecated.GetValueOrDefault());
             });
 
         private static EnumerationDictionary DecodeEnumeration(Stream s) {
@@ -325,9 +325,9 @@ namespace InterlockLedger.Tags
                     s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
 
                 protected override byte[] ToBytes(Triplet value) => TagHelpers.ToBytesHelper(s => {
-                    s.EncodeILInt(value.Value);
-                    s.EncodeString(value.Name);
-                    s.EncodeString(value.Description);
+                    s.EncodeILInt(Value.Value);
+                    s.EncodeString(Value.Name);
+                    s.EncodeString(Value.Description);
                 });
             }
         }

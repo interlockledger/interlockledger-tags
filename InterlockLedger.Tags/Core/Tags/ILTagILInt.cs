@@ -49,10 +49,10 @@ namespace InterlockLedger.Tags
 
         public override int GetHashCode() => -1937169414 + Value.GetHashCode();
 
-        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(s, ILTagId.ILInt) => Traits.ValidateTagId(alreadyDeserializedTagId);
+        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override ulong DeserializeValueFromStream(StreamSpan s) => s.ILIntDecode();
+        protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
 
-        protected override void SerializeValueToStream(Stream s, ulong value) => s.ILIntEncode(value);
+        protected override void ValueToStream(Stream s) => s.ILIntEncode(Value);
     }
 }

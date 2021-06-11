@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -46,12 +46,12 @@ namespace InterlockLedger.Tags
 
         public TestSignable(ulong someILInt) : base(FieldTagId, CurrentVersion) => SomeILInt = someILInt;
 
+        public override object AsJson => new { TagId, Version, SomeILInt };
+        public override string Formatted => throw new NotImplementedException();
         public ulong SomeILInt { get; private set; }
         public override string TypeName => nameof(TestSignable);
 
-        public override string Formatted => throw new NotImplementedException();
-
-        protected override object AsJson => new { TagId, Version, SomeILInt };
+        public override TestSignable FromJson(object json) => throw new System.NotImplementedException();
 
         protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {
             Name = nameof(SomeILInt),
@@ -63,7 +63,5 @@ namespace InterlockLedger.Tags
         protected override void DecodeRemainingStateFrom(Stream s) => SomeILInt = s.DecodeILInt();
 
         protected override void EncodeRemainingStateTo(Stream s) => s.EncodeILInt(SomeILInt);
-
-        protected override TestSignable FromJson(object json) => throw new System.NotImplementedException();
     }
 }

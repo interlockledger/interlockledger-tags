@@ -75,7 +75,8 @@ namespace InterlockLedger.Tags
                 mso.Position = 0;
                 var tagArray = TagProvider.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
-                CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.ToEncodedBytes());
+                CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
+
             } finally {
                 fi.Delete();
             }
@@ -137,9 +138,10 @@ namespace InterlockLedger.Tags
                 mso.Position = 0;
                 var tagArray = TagProvider.DeserializeFrom(mso);
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
-                CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.ToEncodedBytes());
+                CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
                 var fbba2 = new FileBackedByteArray(fi);
-                CollectionAssert.AreEqual(prefixedArrayBytes, fbba2.ToEncodedBytes());
+                using (var fs = fbba2.OpenReadingStream())
+                    CollectionAssert.AreEqual(prefixedArrayBytes, fs.ReadAllBytesAsync().Result);
                 Assert.AreEqual(arrayBytes.Length, fbba2.Length);
                 using var s = fbba2.ReadingStream;
                 var bytes = s.ReadAllBytesAsync().Result;

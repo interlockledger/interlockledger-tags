@@ -34,7 +34,6 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-
     public interface ITag : IFormatted
     {
         object AsJson { get; }

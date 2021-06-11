@@ -33,7 +33,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
 {
@@ -90,9 +89,6 @@ namespace InterlockLedger.Tags
         public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
         public string Description => Value.Description;
 
-        [JsonIgnore]
-        public byte[] EncodedBytes => _currentBytes ??= TagHelpers.ToBytesHelper(s => SerializeInto(s));
-
         byte[] IInterlockKeySecretData.Encrypted => Value.Encrypted;
         EncryptedContentType IInterlockKeySecretData.EncryptedContentType => EncryptedContentType.EncryptedKey;
         public BaseKeyId Id => Value.Id;
@@ -110,9 +106,7 @@ namespace InterlockLedger.Tags
             return stream.Decode<InterlockUpdatableSigningKeyData>();
         }
 
-        public void InvalidateBytes() => _currentBytes = null;
-
-        public override Stream OpenReadingStream() => new MemoryStream(EncodedBytes, writable: false);
+        public void InvalidateBytes() => Changed();
 
         public string ToShortString() => $"InterlockUpdatableSigningKey '{Name}' by {Identity}";
 
@@ -142,7 +136,9 @@ namespace InterlockLedger.Tags
         internal InterlockUpdatableSigningKeyData(Stream s) : base(ILTagId.InterlockUpdatableSigningKey, s) {
         }
 
-        protected override UpdatableParts DeserializeValueFromStream(StreamSpan s) {
+        protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
+
+        protected override UpdatableParts ValueFromStream(StreamSpan s) {
             var version = s.DecodeUShort();
             return new UpdatableParts {
                 Version = version,                                // Field index 0 //
@@ -159,24 +155,20 @@ namespace InterlockLedger.Tags
             };
         }
 
-        protected override void SerializeValueToStream(Stream s, UpdatableParts value) {
-            s.EncodeUShort(value.Version);                          // Field index 0 //
-            s.EncodeString(value.Name);                             // Field index 1 //
-            s.EncodeILIntArray(value.PurposesAsUlongs);             // Field index 2 //
-            s.EncodeInterlockId(value.Id);                          // Field index 3 //
-            s.EncodeInterlockId(value.Identity);                    // Field index 4 //
-            s.EncodeString(value.Description);                      // Field index 5 //
-            s.EncodeTag(value.PublicKey);                           // Field index 6 //
-            s.EncodeByteArray(value.Encrypted);                     // Field index 7 //
-            s.EncodeDateTimeOffset(value.LastSignatureTimeStamp);   // Field index 8 //
-            s.EncodeILInt(value.SignaturesWithCurrentKey);          // Field index 9 //
-            s.EncodeILInt((ulong)value.Strength);                   // Field index 10 //
+        protected override void ValueToStream(Stream s) {
+            s.EncodeUShort(Value.Version);                          // Field index 0 //
+            s.EncodeString(Value.Name);                             // Field index 1 //
+            s.EncodeILIntArray(Value.PurposesAsUlongs);             // Field index 2 //
+            s.EncodeInterlockId(Value.Id);                          // Field index 3 //
+            s.EncodeInterlockId(Value.Identity);                    // Field index 4 //
+            s.EncodeString(Value.Description);                      // Field index 5 //
+            s.EncodeTag(Value.PublicKey);                           // Field index 6 //
+            s.EncodeByteArray(Value.Encrypted);                     // Field index 7 //
+            s.EncodeDateTimeOffset(Value.LastSignatureTimeStamp);   // Field index 8 //
+            s.EncodeILInt(Value.SignaturesWithCurrentKey);          // Field index 9 //
+            s.EncodeILInt((ulong)Value.Strength);                   // Field index 10 //
         }
 
-        protected override ulong ValueEncodedLength(UpdatableParts value) => (ulong)(ToBytes(value)?.Length ?? 0);
-
-        private byte[] _currentBytes;
-
-        private byte[] ToBytes(UpdatableParts value) => TagHelpers.ToBytesHelper(s => SerializeValueToStream(s, value));
+        private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStream(s));
     }
 }

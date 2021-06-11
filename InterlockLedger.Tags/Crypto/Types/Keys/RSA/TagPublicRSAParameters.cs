@@ -35,7 +35,7 @@ using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-    public class TagPublicRSAParameters : ILTagExplicit<RSAParameters>, IMemoryBackedTag
+    public class TagPublicRSAParameters : ILTagExplicit<RSAParameters>
     {
         public TagPublicRSAParameters(RSAParameters parameters) : base(ILTagId.PublicRSAParameters, parameters) {
         }
@@ -49,7 +49,7 @@ namespace InterlockLedger.Tags
         });
 
         protected override byte[] ToBytes(RSAParameters value) => TagHelpers.ToBytesHelper(s =>
-            s.EncodeByteArray(value.Modulus)
-             .EncodeByteArray(value.Exponent));
+            s.EncodeByteArray(Value.Modulus)
+             .EncodeByteArray(Value.Exponent));
     }
 }

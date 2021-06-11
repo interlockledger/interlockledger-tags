@@ -93,7 +93,7 @@ namespace InterlockLedger.Tags
 
         [TestCase("Test", 1024ul, ExpectedResult = new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Serialize_One_Sequence_with_a_string_and_one_ilint")]
         public byte[] SerializeHeterogenousILTagSequence(string firstElement, ulong secondElement)
-            => new ILTagSequence(new ILTagString(firstElement), new ILTagILInt(secondElement)).ToEncodedBytes();
+            => new ILTagSequence(new ILTagString(firstElement), new ILTagILInt(secondElement)).EncodedBytes;
 
         [TestCase(null, new byte[0], ExpectedResult = new byte[] { 22, 0 }, TestName = "Serialize_a_Null_Sequence")]
         [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 22, 1, 0 }, TestName = "Serialize_an_Empty_Sequence")]
@@ -102,7 +102,7 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Sequences_with_Two_Bytes")]
         [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize_Two_Sequences_with_One_and_Three_Bytes")]
         public byte[] SerializeILTagSequence(byte[] bytes, byte[] splits)
-            => new ILTagSequence(BuildArrayOfArrays(bytes, splits)).ToEncodedBytes();
+            => new ILTagSequence(BuildArrayOfArrays(bytes, splits)).EncodedBytes;
 
         private static ILTagByteArray[] BuildArrayOfArrays(byte[] bytes, byte[] splits) {
             if (bytes == null)

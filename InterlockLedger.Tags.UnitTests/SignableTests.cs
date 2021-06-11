@@ -54,7 +54,7 @@ namespace InterlockLedger.Tags
 
         [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
         public byte[] SerializeSignable(ulong someILInt) {
-            var encodedBytes = new TestSignable(someILInt).AsPayload.ToEncodedBytes();
+            var encodedBytes = new TestSignable(someILInt).AsPayload.EncodedBytes;
             TestContext.WriteLine(encodedBytes.AsLiteral());
             return encodedBytes;
         }

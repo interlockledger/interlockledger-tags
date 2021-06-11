@@ -85,6 +85,6 @@ namespace InterlockLedger.Tags
         }
 
         protected override byte[] ToBytes(Version value)
-            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(value.Major).BigEndianWriteInt(value.Minor).BigEndianWriteInt(value.Build).BigEndianWriteInt(value.Revision));
+            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(Value.Major).BigEndianWriteInt(Value.Minor).BigEndianWriteInt(Value.Build).BigEndianWriteInt(Value.Revision));
     }
 }
