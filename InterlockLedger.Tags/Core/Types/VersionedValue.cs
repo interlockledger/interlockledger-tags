@@ -107,7 +107,10 @@ namespace InterlockLedger.Tags
 
         public class Payload : ILTagOfExplicit<T>, IVersion, INamed
         {
-            public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) => Traits.ValidateTagId(Value.TagId);
+            public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
+                Traits.ValidateTagId(Value.TagId);
+                Value._payload = this;
+            }
 
             public override object AsJson => Value.AsJson;
             protected override bool KeepEncodedBytesInMemory => Value.KeepEncodedBytesInMemory;
