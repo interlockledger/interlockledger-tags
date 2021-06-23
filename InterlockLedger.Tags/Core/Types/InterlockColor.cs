@@ -213,7 +213,7 @@ namespace InterlockLedger.Tags
         public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
 
         [JsonIgnore]
-        public string AsCSS => Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
+        public string AsCSS => Name is null || (Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7) ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
 
         public bool IsEmpty => false;
 
