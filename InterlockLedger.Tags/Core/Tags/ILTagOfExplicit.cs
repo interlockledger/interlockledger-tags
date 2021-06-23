@@ -50,6 +50,8 @@ namespace InterlockLedger.Tags
             : base(alreadyDeserializedTagId, s, setup) {
         }
 
+        protected static void SetLength(ITag it, ulong length) => ((ILTagOfExplicit<T>)it)._valueLength = length;
+
         protected virtual ulong CalcValueLength() {
             using var stream = new MemoryStream();
             ValueToStream(stream);
@@ -58,7 +60,7 @@ namespace InterlockLedger.Tags
         }
 
         protected sealed override T DeserializeInner(Stream s) {
-            _valueLength = s.ILIntDecode();
+            _valueLength ??= s.ILIntDecode();
             return (_valueLength <= int.MaxValue || !KeepEncodedBytesInMemory)
                 ? ValueFromStream(new StreamSpan(s, _valueLength.Value))
                 : throw new InvalidDataException("Tag content is TOO BIG to deserialize!");

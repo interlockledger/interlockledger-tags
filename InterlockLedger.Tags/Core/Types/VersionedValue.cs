@@ -33,6 +33,7 @@
 #nullable enable
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -77,12 +78,6 @@ namespace InterlockLedger.Tags
 
         public abstract T FromJson(object json);
 
-        public T FromStream(Stream s) {
-            Version = s.DecodeUShort(); // Field index 0 //
-            DecodeRemainingStateFrom(s);
-            return (T)this;
-        }
-
         public T FromUnknown(ILTagUnknown unknown) {
             if (unknown is null)
                 throw new ArgumentNullException(nameof(unknown));
@@ -100,35 +95,39 @@ namespace InterlockLedger.Tags
             => registrar.Required(nameof(registrar))
                 .RegisterILTag(TagId, s => new Payload(TagId, s), o => new T().FromJson(o).AsPayload);
 
-        public void ToStream(Stream s) {
-            s.EncodeUShort(Version);    // Field index 0 //
-            EncodeRemainingStateTo(s);
-        }
-
-        public class Payload : ILTagOfExplicit<T>, IVersion, INamed
+        public sealed class Payload : ILTagOfExplicit<T>, IVersion, INamed
         {
-            public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
-                Traits.ValidateTagId(Value.TagId);
-                Value._payload = this;
-            }
+            public Payload(ulong alreadyDeserializedTagId, Stream s)
+                : base(alreadyDeserializedTagId, s)
+                => Initialize();
+
+            public Payload(ulong alreadyDeserializedTagId, ReadOnlySequence<byte> bytes)
+                : base(alreadyDeserializedTagId, new ReadOnlySequenceStream(bytes), it => SetLength(it, (ulong)bytes.Length))
+                => Initialize();
 
             public override object AsJson => Value.AsJson;
+
             protected override bool KeepEncodedBytesInMemory => Value.KeepEncodedBytesInMemory;
+
             public string TypeName => typeof(T).Name;
+
             public ushort Version => Value.Version;
 
             public override string ToString() => Value?.ToString() ?? "?";
 
-            internal Payload(T Value) : base(Value.TagId, Value) {
+            internal Payload(T value) : base(value.Required(nameof(value)).TagId, value) {
             }
-
-            protected ulong? _valueLength;
 
             protected override ulong CalcValueLength() => Value.CalcValueLength();
 
             protected override T ValueFromStream(StreamSpan s) => new T().FromStream(s);
 
             protected override void ValueToStream(Stream s) => Value.ToStream(s);
+
+            private void Initialize() {
+                Traits.ValidateTagId(Value.TagId);
+                Value._payload = this;
+            }
         }
 
         protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);
@@ -167,7 +166,20 @@ namespace InterlockLedger.Tags
         protected abstract void EncodeRemainingStateTo(Stream s);
 
         private readonly Lazy<DataField> _fieldModel;
+
         private readonly Lazy<DataModel> _payloadDataModel;
+
         private Payload? _payload;
+
+        private T FromStream(Stream s) {
+            Version = s.DecodeUShort(); // Field index 0 //
+            DecodeRemainingStateFrom(s);
+            return (T)this;
+        }
+
+        private void ToStream(Stream s) {
+            s.EncodeUShort(Version);    // Field index 0 //
+            EncodeRemainingStateTo(s);
+        }
     }
 }

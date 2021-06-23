@@ -13,9 +13,9 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>9.1.5</Version>
+      <Version>9.1.6</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Avoid circular creation of VersionedValue.AsPayload if coming from deserialization</PackageReleaseNotes>
+      <PackageReleaseNotes>Payload construction tailored for ReadOnlySequence&lt;Byte&gt;</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
