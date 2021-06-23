@@ -13,13 +13,15 @@
       <Product>InterlockLedger</Product>
       <RepositoryType>git</RepositoryType>
       <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>9.1.6</Version>
+      <Version>9.1.7</Version>
       <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>Payload construction tailored for ReadOnlySequence&lt;Byte&gt;</PackageReleaseNotes>
+      <PackageReleaseNotes>More resiliency on ILTagArryOfILTag deserialization</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
       <None Include="..\LICENSE">

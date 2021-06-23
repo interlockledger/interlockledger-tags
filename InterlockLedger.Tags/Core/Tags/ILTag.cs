@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+using System;
 using System.IO;
 using System.Text.Json.Serialization;
 
@@ -53,7 +54,12 @@ namespace InterlockLedger.Tags
 
         public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
-        public void Changed() => _encodedBytes = null;
+        public void Changed() {
+            _encodedBytes = null;
+            OnChanged();
+        }
+
+        protected virtual void OnChanged() { }
 
         public virtual Stream OpenReadingStream() {
             if (KeepEncodedBytesInMemory)

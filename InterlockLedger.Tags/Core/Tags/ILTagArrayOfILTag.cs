@@ -47,7 +47,7 @@ namespace InterlockLedger.Tags
 
         public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
 
-        internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s, null) {
+        internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
         }
 
         internal ILTagArrayOfILTag(Stream s, Func<Stream, T> decoder) :
@@ -85,14 +85,14 @@ namespace InterlockLedger.Tags
         }
 
         protected override T[] ValueFromStream(StreamSpan s) {
-            if (s.HasBytes()) {
+            if (s.Length > 0) {
                 var arrayLength = (int)s.ILIntDecode();
                 var array = new T[arrayLength];
                 for (var i = 0; i < arrayLength; i++) {
                     array[i] = _decoder(s);
                 }
                 return array;
-            };
+            }
             return null;
         }
 
@@ -106,7 +106,7 @@ namespace InterlockLedger.Tags
 
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
 
-        private static T AllowNull(ILTag tag) => tag.Traits.IsNull ? default : (T)tag;
+        private static T AllowNull(ILTag tag) => (tag.Traits.IsNull || tag is not T) ? default : (T)tag;
 
         private class JsonRepresentation
         {

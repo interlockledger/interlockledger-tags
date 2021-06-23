@@ -59,11 +59,14 @@ namespace InterlockLedger.Tags
             return (ulong)stream.ToArray().Length;
         }
 
-        protected sealed override T DeserializeInner(Stream s) {
-            _valueLength ??= s.ILIntDecode();
-            return (_valueLength <= int.MaxValue || !KeepEncodedBytesInMemory)
-                ? ValueFromStream(new StreamSpan(s, _valueLength.Value))
-                : throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
+        protected sealed override T DeserializeInner(Stream s)
+            => (_valueLength ??= s.ILIntDecode()) > int.MaxValue && KeepEncodedBytesInMemory
+                ? throw new InvalidDataException("Tag content is TOO BIG to deserialize!")
+                : ValueFromStream(new StreamSpan(s, _valueLength.Value));
+
+        protected sealed override void OnChanged() {
+            base.OnChanged();
+            _valueLength = null;
         }
 
         protected sealed override void SerializeInner(Stream s) {

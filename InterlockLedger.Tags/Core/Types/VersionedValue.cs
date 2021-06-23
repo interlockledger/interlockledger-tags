@@ -125,8 +125,10 @@ namespace InterlockLedger.Tags
             protected override void ValueToStream(Stream s) => Value.ToStream(s);
 
             private void Initialize() {
-                Traits.ValidateTagId(Value.TagId);
-                Value._payload = this;
+                if (Value is not null) {
+                    Traits.ValidateTagId(Value.TagId);
+                    Value._payload = this;
+                }
             }
         }
 
@@ -166,9 +168,7 @@ namespace InterlockLedger.Tags
         protected abstract void EncodeRemainingStateTo(Stream s);
 
         private readonly Lazy<DataField> _fieldModel;
-
         private readonly Lazy<DataModel> _payloadDataModel;
-
         private Payload? _payload;
 
         private T FromStream(Stream s) {
