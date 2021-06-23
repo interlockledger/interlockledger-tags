@@ -62,6 +62,12 @@ namespace InterlockLedger.Tags
         public abstract string Formatted { get; }
 
         [JsonIgnore]
+        public bool Incomplete => !string.IsNullOrWhiteSpace(IncompletenessReason);
+
+        [JsonIgnore]
+        public string? IncompletenessReason { get; private set; }
+
+        [JsonIgnore]
         public virtual bool KeepEncodedBytesInMemory => true;
 
         [JsonIgnore]
@@ -74,7 +80,7 @@ namespace InterlockLedger.Tags
 
         public ushort Version { get; set; }
 
-        public void Changed() => _payload = null;
+        public void Changed() => _payload?.Changed();
 
         public abstract T FromJson(object json);
 
@@ -172,8 +178,12 @@ namespace InterlockLedger.Tags
         private Payload? _payload;
 
         private T FromStream(Stream s) {
-            Version = s.DecodeUShort(); // Field index 0 //
-            DecodeRemainingStateFrom(s);
+            try {
+                Version = s.DecodeUShort(); // Field index 0 //
+                DecodeRemainingStateFrom(s);
+            } catch (Exception e) {
+                IncompletenessReason = e.ToString();
+            }
             return (T)this;
         }
 

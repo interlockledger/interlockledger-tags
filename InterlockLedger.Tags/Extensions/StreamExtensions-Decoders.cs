@@ -59,7 +59,7 @@ namespace InterlockLedger.Tags
         public static T[] DecodeArray<T>(this Stream s) where T : class, ITaggableOf<T> {
             var tagId = s.DecodeTagId();
             return tagId == ILTagId.ILTagArray
-                ? (new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s).Value?.Select(element => element.Value).ToArray())
+                ? (new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s).Value?.Select(element => element?.Value).ToArray())
                 : throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagOfExplicit<T>>).Name}");
         }
 
