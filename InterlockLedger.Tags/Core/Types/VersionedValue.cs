@@ -85,9 +85,7 @@ namespace InterlockLedger.Tags
         public abstract T FromJson(object json);
 
         public T FromUnknown(ILTagUnknown unknown) {
-            if (unknown is null)
-                throw new ArgumentNullException(nameof(unknown));
-            if (unknown.TagId != TagId)
+            if (unknown.Required(nameof(unknown)).TagId != TagId)
                 throw new InvalidCastException($"Wrong tagId! Expecting {TagId} but came {unknown.TagId}");
             if (unknown.Value.None())
                 throw new ArgumentException("Empty tagged value not expected!", nameof(unknown));
