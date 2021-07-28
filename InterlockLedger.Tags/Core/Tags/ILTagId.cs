@@ -73,8 +73,6 @@ namespace InterlockLedger.Tags
 
         public const ulong Signature = 38;  //                          The signature data
         public const ulong Hash = 39;       //                          The hash data
-        public const ulong PublicRSAParameters = 40;
-        public const ulong RSAParameters = 41;
         public const ulong Encrypted = 42;
         public const ulong InterlockId = 43; //                         The interlock id
         public const ulong InterlockKey = 44; //                        Per Usage Verifiying Key
@@ -91,6 +89,15 @@ namespace InterlockLedger.Tags
         public const ulong InterlockKeyAppPermission = 56;
         public const ulong EncryptedText = 57;
 
+        // RSA
+        public const ulong PublicRSAParameters = 40;
+        public const ulong RSAParameters = 41;
+        // ECDSA
+        public const ulong PublicECParameters = 58;
+        public const ulong ECParameters = 59;
+
+        // ********** Free range 60-126 **************
+        
         // Metadata
         public const ulong DataField = 225;         //  DataField for Published Apps Records
 

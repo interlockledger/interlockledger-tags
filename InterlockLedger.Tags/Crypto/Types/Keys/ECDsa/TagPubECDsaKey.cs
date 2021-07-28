@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,39 +30,44 @@
 //
 // ******************************************************************************************************************************
 
-using System;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-    public static class RSAExtensions
+    public class TagPubECDsaKey : TagPubKey
     {
-        //  enum KeyStrength
-        //  Normal = 0,         // RSA 2048
-        //  Strong = 1,         // RSA 3072
-        //  ExtraStrong = 2,    // RSA 4096
-        //  MegaStrong = 3,     // RSA 5120
-        //  SuperStrong = 4,    // RSA 6144
-        //  HyperStrong = 5,    // RSA 7172
-        //  UltraStrong = 6     // RSA 8192
+        public readonly ECParameters Parameters;
 
-        public static KeyStrength KeyStrengthGuess(this RSA key) => Guess(key.Required(nameof(key)).KeySize);
+        public TagPubECDsaKey(ECParameters parameters) : this(EncodeParameters(parameters)) {
+        }
 
-        public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
+        public override KeyStrength Strength {
+            get {
+                using var ECDsaalg = new ECDsaCryptoServiceProvider();
+                ECDsaalg.ImportParameters(Parameters);
+                return ECDsaalg.KeyStrengthGuess();
+            }
+        }
 
-        private static KeyStrength Guess(int size)
-            => size <= 2048
-                ? KeyStrength.Normal
-                : size <= 3072
-                    ? KeyStrength.Strong
-                    : size <= 4096
-                        ? KeyStrength.ExtraStrong
-                        : size <= 5120
-                            ? KeyStrength.MegaStrong
-                            : size <= 6144
-                                ? KeyStrength.SuperStrong
-                                : size <= 7172
-                                    ? KeyStrength.HyperStrong
-                                    : KeyStrength.UltraStrong;
+        public override byte[] Encrypt(byte[] bytes) => ECDsaHelper.Encrypt(bytes, Parameters);
+
+        public override bool Verify<T>(T data, TagSignature signature)
+            => ECDsaHelper.Verify(data, signature, Parameters);
+
+        public override bool Verify(byte[] data, TagSignature signature)
+            => ECDsaHelper.Verify(data, signature, Parameters);
+
+        internal TagPubECDsaKey(byte[] data) : base(Algorithm.ECDsa, data) => Parameters = DecodeParameters(Data);
+
+        private static ECParameters DecodeParameters(byte[] bytes) {
+            if (bytes == null || bytes.Length == 0)
+                return default;
+            using var s = new MemoryStream(bytes);
+            return s.Decode<TagPublicECDsaParameters>().Value;
+        }
+
+        private static byte[] EncodeParameters(ECParameters parameters)
+            => new TagPublicECDsaParameters(parameters).EncodedBytes;
     }
 }
