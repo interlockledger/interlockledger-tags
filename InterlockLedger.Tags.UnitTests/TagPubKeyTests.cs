@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,17 +30,33 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
 using NUnit.Framework;
+using System;
+using System.IO;
 
 namespace InterlockLedger.Tags
 {
     [TestFixture]
     public class TagPubKeyTests
     {
+        [Test]
+        public void CreateECKeySerializeDeserializeSignAndVerify() {
+            var parameters = ECDsaHelper.CreateNewECDsaParameters(KeyStrength.Strong);
+            var key = new TagPubECKey(parameters);
+            var bytes = key.EncodedBytes;
+            TestContext.WriteLine(bytes.AsLiteral());
+            using var ms = new MemoryStream(bytes);
+            var tag = ms.Decode<TagPubKey>();
+            Assert.NotNull(tag);
+            Assert.AreEqual(key, tag);
+            CollectionAssert.AreEqual(bytes, tag.EncodedBytes);
+            var signatureBytes = ECDsaHelper.HashAndSign(bytes, parameters.Parameters, parameters.HashAlgorithm.ToName());
+            var signature = new TagSignature(Algorithm.EcDSA, signatureBytes);
+            Assert.IsTrue(key.Verify(bytes, signature), "Signature failed!");
+        }
+
         [TestCase(new byte[] { 37, 4, 4, 0, 0, 0 }, Algorithm.EcDSA, new byte[] { 0, 0 })]
         [TestCase(new byte[] { 37, 8, 0, 0, 40, 4, 16, 0, 16, 0 }, Algorithm.RSA, new byte[] { 40, 4, 16, 0, 16, 0 })]
-        [TestCase(new byte[] { 37, 2, 3, 0 }, Algorithm.ElGamal, new byte[] { })]
         public void NewTagPubKeyFromStream(byte[] bytes, Algorithm algorithm, byte[] data) {
             using var ms = new MemoryStream(bytes);
             var tag = ms.Decode<TagPubKey>();

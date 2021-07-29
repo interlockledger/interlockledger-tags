@@ -38,59 +38,31 @@ namespace InterlockLedger.Tags
 {
     public static class ECDsaHelper
     {
-        public static TagECParameters CreateNewECDsaParameters(KeyStrength strength) {
-            var keySize = strength.ECDsaKeySize();
+        public static ECDsaParameters CreateNewECDsaParameters(KeyStrength strength) {
             using var provider = ECDsa.Create();
-            return new TagECParameters(provider.ExportParameters(true), strength);
+            provider.GenerateKey(ECCurve.NamedCurves.brainpoolP192r1);
+            return new ECDsaParameters(provider.ExportParameters(true));
         }
 
-        public static byte[] Decrypt(byte[] data, ECParameters Key) {
+        public static byte[] HashAndSign(byte[] data, ECParameters parameters, HashAlgorithmName hashName) {
             int retries = _maxRetries;
             while (true)
                 try {
-                    using var ECDsaalg = OpenWith(Key);
-                    try {
-                        return ECDsaalg.Decrypt(data, true);
-                    } catch (CryptographicException) {
-                        return ECDsaalg.Decrypt(data, false);
-                    }
-                } catch (CryptographicException e) {
-                    if (retries-- <= 0)
-                        throw new InterlockLedgerCryptographicException($"Failed to decrypt data with current parameters after {_maxRetries} retries", e);
-                }
-        }
-
-        public static byte[] Encrypt(byte[] data, ECParameters Key) {
-            int retries = _maxRetries;
-            while (true)
-                try {
-                    var ECDsaalg = OpenWith(Key);
-                    return ECDsaalg.Encrypt(data, true);
-                } catch (CryptographicException e) {
-                    if (retries-- <= 0)
-                        throw new InterlockLedgerCryptographicException($"Failed to encrypt data with current parameters after {_maxRetries} retries", e);
-                }
-        }
-
-        public static byte[] HashAndSign(byte[] data, ECParameters parameters) {
-            int retries = _maxRetries;
-            while (true)
-                try {
-                    using var ECDsaalg = OpenWith(parameters);
-                    return ECDsaalg.SignData(data, HashAlgorithmName.SHA256);
+                    using var algo = OpenWith(parameters);
+                    return algo.SignData(data, hashName);
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
                         throw new InterlockLedgerCryptographicException($"Failed to sign data with current parameters after {_maxRetries} retries", e);
                 }
         }
 
-        public static byte[] HashAndSignBytes<T>(T dataToSign, ECParameters parameters) where T : Signable<T>, new() {
+        public static byte[] HashAndSignBytes<T>(T dataToSign, ECParameters parameters, HashAlgorithmName hashName) where T : Signable<T>, new() {
             int retries = _maxRetries;
             while (true)
                 try {
-                    using var ECDsaalg = OpenWith(parameters);
+                    using var algo = OpenWith(parameters);
                     using var dataStream = dataToSign.OpenReadingStream();
-                    return ECDsaalg.SignData(dataStream, HashAlgorithmName.SHA256);
+                    return algo.SignData(dataStream, hashName);
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
                         throw new InterlockLedgerCryptographicException($"Failed to sign data with current parameters after {_maxRetries} retries", e);
@@ -121,8 +93,8 @@ namespace InterlockLedger.Tags
                     throw new InvalidDataException($"Signature uses different algorithm {signature.Algorithm} from this ECDsa key!");
                 if (parameters.D == null)
                     throw new InvalidDataException($"This ECDsa key is not properly configured to be able to verify a signature!");
-                using var ECDsaalg = OpenWith(parameters);
-                return ECDsaalg.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256);
+                using var algo = OpenWith(parameters);
+                return algo.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256);
             } catch (CryptographicException e) {
                 throw new InterlockLedgerCryptographicException("Failed to verify data with current parameters and signature", e);
             }

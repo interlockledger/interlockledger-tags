@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using System.IO;
+using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 
 namespace InterlockLedger.Tags
@@ -42,7 +44,20 @@ namespace InterlockLedger.Tags
         SHA512 = 2,
         SHA3_256 = 3,
         SHA3_512 = 4,
+        SHA384 = 5,
 
         Copy = 0xFFFF
+
+    }
+
+    public static class HashAlgorithmExtensions
+    {
+        public static HashAlgorithmName ToName(this HashAlgorithm value) => value switch {
+            HashAlgorithm.SHA1 => HashAlgorithmName.SHA1,
+            HashAlgorithm.SHA256 => HashAlgorithmName.SHA256,
+            HashAlgorithm.SHA512 => HashAlgorithmName.SHA512,
+            HashAlgorithm.SHA384 => HashAlgorithmName.SHA384,
+            _ => throw new InvalidDataException()
+        };
     }
 }

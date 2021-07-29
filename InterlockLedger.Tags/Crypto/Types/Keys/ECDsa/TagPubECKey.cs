@@ -29,45 +29,39 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
+#nullable enable
 
+using System;
 using System.IO;
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
-    public class TagPubECDsaKey : TagPubKey
+    public class TagPubECKey : TagPubKey
     {
-        public readonly ECParameters Parameters;
+        public TagPubECKey(ECDsaParameters parameters) : base(Algorithm.EcDSA, parameters.EncodedPublicBytes) => _kp = parameters;
 
-        public TagPubECDsaKey(ECParameters parameters) : this(EncodeParameters(parameters)) {
-        }
+        public override KeyStrength Strength => _kp.Strength;
 
-        public override KeyStrength Strength {
-            get {
-                using var ECDsaalg = new ECDsaCryptoServiceProvider();
-                ECDsaalg.ImportParameters(Parameters);
-                return ECDsaalg.KeyStrengthGuess();
-            }
-        }
-
-        public override byte[] Encrypt(byte[] bytes) => ECDsaHelper.Encrypt(bytes, Parameters);
+        public override byte[] Encrypt(byte[] bytes) => throw new InvalidOperationException("ECDsa does not permit encryption");
+        // ECDsaHelper.Encrypt(bytes, _kp.Parameters);
 
         public override bool Verify<T>(T data, TagSignature signature)
-            => ECDsaHelper.Verify(data, signature, Parameters);
+            => ECDsaHelper.Verify(data, signature, _kp.Parameters);
 
         public override bool Verify(byte[] data, TagSignature signature)
-            => ECDsaHelper.Verify(data, signature, Parameters);
+            => ECDsaHelper.Verify(data, signature, _kp.Parameters);
 
-        internal TagPubECDsaKey(byte[] data) : base(Algorithm.ECDsa, data) => Parameters = DecodeParameters(Data);
-
-        private static ECParameters DecodeParameters(byte[] bytes) {
-            if (bytes == null || bytes.Length == 0)
-                return default;
-            using var s = new MemoryStream(bytes);
-            return s.Decode<TagPublicECDsaParameters>().Value;
+        internal TagPubECKey(ECParameters parameters) : this(new ECDsaParameters(parameters)) {
         }
 
-        private static byte[] EncodeParameters(ECParameters parameters)
-            => new TagPublicECDsaParameters(parameters).EncodedBytes;
+        internal static TagPubECKey From(byte[] data) => new(data.Required(nameof(data)));
+
+        protected TagPubECKey(byte[] data) : base(Algorithm.EcDSA, data) {
+            using var ms = new MemoryStream(data);
+            _kp = new ECDsaParameters().DecodeFrom(ms);
+        }
+
+        private readonly ECDsaParameters _kp;
     }
 }

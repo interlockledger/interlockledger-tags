@@ -63,25 +63,23 @@ namespace InterlockLedger.Tags
 
         public static TagPubKey Resolve(X509Certificate2 certificate) {
             var RSA = certificate.GetRSAPublicKey();
-            if (RSA != null)
-                return new TagPubRSAKey(RSA.ExportParameters(false));
             var ECDsa = certificate.GetECDsaPublicKey();
-            if (ECDsa == null)
-                throw new NotSupportedException("Only support RSA certificates for now!!!");
-            throw new NotSupportedException("Not yet supporting ECDsa certificates!");
+            return RSA != null
+                ? new TagPubRSAKey(RSA.ExportParameters(false))
+                : ECDsa == null
+                    ? new TagPubECKey(ECDsa.ExportParameters(false))
+                    : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
         }
 
         public static TagPubKey Resolve(string textualRepresentation) {
             if (string.IsNullOrWhiteSpace(textualRepresentation))
                 throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
             var parts = textualRepresentation.Split('!', '#');
-            if (parts.Length != 3 || (!parts[0].Equals("PubKey", StringComparison.OrdinalIgnoreCase)) || !Enum.TryParse(parts[2], out Algorithm algorithm))
-                throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation));
-            if (algorithm == Algorithm.RSA)
-                return new TagPubRSAKey(parts[1].FromSafeBase64());
-            if (algorithm == Algorithm.EcDSA)
-                throw new NotSupportedException("Not yet supporting EcDSA certificates!");
-            throw new NotSupportedException("Only support RSA certificates for now!!!");
+            return parts.Length != 3
+                   || (!parts[0].Equals("PubKey", StringComparison.OrdinalIgnoreCase))
+                   || !Enum.TryParse(parts[2], ignoreCase: true, out Algorithm algorithm)
+                ? throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation))
+                : ResolveAs(algorithm, parts[1].FromSafeBase64());
         }
 
         public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
@@ -95,11 +93,12 @@ namespace InterlockLedger.Tags
         public override string ToString() => TextualRepresentation;
 
         public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
+
         public virtual bool Verify(byte[] data, TagSignature signature) => false;
 
         internal static TagPubKey Resolve(Stream s) {
             var pubKey = new TagPubKey(s);
-            return pubKey.Algorithm == Algorithm.RSA ? new TagPubRSAKey(pubKey.Data) : pubKey;
+            return ResolveAs(pubKey.Algorithm, pubKey.Data);
         }
 
         protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) {
@@ -114,6 +113,13 @@ namespace InterlockLedger.Tags
 
         private TagPubKey(Stream s) : base(ILTagId.PubKey, s) {
         }
+
+        private static TagPubKey ResolveAs(Algorithm algorithm, byte[] data)
+            => algorithm switch {
+                Algorithm.RSA => new TagPubRSAKey(data),
+                Algorithm.EcDSA => TagPubECKey.From(data),
+                _ => throw new NotSupportedException("Only support RSA/EcDSA certificates for now!!!")
+            };
     }
 
     public class TagPubKeyConverter : TypeConverter

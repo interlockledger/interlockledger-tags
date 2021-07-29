@@ -52,12 +52,12 @@ namespace InterlockLedger.Tags
 
         private static KeyStrength Guess(int size)
             => size <= 192
-                ? KeyStrength.Normal                                        
-                : size <= 256                                              
-                    ? KeyStrength.Strong                                    
-                    : size <= 320                                          
-                        ? KeyStrength.ExtraStrong                           
-                        : size <= 384                                      
+                ? KeyStrength.Normal
+                : size <= 256
+                    ? KeyStrength.Strong
+                    : size <= 320
+                        ? KeyStrength.ExtraStrong
+                        : size <= 384
                             ? KeyStrength.MegaStrong
                             : size <= 448
                                 ? KeyStrength.SuperStrong

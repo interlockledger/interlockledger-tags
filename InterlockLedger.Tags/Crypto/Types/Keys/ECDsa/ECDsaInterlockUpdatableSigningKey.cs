@@ -32,6 +32,7 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags
 {
@@ -39,7 +40,7 @@ namespace InterlockLedger.Tags
     {
         public ECDsaInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper) : base(tag, timeStamper) {
             using var ms = new MemoryStream(decrypted);
-            _keyParameters = ms.Decode<TagECParameters>();
+            _keyParameters = ms.DecodeAny<ECDsaParameters>();
         }
 
         public override TagPubKey NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
@@ -49,15 +50,15 @@ namespace InterlockLedger.Tags
         public override void GenerateNextKeys() => _nextKeyParameters = ECDsaHelper.CreateNewECDsaParameters(_data.Strength);
 
         public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null)
-            => Update(encrypt, ECDsaHelper.HashAndSign(data, _keyParameters.Value.Parameters));
+            => Update(encrypt, ECDsaHelper.HashAndSign(data, _keyParameters.Parameters, HashAlgorithmName.SHA256));
 
         public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null)
-            => Update(encrypt, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
+            => Update(encrypt, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Parameters, HashAlgorithmName.SHA256));
 
-        private readonly bool _destroyKeysAfterSigning;
+        private bool _destroyKeysAfterSigning;
 
-        private readonly TagECParameters _keyParameters;
-        private readonly TagECParameters _nextKeyParameters;
+        private ECDsaParameters _keyParameters;
+        private ECDsaParameters _nextKeyParameters;
 
         private TagSignature Update(Func<byte[], byte[]> encrypt, byte[] signatureData) {
             if (_destroyKeysAfterSigning) {
@@ -66,9 +67,7 @@ namespace InterlockLedger.Tags
                 _data.Value.Encrypted = null;
                 _data.Value.PublicKey = null;
             } else {
-                var encryptionHandler = encrypt;
-                if (encryptionHandler == null)
-                    throw new ArgumentNullException(nameof(encrypt));
+                var encryptionHandler = encrypt.Required(nameof(encrypt));
                 if (_nextKeyParameters != null) {
                     _keyParameters = _nextKeyParameters;
                     _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
@@ -81,7 +80,7 @@ namespace InterlockLedger.Tags
                 _data.LastSignatureTimeStamp = _timeStamper.Now;
             }
             _data.Changed();
-            return new TagSignature(Algorithm.ECDsa, signatureData);
+            return new TagSignature(Algorithm.EcDSA, signatureData);
         }
     }
 }

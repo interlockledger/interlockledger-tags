@@ -97,7 +97,7 @@ namespace InterlockLedger.Tags
         public const ulong ECParameters = 59;
 
         // ********** Free range 60-126 **************
-        
+
         // Metadata
         public const ulong DataField = 225;         //  DataField for Published Apps Records
 
