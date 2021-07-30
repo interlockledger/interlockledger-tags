@@ -40,8 +40,9 @@ namespace InterlockLedger.Tags
     {
         public static ECDsaParameters CreateNewECDsaParameters(KeyStrength strength) {
             using var provider = ECDsa.Create();
-            provider.GenerateKey(ECCurve.NamedCurves.brainpoolP192r1);
-            return new ECDsaParameters(provider.ExportParameters(true));
+            var curve = ECDsaParameters.ChooseCurve(strength);
+            provider.GenerateKey(curve);
+            return new ECDsaParameters(provider.ExportParameters(true), strength, ECDsaParameters.ChooseHashAlgo(curve));
         }
 
         public static byte[] HashAndSign(byte[] data, ECParameters parameters, HashAlgorithmName hashName) {
@@ -94,7 +95,7 @@ namespace InterlockLedger.Tags
                 if (parameters.D == null)
                     throw new InvalidDataException($"This ECDsa key is not properly configured to be able to verify a signature!");
                 using var algo = OpenWith(parameters);
-                return algo.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256);
+                return algo.VerifyData(dataStream, signature.Data, ECDsaParameters.ChooseHashAlgo(parameters.Curve).ToName());
             } catch (CryptographicException e) {
                 throw new InterlockLedgerCryptographicException("Failed to verify data with current parameters and signature", e);
             }

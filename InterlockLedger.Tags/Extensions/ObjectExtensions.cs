@@ -43,6 +43,8 @@ namespace InterlockLedger.Tags
 {
     public static class ObjectExtensions
     {
+        public static string AsJson<T>(this T json) => JsonSerializer.Serialize<T>(json, StringExtensions._jsonOptions);
+
         public static object? AsNavigable(this object? value)
             => value switch {
                 null => null,

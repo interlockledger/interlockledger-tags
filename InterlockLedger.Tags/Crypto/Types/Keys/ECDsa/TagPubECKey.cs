@@ -59,7 +59,7 @@ namespace InterlockLedger.Tags
 
         protected TagPubECKey(byte[] data) : base(Algorithm.EcDSA, data) {
             using var ms = new MemoryStream(data);
-            _kp = new ECDsaParameters().DecodeFrom(ms);
+            _kp = ms.DecodeAny<ECDsaParameters>();
         }
 
         private readonly ECDsaParameters _kp;

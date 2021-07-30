@@ -126,6 +126,7 @@ namespace InterlockLedger.Tags
             [ILTagId.EncryptedBlob] = (s => new EncryptedBlob.Payload(ILTagId.EncryptedBlob, s), NoJson),
             [ILTagId.InterlockKeyAppPermission] = (s => new AppPermissions.Tag(s), NoJson),
             [ILTagId.EncryptedText] = (s => new EncryptedText.Payload(ILTagId.EncryptedText, s), NoJson),
+            [ILTagId.ECParameters] = (s => new ECDsaParameters.Payload(ILTagId.ECParameters, s), NoJson),
             [ILTagId.DataModel] = (s => new ILTagDataModel(s), NoJson),
             [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),
             [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),

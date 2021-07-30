@@ -93,10 +93,9 @@ namespace InterlockLedger.Tags
         public const ulong PublicRSAParameters = 40;
         public const ulong RSAParameters = 41;
         // ECDSA
-        public const ulong PublicECParameters = 58;
-        public const ulong ECParameters = 59;
+        public const ulong ECParameters = 58;
 
-        // ********** Free range 60-126 **************
+        // ********** Free range 59-126 **************
 
         // Metadata
         public const ulong DataField = 225;         //  DataField for Published Apps Records
