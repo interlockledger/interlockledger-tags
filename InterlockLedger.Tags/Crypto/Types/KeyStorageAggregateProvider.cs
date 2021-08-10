@@ -76,7 +76,8 @@ namespace InterlockLedger.Tags
         public InterlockSigningKeyData Import(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password)
             => FindProviderFor(ksp => ksp.SupportsCertificateImport, "certificate import").Import(purposes, permissions, certificateBytes, password);
 
-        public InterlockSigningKey Open(InterlockSigningKeyData key, string password) => key is null
+        public InterlockSigningKey Open(InterlockSigningKeyData key, string password)
+            => key is null
                 ? throw new ArgumentNullException(nameof(key))
                 : FindProviderFor(key.PublicKey.Algorithm, _ => true).Open(key, password);
 
