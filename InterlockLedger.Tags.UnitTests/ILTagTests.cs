@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -54,6 +54,13 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = 503, TestName = "AsILInt_503")]
         [TestCase(new byte[] { 10, 32 }, ExpectedResult = 32, TestName = "AsILInt_32")]
         public ulong AsILInt(byte[] bytes) => ((ILTagILInt)TagProvider.DeserializeFrom(new MemoryStream(bytes))).Value;
+
+        [TestCase(new byte[] { 14, 0xF9, 1, 0 }, ExpectedResult = 252, TestName = "AsILIntSigned_252")]
+        [TestCase(new byte[] { 14, 0xF8, 0xFF }, ExpectedResult = -252, TestName = "AsILIntSigned_Minus252")]
+        [TestCase(new byte[] { 14, 32 }, ExpectedResult = 16, TestName = "AsILIntSigned_16")]
+        [TestCase(new byte[] { 14, 31 }, ExpectedResult = -16, TestName = "AsILIntSigned_Minus16")]
+        [TestCase(new byte[] { 14, 0 }, ExpectedResult = 0, TestName = "AsILIntSigned_Zero")]
+        public long AsILIntSigned(byte[] bytes) => ((ILTagILIntSigned)TagProvider.DeserializeFrom(new MemoryStream(bytes))).Value;
 
         [TestCase(new byte[] { 6, 255, 255, 255, 255 }, ExpectedResult = -1, TestName = "AsInt_1")]
         [TestCase(new byte[] { 6, 0, 0, 0, 1 }, ExpectedResult = 0x01000000, TestName = "AsInt_0x01000000")]
@@ -137,6 +144,7 @@ namespace InterlockLedger.Tags
         [TestCase(new byte[] { 8, 1, 2, 3, 4, 5, 6, 7, 8 }, ExpectedResult = ILTagId.Int64, TestName = "DeserializeFrom_Int64")]
         [TestCase(new byte[] { 9, 1, 2, 3, 4, 5, 6, 7, 8 }, ExpectedResult = ILTagId.UInt64, TestName = "DeserializeFrom_UInt64")]
         [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = ILTagId.ILInt, TestName = "DeserializeFrom_ILInt")]
+        [TestCase(new byte[] { 14, 0xF8, 0xFF }, ExpectedResult = ILTagId.ILIntSigned, TestName = "DeserializeFrom_ILIntSigned")]
         [TestCase(new byte[] { 16, 1, 2 }, ExpectedResult = ILTagId.ByteArray, TestName = "DeserializeFrom_ByteArray")]
         [TestCase(new byte[] { 17, 2, 65, 66 }, ExpectedResult = ILTagId.String, TestName = "DeserializeFrom_String")]
         [TestCase(new byte[] { 20, 0 }, ExpectedResult = ILTagId.ILIntArray, TestName = "DeserializeFrom_ILIntArray_Null")]
@@ -154,6 +162,9 @@ namespace InterlockLedger.Tags
             ITag tag = TagProvider.DeserializeFrom(new MemoryStream(bytes));
             return tag.IsNull && !tag.ValueIs<object>(out _);
         }
+
+        [TestCase(252, ExpectedResult = new byte[] { 14, 0xF9, 1, 0 })]
+        public byte[] SerializeILIntSigned(long value) => new ILTagILIntSigned(value).EncodedBytes;
 
         [TestCase(null, ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt_null")]
         [TestCase(new ulong[0], ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt")]

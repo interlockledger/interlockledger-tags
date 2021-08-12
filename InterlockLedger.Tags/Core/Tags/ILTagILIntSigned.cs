@@ -36,23 +36,23 @@ using System.IO;
 
 namespace InterlockLedger.Tags
 {
-    public class ILTagILInt : ILTagOfImplicit<ulong>, IEquatable<ILTagILInt>
+    public class ILTagILIntSigned : ILTagOfImplicit<long>, IEquatable<ILTagILIntSigned>
     {
-        public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
+        public ILTagILIntSigned(long value) : base(ILTagId.ILIntSigned, value) {
         }
 
         public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
 
-        public override bool Equals(object obj) => Equals(obj as ILTagILInt);
+        public override bool Equals(object obj) => Equals(obj as ILTagILIntSigned);
 
-        public bool Equals(ILTagILInt other) => other != null && Value == other.Value;
+        public bool Equals(ILTagILIntSigned other) => other != null && Value == other.Value;
 
         public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
 
-        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+        internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
+        protected override long ValueFromStream(StreamSpan s) => s.ILIntDecode().AsSignedILInt();
 
-        protected override void ValueToStream(Stream s) => s.ILIntEncode(Value);
+        protected override void ValueToStream(Stream s) => s.ILIntEncode(Value.AsUnsignedILInt());
     }
 }

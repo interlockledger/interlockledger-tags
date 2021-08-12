@@ -50,6 +50,7 @@ namespace InterlockLedger.Tags
         public const ulong Binary32 = 11;   // length in bytes = 4	    32-bit floating point.
         public const ulong Binary64 = 12;   // length in bytes = 8	    64-bit floating point.
         public const ulong Binary128 = 13;  // length in bytes = 16     128-bit floating point.
+        public const ulong ILIntSigned = 14;// length in bytes = 1-9    An ILIntSigned value.
 
         // Explicit
         public const ulong ByteArray = 16;          //                  A raw byte array.
