@@ -75,7 +75,7 @@ namespace InterlockLedger.Tags
         public static Stream EncodeInt(this Stream s, int value)
             => s.EncodeTag(new ILTagInt32(value));
 
-        public static Stream EncodeNull(this Stream s) => ILTagNull.Instance.SerializeInto(s);
+        public static Stream EncodeNull(this Stream s) => ILTagNull.Instance.SerializeIntoAsync(s).Result;
 
         public static Stream EncodeOptionalILInt(this Stream s, ulong? optionalValue)
             => (optionalValue.HasValue) ? s.EncodeILInt(optionalValue.Value) : s.EncodeNull();
@@ -90,7 +90,7 @@ namespace InterlockLedger.Tags
             => s.EncodeTag(new ILTagString(value));
 
         public static Stream EncodeTag(this Stream s, ILTag tag)
-            => tag == null ? s.EncodeNull() : tag.SerializeInto(s);
+            => tag == null ? s.EncodeNull() : tag.SerializeIntoAsync(s).Result;
 
         public static Stream EncodeTagArray<T>(this Stream s, IEnumerable<T> values) where T : ILTag
             => s.EncodeTag(new ILTagArrayOfILTag<T>(values?.ToArray()));

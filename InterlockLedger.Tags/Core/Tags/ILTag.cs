@@ -32,6 +32,7 @@
 
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -60,24 +61,22 @@ namespace InterlockLedger.Tags
 
         protected virtual void OnChanged() { }
 
-        public virtual Stream OpenReadingStream() {
+        public async virtual Task<Stream> OpenReadingStreamAsync() {
             if (KeepEncodedBytesInMemory)
                 return new MemoryStream(EncodedBytes, writable: false);
-            var s = BuildTempStream();
+            var s = await BuildTempStreamAsync();
             s.ILIntEncode(TagId);
-            SerializeInner(s);
+            await SerializeInnerAsync(s);
             s.Flush();
             s.Position = 0;
             return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
         }
 
-        public Stream SerializeInto(Stream s) {
+        public async Task<Stream> SerializeIntoAsync(Stream s) {
             if (s is not null) {
-                try {
-                    OpenReadingStream().CopyTo(s);
-                } finally {
-                    s.Flush();
-                }
+                s.ILIntEncode(TagId);
+                await SerializeInnerAsync(s);
+                s.Flush();
             }
             return s;
         }
@@ -93,16 +92,16 @@ namespace InterlockLedger.Tags
 
         protected virtual bool KeepEncodedBytesInMemory => true;
 
-        protected virtual Stream BuildTempStream() => new MemoryStream();
+        protected virtual Task<Stream> BuildTempStreamAsync() => Task.FromResult<Stream>(new MemoryStream());
 
-        protected abstract void SerializeInner(Stream s);
+        protected abstract Task SerializeInnerAsync(Stream s);
 
         private byte[] _encodedBytes;
 
         private byte[] ToBytes() {
             using var stream = new MemoryStream();
             stream.ILIntEncode(TagId);
-            SerializeInner(stream);
+            SerializeInnerAsync(stream);
             stream.Flush();
             return stream.ToArray();
         }

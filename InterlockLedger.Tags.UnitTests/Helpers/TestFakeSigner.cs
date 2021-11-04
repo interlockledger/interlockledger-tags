@@ -71,7 +71,7 @@ namespace InterlockLedger.Tags
         public (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag
             => cipher != CipherAlgorithm.AES256
                 ? throw new InvalidOperationException("Only AES256 is valid for now")
-                : new AES256Engine().Encrypt(clearText.OpenReadingStream(), key: _fakeCipherKey, iv: _fakeCipherIV);
+                : new AES256Engine().Encrypt(clearText.OpenReadingStreamAsync().Result, key: _fakeCipherKey, iv: _fakeCipherIV);
 
         public (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText)
             => cipher != CipherAlgorithm.AES256

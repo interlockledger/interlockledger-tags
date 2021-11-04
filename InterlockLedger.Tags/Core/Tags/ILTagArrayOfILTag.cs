@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -66,7 +67,7 @@ namespace InterlockLedger.Tags
                     var list = new List<T>();
                     foreach (var item in elements) {
                         if (item is ILTag tag) {
-                            if (tag.TagId != elementTagId || !(tag is T))
+                            if (tag.TagId != elementTagId || tag is not T)
                                 throw new InvalidCastException($"Value in Array is a tag {tag.TagId} != {elementTagId}");
                             list.Add((T)tag);
                         } else {
@@ -96,12 +97,14 @@ namespace InterlockLedger.Tags
             return null;
         }
 
-        protected override void ValueToStream(Stream s) {
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
             if (Value is not null) {
                 s.ILIntEncode((ulong)Value.Length);
                 foreach (var tag in Value)
                     s.EncodeTag(tag);
             }
+            return Task.FromResult(s);
+
         }
 
         private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());

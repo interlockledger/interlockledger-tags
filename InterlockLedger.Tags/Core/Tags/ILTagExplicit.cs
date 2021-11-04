@@ -32,6 +32,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -58,7 +59,10 @@ namespace InterlockLedger.Tags
 
         protected abstract T FromBytes(byte[] bytes);
 
-        protected sealed override void ValueToStream(Stream s) => s.WriteBytes(ToBytes(Value));
+        protected sealed override Task<Stream> ValueToStreamAsync(Stream s) {
+            s.WriteBytes(ToBytes(Value));
+            return Task.FromResult(s);
+        }
 
         protected abstract byte[] ToBytes(T Value);
 

@@ -62,7 +62,7 @@ namespace InterlockLedger.Tags
             while (true)
                 try {
                     using var algo = OpenWith(parameters);
-                    using var dataStream = dataToSign.OpenReadingStream();
+                    using var dataStream = dataToSign.OpenReadingStreamAsync().Result;
                     return algo.SignData(dataStream, hashName);
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
@@ -71,7 +71,7 @@ namespace InterlockLedger.Tags
         }
 
         public static bool Verify<T>(T dataToVerify, TagSignature signature, ECParameters parameters) where T : Signable<T>, new() {
-            using var dataStream = dataToVerify.Required(nameof(dataToVerify)).OpenReadingStream();
+            using var dataStream = dataToVerify.Required(nameof(dataToVerify)).OpenReadingStreamAsync().Result;
             return VerifyStream(dataStream, signature, parameters);
         }
 

@@ -33,6 +33,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -49,7 +50,10 @@ namespace InterlockLedger.Tags
 
         protected override bool ValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
-        protected override void ValueToStream(Stream s) => s.WriteByte((byte)(Value ? 1 : 0));
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
+            s.WriteByte((byte)(Value ? 1 : 0));
+            return Task.FromResult(s);
+        }
 
         private ILTagBool(bool value) : base(ILTagId.Bool, value) {
         }

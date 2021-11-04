@@ -66,7 +66,7 @@ namespace InterlockLedger.Tags
                 ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
                 : _contentStream;
 
-        public override Stream OpenReadingStream() => new TagStream(TagId, _contentStream);
+        public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult<Stream>(new TagStream(TagId, _contentStream));
 
         public override bool ValueIs<TV>(out TV value) {
             value = default;
@@ -107,10 +107,11 @@ namespace InterlockLedger.Tags
 
         protected override T ValueFromStream(StreamSpan s) => default;
 
-        protected override void ValueToStream(Stream s) {
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
             using var fileStream = FileInfo.OpenRead();
             using var streamSlice = new StreamSpan(fileStream, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);
+            return Task.FromResult(s);
         }
 
         private const int _bufferLength = 16 * 1024;

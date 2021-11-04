@@ -33,6 +33,7 @@
 using System;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -54,7 +55,7 @@ namespace InterlockLedger.Tags
 
         protected virtual ulong CalcValueLength() {
             using var stream = new MemoryStream();
-            ValueToStream(stream);
+            ValueToStreamAsync(stream);
             stream.Flush();
             return (ulong)stream.ToArray().Length;
         }
@@ -71,10 +72,11 @@ namespace InterlockLedger.Tags
             _valueLength = null;
         }
 
-        protected sealed override void SerializeInner(Stream s) {
+        protected sealed override Task<Stream> SerializeInnerAsync(Stream s) {
             s.ILIntEncode(ValueLength);
             if (ValueLength > 0)
-                ValueToStream(s);
+                ValueToStreamAsync(s);
+            return Task.FromResult(s);
         }
 
         private ulong? _valueLength;

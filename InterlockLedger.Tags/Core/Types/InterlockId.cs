@@ -86,7 +86,7 @@ namespace InterlockLedger.Tags
 
         public override bool Equals(object obj) => Equals(obj as InterlockId);
 
-        public bool Equals(InterlockId other) => (!(other is null)) && Type == other.Type && Algorithm == other.Algorithm && DataEquals(other.Data);
+        public bool Equals(InterlockId other) => (other is not null) && Type == other.Type && Algorithm == other.Algorithm && DataEquals(other.Data);
 
         public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
 

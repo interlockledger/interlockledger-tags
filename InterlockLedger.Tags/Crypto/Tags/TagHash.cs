@@ -80,7 +80,7 @@ namespace InterlockLedger.Tags
 
         public override bool Equals(object obj) => Equals(obj as TagHash);
 
-        public bool Equals(TagHash other) => !(other is null) && Algorithm == other.Algorithm && DataEquals(other.Data);
+        public bool Equals(TagHash other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
 
         public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
 

@@ -104,7 +104,7 @@ namespace InterlockLedger.Tags
 
         private EnumerationItems Resolve<T>(T originalData, Func<T, IEnumerable<FullEnumerationDetails>> converter) {
             _details.Clear();
-            if (!(originalData is null))
+            if (originalData is not null)
                 _details.AddRange(converter(originalData));
             return this;
         }

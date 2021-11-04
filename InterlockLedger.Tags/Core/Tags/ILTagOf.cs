@@ -34,6 +34,7 @@
 using System;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -70,6 +71,6 @@ namespace InterlockLedger.Tags
 
         protected abstract T ValueFromStream(StreamSpan s);
 
-        protected abstract void ValueToStream(Stream s);
+        protected abstract Task<Stream> ValueToStreamAsync(Stream s);
     }
 }

@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -155,7 +156,7 @@ namespace InterlockLedger.Tags
             };
         }
 
-        protected override void ValueToStream(Stream s) {
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
             s.EncodeUShort(Value.Version);                          // Field index 0 //
             s.EncodeString(Value.Name);                             // Field index 1 //
             s.EncodeILIntArray(Value.PurposesAsUlongs);             // Field index 2 //
@@ -167,8 +168,9 @@ namespace InterlockLedger.Tags
             s.EncodeDateTimeOffset(Value.LastSignatureTimeStamp);   // Field index 8 //
             s.EncodeILInt(Value.SignaturesWithCurrentKey);          // Field index 9 //
             s.EncodeILInt((ulong)Value.Strength);                   // Field index 10 //
+            return Task.FromResult(s);
         }
 
-        private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStream(s));
+        private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStreamAsync(s));
     }
 }

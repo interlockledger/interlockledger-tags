@@ -33,6 +33,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -53,6 +54,9 @@ namespace InterlockLedger.Tags
 
         protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
 
-        protected override void ValueToStream(Stream s) => s.ILIntEncode(Value);
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
+            s.ILIntEncode(Value);
+            return Task.FromResult(s);
+        }
     }
 }

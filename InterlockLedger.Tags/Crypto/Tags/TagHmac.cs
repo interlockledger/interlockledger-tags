@@ -63,7 +63,7 @@ namespace InterlockLedger.Tags
 
         public static implicit operator string(TagHmac Value) => Value?.ToString();
 
-        public bool Equals(TagHmac other) => (!(other is null)) && Algorithm == other.Algorithm && DataEquals(other.Data);
+        public bool Equals(TagHmac other) => (other is not null) && Algorithm == other.Algorithm && DataEquals(other.Data);
 
         public override bool Equals(object obj) => Equals(obj as TagHmac);
 

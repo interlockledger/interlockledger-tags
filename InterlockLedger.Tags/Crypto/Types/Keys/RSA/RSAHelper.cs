@@ -91,7 +91,7 @@ namespace InterlockLedger.Tags
             while (true)
                 try {
                     using var RSAalg = OpenProvider(parameters);
-                    using var dataStream = dataToSign.OpenReadingStream();
+                    using var dataStream = dataToSign.OpenReadingStreamAsync().Result;
                     return RSAalg.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 } catch (CryptographicException e) {
                     if (retries-- <= 0)
@@ -100,7 +100,7 @@ namespace InterlockLedger.Tags
         }
 
         public static bool Verify<T>(T dataToVerify, TagSignature signature, RSAParameters parameters) where T : Signable<T>, new() {
-            using var dataStream = dataToVerify.Required(nameof(dataToVerify)).OpenReadingStream();
+            using var dataStream = dataToVerify.Required(nameof(dataToVerify)).OpenReadingStreamAsync().Result;
             return VerifyStream(dataStream, signature, parameters);
         }
 

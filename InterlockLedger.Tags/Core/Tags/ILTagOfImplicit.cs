@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -44,6 +45,6 @@ namespace InterlockLedger.Tags
 
         protected sealed override T DeserializeInner(Stream s) => ValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
 
-        protected sealed override void SerializeInner(Stream s) => ValueToStream(s);
+        protected sealed override Task<Stream> SerializeInnerAsync(Stream s) => ValueToStreamAsync(s);
     }
 }

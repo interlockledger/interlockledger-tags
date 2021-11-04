@@ -142,7 +142,7 @@ namespace InterlockLedger.Tags
                 ? throw new ArgumentNullException(nameof(destinationType))
                 : Value == null
                     ? throw new ArgumentNullException(nameof(Value))
-                    : destinationType != typeof(string) || !(Value is TagPubKey)
+                    : destinationType != typeof(string) || Value is not TagPubKey
                         ? throw new InvalidOperationException("Can only convert TagPubKey to string!!!")
                         : Value.ToString();
     }

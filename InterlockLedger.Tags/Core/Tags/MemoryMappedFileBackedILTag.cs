@@ -34,6 +34,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -57,7 +58,7 @@ namespace InterlockLedger.Tags
                 ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
                 : new StreamSpan(_mmvs, Offset, Length, closeWrappedStreamOnDispose: false);
 
-        public override Stream OpenReadingStream() => ReadingStream;
+        public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult(ReadingStream);
 
         public override bool ValueIs<TV>(out TV value) {
             value = default;
@@ -68,9 +69,10 @@ namespace InterlockLedger.Tags
 
         protected override T ValueFromStream(StreamSpan s) => default;
 
-        protected override void ValueToStream(Stream s) {
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
             using var streamSlice = new StreamSpan(_mmvs, Offset, Length);
             streamSlice.CopyTo(s, _bufferLength);
+            return Task.FromResult(s);
         }
 
         protected override ulong CalcValueLength() => Length;

@@ -32,6 +32,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -51,7 +52,10 @@ namespace InterlockLedger.Tags
 
         protected override byte[] ValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
 
-        protected override void ValueToStream(Stream s) => s.WriteBytes(Value);
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
+            s.WriteBytes(Value);
+            return Task.FromResult(s);
+        }
 
         protected override ulong CalcValueLength() => (ulong)(Value?.Length ?? 0);
 

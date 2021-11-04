@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -42,7 +43,7 @@ namespace InterlockLedger.Tags
 
         public override string Formatted => "null";
 
-        protected override void SerializeInner(Stream s) { }
+        protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
 
         private ILTagNull() : base(ILTagId.Null) { }
     }

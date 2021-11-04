@@ -32,6 +32,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -41,6 +42,6 @@ namespace InterlockLedger.Tags
 
         public override object AsJson => throw new NotSupportedException();
 
-        protected override void SerializeInner(Stream s) => throw new NotImplementedException();
+        protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
     }
 }

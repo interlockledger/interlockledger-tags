@@ -456,7 +456,7 @@ namespace InterlockLedger.Tags
                 if (Version > 2)
                     s.EncodeILIntArray(Values);
                 if (Version > 3)
-                    Fancy.SerializeInto(s);
+                    _ = Fancy.SerializeIntoAsync(s).Result;
                 if (Version > 4)
                     s.EncodeTagArray(Ranges.Select(r => new ILTagRange(r)));
                 if (Version > 5)

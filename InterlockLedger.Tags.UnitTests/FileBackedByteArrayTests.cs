@@ -140,7 +140,7 @@ namespace InterlockLedger.Tags
                 Assert.IsInstanceOf<ILTagByteArray>(tagArray);
                 CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
                 var fbba2 = new FileBackedByteArray(fi);
-                using (var fs = fbba2.OpenReadingStream())
+                using (var fs = fbba2.OpenReadingStreamAsync().Result)
                     CollectionAssert.AreEqual(prefixedArrayBytes, fs.ReadAllBytesAsync().Result);
                 Assert.AreEqual(arrayBytes.Length, fbba2.Length);
                 using var s = fbba2.ReadingStream;
@@ -154,7 +154,7 @@ namespace InterlockLedger.Tags
 
         private static MemoryStream SerializeInto(FileBackedByteArray fbba, byte[] prefixedArrayBytes) {
             var mso = new MemoryStream();
-            _ = fbba.SerializeInto(mso);
+            _ = fbba.SerializeIntoAsync(mso).Result;
             var outputBytes = mso.ToArray();
             Assert.IsNotNull(outputBytes);
             CollectionAssert.AreEqual(prefixedArrayBytes, outputBytes);

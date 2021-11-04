@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -43,6 +44,9 @@ namespace InterlockLedger.Tags
 
         protected override long ValueFromStream(StreamSpan s) => s.BigEndianReadLong();
 
-        protected override void ValueToStream(Stream s) => s.BigEndianWriteLong(Value);
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
+            s.BigEndianWriteLong(Value);
+            return Task.FromResult(s);
+        }
     }
 }

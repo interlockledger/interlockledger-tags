@@ -88,7 +88,7 @@ namespace InterlockLedger.Tags
         private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() {
             using var x509Certificate = _certificateBytes.OpenCertificate(_password);
             using var rsa = x509Certificate.GetRSAPrivateKey();
-            return rsa.SignData(data.OpenReadingStream(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            return rsa.SignData(data.OpenReadingStreamAsync().Result, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         }
     }
 }

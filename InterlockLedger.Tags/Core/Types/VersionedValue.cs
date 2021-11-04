@@ -38,6 +38,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace InterlockLedger.Tags
 {
@@ -93,7 +94,7 @@ namespace InterlockLedger.Tags
             return FromStream(s);
         }
 
-        public Stream OpenReadingStream() => AsPayload.OpenReadingStream();
+        public Task<Stream> OpenReadingStreamAsync() => AsPayload.OpenReadingStreamAsync();
 
         public bool RegisterAsField(ITagRegistrar registrar)
             => registrar.Required(nameof(registrar))
@@ -126,7 +127,10 @@ namespace InterlockLedger.Tags
 
             protected override T ValueFromStream(StreamSpan s) => new T().FromStream(s);
 
-            protected override void ValueToStream(Stream s) => Value.ToStream(s);
+            protected override Task<Stream> ValueToStreamAsync(Stream s) {
+                Value.ToStream(s);
+                return Task.FromResult(s);
+            }
 
             private void Initialize() {
                 if (Value is not null) {
