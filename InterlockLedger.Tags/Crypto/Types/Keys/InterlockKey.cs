@@ -170,16 +170,16 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             var version = s.DecodeUShort();
             var result = new Parts {
                 Version = version,                                // Field index 0 //
-                    Name = s.DecodeString(),                          // Field index 1 //
-                    PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
-                    Id = s.Decode<BaseKeyId>(),                       // Field index 3 //
-                    Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
-                    Description = s.DecodeString(),                   // Field index 5 //
-                    PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
-                    FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 7  - since version 1 //
-                    Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
-                    FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
-                };
+                Name = s.DecodeString(),                          // Field index 1 //
+                PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
+                Id = s.Decode<BaseKeyId>(),                       // Field index 3 //
+                Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
+                Description = s.DecodeString(),                   // Field index 5 //
+                PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
+                FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 7  - since version 1 //
+                Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
+                FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
+            };
             if (version > 3)
                 result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
             return result;
@@ -188,17 +188,17 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
     protected override byte[] ToBytes(Parts value)
         => TagHelpers.ToBytesHelper(s => {
             s.EncodeUShort(Value.Version);              // Field index 0 //
-                s.EncodeString(Value.Name);                 // Field index 1 //
-                s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
-                s.EncodeInterlockId(Value.Id);              // Field index 3 //
-                s.EncodeInterlockId(Value.Identity);        // Field index 4 //
-                s.EncodeString(Value.Description);          // Field index 5 //
-                s.EncodeTag(Value.PublicKey);               // Field index 6 //
-                s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
-                s.EncodeILInt((ulong)value.Strength);       // Field index 8 //
-                s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
-                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
-            });
+            s.EncodeString(Value.Name);                 // Field index 1 //
+            s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
+            s.EncodeInterlockId(Value.Id);              // Field index 3 //
+            s.EncodeInterlockId(Value.Identity);        // Field index 4 //
+            s.EncodeString(Value.Description);          // Field index 5 //
+            s.EncodeTag(Value.PublicKey);               // Field index 6 //
+            s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
+            s.EncodeILInt((ulong)value.Strength);       // Field index 8 //
+            s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
+            s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
+        });
 
     private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {
     }

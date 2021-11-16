@@ -119,18 +119,18 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, 
             var version = s.DecodeUShort();
             var result = new InterlockSigningKeyParts {
                 Version = version,                                // Field index 0 //
-                    Name = s.DecodeString(),                          // Field index 1 //
-                    PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
-                    Id = s.Decode<KeyId>(),                           // Field index 3 //
-                    Identity = s.DecodeBaseKeyId(),                   // Field index 4 //
-                    Description = s.DecodeString(),                   // Field index 5 //
-                    PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
-                    Encrypted = s.DecodeByteArray(),                  // Field index 7 //
-                    FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 8 //
-                    Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 9 //
-                    FirstActions = version > 1 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
-                    EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
-                };
+                Name = s.DecodeString(),                          // Field index 1 //
+                PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
+                Id = s.Decode<KeyId>(),                           // Field index 3 //
+                Identity = s.DecodeBaseKeyId(),                   // Field index 4 //
+                Description = s.DecodeString(),                   // Field index 5 //
+                PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
+                Encrypted = s.DecodeByteArray(),                  // Field index 7 //
+                FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 8 //
+                Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 9 //
+                FirstActions = version > 1 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
+                EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
+            };
             if (version > 5)
                 result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
             return result;
@@ -139,19 +139,19 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, 
     protected override byte[] ToBytes(InterlockSigningKeyParts value)
         => TagHelpers.ToBytesHelper(s => {
             s.EncodeUShort(Value.Version);              // Field index 0 //
-                s.EncodeString(Value.Name);                 // Field index 1 //
-                s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
-                s.EncodeInterlockId(Value.Id);              // Field index 3 //
-                s.EncodeInterlockId(Value.Identity);        // Field index 4 //
-                s.EncodeString(Value.Description);          // Field index 5 //
-                s.EncodeTag(Value.PublicKey);               // Field index 6 //
-                s.EncodeByteArray(Value.Encrypted);         // Field index 7 //
-                s.EncodeILInt(Value.FirstAppId);            // Field index 8 //
-                s.EncodeILInt((ulong)value.Strength);       // Field index 9 //
-                s.EncodeILIntArray(Value.FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
-                s.EncodeILInt((ulong)value.EncryptedContentType); // Field index 11 - since version 5
-                s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
-            });
+            s.EncodeString(Value.Name);                 // Field index 1 //
+            s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
+            s.EncodeInterlockId(Value.Id);              // Field index 3 //
+            s.EncodeInterlockId(Value.Identity);        // Field index 4 //
+            s.EncodeString(Value.Description);          // Field index 5 //
+            s.EncodeTag(Value.PublicKey);               // Field index 6 //
+            s.EncodeByteArray(Value.Encrypted);         // Field index 7 //
+            s.EncodeILInt(Value.FirstAppId);            // Field index 8 //
+            s.EncodeILInt((ulong)value.Strength);       // Field index 9 //
+            s.EncodeILIntArray(Value.FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
+            s.EncodeILInt((ulong)value.EncryptedContentType); // Field index 11 - since version 5
+            s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
+        });
 }
 
 public class InterlockSigningKeyParts : InterlockKey.Parts
