@@ -30,23 +30,18 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IVersionedEmbeddedValue<T> where T : IVersionedEmbeddedValue<T>
 {
-    public interface IVersionedEmbeddedValue<T> where T : IVersionedEmbeddedValue<T>
-    {
-        object AsJson { get; }
-        IEnumerable<DataField> RemainingStateFields { get; }
-        ulong TagId { get; }
-        string TypeDescription { get; }
-        string TypeName { get; }
+    object AsJson { get; }
+    IEnumerable<DataField> RemainingStateFields { get; }
+    ulong TagId { get; }
+    string TypeDescription { get; }
+    string TypeName { get; }
 
-        void DecodeRemainingStateFrom(Stream s);
+    void DecodeRemainingStateFrom(Stream s);
 
-        void EncodeRemainingStateTo(Stream s);
+    void EncodeRemainingStateTo(Stream s);
 
-        T FromJson(object o);
-    }
+    T FromJson(object o);
 }

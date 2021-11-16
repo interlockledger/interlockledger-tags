@@ -30,14 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class DictionaryExtensions
 {
-    public static class DictionaryExtensions
-    {
 
-        internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary oldEnumeration, EnumerationDictionary newEnumeration)
-            => oldEnumeration.None() || oldEnumeration.EqualTo(newEnumeration?.Take(oldEnumeration.Count));
-    }
+    internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary oldEnumeration, EnumerationDictionary newEnumeration)
+        => oldEnumeration.None() || oldEnumeration.EqualTo(newEnumeration?.Take(oldEnumeration.Count));
 }

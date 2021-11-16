@@ -30,57 +30,53 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
 using System.Security.Cryptography;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ECDsaInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 {
-    public class ECDsaInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
-    {
-        public ECDsaInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper) : base(tag, timeStamper) {
-            using var ms = new MemoryStream(decrypted);
-            _keyParameters = ms.DecodeAny<ECDsaParameters>();
-        }
+    public ECDsaInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper) : base(tag, timeStamper) {
+        using var ms = new MemoryStream(decrypted);
+        _keyParameters = ms.DecodeAny<ECDsaParameters>();
+    }
 
-        public override TagPubKey NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
+    public override TagPubKey NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
 
-        public override void DestroyKeys() => _destroyKeysAfterSigning = true;
+    public override void DestroyKeys() => _destroyKeysAfterSigning = true;
 
-        public override void GenerateNextKeys() => _nextKeyParameters = ECDsaHelper.CreateNewECDsaParameters(_data.Strength);
+    public override void GenerateNextKeys() => _nextKeyParameters = ECDsaHelper.CreateNewECDsaParameters(_data.Strength);
 
-        public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null)
-            => Update(encrypt, ECDsaHelper.HashAndSign(data, _keyParameters.Parameters, HashAlgorithmName.SHA256));
+    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null)
+        => Update(encrypt, ECDsaHelper.HashAndSign(data, _keyParameters.Parameters, HashAlgorithmName.SHA256));
 
-        public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null)
-            => Update(encrypt, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Parameters, HashAlgorithmName.SHA256));
+    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null)
+        => Update(encrypt, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Parameters, HashAlgorithmName.SHA256));
 
-        private bool _destroyKeysAfterSigning;
+    private bool _destroyKeysAfterSigning;
 
-        private ECDsaParameters _keyParameters;
-        private ECDsaParameters _nextKeyParameters;
+    private ECDsaParameters _keyParameters;
+    private ECDsaParameters _nextKeyParameters;
 
-        private TagSignature Update(Func<byte[], byte[]> encrypt, byte[] signatureData) {
-            if (_destroyKeysAfterSigning) {
-                _keyParameters = null;
+    private TagSignature Update(Func<byte[], byte[]> encrypt, byte[] signatureData) {
+        if (_destroyKeysAfterSigning) {
+            _keyParameters = null;
+            _nextKeyParameters = null;
+            _data.Value.Encrypted = null;
+            _data.Value.PublicKey = null;
+        } else {
+            var encryptionHandler = encrypt.Required();
+            if (_nextKeyParameters != null) {
+                _keyParameters = _nextKeyParameters;
+                _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
+                _data.Value.PublicKey = NextPublicKey;
                 _nextKeyParameters = null;
-                _data.Value.Encrypted = null;
-                _data.Value.PublicKey = null;
+                _data.SignaturesWithCurrentKey = 0;
             } else {
-                var encryptionHandler = encrypt.Required(nameof(encrypt));
-                if (_nextKeyParameters != null) {
-                    _keyParameters = _nextKeyParameters;
-                    _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
-                    _data.Value.PublicKey = NextPublicKey;
-                    _nextKeyParameters = null;
-                    _data.SignaturesWithCurrentKey = 0;
-                } else {
-                    _data.SignaturesWithCurrentKey++;
-                }
-                _data.LastSignatureTimeStamp = _timeStamper.Now;
+                _data.SignaturesWithCurrentKey++;
             }
-            _data.Changed();
-            return new TagSignature(Algorithm.EcDSA, signatureData);
+            _data.LastSignatureTimeStamp = _timeStamper.Now;
         }
+        _data.Changed();
+        return new TagSignature(Algorithm.EcDSA, signatureData);
     }
 }

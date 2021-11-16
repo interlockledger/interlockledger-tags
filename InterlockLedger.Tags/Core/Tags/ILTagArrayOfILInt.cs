@@ -32,47 +32,41 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
 {
-    public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
-    {
-        public ILTagArrayOfILInt(ulong[] Value) : base(ILTagId.ILIntArray, Value ?? Array.Empty<ulong>()) {
-        }
-
-        public ulong this[int i] => Value[i];
-
-        internal ILTagArrayOfILInt(Stream s) : base(ILTagId.ILIntArray, s) {
-        }
-
-        internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
-
-        protected override ulong[] FromBytes(byte[] bytes) =>
-           FromBytesHelper(bytes, s => {
-               var length = (int)s.ILIntDecode();
-               var result = new ulong[length];
-               for (var i = 0; i < length; i++) {
-                   result[i] = s.ILIntDecode();
-               }
-               return result;
-           });
-
-        protected override byte[] ToBytes(ulong[] value)
-            => TagHelpers.ToBytesHelper(s => {
-                s.ILIntEncode((ulong)value.Length);
-                foreach (var ilint in value)
-                    s.ILIntEncode(ilint);
-            });
-
-        private static ulong[] Elicit(object? opaqueValue)
-            => opaqueValue switch {
-                ulong[] values => values,
-                IEnumerable<object> items => items.Select(Convert.ToUInt64).ToArray(),
-                _ => throw new InvalidCastException($"Can't elicit an ulong[] from {opaqueValue?.GetType().Name ?? "null"}")
-            };
+    public ILTagArrayOfILInt(ulong[] Value) : base(ILTagId.ILIntArray, Value ?? Array.Empty<ulong>()) {
     }
+
+    public ulong this[int i] => Value[i];
+
+    internal ILTagArrayOfILInt(Stream s) : base(ILTagId.ILIntArray, s) {
+    }
+
+    internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
+
+    protected override ulong[] FromBytes(byte[] bytes) =>
+       FromBytesHelper(bytes, s => {
+           var length = (int)s.ILIntDecode();
+           var result = new ulong[length];
+           for (var i = 0; i < length; i++) {
+               result[i] = s.ILIntDecode();
+           }
+           return result;
+       });
+
+    protected override byte[] ToBytes(ulong[] value)
+        => TagHelpers.ToBytesHelper(s => {
+            s.ILIntEncode((ulong)value.Length);
+            foreach (var ilint in value)
+                s.ILIntEncode(ilint);
+        });
+
+    private static ulong[] Elicit(object? opaqueValue)
+        => opaqueValue switch {
+            ulong[] values => values,
+            IEnumerable<object> items => items.Select(Convert.ToUInt64).ToArray(),
+            _ => throw new InvalidCastException($"Can't elicit an ulong[] from {opaqueValue?.GetType().Name ?? "null"}")
+        };
 }

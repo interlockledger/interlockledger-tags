@@ -32,10 +32,8 @@
 
 using System.Security.Claims;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class ClaimsIdentityExtensions
 {
-    public static class ClaimsIdentityExtensions
-    {
-        public static SenderIdentity Sender(this ClaimsIdentity identity) => new(identity?.Claims);
-    }
+    public static SenderIdentity Sender(this ClaimsIdentity identity) => new(identity?.Claims);
 }

@@ -30,16 +30,13 @@
 //
 // ******************************************************************************************************************************
 
-using System.Text.Json.Serialization;
+namespace InterlockLedger.Tags;
 
-namespace InterlockLedger.Tags
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum CastType : byte
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum CastType : byte
-    {
-        None = 0,
-        DateTime = 1,
-        Integer = 2,
-        TimeSpan = 3
-    }
+    None = 0,
+    DateTime = 1,
+    Integer = 2,
+    TimeSpan = 3
 }

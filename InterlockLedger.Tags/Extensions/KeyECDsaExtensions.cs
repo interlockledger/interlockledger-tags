@@ -30,39 +30,36 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Security.Cryptography;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class KeyECDsaExtensions
 {
-    public static class KeyECDsaExtensions
-    {
-        //  enum KeyStrength
-        //  Normal = 0,         // ECDsa 192
-        //  Strong = 1,         // ECDsa 256
-        //  ExtraStrong = 2,    // ECDsa 320
-        //  MegaStrong = 3,     // ECDsa 384
-        //  SuperStrong = 4,    // ECDsa 448
-        //  HyperStrong = 5,    // ECDsa 512
-        //  UltraStrong = 6     // ECDsa 576
+    //  enum KeyStrength
+    //  Normal = 0,         // ECDsa 192
+    //  Strong = 1,         // ECDsa 256
+    //  ExtraStrong = 2,    // ECDsa 320
+    //  MegaStrong = 3,     // ECDsa 384
+    //  SuperStrong = 4,    // ECDsa 448
+    //  HyperStrong = 5,    // ECDsa 512
+    //  UltraStrong = 6     // ECDsa 576
 
-        public static KeyStrength KeyStrengthGuess(this ECDsa key) => Guess(key.Required(nameof(key)).KeySize);
+    public static KeyStrength KeyStrengthGuess(this ECDsa key) => Guess(key.Required().KeySize);
 
-        public static int ECDsaKeySize(this KeyStrength strength) => 192 + (64 * (int)strength);
+    public static int ECDsaKeySize(this KeyStrength strength) => 192 + (64 * (int)strength);
 
-        private static KeyStrength Guess(int size)
-            => size <= 192
-                ? KeyStrength.Normal
-                : size <= 256
-                    ? KeyStrength.Strong
-                    : size <= 320
-                        ? KeyStrength.ExtraStrong
-                        : size <= 384
-                            ? KeyStrength.MegaStrong
-                            : size <= 448
-                                ? KeyStrength.SuperStrong
-                                : size <= 512
-                                    ? KeyStrength.HyperStrong
-                                    : KeyStrength.UltraStrong;
-    }
+    private static KeyStrength Guess(int size)
+        => size <= 192
+            ? KeyStrength.Normal
+            : size <= 256
+                ? KeyStrength.Strong
+                : size <= 320
+                    ? KeyStrength.ExtraStrong
+                    : size <= 384
+                        ? KeyStrength.MegaStrong
+                        : size <= 448
+                            ? KeyStrength.SuperStrong
+                            : size <= 512
+                                ? KeyStrength.HyperStrong
+                                : KeyStrength.UltraStrong;
 }

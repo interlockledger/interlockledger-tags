@@ -30,38 +30,32 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+internal class TestSignable : Signable<TestSignable>
 {
-    internal class TestSignable : Signable<TestSignable>
-    {
-        public const ushort CurrentVersion = 1;
-        public const ulong FieldTagId = 1_000_000;
+    public const ushort CurrentVersion = 1;
+    public const ulong FieldTagId = 1_000_000;
 
-        public TestSignable() : this(0ul) {
-        }
-
-        public TestSignable(ulong someILInt) : base(FieldTagId, CurrentVersion) => SomeILInt = someILInt;
-
-        public override object AsJson => new { TagId, Version, SomeILInt };
-        public override string Formatted => throw new NotImplementedException();
-        public ulong SomeILInt { get; private set; }
-        public override string TypeName => nameof(TestSignable);
-
-        public override TestSignable FromJson(object json) => throw new System.NotImplementedException();
-
-        protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {
-            Name = nameof(SomeILInt),
-            TagId = ILTagId.ILInt
-        }.AsSingle();
-
-        protected override string TypeDescription => "Signable for unit testing";
-
-        protected override void DecodeRemainingStateFrom(Stream s) => SomeILInt = s.DecodeILInt();
-
-        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeILInt(SomeILInt);
+    public TestSignable() : this(0ul) {
     }
+
+    public TestSignable(ulong someILInt) : base(FieldTagId, CurrentVersion) => SomeILInt = someILInt;
+
+    public override object AsJson => new { TagId, Version, SomeILInt };
+    public override string Formatted => throw new NotImplementedException();
+    public ulong SomeILInt { get; private set; }
+    public override string TypeName => nameof(TestSignable);
+
+    public override TestSignable FromJson(object json) => throw new System.NotImplementedException();
+
+    protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {
+        Name = nameof(SomeILInt),
+        TagId = ILTagId.ILInt
+    }.AsSingle();
+
+    protected override string TypeDescription => "Signable for unit testing";
+
+    protected override void DecodeRemainingStateFrom(Stream s) => SomeILInt = s.DecodeILInt();
+
+    protected override void EncodeRemainingStateTo(Stream s) => s.EncodeILInt(SomeILInt);
 }

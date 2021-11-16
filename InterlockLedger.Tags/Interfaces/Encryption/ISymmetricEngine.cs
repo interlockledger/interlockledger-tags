@@ -30,21 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ISymmetricEngine
 {
-    public interface ISymmetricEngine
-    {
-        byte[] Decrypt(byte[] cipherData, byte[] key, byte[] iv);
+    byte[] Decrypt(byte[] cipherData, byte[] key, byte[] iv);
 
-        byte[] Decrypt(byte[] cipherData, Func<MemoryStream, (byte[] key, byte[] iv)> readHeader);
+    byte[] Decrypt(byte[] cipherData, Func<MemoryStream, (byte[] key, byte[] iv)> readHeader);
 
-        (byte[] cipherData, byte[] key, byte[] iv) Encrypt(byte[] clearData,
-                                                           Action<MemoryStream, byte[], byte[]> writeHeader = null,
-                                                           byte[] key = null,
-                                                           byte[] iv = null);
-        (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream, Action<MemoryStream, byte[], byte[]> writeHeader = null, byte[] key = null, byte[] iv = null);
-    }
+    (byte[] cipherData, byte[] key, byte[] iv) Encrypt(byte[] clearData,
+                                                       Action<MemoryStream, byte[], byte[]> writeHeader = null,
+                                                       byte[] key = null,
+                                                       byte[] iv = null);
+    (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream, Action<MemoryStream, byte[], byte[]> writeHeader = null, byte[] key = null, byte[] iv = null);
 }

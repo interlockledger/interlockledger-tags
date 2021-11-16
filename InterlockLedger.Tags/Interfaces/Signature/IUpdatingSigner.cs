@@ -30,19 +30,15 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IUpdatingSigner : ISigner
 {
-    public interface IUpdatingSigner : ISigner
-    {
-        BaseKeyId Identity { get; }
-        DateTimeOffset LastSignatureTimeStamp { get; }
-        TagPubKey NextPublicKey { get; }
-        ulong SignaturesWithCurrentKey { get; }
+    BaseKeyId Identity { get; }
+    DateTimeOffset LastSignatureTimeStamp { get; }
+    TagPubKey NextPublicKey { get; }
+    ulong SignaturesWithCurrentKey { get; }
 
-        IUpdatingSigner DestroyKeys();
+    IUpdatingSigner DestroyKeys();
 
-        void RegenerateKeys();
-    }
+    void RegenerateKeys();
 }

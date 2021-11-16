@@ -30,14 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IVerifier
 {
-    public interface IVerifier
-    {
-        IEnumerable<Algorithm> SupportedAlgorithms { get; }
+    IEnumerable<Algorithm> SupportedAlgorithms { get; }
 
-        bool Verify(byte[] dataToVerify, TagSignature signature);
-    }
+    bool Verify(byte[] dataToVerify, TagSignature signature);
 }

@@ -30,21 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public sealed class ILTagNull : ILTag
 {
-    public sealed class ILTagNull : ILTag
-    {
-        public static readonly ILTagNull Instance = new();
+    public static readonly ILTagNull Instance = new();
 
-        public override object AsJson => null;
+    public override object AsJson => null;
 
-        public override string Formatted => "null";
+    public override string Formatted => "null";
 
-        protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
+    protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
 
-        private ILTagNull() : base(ILTagId.Null) { }
-    }
+    private ILTagNull() : base(ILTagId.Null) { }
 }

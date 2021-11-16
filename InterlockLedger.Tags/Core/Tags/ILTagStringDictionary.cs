@@ -30,33 +30,27 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagStringDictionary : ILTagAbstractDictionary<string>
 {
-    public class ILTagStringDictionary : ILTagAbstractDictionary<string>
-    {
-        public ILTagStringDictionary(params (string key, string value)[] pairs) : this(pairs.ToDictionary(p => p.key, pp => pp.value)) {
-        }
-
-        public ILTagStringDictionary(Dictionary<string, string> value) : base(ILTagId.StringDictionary, value) {
-        }
-
-        public ILTagStringDictionary(object opaqueValue) : this(Elicit(opaqueValue)) {
-        }
-
-        internal ILTagStringDictionary(Stream s) : base(ILTagId.StringDictionary, s) {
-        }
-
-        protected override string DecodeValue(Stream s) => s.Decode<ILTagString>()?.Value;
-
-        protected override void EncodeValue(Stream s, string value) {
-            if (value is null) s.EncodeNull(); else s.EncodeString(value);
-        }
-
-        private static Dictionary<string, string> Elicit(object opaqueValue)
-            => (opaqueValue as Dictionary<string, string>) ?? new Dictionary<string, string>();
+    public ILTagStringDictionary(params (string key, string value)[] pairs) : this(pairs.ToDictionary(p => p.key, pp => pp.value)) {
     }
+
+    public ILTagStringDictionary(Dictionary<string, string> value) : base(ILTagId.StringDictionary, value) {
+    }
+
+    public ILTagStringDictionary(object opaqueValue) : this(Elicit(opaqueValue)) {
+    }
+
+    internal ILTagStringDictionary(Stream s) : base(ILTagId.StringDictionary, s) {
+    }
+
+    protected override string DecodeValue(Stream s) => s.Decode<ILTagString>()?.Value;
+
+    protected override void EncodeValue(Stream s, string value) {
+        if (value is null) s.EncodeNull(); else s.EncodeString(value);
+    }
+
+    private static Dictionary<string, string> Elicit(object opaqueValue)
+        => (opaqueValue as Dictionary<string, string>) ?? new Dictionary<string, string>();
 }

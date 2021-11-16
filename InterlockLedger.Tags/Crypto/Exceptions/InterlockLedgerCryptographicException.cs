@@ -30,13 +30,9 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class InterlockLedgerCryptographicException : InterlockLedgerException
 {
-    public class InterlockLedgerCryptographicException : InterlockLedgerException
-    {
-        public InterlockLedgerCryptographicException(string message, Exception innerException) : base(message, innerException) {
-        }
+    public InterlockLedgerCryptographicException(string message, Exception innerException) : base(message, innerException) {
     }
 }

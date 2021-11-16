@@ -30,19 +30,15 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Linq;
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+
+
+[TestFixture]
+public class EncryptedBlobTests
 {
-
-
-    [TestFixture]
-    public class EncryptedBlobTests
-    {
-        [TestCase(new byte[] {
+    [TestCase(new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
                 16, 16, 115, 55, 111, 187, 246, 84, 208, 104, 110, 14, 132, 0, 20, 119, 16, 107,
@@ -74,7 +70,7 @@ namespace InterlockLedger.Tags
                             135, 152, 128, 201, 247, 155, 122, 0, 53, 213, 169, 231, 5, 214, 0, 213, 203, 214, 42, 228, 179, 35, 84, 234, 2, 162, 108, 201, 203,
                             195, 193, 94, 223, 10, 71, 211, 182, 246, 201, 72, 215, 230, 121, 46, 78, 84, 252, 130, 76, 76, 62, 122, 73, 101, 56, 189, 66, 85
             }, CipherAlgorithm.AES256, new byte[] { }, TestName = "NewEncryptedBlobFromStream Better Padding")]
-        [TestCase(new byte[] {
+    [TestCase(new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
                 16, 16, 228, 155, 155, 36, 5, 133, 124, 106, 244, 135, 239, 56, 50, 213, 198, 74,
@@ -107,7 +103,7 @@ namespace InterlockLedger.Tags
                             147, 206, 83, 148, 57, 70, 57, 48, 10, 132, 62, 3, 149, 214, 32, 237, 89, 48, 36, 213, 184, 123, 156, 188, 91, 223, 193, 202, 97,
                             83, 152, 241
         }, CipherAlgorithm.AES256, new byte[] { 0, 0 }, TestName = "NewEncryptedBlobFromStreamFromZeroes")]
-        [TestCase(new byte[] {
+    [TestCase(new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
                 16, 16, 115, 55, 111, 187, 246, 84, 208, 104, 110, 14, 132, 0, 20, 119, 16, 107,
@@ -140,17 +136,17 @@ namespace InterlockLedger.Tags
                             134, 211, 110, 36, 124, 101, 19, 246, 18, 196, 175, 113, 136, 226, 141, 27, 139, 123, 127, 226, 98, 125, 36, 40, 118, 210, 6, 146, 235, 150, 46,
                             152, 218, 113, 174, 82
         }, CipherAlgorithm.AES256, new byte[] { }, TestName = "NewEncryptedBlobFromStream")]
-        public void NewEncryptedBlobFromStream(byte[] bytes, CipherAlgorithm algorithm, byte[] data) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<EncryptedBlob.Payload>();
-            Assert.AreEqual(ILTagId.EncryptedBlob, tag.TagId);
-            Assert.AreEqual(algorithm, tag.Value.Cipher);
-            var clearBlob = tag.Value.DecryptBlob(TestFakeSigner.FixedKeysInstance, _ => new AES256Engine());
-            Assert.IsNotNull(clearBlob);
-            Assert.AreEqual(data.Length, clearBlob.Length);
-        }
+    public void NewEncryptedBlobFromStream(byte[] bytes, CipherAlgorithm algorithm, byte[] data) {
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.Decode<EncryptedBlob.Payload>();
+        Assert.AreEqual(ILTagId.EncryptedBlob, tag.TagId);
+        Assert.AreEqual(algorithm, tag.Value.Cipher);
+        var clearBlob = tag.Value.DecryptBlob(TestFakeSigner.FixedKeysInstance, _ => new AES256Engine());
+        Assert.IsNotNull(clearBlob);
+        Assert.AreEqual(data.Length, clearBlob.Length);
+    }
 
-        [TestCase(CipherAlgorithm.AES256, new byte[] { 0, 0 }, ExpectedResult = new byte[] {
+    [TestCase(CipherAlgorithm.AES256, new byte[] { 0, 0 }, ExpectedResult = new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
                 16, 16, 228, 155, 155, 36, 5, 133, 124, 106, 244, 135, 239, 56, 50, 213, 198, 74,
@@ -162,7 +158,7 @@ namespace InterlockLedger.Tags
                             106, 221, 140, 204, 78, 212, 55, 139, 19, 26, 150, 206,
                         16, 248, 8,
         }, TestName = "SerializeEncryptedBlobAsZeroes")]
-        [TestCase(CipherAlgorithm.AES256, new byte[] { }, ExpectedResult = new byte[] {
+    [TestCase(CipherAlgorithm.AES256, new byte[] { }, ExpectedResult = new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
                 16, 16, 115, 55, 111, 187, 246, 84, 208, 104, 110, 14, 132, 0, 20, 119, 16, 107,
@@ -178,49 +174,48 @@ namespace InterlockLedger.Tags
                             1, 0, 90, 234, 31, 9, 108, 223, 128, 59, 77, 2, 215, 129, 119, 28, 194, 164, 198, 5, 74, 36, 106, 221, 140, 204, 78, 212, 55, 139, 19, 26, 150, 206,
                         16, 248, 8,
         }, TestName = "SerializeEncryptedBlob")]
-        public byte[] SerializeEncryptedBlob(CipherAlgorithm algorithm, byte[] data) {
-            var payload = new EncryptedBlob(algorithm,
-                                            data,
-                                            TestFakeSigner.FixedKeysInstance,
-                                            TestFakeSigner.FixedKeysInstance,
-                                            Array.Empty<TagReader>()).AsPayload;
-            byte[] encodedBytes = payload.EncodedBytes;
-            TestContext.WriteLine(encodedBytes.AsLiteral());
-            return encodedBytes.PartOf(124);
-        }
+    public byte[] SerializeEncryptedBlob(CipherAlgorithm algorithm, byte[] data) {
+        var payload = new EncryptedBlob(algorithm,
+                                        data,
+                                        TestFakeSigner.FixedKeysInstance,
+                                        TestFakeSigner.FixedKeysInstance,
+                                        Array.Empty<TagReader>()).AsPayload;
+        byte[] encodedBytes = payload.EncodedBytes;
+        TestContext.WriteLine(encodedBytes.AsLiteral());
+        return encodedBytes.PartOf(124);
+    }
 
 
-        [Test]
-        public void ValidateFieldDefinition() {
-            var fd = EncryptedBlob.FieldDefinition;
-            Assert.IsNotNull(fd);
-            Assert.AreEqual(nameof(EncryptedBlob), fd.Name);
-            Assert.AreEqual(ILTagId.EncryptedBlob, fd.TagId);
-            Assert.IsTrue(fd.HasSubFields, "Must have subfields");
-            Assert.IsFalse(fd.IsEnumeration, "Should not be an enumeration");
-            Assert.AreEqual(3, fd.SubDataFields.SafeCount());
-            var fieldVersion = fd.SubDataFields.First();
-            Assert.AreEqual(nameof(EncryptedBlob.Version), fieldVersion.Name);
-            Assert.AreEqual(ILTagId.UInt16, fieldVersion.TagId);
-            Assert.AreEqual((ushort)1, fieldVersion.Version);
-            Assert.IsTrue(fieldVersion.IsVersion);
-            Assert.IsFalse(fieldVersion.IsDeprecated.GetValueOrDefault());
-            Assert.IsFalse(fieldVersion.IsOpaque.GetValueOrDefault());
-            var fieldCipherText = fd.SubDataFields.Skip(1).First();
-            Assert.AreEqual(nameof(EncryptedBlob.CipherText), fieldCipherText.Name);
-            Assert.AreEqual(ILTagId.ByteArray, fieldCipherText.TagId);
-            Assert.AreEqual((ushort)1, fieldCipherText.Version);
-            Assert.IsFalse(fieldCipherText.IsVersion);
-            Assert.IsFalse(fieldCipherText.IsDeprecated.GetValueOrDefault());
-            Assert.IsTrue(fieldCipherText.IsOpaque.GetValueOrDefault());
-            var fieldKeys = fd.SubDataFields.Skip(2).First();
-            Assert.AreEqual(nameof(EncryptedBlob.ReadingKeys), fieldKeys.Name);
-            Assert.AreEqual(ILTagId.ILTagArray, fieldKeys.TagId);
-            Assert.AreEqual((ushort)1, fieldKeys.Version);
-            Assert.IsFalse(fieldKeys.IsVersion);
-            Assert.IsFalse(fieldKeys.IsDeprecated.GetValueOrDefault());
-            Assert.IsFalse(fieldKeys.IsOpaque.GetValueOrDefault());
-            Assert.AreEqual(ILTagId.ReadingKey, fieldKeys.ElementTagId.GetValueOrDefault());
-        }
+    [Test]
+    public void ValidateFieldDefinition() {
+        var fd = EncryptedBlob.FieldDefinition;
+        Assert.IsNotNull(fd);
+        Assert.AreEqual(nameof(EncryptedBlob), fd.Name);
+        Assert.AreEqual(ILTagId.EncryptedBlob, fd.TagId);
+        Assert.IsTrue(fd.HasSubFields, "Must have subfields");
+        Assert.IsFalse(fd.IsEnumeration, "Should not be an enumeration");
+        Assert.AreEqual(3, fd.SubDataFields.SafeCount());
+        var fieldVersion = fd.SubDataFields.First();
+        Assert.AreEqual(nameof(EncryptedBlob.Version), fieldVersion.Name);
+        Assert.AreEqual(ILTagId.UInt16, fieldVersion.TagId);
+        Assert.AreEqual((ushort)1, fieldVersion.Version);
+        Assert.IsTrue(fieldVersion.IsVersion);
+        Assert.IsFalse(fieldVersion.IsDeprecated.GetValueOrDefault());
+        Assert.IsFalse(fieldVersion.IsOpaque.GetValueOrDefault());
+        var fieldCipherText = fd.SubDataFields.Skip(1).First();
+        Assert.AreEqual(nameof(EncryptedBlob.CipherText), fieldCipherText.Name);
+        Assert.AreEqual(ILTagId.ByteArray, fieldCipherText.TagId);
+        Assert.AreEqual((ushort)1, fieldCipherText.Version);
+        Assert.IsFalse(fieldCipherText.IsVersion);
+        Assert.IsFalse(fieldCipherText.IsDeprecated.GetValueOrDefault());
+        Assert.IsTrue(fieldCipherText.IsOpaque.GetValueOrDefault());
+        var fieldKeys = fd.SubDataFields.Skip(2).First();
+        Assert.AreEqual(nameof(EncryptedBlob.ReadingKeys), fieldKeys.Name);
+        Assert.AreEqual(ILTagId.ILTagArray, fieldKeys.TagId);
+        Assert.AreEqual((ushort)1, fieldKeys.Version);
+        Assert.IsFalse(fieldKeys.IsVersion);
+        Assert.IsFalse(fieldKeys.IsDeprecated.GetValueOrDefault());
+        Assert.IsFalse(fieldKeys.IsOpaque.GetValueOrDefault());
+        Assert.AreEqual(ILTagId.ReadingKey, fieldKeys.ElementTagId.GetValueOrDefault());
     }
 }

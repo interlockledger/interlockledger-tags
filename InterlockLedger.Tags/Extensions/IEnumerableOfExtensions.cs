@@ -30,20 +30,14 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class IEnumerableOfExtensions
 {
-    public static class IEnumerableOfExtensions
-    {
-        public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag {
-            convert.Required(nameof(convert));
-            return new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
-        }
-
-        public static ILTagArrayOfILTag<ILTagOf<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagOf<T>> convert)
-            => ToTagArray(list, convert);
+    public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag {
+        convert.Required();
+        return new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
     }
+
+    public static ILTagArrayOfILTag<ILTagOf<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagOf<T>> convert)
+        => ToTagArray(list, convert);
 }

@@ -30,18 +30,14 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class SigningContext : ISigningContext
 {
-    public class SigningContext : ISigningContext
-    {
-        public SigningContext(InterlockSigningKey key, ITimeStamper timeStamper) {
-            Key = key.Required(nameof(key));
-            TimeStamper = timeStamper.Required(nameof(timeStamper));
-        }
-
-        public ISigningKey Key { get; }
-        public ITimeStamper TimeStamper { get; }
+    public SigningContext(InterlockSigningKey key, ITimeStamper timeStamper) {
+        Key = key.Required();
+        TimeStamper = timeStamper.Required();
     }
+
+    public ISigningKey Key { get; }
+    public ITimeStamper TimeStamper { get; }
 }

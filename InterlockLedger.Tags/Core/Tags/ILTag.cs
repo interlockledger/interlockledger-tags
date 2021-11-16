@@ -30,80 +30,75 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+namespace InterlockLedger.Tags;
 
-namespace InterlockLedger.Tags
+public abstract class ILTag : ITag
 {
-    public abstract class ILTag : ITag
-    {
-        [JsonIgnore]
-        public abstract object AsJson { get; }
+    [JsonIgnore]
+    public abstract object AsJson { get; }
 
-        [JsonIgnore]
-        public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
+    [JsonIgnore]
+    public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
 
-        [JsonIgnore]
-        public virtual string Formatted => "?";
+    [JsonIgnore]
+    public virtual string Formatted => "?";
 
-        public ulong TagId { get; set; }
+    public ulong TagId { get; set; }
 
-        [JsonIgnore]
-        public ITag Traits => this;
+    [JsonIgnore]
+    public ITag Traits => this;
 
-        public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
+    public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
 
-        public void Changed() {
-            _encodedBytes = null;
-            OnChanged();
-        }
+    public void Changed() {
+        _encodedBytes = null;
+        OnChanged();
+    }
 
-        protected virtual void OnChanged() { }
+    protected virtual void OnChanged() { }
 
-        public async virtual Task<Stream> OpenReadingStreamAsync() {
-            if (KeepEncodedBytesInMemory)
-                return new MemoryStream(EncodedBytes, writable: false);
-            var s = await BuildTempStreamAsync();
+    public virtual async Task<Stream> OpenReadingStreamAsync() {
+        if (KeepEncodedBytesInMemory)
+            return new MemoryStream(EncodedBytes, writable: false);
+        var s = await BuildTempStreamAsync();
+        s.ILIntEncode(TagId);
+        await SerializeInnerAsync(s);
+        s.Flush();
+        s.Position = 0;
+        return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
+    }
+
+    public async Task<Stream> SerializeIntoAsync(Stream s) {
+        if (s is not null) {
             s.ILIntEncode(TagId);
             await SerializeInnerAsync(s);
             s.Flush();
-            s.Position = 0;
-            return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
         }
+        return s;
+    }
 
-        public async Task<Stream> SerializeIntoAsync(Stream s) {
-            if (s is not null) {
-                s.ILIntEncode(TagId);
-                await SerializeInnerAsync(s);
-                s.Flush();
-            }
-            return s;
-        }
+    public override string ToString() => GetType().Name + $"#{TagId}: " + Formatted;
 
-        public override string ToString() => GetType().Name + $"#{TagId}: " + Formatted;
+    public virtual bool ValueIs<TV>(out TV value) {
+        value = default;
+        return false;
+    }
 
-        public virtual bool ValueIs<TV>(out TV value) {
-            value = default;
-            return false;
-        }
+    protected ILTag(ulong tagId) => TagId = tagId;
 
-        protected ILTag(ulong tagId) => TagId = tagId;
+    protected virtual bool KeepEncodedBytesInMemory => true;
 
-        protected virtual bool KeepEncodedBytesInMemory => true;
+    protected virtual Task<Stream> BuildTempStreamAsync() => Task.FromResult<Stream>(new MemoryStream());
 
-        protected virtual Task<Stream> BuildTempStreamAsync() => Task.FromResult<Stream>(new MemoryStream());
+    protected abstract Task SerializeInnerAsync(Stream s);
 
-        protected abstract Task SerializeInnerAsync(Stream s);
+    private byte[] _encodedBytes;
 
-        private byte[] _encodedBytes;
-
-        private byte[] ToBytes() {
-            using var stream = new MemoryStream();
-            stream.ILIntEncode(TagId);
-            SerializeInnerAsync(stream);
-            stream.Flush();
-            return stream.ToArray();
-        }
+    private byte[] ToBytes() {
+        using var stream = new MemoryStream();
+        stream.ILIntEncode(TagId);
+        SerializeInnerAsync(stream);
+        stream.Flush();
+        return stream.ToArray();
     }
 }

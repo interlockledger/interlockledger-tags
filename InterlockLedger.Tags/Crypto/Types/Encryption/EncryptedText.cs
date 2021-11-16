@@ -30,54 +30,48 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class EncryptedText : VersionedValue<EncryptedText>
 {
-    public class EncryptedText : VersionedValue<EncryptedText>
-    {
-        public static readonly DataField FieldDefinition = new EncryptedText().FieldModel;
+    public static readonly DataField FieldDefinition = new EncryptedText().FieldModel;
 
-        public EncryptedText() : base(ILTagId.EncryptedText, EncryptedValue<ILTagString>.CurrentVersion)
-            => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText);
+    public EncryptedText() : base(ILTagId.EncryptedText, EncryptedValue<ILTagString>.CurrentVersion)
+        => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText);
 
-        public EncryptedText(CipherAlgorithm cipher, string clearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
-            => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText, cipher, encryptor, new ILTagString(clearText), author, readers);
+    public EncryptedText(CipherAlgorithm cipher, string clearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
+        => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText, cipher, encryptor, new ILTagString(clearText), author, readers);
 
-        public override object AsJson {
-            get {
-                _encrypted.Version = Version;
-                return _encrypted.AsJson;
-            }
+    public override object AsJson {
+        get {
+            _encrypted.Version = Version;
+            return _encrypted.AsJson;
         }
-
-        public CipherAlgorithm Cipher => _encrypted.Cipher;
-        public byte[] CipherText => _encrypted.CipherText;
-        public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
-        public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
-        public override string TypeName => nameof(EncryptedText);
-
-        public static EncryptedText Embed(EncryptedValue<ILTagString> value)
-            => new(value.Required(nameof(value)));
-
-        public ILTagString Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
-
-        public string DecryptText(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
-
-        public override EncryptedText FromJson(object json) => new(_encrypted.FromJson(json));
-
-        protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
-
-        protected override string TypeDescription => "A text encrypted for some readers";
-
-        protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
-
-        protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
-
-        private readonly EncryptedValue<ILTagString> _encrypted;
-
-        private EncryptedText(EncryptedValue<ILTagString> encrypted) : base(ILTagId.EncryptedText, encrypted.Version) => _encrypted = encrypted;
     }
+
+    public CipherAlgorithm Cipher => _encrypted.Cipher;
+    public byte[] CipherText => _encrypted.CipherText;
+    public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
+    public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
+    public override string TypeName => nameof(EncryptedText);
+
+    public static EncryptedText Embed(EncryptedValue<ILTagString> value)
+        => new(value.Required());
+
+    public ILTagString Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
+
+    public string DecryptText(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
+
+    public override EncryptedText FromJson(object json) => new(_encrypted.FromJson(json));
+
+    protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
+
+    protected override string TypeDescription => "A text encrypted for some readers";
+
+    protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
+
+    protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
+
+    private readonly EncryptedValue<ILTagString> _encrypted;
+
+    private EncryptedText(EncryptedValue<ILTagString> encrypted) : base(ILTagId.EncryptedText, encrypted.Version) => _encrypted = encrypted;
 }

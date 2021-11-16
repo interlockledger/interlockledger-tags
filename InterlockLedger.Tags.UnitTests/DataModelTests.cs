@@ -30,262 +30,260 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[TestFixture]
+public class DataModelTests
 {
-    [TestFixture]
-    public class DataModelTests
-    {
-        [Test]
-        public void BadCompatibilityElementTagIdChangedDataModel() => Assert.IsFalse(_bad_ElementTagIdChangedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityElementTagIdChangedDataModel() => Assert.IsFalse(_bad_ElementTagIdChangedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityFieldTagIdChangedDataModel() => Assert.IsFalse(_bad_FieldTagIdChangedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityFieldTagIdChangedDataModel() => Assert.IsFalse(_bad_FieldTagIdChangedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityIndexUniquenessDataModel() => Assert.IsFalse(_bad_IndexUniquenessDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityIndexUniquenessDataModel() => Assert.IsFalse(_bad_IndexUniquenessDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityLessIndexedDataModel() => Assert.IsFalse(_bad_LessIndexedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityLessIndexedDataModel() => Assert.IsFalse(_bad_LessIndexedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityOpaquedDataModel() => Assert.IsFalse(_bad_OpaquedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityOpaquedDataModel() => Assert.IsFalse(_bad_OpaquedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityRenamedDataModel() => Assert.IsFalse(_bad_RenamedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityRenamedDataModel() => Assert.IsFalse(_bad_RenamedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityRenamedFieldDataModel() => Assert.IsFalse(_bad_RenamedFieldDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityRenamedFieldDataModel() => Assert.IsFalse(_bad_RenamedFieldDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityRenamedIndexDataModel() => Assert.IsFalse(_bad_RenamedIndexDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityRenamedIndexDataModel() => Assert.IsFalse(_bad_RenamedIndexDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityRenumberedDataModel() => Assert.IsFalse(_bad_RenumberedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityRenumberedDataModel() => Assert.IsFalse(_bad_RenumberedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityShorterDataModel() => Assert.IsFalse(_bad_ShorterDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void BadCompatibilityShorterDataModel() => Assert.IsFalse(_bad_ShorterDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void BadCompatibilityUnblobedAndIndexedDataModel() {
-            Assert.IsTrue(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_baseDataModel));
-            Assert.IsFalse(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_ok_UnblobedDataModel));
-        }
+    [Test]
+    public void BadCompatibilityUnblobedAndIndexedDataModel() {
+        Assert.IsTrue(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_baseDataModel));
+        Assert.IsFalse(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_ok_UnblobedDataModel));
+    }
 
-        [Test]
-        public void GoodCompatibilityUnblobedAndIndexedDataModel() {
-            Assert.IsTrue(_ok_UnblobedAndIndexedDataModel.IsCompatible(_baseDataModel));
-            Assert.IsTrue(_ok_UnblobedAndIndexedDataModel.IsCompatible(_ok_UnblobedDataModel));
-            Assert.IsTrue(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_baseDataModel));
-            Assert.IsTrue(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_ok_UnblobedDataModel));
-        }
+    [Test]
+    public void GoodCompatibilityUnblobedAndIndexedDataModel() {
+        Assert.IsTrue(_ok_UnblobedAndIndexedDataModel.IsCompatible(_baseDataModel));
+        Assert.IsTrue(_ok_UnblobedAndIndexedDataModel.IsCompatible(_ok_UnblobedDataModel));
+        Assert.IsTrue(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_baseDataModel));
+        Assert.IsTrue(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_ok_UnblobedDataModel));
+    }
 
-        [Test]
-        public void GoodCompatibilityUnblobedDataModel() => Assert.IsTrue(_ok_UnblobedDataModel.IsCompatible(_baseDataModel));
+    [Test]
+    public void GoodCompatibilityUnblobedDataModel() => Assert.IsTrue(_ok_UnblobedDataModel.IsCompatible(_baseDataModel));
 
-        [Test]
-        public void HasField() {
-            ShouldHave("DateOfPurchase");
-            ShouldHave("dateofpurchase");
-            ShouldHave("Buyer");
-            ShouldHave("Buyer.Id");
-            ShouldHave("Blob");
-            ShouldHave("Blob.Balance");
-            ShouldNotHave("Date_Of_Purchase");
-            ShouldNotHave("Buyer.Balance");
-            ShouldNotHave(null);
-            ShouldNotHave("");
-            ShouldNotHave("    ");
-            ShouldNotHave(" .  ");
-            ShouldNotHave("Buyer.");
-            ShouldNotHave("Buyer..ID");
+    [Test]
+    public void HasField() {
+        ShouldHave("DateOfPurchase");
+        ShouldHave("dateofpurchase");
+        ShouldHave("Buyer");
+        ShouldHave("Buyer.Id");
+        ShouldHave("Blob");
+        ShouldHave("Blob.Balance");
+        ShouldNotHave("Date_Of_Purchase");
+        ShouldNotHave("Buyer.Balance");
+        ShouldNotHave(null);
+        ShouldNotHave("");
+        ShouldNotHave("    ");
+        ShouldNotHave(" .  ");
+        ShouldNotHave("Buyer.");
+        ShouldNotHave("Buyer..ID");
 
-            static void ShouldHave(string fieldName)
-                => Assert.IsTrue(_ok_UnblobedDataModel.HasField(fieldName), $"Should have '{fieldName}' field");
+        static void ShouldHave(string fieldName)
+            => Assert.IsTrue(_ok_UnblobedDataModel.HasField(fieldName), $"Should have '{fieldName}' field");
 
-            static void ShouldNotHave(string fieldName)
-                => Assert.IsFalse(_ok_UnblobedDataModel.HasField(fieldName), $"Should not have '{fieldName}' field");
-        }
+        static void ShouldNotHave(string fieldName)
+            => Assert.IsFalse(_ok_UnblobedDataModel.HasField(fieldName), $"Should not have '{fieldName}' field");
+    }
 
-        private static readonly DataModel _bad_ElementTagIdChangedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_ElementTagIdChangedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, ElementTagId = 12, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_FieldTagIdChangedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_FieldTagIdChangedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 12, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_IndexUniquenessDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_IndexUniquenessDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { IsUnique = true, ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { IsUnique = true, ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_LessIndexedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_LessIndexedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = Array.Empty<DataIndex>()
-        };
+        Indexes = Array.Empty<DataIndex>()
+    };
 
-        private static readonly DataModel _bad_OpaquedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_OpaquedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1, IsOpaque = true },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_RenamedDataModel = new DataModel {
-            PayloadName = "Test_Renamed",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_RenamedDataModel = new() {
+        PayloadName = "Test_Renamed",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_RenamedFieldDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_RenamedFieldDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Vendor", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_RenamedIndexDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_RenamedIndexDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { Name = "History", ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { Name = "History", ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_RenumberedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 101,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_RenumberedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 101,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_ShorterDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_ShorterDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _bad_UnblobedAndIndexedMisversionedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _bad_UnblobedAndIndexedMisversionedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 8, Name= "Blob", Version = 2,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 6, Name= "Balance", Version = 1} }},
                 },
-            Indexes = new DataIndex[] {
+        Indexes = new DataIndex[] {
                     new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" },
                     new DataIndex { ElementsAsString = "Blob.Balance" }}
-        };
+    };
 
-        private static readonly DataModel _baseDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _baseDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 5, Name= "Blob", IsOpaque = true, Version = 1},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _ok_UnblobedAndIndexedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _ok_UnblobedAndIndexedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 8, Name= "Blob", Version = 2,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 6, Name= "Balance", Version = 2} }},
                 },
-            Indexes = new DataIndex[] {
+        Indexes = new DataIndex[] {
                     new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" },
                     new DataIndex { ElementsAsString = "Blob.Balance" }}
-        };
+    };
 
-        private static readonly DataModel _ok_UnblobedDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _ok_UnblobedDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
                     new DataField() { TagId = 8, Name= "Blob", Version = 2,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 6, Name= "Balance", Version = 2} }},
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 
-        private static readonly DataModel _ok_UnblobedWithEnumerationDataModel = new DataModel {
-            PayloadName = "Test",
-            PayloadTagId = 1,
-            DataFields = new DataField[] {
+    private static readonly DataModel _ok_UnblobedWithEnumerationDataModel = new() {
+        PayloadName = "Test",
+        PayloadTagId = 1,
+        DataFields = new DataField[] {
                     new DataField() { TagId = 2, Name= "DateOfPurchase", Cast = CastType.DateTime, Version = 1},
                     new DataField() { TagId = 3, Name= "Buyer", Version = 1,
                         SubDataFields  = new DataField [] { new DataField() { TagId = 4, Name= "Id", Version = 1} } },
@@ -301,7 +299,6 @@ namespace InterlockLedger.Tags
                         }
                     }
                 },
-            Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
-        };
-    }
+        Indexes = new DataIndex[] { new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" } }
+    };
 }

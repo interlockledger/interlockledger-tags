@@ -30,28 +30,23 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ITag : IFormatted
 {
-    public interface ITag : IFormatted
-    {
-        object AsJson { get; }
+    object AsJson { get; }
 
-        bool IsNull => TagId == ILTagId.Null;
+    bool IsNull => TagId == ILTagId.Null;
 
-        ulong TagId { get; }
+    ulong TagId { get; }
 
-        T As<T>() where T : ITag => this is T tag ? tag : throw new InvalidDataException($"Not an {typeof(T).Name}");
+    T As<T>() where T : ITag => this is T tag ? tag : throw new InvalidDataException($"Not an {typeof(T).Name}");
 
-        Task<Stream> SerializeIntoAsync(Stream s);
+    Task<Stream> SerializeIntoAsync(Stream s);
 
-        void ValidateTagId(ulong decodedTagId) {
-            if (decodedTagId != TagId)
-                throw new InvalidDataException($"This is not an {GetType().Name}");
-        }
-
-        bool ValueIs<TV>(out TV value);
+    void ValidateTagId(ulong decodedTagId) {
+        if (decodedTagId != TagId)
+            throw new InvalidDataException($"This is not an {GetType().Name}");
     }
+
+    bool ValueIs<TV>(out TV value);
 }

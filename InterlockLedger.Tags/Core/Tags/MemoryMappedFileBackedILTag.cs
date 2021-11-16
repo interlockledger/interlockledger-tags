@@ -30,67 +30,62 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Threading.Tasks;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
+public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T>
 {
-    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T>
-    {
-        public MemoryMappedFileBackedILTag(ulong tagId, MemoryMappedViewStream mmvs, long offset, ulong length) : base(tagId, default) {
-            _mmvs = mmvs.Required(nameof(mmvs));
-            Initialize(offset, length, mmvs.Length);
-        }
+    public MemoryMappedFileBackedILTag(ulong tagId, MemoryMappedViewStream mmvs, long offset, ulong length) : base(tagId, default) {
+        _mmvs = mmvs.Required();
+        Initialize(offset, length, mmvs.Length);
+    }
 
-        public override object AsJson => null;
+    public override object AsJson => null;
 
-        public override string Formatted => TagTypeName;
+    public override string Formatted => TagTypeName;
 
-        public ulong Length { get; private set; }
-        public long Offset { get; private set; }
+    public ulong Length { get; private set; }
+    public long Offset { get; private set; }
 
-        public Stream ReadingStream =>
-            Length == 0
-                ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
-                : new StreamSpan(_mmvs, Offset, Length, closeWrappedStreamOnDispose: false);
+    public Stream ReadingStream =>
+        Length == 0
+            ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")
+            : new StreamSpan(_mmvs, Offset, Length, closeWrappedStreamOnDispose: false);
 
-        public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult(ReadingStream);
+    public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult(ReadingStream);
 
-        public override bool ValueIs<TV>(out TV value) {
-            value = default;
-            return false;
-        }
+    public override bool ValueIs<TV>(out TV value) {
+        value = default;
+        return false;
+    }
 
-        protected string TagTypeName => $"{GetType().Name}#{TagId}";
+    protected string TagTypeName => $"{GetType().Name}#{TagId}";
 
-        protected override T ValueFromStream(StreamSpan s) => default;
+    protected override T ValueFromStream(StreamSpan s) => default;
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            using var streamSlice = new StreamSpan(_mmvs, Offset, Length);
-            streamSlice.CopyTo(s, _bufferLength);
-            return Task.FromResult(s);
-        }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        using var streamSlice = new StreamSpan(_mmvs, Offset, Length);
+        streamSlice.CopyTo(s, _bufferLength);
+        return Task.FromResult(s);
+    }
 
-        protected override ulong CalcValueLength() => Length;
+    protected override ulong CalcValueLength() => Length;
 
-        private const int _bufferLength = 16 * 1024;
-        private readonly MemoryMappedViewStream _mmvs;
+    private const int _bufferLength = 16 * 1024;
+    private readonly MemoryMappedViewStream _mmvs;
 
-        private string GetDebuggerDisplay() => $"{TagTypeName}: [{Offset}:{Length}]";
+    private string GetDebuggerDisplay() => $"{TagTypeName}: [{Offset}:{Length}]";
 
-        private void Initialize(long offset, ulong length, long fileLength) {
-            if (offset < 0 || offset > fileLength)
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            Offset = offset;
-            Length = length == 0
-                ? (ulong)(fileLength - offset)
-                : length >= long.MaxValue || (offset + (long)length) > fileLength
-                    ? throw new ArgumentOutOfRangeException(nameof(length))
-                    : length;
-        }
+    private void Initialize(long offset, ulong length, long fileLength) {
+        if (offset < 0 || offset > fileLength)
+            throw new ArgumentOutOfRangeException(nameof(offset));
+        Offset = offset;
+        Length = length == 0
+            ? (ulong)(fileLength - offset)
+            : length >= long.MaxValue || (offset + (long)length) > fileLength
+                ? throw new ArgumentOutOfRangeException(nameof(length))
+                : length;
     }
 }

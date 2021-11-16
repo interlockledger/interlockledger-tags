@@ -30,55 +30,49 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class EncryptedBlob : VersionedValue<EncryptedBlob>
 {
-    public class EncryptedBlob : VersionedValue<EncryptedBlob>
-    {
-        public static readonly DataField FieldDefinition = new EncryptedBlob().FieldModel;
+    public static readonly DataField FieldDefinition = new EncryptedBlob().FieldModel;
 
-        public EncryptedBlob() : base(ILTagId.EncryptedBlob, EncryptedValue<ILTagByteArray>.CurrentVersion)
-            => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob);
+    public EncryptedBlob() : base(ILTagId.EncryptedBlob, EncryptedValue<ILTagByteArray>.CurrentVersion)
+        => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob);
 
-        public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
-            => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, encryptor, new ILTagByteArray(blobInClearText), author, readers);
+    public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
+        => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, encryptor, new ILTagByteArray(blobInClearText), author, readers);
 
-        public override object AsJson {
-            get {
-                _encrypted.Version = Version;
-                return _encrypted.AsJson;
-            }
+    public override object AsJson {
+        get {
+            _encrypted.Version = Version;
+            return _encrypted.AsJson;
         }
-
-        public CipherAlgorithm Cipher => _encrypted.Cipher;
-        public byte[] CipherText => _encrypted.CipherText;
-        public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
-        public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
-        public override string TypeName => nameof(EncryptedBlob);
-
-        public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
-            => new(value.Required(nameof(value)));
-
-        public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
-
-        public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
-
-        public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
-
-        public override EncryptedBlob FromJson(object json) => new(_encrypted.FromJson(json));
-
-        protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
-        protected override string TypeDescription => "An array of bytes encrypted for some readers";
-
-        protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
-
-        protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
-
-        private readonly EncryptedValue<ILTagByteArray> _encrypted;
-
-        private EncryptedBlob(EncryptedValue<ILTagByteArray> encrypted) : base(ILTagId.EncryptedBlob, encrypted.Version) => _encrypted = encrypted;
     }
+
+    public CipherAlgorithm Cipher => _encrypted.Cipher;
+    public byte[] CipherText => _encrypted.CipherText;
+    public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
+    public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
+    public override string TypeName => nameof(EncryptedBlob);
+
+    public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
+        => new(value.Required());
+
+    public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
+
+    public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
+
+    public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
+
+    public override EncryptedBlob FromJson(object json) => new(_encrypted.FromJson(json));
+
+    protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
+    protected override string TypeDescription => "An array of bytes encrypted for some readers";
+
+    protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
+
+    protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
+
+    private readonly EncryptedValue<ILTagByteArray> _encrypted;
+
+    private EncryptedBlob(EncryptedValue<ILTagByteArray> encrypted) : base(ILTagId.EncryptedBlob, encrypted.Version) => _encrypted = encrypted;
 }

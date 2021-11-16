@@ -30,101 +30,93 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
+namespace InterlockLedger.Tags;
 
-namespace InterlockLedger.Tags
+public class DataIndex : IEquatable<DataIndex>
 {
-    public class DataIndex : IEquatable<DataIndex>
-    {
-        public const string PrimaryIndexName = "~Primary~";
+    public const string PrimaryIndexName = "~Primary~";
 
-        public IEnumerable<DataIndexElement> Elements { get; set; }
+    public IEnumerable<DataIndexElement> Elements { get; set; }
 
-        [JsonIgnore]
-        public string ElementsAsString {
-            get => Elements?.JoinedBy("|");
-            set => Elements = DataIndexElement.ParseList(value.Required(nameof(ElementsAsString)));
-        }
-
-        public bool IsUnique { get; set; }
-
-        public string Name { get; set; }
-
-        public override bool Equals(object obj) => Equals(obj as DataIndex);
-
-        public bool Equals(DataIndex other) =>
-            other != null &&
-            ElementsAsString == other.ElementsAsString &&
-            IsUnique == other.IsUnique &&
-            Name == other.Name;
-
-        public override int GetHashCode() => HashCode.Combine(ElementsAsString, IsUnique, Name);
-
-        public override string ToString() => ElementsAsString;
+    [JsonIgnore]
+    public string ElementsAsString {
+        get => Elements?.JoinedBy("|");
+        set => Elements = DataIndexElement.ParseList(value.Required());
     }
 
-    public class DataIndexElement
-    {
-        public bool DescendingOrder { get; set; }
+    public bool IsUnique { get; set; }
 
-        public string FieldPath { get; set; } // in the form 'FieldName.ChildrenFieldName'
+    public string Name { get; set; }
 
-        public string Function { get; set; }
+    public override bool Equals(object obj) => Equals(obj as DataIndex);
 
-        [JsonIgnore]
-        public bool HasFunction => !string.IsNullOrWhiteSpace(Function);
+    public bool Equals(DataIndex other) =>
+        other != null &&
+        ElementsAsString == other.ElementsAsString &&
+        IsUnique == other.IsUnique &&
+        Name == other.Name;
 
-        public override string ToString() {
-            var sb = new StringBuilder();
-            sb.Append(FieldPath);
-            var hasFunction = HasFunction;
-            if (DescendingOrder || hasFunction) {
-                sb.Append(':').Append(DescendingOrder ? "-" : "+");
-                if (hasFunction)
-                    sb.Append(':').Append(Function);
-            }
-            return sb.ToString();
+    public override int GetHashCode() => HashCode.Combine(ElementsAsString, IsUnique, Name);
+
+    public override string ToString() => ElementsAsString;
+}
+
+public class DataIndexElement
+{
+    public bool DescendingOrder { get; set; }
+
+    public string FieldPath { get; set; } // in the form 'FieldName.ChildrenFieldName'
+
+    public string Function { get; set; }
+
+    [JsonIgnore]
+    public bool HasFunction => !string.IsNullOrWhiteSpace(Function);
+
+    public override string ToString() {
+        var sb = new StringBuilder();
+        sb.Append(FieldPath);
+        var hasFunction = HasFunction;
+        if (DescendingOrder || hasFunction) {
+            sb.Append(':').Append(DescendingOrder ? "-" : "+");
+            if (hasFunction)
+                sb.Append(':').Append(Function);
         }
-
-        internal static IEnumerable<DataIndexElement> ParseList(string Value) {
-            var elements = new List<DataIndexElement>();
-            foreach (var element in Value.Split('|'))
-                elements.Add(FromParts(element.Split(':')));
-            return elements;
-        }
-
-        private static DataIndexElement FromParts(string[] parts) => new() {
-            FieldPath = parts[0],
-            DescendingOrder = parts.Length > 1 && parts[1] == "-",
-            Function = parts.Length > 2 ? parts[2].TrimToNull() : null
-        };
+        return sb.ToString();
     }
 
-    public class ILTagDataIndex : ILTagExplicit<DataIndex>
-    {
-        public ILTagDataIndex(DataIndex index) : base(ILTagId.DataIndex, index) {
-        }
-
-        public ILTagDataIndex(Stream s) : base(ILTagId.DataIndex, s) {
-        }
-
-        protected override DataIndex FromBytes(byte[] bytes)
-            => FromBytesHelper(bytes, s => new DataIndex {
-                Name = s.DecodeString(),
-                IsUnique = s.DecodeBool(),
-                ElementsAsString = s.DecodeString(),
-            });
-
-        protected override byte[] ToBytes(DataIndex value)
-             => TagHelpers.ToBytesHelper(s => {
-                 s.EncodeString(Value.Name);
-                 s.EncodeBool(Value.IsUnique);
-                 s.EncodeString(Value.ElementsAsString);
-             });
+    internal static IEnumerable<DataIndexElement> ParseList(string Value) {
+        var elements = new List<DataIndexElement>();
+        foreach (var element in Value.Split('|'))
+            elements.Add(FromParts(element.Split(':')));
+        return elements;
     }
+
+    private static DataIndexElement FromParts(string[] parts) => new() {
+        FieldPath = parts[0],
+        DescendingOrder = parts.Length > 1 && parts[1] == "-",
+        Function = parts.Length > 2 ? parts[2].TrimToNull() : null
+    };
+}
+
+public class ILTagDataIndex : ILTagExplicit<DataIndex>
+{
+    public ILTagDataIndex(DataIndex index) : base(ILTagId.DataIndex, index) {
+    }
+
+    public ILTagDataIndex(Stream s) : base(ILTagId.DataIndex, s) {
+    }
+
+    protected override DataIndex FromBytes(byte[] bytes)
+        => FromBytesHelper(bytes, s => new DataIndex {
+            Name = s.DecodeString(),
+            IsUnique = s.DecodeBool(),
+            ElementsAsString = s.DecodeString(),
+        });
+
+    protected override byte[] ToBytes(DataIndex value)
+         => TagHelpers.ToBytesHelper(s => {
+             s.EncodeString(Value.Name);
+             s.EncodeBool(Value.IsUnique);
+             s.EncodeString(Value.ElementsAsString);
+         });
 }

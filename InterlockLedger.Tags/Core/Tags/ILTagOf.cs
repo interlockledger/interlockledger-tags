@@ -31,46 +31,40 @@
 // ******************************************************************************************************************************
 #nullable enable
 
-using System;
-using System.IO;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public abstract class ILTagOf<T> : ILTag
 {
-    public abstract class ILTagOf<T> : ILTag
-    {
-        [JsonIgnore]
+    [JsonIgnore]
 #pragma warning disable CS8603 // Possible null reference return.
-        public override object AsJson => Value;
+    public override object AsJson => Value;
 #pragma warning restore CS8603 // Possible null reference return.
 
-        public override string Formatted => Value is IFormatted v ? v.Formatted : Value?.ToString() ?? "??";
+    public override string Formatted => Value is IFormatted v ? v.Formatted : Value?.ToString() ?? "??";
 
-        public T Value { get; set; }
+    public T Value { get; set; }
 
-        public override bool ValueIs<TV>(out TV value) {
-            if (Value is TV tvalue) {
-                value = tvalue;
-                return true;
-            }
+    public override bool ValueIs<TV>(out TV value) {
+        if (Value is TV tvalue) {
+            value = tvalue;
+            return true;
+        }
 #pragma warning disable CS8601 // Possible null reference assignment.
-            value = default;
+        value = default;
 #pragma warning restore CS8601 // Possible null reference assignment.
-            return false;
-        }
-
-        protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
-
-        protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
-            setup?.Invoke(this);
-            Value = DeserializeInner(s);
-        }
-
-        protected abstract T DeserializeInner(Stream s);
-
-        protected abstract T ValueFromStream(StreamSpan s);
-
-        protected abstract Task<Stream> ValueToStreamAsync(Stream s);
+        return false;
     }
+
+    protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
+
+    protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
+        setup?.Invoke(this);
+        Value = DeserializeInner(s);
+    }
+
+    protected abstract T DeserializeInner(Stream s);
+
+    protected abstract T ValueFromStream(StreamSpan s);
+
+    protected abstract Task<Stream> ValueToStreamAsync(Stream s);
 }

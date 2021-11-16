@@ -30,33 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagUnknown : ILTagExplicit<byte[]>
 {
-    public class ILTagUnknown : ILTagExplicit<byte[]>
-    {
-        public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
-        }
-
-        public ILTagUnknown(ulong tagId, byte[] bytes) : base(tagId, bytes) {
-        }
-
-        public ILTagUnknown(IDataModel model, Stream s)
-            : base((model.Required(nameof(model))).PayloadTagId, s)
-            => Model = model;
-
-        public ILTagUnknown(IDataModel model, byte[] bytes)
-            : base((model.Required(nameof(model))).PayloadTagId, bytes)
-            => Model = model;
-
-        public override object AsJson => (object)Model?.ToJson(EncodedBytes) ?? Value;
-
-        public IDataModel Model { get; }
-
-        protected override byte[] FromBytes(byte[] bytes) => bytes;
-
-        protected override byte[] ToBytes(byte[] value) => value;
+    public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
     }
+
+    public ILTagUnknown(ulong tagId, byte[] bytes) : base(tagId, bytes) {
+    }
+
+    public ILTagUnknown(IDataModel model, Stream s)
+        : base(model.Required().PayloadTagId, s)
+        => Model = model;
+
+    public ILTagUnknown(IDataModel model, byte[] bytes)
+        : base(model.Required().PayloadTagId, bytes)
+        => Model = model;
+
+    public override object AsJson => (object)Model?.ToJson(EncodedBytes) ?? Value;
+
+    public IDataModel Model { get; }
+
+    protected override byte[] FromBytes(byte[] bytes) => bytes;
+
+    protected override byte[] ToBytes(byte[] value) => value;
 }

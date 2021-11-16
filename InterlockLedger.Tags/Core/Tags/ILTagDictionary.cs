@@ -30,37 +30,31 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagDictionary<T> : ILTagAbstractDictionary<T> where T : ILTag
 {
-    public class ILTagDictionary<T> : ILTagAbstractDictionary<T> where T : ILTag
-    {
-        public ILTagDictionary(params (string key, T value)[] pairs) : this(pairs.ToDictionary(p => p.key, pp => pp.value)) {
-        }
-
-        public ILTagDictionary(object opaqueValue) : this(Elicit(opaqueValue)) {
-        }
-
-        public ILTagDictionary(Dictionary<string, T> value) : base(ILTagId.Dictionary, value) {
-        }
-
-        public override object AsJson => Value.ToDictionary(p => p.Key, pp => new { pp.Value.TagId, Value = pp.Value.AsJson });
-
-        internal ILTagDictionary(Stream s) : base(ILTagId.Dictionary, s) {
-        }
-
-        protected override T DecodeValue(Stream s) => s.Decode<T>();
-
-        protected override void EncodeValue(Stream s, T value) => s.EncodeTag(value);
-
-        private static Dictionary<string, T> Elicit(object opaqueValue)
-            => opaqueValue switch {
-                Dictionary<string, T> dict => dict,
-                Dictionary<string, object> odict => odict.ToDictionary(p => p.Key, pp => (T)pp.Value.AsNavigable()),
-                _ => new Dictionary<string, T>()
-            };
+    public ILTagDictionary(params (string key, T value)[] pairs) : this(pairs.ToDictionary(p => p.key, pp => pp.value)) {
     }
+
+    public ILTagDictionary(object opaqueValue) : this(Elicit(opaqueValue)) {
+    }
+
+    public ILTagDictionary(Dictionary<string, T> value) : base(ILTagId.Dictionary, value) {
+    }
+
+    public override object AsJson => Value.ToDictionary(p => p.Key, pp => new { pp.Value.TagId, Value = pp.Value.AsJson });
+
+    internal ILTagDictionary(Stream s) : base(ILTagId.Dictionary, s) {
+    }
+
+    protected override T DecodeValue(Stream s) => s.Decode<T>();
+
+    protected override void EncodeValue(Stream s, T value) => s.EncodeTag(value);
+
+    private static Dictionary<string, T> Elicit(object opaqueValue)
+        => opaqueValue switch {
+            Dictionary<string, T> dict => dict,
+            Dictionary<string, object> odict => odict.ToDictionary(p => p.Key, pp => (T)pp.Value.AsNavigable()),
+            _ => new Dictionary<string, T>()
+        };
 }

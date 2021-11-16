@@ -30,11 +30,9 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ISigningContext
 {
-    public interface ISigningContext
-    {
-        ISigningKey Key { get; }
-        ITimeStamper TimeStamper { get; }
-    }
+    ISigningKey Key { get; }
+    ITimeStamper TimeStamper { get; }
 }

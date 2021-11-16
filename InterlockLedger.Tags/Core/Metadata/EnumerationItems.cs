@@ -30,85 +30,80 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text.Json.Serialization;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+
+[TypeConverter(typeof(TypeCustomConverter<EnumerationItems>))]
+[JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
+public class EnumerationItems : ITextual<EnumerationItems>
 {
-    [TypeConverter(typeof(TypeCustomConverter<EnumerationItems>))]
-    [JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
-    public class EnumerationItems : ITextual<EnumerationItems>
+    public EnumerationItems() { }
+
+    public EnumerationItems(string textualRepresentation) {
+        var items = textualRepresentation.Safe()
+                                         .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
+                                         .Select(t => new FullEnumerationDetails(t));
+        _details.AddRange(items);
+    }
+
+    public EnumerationItems(Dictionary<ulong, EnumerationDetails> values) => _ = Resolve(values, ConvertFromDictionary);
+
+    [JsonIgnore]
+    public bool IsEmpty => _details.None();
+
+    public bool IsInvalid { get; }
+
+    [JsonIgnore]
+    public string TextualRepresentation => IsEmpty ? null : $"{_detailSeparator}" + _details.JoinedBy($"{_detailSeparator}");
+
+    public EnumerationItems ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation, ConvertFromString);
+
+    internal const char _detailSeparator = '#';
+
+    internal EnumerationDictionary UpdateFrom() => IsEmpty ? null : ToDictionary();
+
+    internal class FullEnumerationDetails : EnumerationDetails
     {
-        public EnumerationItems() { }
+        public FullEnumerationDetails() { }
 
-        public EnumerationItems(string textualRepresentation) {
-            var items = textualRepresentation.Safe()
-                                             .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
-                                             .Select(t => new FullEnumerationDetails(t));
-            _details.AddRange(items);
-        }
+        public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
 
-        public EnumerationItems(Dictionary<ulong, EnumerationDetails> values) => _ = Resolve(values, ConvertFromDictionary);
+        public ulong Index { get; set; }
+        public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
 
-        [JsonIgnore]
-        public bool IsEmpty => _details.None();
+        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
 
-        public bool IsInvalid { get; }
-
-        [JsonIgnore]
-        public string TextualRepresentation => IsEmpty ? null : $"{_detailSeparator}" + _details.JoinedBy($"{_detailSeparator}");
-
-        public EnumerationItems ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation, ConvertFromString);
-
-        internal const char _detailSeparator = '#';
-
-        internal EnumerationDictionary UpdateFrom() => IsEmpty ? null : ToDictionary();
-
-        internal class FullEnumerationDetails : EnumerationDetails
-        {
-            public FullEnumerationDetails() { }
-
-            public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
-
-            public ulong Index { get; set; }
-            public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
-
-            public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
-
-            internal FullEnumerationDetails FromTextualRepresentation(string s) {
-                if (s is null)
-                    throw new ArgumentNullException(nameof(s));
-                var parts = s.Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
-                Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
-                Name = parts[1];
-                Description = parts.Length > 2 ? parts[2] : null;
-                return this;
-            }
-
-            private const char _fieldSeparator = '|';
-
-            private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
-        }
-
-        private readonly List<FullEnumerationDetails> _details = new();
-
-        private static IEnumerable<FullEnumerationDetails> ConvertFromDictionary(Dictionary<ulong, EnumerationDetails> values)
-            => values.Select(p => p.Value.ToFull(p.Key));
-
-        private static IEnumerable<FullEnumerationDetails> ConvertFromString(string s)
-            => s.Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries).Select(t => new FullEnumerationDetails(t));
-
-        private EnumerationItems Resolve<T>(T originalData, Func<T, IEnumerable<FullEnumerationDetails>> converter) {
-            _details.Clear();
-            if (originalData is not null)
-                _details.AddRange(converter(originalData));
+        internal FullEnumerationDetails FromTextualRepresentation(string s) {
+            if (s is null)
+                throw new ArgumentNullException(nameof(s));
+            var parts = s.Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
+            Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
+            Name = parts[1];
+            Description = parts.Length > 2 ? parts[2] : null;
             return this;
         }
 
-        private EnumerationDictionary ToDictionary() => new(_details.ToDictionary(d => d.Index, dd => dd.Shorter));
+        private const char _fieldSeparator = '|';
+
+        private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
     }
+
+    private readonly List<FullEnumerationDetails> _details = new();
+
+    private static IEnumerable<FullEnumerationDetails> ConvertFromDictionary(Dictionary<ulong, EnumerationDetails> values)
+        => values.Select(p => p.Value.ToFull(p.Key));
+
+    private static IEnumerable<FullEnumerationDetails> ConvertFromString(string s)
+        => s.Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries).Select(t => new FullEnumerationDetails(t));
+
+    private EnumerationItems Resolve<T>(T originalData, Func<T, IEnumerable<FullEnumerationDetails>> converter) {
+        _details.Clear();
+        if (originalData is not null)
+            _details.AddRange(converter(originalData));
+        return this;
+    }
+
+    private EnumerationDictionary ToDictionary() => new(_details.ToDictionary(d => d.Index, dd => dd.Shorter));
 }

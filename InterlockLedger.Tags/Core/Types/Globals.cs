@@ -32,22 +32,21 @@
 
 using System.Text.Json;
 
-namespace InterlockLedger.Tags
-{
-    public static class Globals
-    {
-        public static JsonSerializerOptions JsonOptions { get; } = new JsonSerializerOptions {
-            AllowTrailingCommas = true,
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            WriteIndented = true,
-            IgnoreNullValues = true,
-            IgnoreReadOnlyProperties = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-        };
+namespace InterlockLedger.Tags;
 
-        public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, IFormatted, new()
-            => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
-    }
+public static class Globals
+{
+    public static JsonSerializerOptions JsonOptions { get; } = new JsonSerializerOptions {
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        WriteIndented = true,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
+        IgnoreReadOnlyProperties = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, IFormatted, new()
+        => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
 }

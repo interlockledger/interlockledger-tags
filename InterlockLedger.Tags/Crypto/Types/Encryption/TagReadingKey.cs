@@ -30,64 +30,58 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
 {
-    public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
-    {
-        public TagReadingKey(string id, TagHash publicKeyHash, byte[] encryptedKey, byte[] encryptedIV)
-            : base(ILTagId.ReadingKey, new Parts(id, publicKeyHash, encryptedKey, encryptedIV)) {
-        }
-
-        public byte[] EncryptedIV => Value.EncryptedIV;
-        public byte[] EncryptedKey => Value.EncryptedKey;
-        public TagHash PublicKeyHash => Value.PublicKeyHash;
-        public string ReaderId => Value.ReaderId;
-
-        public struct Parts : IEquatable<Parts>
-        {
-            public readonly byte[] EncryptedIV;
-            public readonly byte[] EncryptedKey;
-
-            public readonly TagHash PublicKeyHash;
-
-            public readonly string ReaderId;
-
-            public Parts(string id, TagHash publicKeyHash, byte[] encryptedKey, byte[] encryptedIV) {
-                if (string.IsNullOrWhiteSpace(id))
-                    throw new ArgumentException("Must provide a non-empty id for this reading key", nameof(id));
-                ReaderId = id;
-                PublicKeyHash = publicKeyHash;
-                EncryptedKey = encryptedKey ?? throw new System.ArgumentNullException(nameof(encryptedKey));
-                EncryptedIV = encryptedIV.Required(nameof(encryptedIV));
-            }
-
-            public static bool operator !=(Parts left, Parts right) => !(left == right);
-
-            public static bool operator ==(Parts left, Parts right) => left.Equals(right);
-
-            public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
-
-            public bool Equals(Parts other) => EqualityComparer<byte[]>.Default.Equals(EncryptedIV, other.EncryptedIV) && EqualityComparer<byte[]>.Default.Equals(EncryptedKey, other.EncryptedKey) && EqualityComparer<TagHash>.Default.Equals(PublicKeyHash, other.PublicKeyHash) && ReaderId == other.ReaderId;
-
-            public override int GetHashCode() => HashCode.Combine(EncryptedIV, EncryptedKey, PublicKeyHash, ReaderId);
-
-            public override string ToString() => $"Reading key for reader {ReaderId}";
-        }
-
-        internal TagReadingKey(Stream s) : base(ILTagId.ReadingKey, s) {
-        }
-
-        protected override Parts FromBytes(byte[] bytes) =>
-            FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagHash>(), s.DecodeByteArray(), s.DecodeByteArray()));
-
-        protected override byte[] ToBytes(Parts value)
-            => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.ReaderId)
-                                   .EncodeTag(Value.PublicKeyHash)
-                                   .EncodeByteArray(Value.EncryptedKey)
-                                   .EncodeByteArray(Value.EncryptedIV));
+    public TagReadingKey(string id, TagHash publicKeyHash, byte[] encryptedKey, byte[] encryptedIV)
+        : base(ILTagId.ReadingKey, new Parts(id, publicKeyHash, encryptedKey, encryptedIV)) {
     }
+
+    public byte[] EncryptedIV => Value.EncryptedIV;
+    public byte[] EncryptedKey => Value.EncryptedKey;
+    public TagHash PublicKeyHash => Value.PublicKeyHash;
+    public string ReaderId => Value.ReaderId;
+
+    public struct Parts : IEquatable<Parts>
+    {
+        public readonly byte[] EncryptedIV;
+        public readonly byte[] EncryptedKey;
+
+        public readonly TagHash PublicKeyHash;
+
+        public readonly string ReaderId;
+
+        public Parts(string id, TagHash publicKeyHash, byte[] encryptedKey, byte[] encryptedIV) {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("Must provide a non-empty id for this reading key", nameof(id));
+            ReaderId = id;
+            PublicKeyHash = publicKeyHash;
+            EncryptedKey = encryptedKey ?? throw new System.ArgumentNullException(nameof(encryptedKey));
+            EncryptedIV = encryptedIV.Required();
+        }
+
+        public static bool operator !=(Parts left, Parts right) => !(left == right);
+
+        public static bool operator ==(Parts left, Parts right) => left.Equals(right);
+
+        public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
+
+        public bool Equals(Parts other) => EqualityComparer<byte[]>.Default.Equals(EncryptedIV, other.EncryptedIV) && EqualityComparer<byte[]>.Default.Equals(EncryptedKey, other.EncryptedKey) && EqualityComparer<TagHash>.Default.Equals(PublicKeyHash, other.PublicKeyHash) && ReaderId == other.ReaderId;
+
+        public override int GetHashCode() => HashCode.Combine(EncryptedIV, EncryptedKey, PublicKeyHash, ReaderId);
+
+        public override string ToString() => $"Reading key for reader {ReaderId}";
+    }
+
+    internal TagReadingKey(Stream s) : base(ILTagId.ReadingKey, s) {
+    }
+
+    protected override Parts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagHash>(), s.DecodeByteArray(), s.DecodeByteArray()));
+
+    protected override byte[] ToBytes(Parts value)
+        => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.ReaderId)
+                               .EncodeTag(Value.PublicKeyHash)
+                               .EncodeByteArray(Value.EncryptedKey)
+                               .EncodeByteArray(Value.EncryptedIV));
 }

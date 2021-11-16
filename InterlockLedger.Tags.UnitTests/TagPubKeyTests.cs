@@ -30,39 +30,36 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[TestFixture]
+public class TagPubKeyTests
 {
-    [TestFixture]
-    public class TagPubKeyTests
-    {
-        [TestCase(KeyStrength.Normal)]
-        [TestCase(KeyStrength.Strong)]
-        [TestCase(KeyStrength.ExtraStrong)]
-        [TestCase(KeyStrength.MegaStrong)]
-        [TestCase(KeyStrength.SuperStrong)]
-        [TestCase(KeyStrength.HyperStrong)]
-        [TestCase(KeyStrength.UltraStrong)]
-        public void CreateECKeySerializeDeserializeSignAndVerify(KeyStrength keyStrength) {
-            var parameters = ECDsaHelper.CreateNewECDsaParameters(keyStrength);
-            var key = new TagPubECKey(parameters);
-            var bytes = key.EncodedBytes;
-            TestContext.WriteLine(bytes.AsLiteral());
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<TagPubKey>();
-            Assert.NotNull(tag);
-            Assert.AreEqual(key, tag);
-            CollectionAssert.AreEqual(bytes, tag.EncodedBytes);
-            var signatureBytes = ECDsaHelper.HashAndSign(bytes, parameters.Parameters, parameters.HashAlgorithm.ToName());
-            var signature = new TagSignature(Algorithm.EcDSA, signatureBytes);
-            Assert.IsTrue(key.Verify(bytes, signature), "Signature failed!");
-        }
+    [TestCase(KeyStrength.Normal)]
+    [TestCase(KeyStrength.Strong)]
+    [TestCase(KeyStrength.ExtraStrong)]
+    [TestCase(KeyStrength.MegaStrong)]
+    [TestCase(KeyStrength.SuperStrong)]
+    [TestCase(KeyStrength.HyperStrong)]
+    [TestCase(KeyStrength.UltraStrong)]
+    public void CreateECKeySerializeDeserializeSignAndVerify(KeyStrength keyStrength) {
+        var parameters = ECDsaHelper.CreateNewECDsaParameters(keyStrength);
+        var key = new TagPubECKey(parameters);
+        var bytes = key.EncodedBytes;
+        TestContext.WriteLine(bytes.AsLiteral());
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.Decode<TagPubKey>();
+        Assert.NotNull(tag);
+        Assert.AreEqual(key, tag);
+        CollectionAssert.AreEqual(bytes, tag.EncodedBytes);
+        var signatureBytes = ECDsaHelper.HashAndSign(bytes, parameters.Parameters, parameters.HashAlgorithm.ToName());
+        var signature = new TagSignature(Algorithm.EcDSA, signatureBytes);
+        Assert.IsTrue(key.Verify(bytes, signature), "Signature failed!");
+    }
 
-        [TestCase(
-            new byte[] {
+    [TestCase(
+        new byte[] {
                 37, 242,
                     4, 0,
                     58, 238,
@@ -85,9 +82,9 @@ namespace InterlockLedger.Tags
                             108, 105, 99, 105, 116, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 78, 97,
                             109, 101, 100, 34, 58, 32, 116, 114, 117, 101, 13, 10, 125
 
-            },
-            Algorithm.EcDSA,
-            new byte[] {
+        },
+        Algorithm.EcDSA,
+        new byte[] {
                 58, 238,
                     5, 1, 0,
                     10, 0,
@@ -107,25 +104,24 @@ namespace InterlockLedger.Tags
                         116, 105, 99, 50, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 69, 120, 112,
                         108, 105, 99, 105, 116, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 78, 97,
                         109, 101, 100, 34, 58, 32, 116, 114, 117, 101, 13, 10, 125
-             })]
-        [TestCase(new byte[] { 37, 8, 0, 0, 40, 4, 16, 0, 16, 0 }, Algorithm.RSA, new byte[] { 40, 4, 16, 0, 16, 0 })]
-        public void NewTagPubKeyFromStream(byte[] bytes, Algorithm algorithm, byte[] data) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<TagPubKey>();
-            Assert.AreEqual(ILTagId.PubKey, tag.TagId);
-            Assert.AreEqual(algorithm, tag.Algorithm);
-            Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
-        }
-
-        [TestCase(Algorithm.EcDSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 37, 4, 4, 0, 0, 0 })]
-        [TestCase(Algorithm.RSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 37, 4, 0, 0, 0, 0 })]
-        [TestCase(Algorithm.ElGamal, new byte[] { }, ExpectedResult = new byte[] { 37, 2, 3, 0 })]
-        public byte[] SerializeTagPubKey(Algorithm algorithm, byte[] data) => new TestTagPubKey(algorithm, data).EncodedBytes;
+         })]
+    [TestCase(new byte[] { 37, 8, 0, 0, 40, 4, 16, 0, 16, 0 }, Algorithm.RSA, new byte[] { 40, 4, 16, 0, 16, 0 })]
+    public void NewTagPubKeyFromStream(byte[] bytes, Algorithm algorithm, byte[] data) {
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.Decode<TagPubKey>();
+        Assert.AreEqual(ILTagId.PubKey, tag.TagId);
+        Assert.AreEqual(algorithm, tag.Algorithm);
+        Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
     }
 
-    public class TestTagPubKey : TagPubKey
-    {
-        public TestTagPubKey(Algorithm algorithm, byte[] data) : base(algorithm, data) {
-        }
+    [TestCase(Algorithm.EcDSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 37, 4, 4, 0, 0, 0 })]
+    [TestCase(Algorithm.RSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 37, 4, 0, 0, 0, 0 })]
+    [TestCase(Algorithm.ElGamal, new byte[] { }, ExpectedResult = new byte[] { 37, 2, 3, 0 })]
+    public byte[] SerializeTagPubKey(Algorithm algorithm, byte[] data) => new TestTagPubKey(algorithm, data).EncodedBytes;
+}
+
+public class TestTagPubKey : TagPubKey
+{
+    public TestTagPubKey(Algorithm algorithm, byte[] data) : base(algorithm, data) {
     }
 }

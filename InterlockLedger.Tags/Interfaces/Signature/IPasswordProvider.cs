@@ -30,12 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IPasswordProvider
 {
-    public interface IPasswordProvider
-    {
-        OwnerId OwnerId { get; }
+    OwnerId OwnerId { get; }
 
-        string PasswordFor(InterlockId id);
-    }
+    string PasswordFor(InterlockId id);
 }

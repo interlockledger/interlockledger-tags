@@ -30,11 +30,9 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IEncryptor
 {
-    public interface IEncryptor
-    {
-        (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag;
-        (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText);
-    }
+    (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag;
+    (byte[] cypherText, byte[] key, byte[] iv) EncryptRaw(CipherAlgorithm cipher, byte[] clearText);
 }

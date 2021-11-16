@@ -30,18 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ISigner : ISigningContext, IIdentifiedPublicKey
 {
-    public interface ISigner : ISigningContext, IIdentifiedPublicKey
-    {
-        Algorithm Algorithm { get; }
-        InterlockKey AsInterlockKey { get; }
-        KeyStrength Strength { get; }
+    Algorithm Algorithm { get; }
+    InterlockKey AsInterlockKey { get; }
+    KeyStrength Strength { get; }
 
-        TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
+    TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
 
-        IdentifiedSignature SignWithId(byte[] data) => new(Key.Sign(data), Id, PublicKey);
+    IdentifiedSignature SignWithId(byte[] data) => new(Key.Sign(data), Id, PublicKey);
 
-        bool Supports(KeyPurpose purpose, ulong? appId = null);
-    }
+    bool Supports(KeyPurpose purpose, ulong? appId = null);
 }

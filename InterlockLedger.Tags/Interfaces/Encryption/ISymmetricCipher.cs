@@ -30,12 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ISymmetricCipher
 {
-    public interface ISymmetricCipher
-    {
-        byte[] Decrypt(byte[] ownerBytes, string composedPassword);
+    byte[] Decrypt(byte[] ownerBytes, string composedPassword);
 
-        byte[] Encrypt(byte[] ownerBytes, string composedPassword);
-    }
+    byte[] Encrypt(byte[] ownerBytes, string composedPassword);
 }

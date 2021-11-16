@@ -30,23 +30,18 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagUInt16 : ILTagOfImplicit<ushort>
 {
-    public class ILTagUInt16 : ILTagOfImplicit<ushort>
-    {
-        public ILTagUInt16(ushort value) : base(ILTagId.UInt16, value) {
-        }
+    public ILTagUInt16(ushort value) : base(ILTagId.UInt16, value) {
+    }
 
-        internal ILTagUInt16(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt16, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    internal ILTagUInt16(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt16, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override ushort ValueFromStream(StreamSpan s) => s.BigEndianReadUShort();
+    protected override ushort ValueFromStream(StreamSpan s) => s.BigEndianReadUShort();
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            s.BigEndianWriteUShort(Value);
-            return Task.FromResult(s);
-        }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.BigEndianWriteUShort(Value);
+        return Task.FromResult(s);
     }
 }

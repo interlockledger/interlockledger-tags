@@ -30,67 +30,64 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
 using System.Security.Cryptography;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public readonly struct KeyParameters
 {
-    public readonly struct KeyParameters
-    {
-        public readonly RSAParameters Parameters;
-        public readonly KeyStrength Strength;
+    public readonly RSAParameters Parameters;
+    public readonly KeyStrength Strength;
 
-        public KeyParameters(RSAParameters parameters, KeyStrength strength) {
-            Parameters = parameters;
-            Strength = strength;
-        }
-
-        internal KeyParameters(Stream s) : this(
-            new RSAParameters {
-                Modulus = s.DecodeByteArray(),
-                Exponent = s.DecodeByteArray(),
-                P = s.DecodeByteArray(),
-                Q = s.DecodeByteArray(),
-                DP = s.DecodeByteArray(),
-                DQ = s.DecodeByteArray(),
-                InverseQ = s.DecodeByteArray(),
-                D = s.DecodeByteArray()
-            },
-            DecodeStrength(s)) { }
-
-        internal Stream EncodeTo(Stream s) => s
-            .EncodeByteArray(Parameters.Modulus)
-            .EncodeByteArray(Parameters.Exponent)
-            .EncodeByteArray(Parameters.P)
-            .EncodeByteArray(Parameters.Q)
-            .EncodeByteArray(Parameters.DP)
-            .EncodeByteArray(Parameters.DQ)
-            .EncodeByteArray(Parameters.InverseQ)
-            .EncodeByteArray(Parameters.D)
-            .EncodeILInt((ulong)Strength);
-
-        private static KeyStrength DecodeStrength(Stream s) => (KeyStrength)(s.HasBytes() ? s.DecodeILInt() : 0);
+    public KeyParameters(RSAParameters parameters, KeyStrength strength) {
+        Parameters = parameters;
+        Strength = strength;
     }
 
-    public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
-    {
-        public TagRSAParameters(RSAParameters parameters, KeyStrength strength) : base(ILTagId.RSAParameters, new KeyParameters(parameters, strength)) {
-        }
+    internal KeyParameters(Stream s) : this(
+        new RSAParameters {
+            Modulus = s.DecodeByteArray(),
+            Exponent = s.DecodeByteArray(),
+            P = s.DecodeByteArray(),
+            Q = s.DecodeByteArray(),
+            DP = s.DecodeByteArray(),
+            DQ = s.DecodeByteArray(),
+            InverseQ = s.DecodeByteArray(),
+            D = s.DecodeByteArray()
+        },
+        DecodeStrength(s)) { }
 
-        public TagPubKey PublicKey => new TagPubRSAKey(Value.Parameters);
+    internal Stream EncodeTo(Stream s) => s
+        .EncodeByteArray(Parameters.Modulus)
+        .EncodeByteArray(Parameters.Exponent)
+        .EncodeByteArray(Parameters.P)
+        .EncodeByteArray(Parameters.Q)
+        .EncodeByteArray(Parameters.DP)
+        .EncodeByteArray(Parameters.DQ)
+        .EncodeByteArray(Parameters.InverseQ)
+        .EncodeByteArray(Parameters.D)
+        .EncodeILInt((ulong)Strength);
 
-        public KeyStrength Strength => Value.Strength;
+    private static KeyStrength DecodeStrength(Stream s) => (KeyStrength)(s.HasBytes() ? s.DecodeILInt() : 0);
+}
 
-        public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
-            using var s = new MemoryStream(encodedBytes);
-            return s.Decode<TagRSAParameters>();
-        }
-
-        internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) {
-        }
-
-        protected override KeyParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new KeyParameters(s));
-
-        protected override byte[] ToBytes(KeyParameters value) => TagHelpers.ToBytesHelper(s => value.EncodeTo(s));
+public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
+{
+    public TagRSAParameters(RSAParameters parameters, KeyStrength strength) : base(ILTagId.RSAParameters, new KeyParameters(parameters, strength)) {
     }
+
+    public TagPubKey PublicKey => new TagPubRSAKey(Value.Parameters);
+
+    public KeyStrength Strength => Value.Strength;
+
+    public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
+        using var s = new MemoryStream(encodedBytes);
+        return s.Decode<TagRSAParameters>();
+    }
+
+    internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) {
+    }
+
+    protected override KeyParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new KeyParameters(s));
+
+    protected override byte[] ToBytes(KeyParameters value) => TagHelpers.ToBytesHelper(s => value.EncodeTo(s));
 }

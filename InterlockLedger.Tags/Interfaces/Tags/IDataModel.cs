@@ -30,18 +30,14 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IDataModel
 {
-    public interface IDataModel
-    {
-        ulong PayloadTagId { get; }
+    ulong PayloadTagId { get; }
 
-        ILTag FromJson(object o);
+    ILTag FromJson(object o);
 
-        ILTag FromNavigable(Dictionary<string, object> json);
+    ILTag FromNavigable(Dictionary<string, object> json);
 
-        Dictionary<string, object> ToJson(byte[] bytes);
-    }
+    Dictionary<string, object> ToJson(byte[] bytes);
 }

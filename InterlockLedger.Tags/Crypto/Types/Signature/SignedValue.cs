@@ -30,78 +30,71 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<T>, new()
 {
-    public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<T>, new()
-    {
-        public const int CurrentVersion = 1;
+    public const int CurrentVersion = 1;
 
-        public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
-        }
+    public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
+    }
 
-        public override object AsJson => new {
-            TagId,
-            ContentTagId,
-            SignedContent = SignedContent.AsILTag.AsJson,
-            Signatures = Signatures.AsJsonArray()
-        };
+    public override object AsJson => new {
+        TagId,
+        ContentTagId,
+        SignedContent = SignedContent.AsILTag.AsJson,
+        Signatures = Signatures.AsJsonArray()
+    };
 
-        public ulong ContentTagId => SignedContent.TagId;
+    public ulong ContentTagId => SignedContent.TagId;
 
-        public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent);
+    public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent);
 
-        public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
-        public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
+    public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
+    public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
 
-        public T SignedContent { get; private set; }
+    public T SignedContent { get; private set; }
 
-        public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
+    public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
 
-        public override SignedValue<T> FromJson(object json) => throw new NotSupportedException();
+    public override SignedValue<T> FromJson(object json) => throw new NotSupportedException();
 
-        public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey)
-            => SignedContent is not null
-            && Signatures.Safe().Any(sig => sig.SignerId == validSigner
-                                            && sig.PublicKey == validPubKey
-                                            && sig.Verify(SignedContent));
+    public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey)
+        => SignedContent is not null
+        && Signatures.Safe().Any(sig => sig.SignerId == validSigner
+                                        && sig.PublicKey == validPubKey
+                                        && sig.Verify(SignedContent));
 
-        internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
-            => Init(signedContent, s.DecodeArray<IdentifiedSignature>());
+    internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
+        => Init(signedContent, s.DecodeArray<IdentifiedSignature>());
 
-        internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
-            => Init(signedContent, signatures);
+    internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
+        => Init(signedContent, signatures);
 
-        protected override IEnumerable<DataField> RemainingStateFields =>
-            new T().FieldModel?.WithName(nameof(SignedContent))
-            .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
-                ElementTagId = ILTagId.IdentifiedSignature,
-                SubDataFields = new IdentifiedSignature().FieldModel.SubDataFields,
-            });
+    protected override IEnumerable<DataField> RemainingStateFields =>
+        new T().FieldModel?.WithName(nameof(SignedContent))
+        .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
+            ElementTagId = ILTagId.IdentifiedSignature,
+            SubDataFields = new IdentifiedSignature().FieldModel.SubDataFields,
+        });
 
-        protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
+    protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
 
-        protected override void DecodeRemainingStateFrom(Stream s) {
-            SignedContent = s.DecodeAny<T>();
-            Signatures = s.DecodeArray<IdentifiedSignature>();
-        }
+    protected override void DecodeRemainingStateFrom(Stream s) {
+        SignedContent = s.DecodeAny<T>();
+        Signatures = s.DecodeArray<IdentifiedSignature>();
+    }
 
-        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
+    protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
 
-        private IEnumerable<IdentifiedSignature> FailedSignaturesFor(T data)
-            => Signatures.Where(sig => !sig.Verify(data)).ToArray();
+    private IEnumerable<IdentifiedSignature> FailedSignaturesFor(T data)
+        => Signatures.Where(sig => !sig.Verify(data)).ToArray();
 
-        private void Init(T signedContent, IEnumerable<IdentifiedSignature> signatures) {
-            SignedContent = signedContent.Required(nameof(signedContent));
-            Signatures = signatures;
-            if (Signatures.None())
-                throw new InvalidDataException("At least one signature must be provided");
-            if (FailedSignatures.SafeAny())
-                throw new InvalidDataException("Some signatures don't match the payload");
-        }
+    private void Init(T signedContent, IEnumerable<IdentifiedSignature> signatures) {
+        SignedContent = signedContent.Required();
+        Signatures = signatures;
+        if (Signatures.None())
+            throw new InvalidDataException("At least one signature must be provided");
+        if (FailedSignatures.SafeAny())
+            throw new InvalidDataException("Some signatures don't match the payload");
     }
 }

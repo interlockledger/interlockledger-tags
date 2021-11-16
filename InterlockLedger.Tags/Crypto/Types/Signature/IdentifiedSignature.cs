@@ -30,59 +30,53 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
 {
-    public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
-    {
-        public const string Description = "A signature identified with the signerId and the corresponding PublickKey";
-        public const ushort ImplementedVersion = 1;
+    public const string Description = "A signature identified with the signerId and the corresponding PublickKey";
+    public const ushort ImplementedVersion = 1;
 
-        public IdentifiedSignature(TagSignature signature, BaseKeyId id, TagPubKey publicKey) : this() {
-            Signature = signature.Required(nameof(signature));
-            SignerId = id.Required(nameof(id));
-            PublicKey = publicKey.Required(nameof(publicKey));
-        }
+    public IdentifiedSignature(TagSignature signature, BaseKeyId id, TagPubKey publicKey) : this() {
+        Signature = signature.Required();
+        SignerId = id.Required();
+        PublicKey = publicKey.Required();
+    }
 
-        public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
-        }
+    public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
+    }
 
-        public override object AsJson => new { TagId, Version, Signature, SignerId, PublicKey };
-        public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
-        public TagPubKey PublicKey { get; set; }
+    public override object AsJson => new { TagId, Version, Signature, SignerId, PublicKey };
+    public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
+    public TagPubKey PublicKey { get; set; }
 
-        public TagSignature Signature { get; set; }
-        public BaseKeyId SignerId { get; set; }
+    public TagSignature Signature { get; set; }
+    public BaseKeyId SignerId { get; set; }
 
-        public override string TypeName => nameof(IdentifiedSignature);
+    public override string TypeName => nameof(IdentifiedSignature);
 
-        public override IdentifiedSignature FromJson(object json) => throw new NotImplementedException();
+    public override IdentifiedSignature FromJson(object json) => throw new NotImplementedException();
 
-        public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
+    public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
 
-        protected override IEnumerable<DataField> RemainingStateFields => _remainingDataFields;
+    protected override IEnumerable<DataField> RemainingStateFields => _remainingDataFields;
 
-        protected override string TypeDescription => Description;
+    protected override string TypeDescription => Description;
 
-        protected override void DecodeRemainingStateFrom(Stream s) {
-            Signature = s.Decode<TagSignature>();
-            SignerId = s.DecodeBaseKeyId();
-            PublicKey = s.Decode<TagPubKey>();
-        }
+    protected override void DecodeRemainingStateFrom(Stream s) {
+        Signature = s.Decode<TagSignature>();
+        SignerId = s.DecodeBaseKeyId();
+        PublicKey = s.Decode<TagPubKey>();
+    }
 
-        protected override void EncodeRemainingStateTo(Stream s) {
-            s.EncodeTag(Signature);
-            s.EncodeTag(SignerId);
-            s.EncodeTag(PublicKey);
-        }
+    protected override void EncodeRemainingStateTo(Stream s) {
+        s.EncodeTag(Signature);
+        s.EncodeTag(SignerId);
+        s.EncodeTag(PublicKey);
+    }
 
-        private static readonly DataField[] _remainingDataFields = new DataField[] {
+    private static readonly DataField[] _remainingDataFields = new DataField[] {
             new DataField { Name = nameof(Signature), TagId = ILTagId.Signature },
             new DataField { Name = nameof(SignerId), TagId = ILTagId.InterlockId },
             new DataField { Name = nameof(PublicKey), TagId = ILTagId.PubKey}
         };
-    }
 }

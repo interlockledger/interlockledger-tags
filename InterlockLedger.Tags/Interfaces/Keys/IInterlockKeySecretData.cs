@@ -30,13 +30,11 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IInterlockKeySecretData
 {
-    public interface IInterlockKeySecretData
-    {
-        byte[] Encrypted { get; }
-        EncryptedContentType EncryptedContentType { get; }
+    byte[] Encrypted { get; }
+    EncryptedContentType EncryptedContentType { get; }
 
-        string ToShortString();
-    }
+    string ToShortString();
 }

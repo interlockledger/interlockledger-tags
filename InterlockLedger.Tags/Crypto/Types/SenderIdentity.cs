@@ -32,40 +32,36 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class SenderIdentity : IEquatable<SenderIdentity?>, IIdentifiedPublicKey
 {
-    public class SenderIdentity : IEquatable<SenderIdentity?>, IIdentifiedPublicKey
-    {
-        public SenderIdentity(BaseKeyId id, TagPubKey publicKey, string? name) {
-            Id = id.Required(nameof(id));
-            PublicKey = publicKey.Required(nameof(publicKey));
-            Name = name;
-            _reader = new Lazy<TagReader>(() => new TagReader(Id.TextualRepresentation, PublicKey));
-        }
-
-        public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey(), claims.Name()) { }
-
-        public TagReader AsReader => _reader.Value;
-        public BaseKeyId Id { get; }
-        public string? Name { get; }
-        public TagPubKey PublicKey { get; }
-
-        public static bool operator !=(SenderIdentity? left, SenderIdentity? right) => !(left == right);
-
-        public static bool operator ==(SenderIdentity? left, SenderIdentity? right) => left?.Equals(right) ?? right is null;
-
-        public override bool Equals(object? obj) => Equals(obj as SenderIdentity);
-
-        public bool Equals(SenderIdentity? other) => other != null && Id == other.Id && PublicKey == other.PublicKey;
-
-        public override int GetHashCode() => HashCode.Combine(Id, PublicKey);
-
-        public override string ToString() => $"Sender {Id} with public key {PublicKey}";
-
-        private readonly Lazy<TagReader> _reader;
+    public SenderIdentity(BaseKeyId id, TagPubKey publicKey, string? name) {
+        Id = id.Required();
+        PublicKey = publicKey.Required();
+        Name = name;
+        _reader = new Lazy<TagReader>(() => new TagReader(Id.TextualRepresentation, PublicKey));
     }
+
+    public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey(), claims.Name()) { }
+
+    public TagReader AsReader => _reader.Value;
+    public BaseKeyId Id { get; }
+    public string? Name { get; }
+    public TagPubKey PublicKey { get; }
+
+    public static bool operator !=(SenderIdentity? left, SenderIdentity? right) => !(left == right);
+
+    public static bool operator ==(SenderIdentity? left, SenderIdentity? right) => left?.Equals(right) ?? right is null;
+
+    public override bool Equals(object? obj) => Equals(obj as SenderIdentity);
+
+    public bool Equals(SenderIdentity? other) => other != null && Id == other.Id && PublicKey == other.PublicKey;
+
+    public override int GetHashCode() => HashCode.Combine(Id, PublicKey);
+
+    public override string ToString() => $"Sender {Id} with public key {PublicKey}";
+
+    private readonly Lazy<TagReader> _reader;
 }

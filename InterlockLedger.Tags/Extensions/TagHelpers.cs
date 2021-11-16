@@ -30,19 +30,14 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
+namespace InterlockLedger.Tags;
 
-namespace InterlockLedger.Tags
+public static class TagHelpers
 {
-
-    public static class TagHelpers
-    {
-        public static byte[] ToBytesHelper(Action<Stream> serialize) {
-            serialize.Required(nameof(serialize));
-            using var s = new MemoryStream();
-            serialize(s);
-            return s.ToArray();
-        }
+    public static byte[] ToBytesHelper(Action<Stream> serialize) {
+        serialize.Required();
+        using var s = new MemoryStream();
+        serialize(s);
+        return s.ToArray();
     }
 }

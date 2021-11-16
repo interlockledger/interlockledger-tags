@@ -30,61 +30,55 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Text.Json.Serialization;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
+[JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
+public class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
 {
-    [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
-    [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
-    public class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
-    {
-        public ILTagVersion() : this(new Version()) {
-        }
-
-        public ILTagVersion(Version version) : base(ILTagId.Version, version) {
-        }
-
-        public ILTagVersion(string textualRepresentation) : base(ILTagId.Version, Version.Parse(textualRepresentation)) {
-        }
-
-        public override object AsJson => TextualRepresentation;
-
-        public bool IsEmpty => Value is null;
-
-        public bool IsInvalid => false;
-        public string TextualRepresentation => Value.ToString();
-
-        public static ILTagVersion FromJson(object o) => new(new Version((string)o));
-
-        public static bool operator !=(ILTagVersion left, ILTagVersion right) => !(left == right);
-
-        public static bool operator ==(ILTagVersion left, ILTagVersion right) => EqualityComparer<ILTagVersion>.Default.Equals(left, right);
-
-        public override bool Equals(object obj) => Equals(obj as ILTagVersion);
-
-        public bool Equals(ILTagVersion other) => other != null && TextualRepresentation == other.TextualRepresentation;
-
-        public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
-
-        internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
-        }
-
-        protected override Version FromBytes(byte[] bytes) {
-            return FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
-
-            static Version Build(int major, int minor, int build, int revision)
-                => revision >= 0
-                    ? new Version(major, minor, build, revision)
-                    : build >= 0
-                        ? new Version(major, minor, build)
-                        : new Version(major, minor);
-        }
-
-        protected override byte[] ToBytes(Version value)
-            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(Value.Major).BigEndianWriteInt(Value.Minor).BigEndianWriteInt(Value.Build).BigEndianWriteInt(Value.Revision));
+    public ILTagVersion() : this(new Version()) {
     }
+
+    public ILTagVersion(Version version) : base(ILTagId.Version, version) {
+    }
+
+    public ILTagVersion(string textualRepresentation) : base(ILTagId.Version, Version.Parse(textualRepresentation)) {
+    }
+
+    public override object AsJson => TextualRepresentation;
+
+    public bool IsEmpty => Value is null;
+
+    public bool IsInvalid => false;
+    public string TextualRepresentation => Value.ToString();
+
+    public static ILTagVersion FromJson(object o) => new(new Version((string)o));
+
+    public static bool operator !=(ILTagVersion left, ILTagVersion right) => !(left == right);
+
+    public static bool operator ==(ILTagVersion left, ILTagVersion right) => EqualityComparer<ILTagVersion>.Default.Equals(left, right);
+
+    public override bool Equals(object obj) => Equals(obj as ILTagVersion);
+
+    public bool Equals(ILTagVersion other) => other != null && TextualRepresentation == other.TextualRepresentation;
+
+    public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
+
+    internal ILTagVersion(Stream s) : base(ILTagId.Version, s) {
+    }
+
+    protected override Version FromBytes(byte[] bytes) {
+        return FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
+
+        static Version Build(int major, int minor, int build, int revision)
+            => revision >= 0
+                ? new Version(major, minor, build, revision)
+                : build >= 0
+                    ? new Version(major, minor, build)
+                    : new Version(major, minor);
+    }
+
+    protected override byte[] ToBytes(Version value)
+        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(Value.Major).BigEndianWriteInt(Value.Minor).BigEndianWriteInt(Value.Build).BigEndianWriteInt(Value.Revision));
 }

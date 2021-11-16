@@ -30,19 +30,15 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
+namespace InterlockLedger.Tags;
 
-namespace InterlockLedger.Tags
+public class FileBackedByteArray : FileBackedILTag<object>
 {
-    public class FileBackedByteArray : FileBackedILTag<object>
-    {
-        public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
+    public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
 
-        public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo.Required(nameof(fileInfo))) { }
+    public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo.Required()) { }
 
-        public FileBackedByteArray() : base(ILTagId.ByteArray) { }
+    public FileBackedByteArray() : base(ILTagId.ByteArray) { }
 
-        public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
-    }
+    public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
 }

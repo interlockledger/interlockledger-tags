@@ -30,119 +30,112 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.Json.Serialization;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[TypeConverter(typeof(TagHashConverter))]
+[JsonConverter(typeof(JsonCustomConverter<TagHash>))]
+public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
 {
-    [TypeConverter(typeof(TagHashConverter))]
-    [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
-    public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
-    {
-        public static readonly TagHash Empty = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
+    public static readonly TagHash Empty = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
 
-        public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) {
-        }
-
-        public TagHash(HashAlgorithm algorithm, byte[] data) : base(ILTagId.Hash, new TagHashParts { Algorithm = algorithm, Data = data }) {
-        }
-
-        public TagHash(string textualRepresentation) : base(ILTagId.Hash, Split(textualRepresentation)) {
-        }
-
-        public HashAlgorithm Algorithm => Value.Algorithm;
-        public override object AsJson => TextualRepresentation;
-        public byte[] Data => Value.Data;
-        public override string Formatted => TextualRepresentation;
-        public bool IsEmpty => Equals(Empty);
-        public bool IsInvalid { get; }
-        public string TextualRepresentation => ToString();
-
-        public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
-
-        public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
-
-        public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
-
-        public static implicit operator string(TagHash Value) => Value?.ToString();
-
-        public static bool operator !=(TagHash a, TagHash b) => !(a == b);
-
-        public static bool operator ==(TagHash a, TagHash b) => a?.Equals(b) ?? b is null;
-
-        public override bool Equals(object obj) => Equals(obj as TagHash);
-
-        public bool Equals(TagHash other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
-
-        public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
-
-        public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
-
-        internal TagHash(Stream s) : base(ILTagId.Hash, s) {
-        }
-
-        internal static TagHash HashFrom(X509Certificate2 certificate)
-            => new(HashAlgorithm.SHA1, certificate.Required(nameof(certificate)).GetCertHash());
-
-        protected override TagHashParts FromBytes(byte[] bytes) =>
-            FromBytesHelper(bytes, s => new TagHashParts {
-                Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-                Data = s.ReadBytes(bytes.Length - sizeof(ushort))
-            });
-
-        protected override byte[] ToBytes(TagHashParts value)
-            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
-
-        private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
-
-        private static byte[] HashSha256(byte[] data) {
-            using var hasher = SHA256.Create();
-            hasher.Initialize();
-            return hasher.ComputeHash(data);
-        }
-
-        private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
-
-        private static TagHashParts Split(string textualRepresentation) {
-            if (string.IsNullOrWhiteSpace(textualRepresentation))
-                throw new ArgumentNullException(nameof(textualRepresentation));
-            var parts = textualRepresentation.Split('#');
-            var algorithm = parts.Length < 2 ? HashAlgorithm.SHA256 : (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), parts[1], ignoreCase: true);
-            return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
-        }
-
-        private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
+    public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) {
     }
 
-    public class TagHashConverter : TypeConverter
-    {
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
-
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-            => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
-
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value)
-            => Value is string text
-                ? TagHash.From(text.Trim())
-                : base.ConvertFrom(context, culture, Value);
-
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
-            => destinationType == typeof(string) && Value is TagHash
-                ? Value.ToString()
-                : throw new InvalidOperationException("Can only convert TagHash to string!!!");
+    public TagHash(HashAlgorithm algorithm, byte[] data) : base(ILTagId.Hash, new TagHashParts { Algorithm = algorithm, Data = data }) {
     }
 
-    public class TagHashParts
-    {
-        public HashAlgorithm Algorithm;
-        public byte[] Data;
+    public TagHash(string textualRepresentation) : base(ILTagId.Hash, Split(textualRepresentation)) {
     }
+
+    public HashAlgorithm Algorithm => Value.Algorithm;
+    public override object AsJson => TextualRepresentation;
+    public byte[] Data => Value.Data;
+    public override string Formatted => TextualRepresentation;
+    public bool IsEmpty => Equals(Empty);
+    public bool IsInvalid { get; }
+    public string TextualRepresentation => ToString();
+
+    public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
+
+    public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
+
+    public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
+
+    public static implicit operator string(TagHash Value) => Value?.ToString();
+
+    public static bool operator !=(TagHash a, TagHash b) => !(a == b);
+
+    public static bool operator ==(TagHash a, TagHash b) => a?.Equals(b) ?? b is null;
+
+    public override bool Equals(object obj) => Equals(obj as TagHash);
+
+    public bool Equals(TagHash other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
+
+    public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
+
+    public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
+
+    internal TagHash(Stream s) : base(ILTagId.Hash, s) {
+    }
+
+    internal static TagHash HashFrom(X509Certificate2 certificate)
+        => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
+
+    protected override TagHashParts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new TagHashParts {
+            Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
+            Data = s.ReadBytes(bytes.Length - sizeof(ushort))
+        });
+
+    protected override byte[] ToBytes(TagHashParts value)
+        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
+
+    private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
+
+    private static byte[] HashSha256(byte[] data) {
+        using var hasher = SHA256.Create();
+        hasher.Initialize();
+        return hasher.ComputeHash(data);
+    }
+
+    private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
+
+    private static TagHashParts Split(string textualRepresentation) {
+        if (string.IsNullOrWhiteSpace(textualRepresentation))
+            throw new ArgumentNullException(nameof(textualRepresentation));
+        var parts = textualRepresentation.Split('#');
+        var algorithm = parts.Length < 2 ? HashAlgorithm.SHA256 : (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), parts[1], ignoreCase: true);
+        return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
+    }
+
+    private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
+}
+
+public class TagHashConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
+
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value)
+        => Value is string text
+            ? TagHash.From(text.Trim())
+            : base.ConvertFrom(context, culture, Value);
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
+        => destinationType == typeof(string) && Value is TagHash
+            ? Value.ToString()
+            : throw new InvalidOperationException("Can only convert TagHash to string!!!");
+}
+
+public class TagHashParts
+{
+    public HashAlgorithm Algorithm;
+    public byte[] Data;
 }

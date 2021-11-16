@@ -30,23 +30,18 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IBaseKey
 {
-    public interface IBaseKey
-    {
-        string Description { get; }
-        BaseKeyId Id { get; }
-        string Name { get; }
-        IEnumerable<AppPermissions> Permissions { get; }
-        TagPubKey PublicKey { get; }
-        KeyPurpose[] Purposes { get; }
-        KeyStrength Strength { get; }
+    string Description { get; }
+    BaseKeyId Id { get; }
+    string Name { get; }
+    IEnumerable<AppPermissions> Permissions { get; }
+    TagPubKey PublicKey { get; }
+    KeyPurpose[] Purposes { get; }
+    KeyStrength Strength { get; }
 
-        bool CanAct(ulong appId, ulong actionId) => Purposes.Contains(KeyPurpose.Action) && Permissions.SafeAny(p => p.CanAct(appId, actionId));
+    bool CanAct(ulong appId, ulong actionId) => Purposes.Contains(KeyPurpose.Action) && Permissions.SafeAny(p => p.CanAct(appId, actionId));
 
-        string ToShortString();
-    }
+    string ToShortString();
 }

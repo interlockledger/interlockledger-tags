@@ -30,10 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IFormatted
 {
-    public interface IFormatted
-    {
-        string Formatted { get; }
-    }
+    string Formatted { get; }
 }

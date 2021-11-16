@@ -30,14 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IKeyStorageImplementationProvider : IKeyStorageProvider
 {
-    public interface IKeyStorageImplementationProvider : IKeyStorageProvider
-    {
-        string Name { get; }
-        bool SupportsCertificateImport { get; }
-        bool SupportsKeyCreation { get; }
+    string Name { get; }
+    bool SupportsCertificateImport { get; }
+    bool SupportsKeyCreation { get; }
 
-        bool SupportsAlgorithm(Algorithm algorithm);
-    }
+    bool SupportsAlgorithm(Algorithm algorithm);
 }

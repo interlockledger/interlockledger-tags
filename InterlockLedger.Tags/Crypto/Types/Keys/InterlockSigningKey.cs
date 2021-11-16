@@ -30,100 +30,95 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public enum EncryptedContentType
 {
-    public enum EncryptedContentType
-    {
-        EncryptedKey = 0,
-        EmbeddedCertificate = 1
+    EncryptedKey = 0,
+    EmbeddedCertificate = 1
+}
+
+public abstract class InterlockSigningKey : ISigningKey
+{
+    public abstract byte[] AsSessionState { get; }
+    public string Description => _value.Description;
+    protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;
+    public BaseKeyId Id => _value.Id;
+    public string Name => _value.Name;
+    public IEnumerable<AppPermissions> Permissions => _value.Permissions;
+    public TagPubKey PublicKey => _value.PublicKey;
+    public KeyPurpose[] Purposes => _value.Purposes;
+    public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
+    public KeyStrength Strength => _value.Strength;
+
+    public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
+
+    public abstract byte[] Decrypt(byte[] bytes);
+
+    public abstract TagSignature Sign(byte[] data);
+
+
+    public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
+
+    protected readonly InterlockSigningKeyData _value;
+
+    protected InterlockSigningKey(InterlockSigningKeyData tag) => _value = tag;
+
+    private static InterlockSigningKey RCSKFrom(byte[] bytes) {
+        try {
+            return RSACertificateSigningKey.FromSessionState(bytes);
+        } catch { return null; }
     }
 
-    public abstract class InterlockSigningKey : ISigningKey
-    {
-        public abstract byte[] AsSessionState { get; }
-        public string Description => _value.Description;
-        protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;
-        public BaseKeyId Id => _value.Id;
-        public string Name => _value.Name;
-        public IEnumerable<AppPermissions> Permissions => _value.Permissions;
-        public TagPubKey PublicKey => _value.PublicKey;
-        public KeyPurpose[] Purposes => _value.Purposes;
-        public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
-        public KeyStrength Strength => _value.Strength;
-
-        public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
-
-        public abstract byte[] Decrypt(byte[] bytes);
-
-        public abstract TagSignature Sign(byte[] data);
-
-
-        public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
-
-        protected readonly InterlockSigningKeyData _value;
-
-        protected InterlockSigningKey(InterlockSigningKeyData tag) => _value = tag;
-
-        private static InterlockSigningKey RCSKFrom(byte[] bytes) {
-            try {
-                return RSACertificateSigningKey.FromSessionState(bytes);
-            } catch { return null; }
-        }
-
-        private static InterlockSigningKey RISKFrom(byte[] bytes) {
-            try {
-                return RSAInterlockSigningKey.FromSessionState(bytes);
-            } catch { return null; }
-        }
-
-        public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    private static InterlockSigningKey RISKFrom(byte[] bytes) {
+        try {
+            return RSAInterlockSigningKey.FromSessionState(bytes);
+        } catch { return null; }
     }
 
-    public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData
-    {
-        public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
-            : this(new InterlockSigningKeyParts(purposes, permissions, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }
+    public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
+}
 
-        public InterlockSigningKeyData(InterlockSigningKeyParts parts) : base(ILTagId.InterlockSigningKey, parts) {
-        }
+public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData
+{
+    public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
+        : this(new InterlockSigningKeyParts(purposes, permissions, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }
 
-        public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
-        public string Description => Value.Description;
-        public byte[] Encrypted => Value.Encrypted;
-        public EncryptedContentType EncryptedContentType => Value.EncryptedContentType;
-        public BaseKeyId Id => Value.Id;
-        public BaseKeyId Identity => Value.Identity ?? Id;
-        public string Name => Value.Name;
-        public IEnumerable<AppPermissions> Permissions => Value.Permissions;
-        public TagPubKey PublicKey => Value.PublicKey;
-        public KeyPurpose[] Purposes => Value.Purposes;
-        public KeyStrength Strength => Value.Strength;
-        public ushort Version => Value.Version;
+    public InterlockSigningKeyData(InterlockSigningKeyParts parts) : base(ILTagId.InterlockSigningKey, parts) {
+    }
 
-        public static InterlockSigningKeyData DecodeFromBytes(byte[] bytes) {
-            using var stream = new MemoryStream(bytes);
-            return stream.Decode<InterlockSigningKeyData>();
-        }
+    public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
+    public string Description => Value.Description;
+    public byte[] Encrypted => Value.Encrypted;
+    public EncryptedContentType EncryptedContentType => Value.EncryptedContentType;
+    public BaseKeyId Id => Value.Id;
+    public BaseKeyId Identity => Value.Identity ?? Id;
+    public string Name => Value.Name;
+    public IEnumerable<AppPermissions> Permissions => Value.Permissions;
+    public TagPubKey PublicKey => Value.PublicKey;
+    public KeyPurpose[] Purposes => Value.Purposes;
+    public KeyStrength Strength => Value.Strength;
+    public ushort Version => Value.Version;
 
-        public string ToShortString() => Value.ToShortString();
+    public static InterlockSigningKeyData DecodeFromBytes(byte[] bytes) {
+        using var stream = new MemoryStream(bytes);
+        return stream.Decode<InterlockSigningKeyData>();
+    }
 
-        public override string ToString() => $@"## InterlockSigningKey ##
+    public string ToShortString() => Value.ToShortString();
+
+    public override string ToString() => $@"## InterlockSigningKey ##
 -- Version: {Version}
 {Value}
 ";
 
-        internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
-        }
+    internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
+    }
 
-        protected override InterlockSigningKeyParts FromBytes(byte[] bytes) =>
-            FromBytesHelper(bytes, s => {
-                var version = s.DecodeUShort();
-                var result = new InterlockSigningKeyParts {
-                    Version = version,                                // Field index 0 //
+    protected override InterlockSigningKeyParts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => {
+            var version = s.DecodeUShort();
+            var result = new InterlockSigningKeyParts {
+                Version = version,                                // Field index 0 //
                     Name = s.DecodeString(),                          // Field index 1 //
                     PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
                     Id = s.Decode<KeyId>(),                           // Field index 3 //
@@ -136,14 +131,14 @@ namespace InterlockLedger.Tags
                     FirstActions = version > 1 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
                     EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
                 };
-                if (version > 5)
-                    result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
-                return result;
-            });
+            if (version > 5)
+                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
+            return result;
+        });
 
-        protected override byte[] ToBytes(InterlockSigningKeyParts value)
-            => TagHelpers.ToBytesHelper(s => {
-                s.EncodeUShort(Value.Version);              // Field index 0 //
+    protected override byte[] ToBytes(InterlockSigningKeyParts value)
+        => TagHelpers.ToBytesHelper(s => {
+            s.EncodeUShort(Value.Version);              // Field index 0 //
                 s.EncodeString(Value.Name);                 // Field index 1 //
                 s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
                 s.EncodeInterlockId(Value.Id);              // Field index 3 //
@@ -157,22 +152,21 @@ namespace InterlockLedger.Tags
                 s.EncodeILInt((ulong)value.EncryptedContentType); // Field index 11 - since version 5
                 s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
             });
+}
+
+public class InterlockSigningKeyParts : InterlockKey.Parts
+{
+    public const ushort InterlockSigningKeyVersion = 0x0006;
+    public byte[] Encrypted;
+    public EncryptedContentType EncryptedContentType;
+
+    public InterlockSigningKeyParts() {
     }
 
-    public class InterlockSigningKeyParts : InterlockKey.Parts
-    {
-        public const ushort InterlockSigningKeyVersion = 0x0006;
-        public byte[] Encrypted;
-        public EncryptedContentType EncryptedContentType;
-
-        public InterlockSigningKeyParts() {
-        }
-
-        public InterlockSigningKeyParts(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, EncryptedContentType encryptedContentType, BaseKeyId keyId)
-            : base(purposes, name, description, pubKey, strength, keyId, permissions) {
-            Version = InterlockSigningKeyVersion;
-            Encrypted = encrypted;
-            EncryptedContentType = encryptedContentType;
-        }
+    public InterlockSigningKeyParts(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, EncryptedContentType encryptedContentType, BaseKeyId keyId)
+        : base(purposes, name, description, pubKey, strength, keyId, permissions) {
+        Version = InterlockSigningKeyVersion;
+        Encrypted = encrypted;
+        EncryptedContentType = encryptedContentType;
     }
 }

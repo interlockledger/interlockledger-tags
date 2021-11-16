@@ -30,13 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ITagRegistrar
 {
-    public interface ITagRegistrar
-    {
-        bool RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer);
-    }
+    bool RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer);
 }

@@ -32,70 +32,66 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.Json;
+
 using IEnum = System.Collections.IEnumerable;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class ObjectExtensions
 {
-    public static class ObjectExtensions
-    {
-        public static string AsJson<T>(this T json) => JsonSerializer.Serialize<T>(json, StringExtensions._jsonOptions);
+    public static string AsJson<T>(this T json) => JsonSerializer.Serialize<T>(json, StringExtensions._jsonOptions);
 
-        public static object? AsNavigable(this object? value)
-            => value switch {
-                null => null,
-                string s => s,
-                ITextual o => o,
-                JsonElement jo => AsILTag(FromJsonElement(jo)),
-                IEnum items => items.AsList<object>(),
-                _ => IsPrimitive(value) ? value : AsILTag(ToDictionary(value))
-            };
+    public static object? AsNavigable(this object? value)
+        => value switch {
+            null => null,
+            string s => s,
+            ITextual o => o,
+            JsonElement jo => AsILTag(FromJsonElement(jo)),
+            IEnum items => items.AsList<object>(),
+            _ => IsPrimitive(value) ? value : AsILTag(ToDictionary(value))
+        };
 
-        private static object? AsILTag(object? o)
-            => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")
-                ? TagProvider.DeserializeFromJson(Convert.ToUInt64(dict["TagId"], CultureInfo.InvariantCulture), dict["Value"])
-                : o;
+    private static object? AsILTag(object? o)
+        => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")
+            ? TagProvider.DeserializeFromJson(Convert.ToUInt64(dict["TagId"], CultureInfo.InvariantCulture), dict["Value"])
+            : o;
 
-        private static object? FromJsonElement(JsonElement jo) {
-            switch (jo.ValueKind) {
-            case JsonValueKind.False:
-                return false;
+    private static object? FromJsonElement(JsonElement jo) {
+        switch (jo.ValueKind) {
+        case JsonValueKind.False:
+            return false;
 
-            case JsonValueKind.True:
-                return true;
+        case JsonValueKind.True:
+            return true;
 
-            case JsonValueKind.Object:
-                return jo.EnumerateObject().ToDictionary(p => p.Name, pp => pp.Value.AsNavigable(), StringComparer.InvariantCultureIgnoreCase);
+        case JsonValueKind.Object:
+            return jo.EnumerateObject().ToDictionary(p => p.Name, pp => pp.Value.AsNavigable(), StringComparer.InvariantCultureIgnoreCase);
 
-            case JsonValueKind.Array:
-                return jo.EnumerateArray().Select(js => js.AsNavigable()).ToArray();
+        case JsonValueKind.Array:
+            return jo.EnumerateArray().Select(js => js.AsNavigable()).ToArray();
 
-            case JsonValueKind.String:
-                return jo.GetString();
+        case JsonValueKind.String:
+            return jo.GetString();
 
-            case JsonValueKind.Number:
-                if (jo.TryGetUInt64(out var value))
-                    return value;
-                return jo.GetInt64();
+        case JsonValueKind.Number:
+            if (jo.TryGetUInt64(out var value))
+                return value;
+            return jo.GetInt64();
 
-            default:
-                return null;
-            }
+        default:
+            return null;
         }
+    }
 
-        private static bool IsPrimitive(object? value) => value?.GetType().IsPrimitive ?? false;
+    private static bool IsPrimitive(object? value) => value?.GetType().IsPrimitive ?? false;
 
-        private static Dictionary<string, object?> ToDictionary(object value) {
-            var dictionary = new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
-            foreach (var p in value.GetType().GetProperties()) {
-                object? propertyValue = p.GetValue(value, null);
-                dictionary[p.Name] = AsNavigable(propertyValue);
-            }
-            return dictionary;
+    private static Dictionary<string, object?> ToDictionary(object value) {
+        var dictionary = new Dictionary<string, object?>(StringComparer.InvariantCultureIgnoreCase);
+        foreach (var p in value.GetType().GetProperties()) {
+            object? propertyValue = p.GetValue(value, null);
+            dictionary[p.Name] = AsNavigable(propertyValue);
         }
+        return dictionary;
     }
 }

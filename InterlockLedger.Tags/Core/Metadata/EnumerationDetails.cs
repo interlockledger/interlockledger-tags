@@ -30,31 +30,27 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class EnumerationDetails : IEquatable<EnumerationDetails>
 {
-    public class EnumerationDetails : IEquatable<EnumerationDetails>
-    {
-        public EnumerationDetails() {
-        }
-
-        public EnumerationDetails(string name, string description) {
-            Name = name.Required(nameof(name));
-            Description = description;
-        }
-
-        public string Description { get; set; }
-        public string Name { get; set; }
-
-        public override bool Equals(object obj) => Equals(obj as EnumerationDetails);
-
-        public bool Equals(EnumerationDetails other) => other != null && Description == other.Description && Name == other.Name;
-
-        public override int GetHashCode() => HashCode.Combine(Description, Name);
-
-        public override string ToString() => $"{Name}:{Description}";
-
-        internal EnumerationItems.FullEnumerationDetails ToFull(ulong index) => new() { Index = index, Description = Description, Name = Name };
+    public EnumerationDetails() {
     }
+
+    public EnumerationDetails(string name, string description) {
+        Name = name.Required();
+        Description = description;
+    }
+
+    public string Description { get; set; }
+    public string Name { get; set; }
+
+    public override bool Equals(object obj) => Equals(obj as EnumerationDetails);
+
+    public bool Equals(EnumerationDetails other) => other != null && Description == other.Description && Name == other.Name;
+
+    public override int GetHashCode() => HashCode.Combine(Description, Name);
+
+    public override string ToString() => $"{Name}:{Description}";
+
+    internal EnumerationItems.FullEnumerationDetails ToFull(ulong index) => new() { Index = index, Description = Description, Name = Name };
 }

@@ -30,26 +30,24 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ExportedKeyFile
 {
-    public class ExportedKeyFile
-    {
-        public ExportedKeyFile(string keyName, string keyFileName, byte[] keyFileBytes) {
-            if (string.IsNullOrWhiteSpace(keyName))
-                throw new System.ArgumentException("Can't have an empty key name!!!", nameof(keyName));
-            if (string.IsNullOrWhiteSpace(keyFileName))
-                throw new System.ArgumentException("Can't have an empty key filename!!!", nameof(keyFileName));
-            if (keyFileBytes == null || keyFileBytes.Length == 0)
-                throw new System.ArgumentException("Can't have zero key file bytes!!!", nameof(keyFileBytes));
-            KeyName = keyName;
-            KeyFileName = keyFileName;
-            KeyFileBytes = keyFileBytes;
-        }
-
-        public byte[] KeyFileBytes { get; }
-
-        public string KeyFileName { get; }
-
-        public string KeyName { get; }
+    public ExportedKeyFile(string keyName, string keyFileName, byte[] keyFileBytes) {
+        if (string.IsNullOrWhiteSpace(keyName))
+            throw new System.ArgumentException("Can't have an empty key name!!!", nameof(keyName));
+        if (string.IsNullOrWhiteSpace(keyFileName))
+            throw new System.ArgumentException("Can't have an empty key filename!!!", nameof(keyFileName));
+        if (keyFileBytes == null || keyFileBytes.Length == 0)
+            throw new System.ArgumentException("Can't have zero key file bytes!!!", nameof(keyFileBytes));
+        KeyName = keyName;
+        KeyFileName = keyFileName;
+        KeyFileBytes = keyFileBytes;
     }
+
+    public byte[] KeyFileBytes { get; }
+
+    public string KeyFileName { get; }
+
+    public string KeyName { get; }
 }

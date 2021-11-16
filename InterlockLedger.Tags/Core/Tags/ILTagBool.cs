@@ -30,32 +30,27 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public sealed class ILTagBool : ILTagOfImplicit<bool>
 {
-    public sealed class ILTagBool : ILTagOfImplicit<bool>
-    {
-        public static readonly ILTagBool False = new(false);
-        public static readonly ILTagBool True = new(true);
+    public static readonly ILTagBool False = new(false);
+    public static readonly ILTagBool True = new(true);
 
-        public override string Formatted => Value.ToString(CultureInfo.InvariantCulture);
+    public override string Formatted => Value.ToString(CultureInfo.InvariantCulture);
 
-        public static ILTagBool From(bool value) => value ? True : False;
+    public static ILTagBool From(bool value) => value ? True : False;
 
-        public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
+    public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
 
-        protected override bool ValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
+    protected override bool ValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            s.WriteByte((byte)(Value ? 1 : 0));
-            return Task.FromResult(s);
-        }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.WriteByte((byte)(Value ? 1 : 0));
+        return Task.FromResult(s);
+    }
 
-        private ILTagBool(bool value) : base(ILTagId.Bool, value) {
-        }
+    private ILTagBool(bool value) : base(ILTagId.Bool, value) {
     }
 }

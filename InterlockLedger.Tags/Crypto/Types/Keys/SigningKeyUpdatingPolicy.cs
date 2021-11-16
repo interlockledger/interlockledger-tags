@@ -30,23 +30,19 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class SigningKeyUpdatingPolicy
 {
-    public class SigningKeyUpdatingPolicy
-    {
-        public static readonly SigningKeyUpdatingPolicy Defaults = new(
-            maxSignaturesWithTheSameKey: 8,
-            maxAgeOfSignatureKey: TimeSpan.FromDays(7)
-        );
+    public static readonly SigningKeyUpdatingPolicy Defaults = new(
+        maxSignaturesWithTheSameKey: 8,
+        maxAgeOfSignatureKey: TimeSpan.FromDays(7)
+    );
 
-        public SigningKeyUpdatingPolicy(ulong maxSignaturesWithTheSameKey, TimeSpan maxAgeOfSignatureKey) {
-            MaxSignaturesWithTheSameKey = maxSignaturesWithTheSameKey;
-            MaxAgeOfSignatureKey = maxAgeOfSignatureKey;
-        }
-
-        public TimeSpan MaxAgeOfSignatureKey { get; private set; }
-        public ulong MaxSignaturesWithTheSameKey { get; }
+    public SigningKeyUpdatingPolicy(ulong maxSignaturesWithTheSameKey, TimeSpan maxAgeOfSignatureKey) {
+        MaxSignaturesWithTheSameKey = maxSignaturesWithTheSameKey;
+        MaxAgeOfSignatureKey = maxAgeOfSignatureKey;
     }
+
+    public TimeSpan MaxAgeOfSignatureKey { get; private set; }
+    public ulong MaxSignaturesWithTheSameKey { get; }
 }

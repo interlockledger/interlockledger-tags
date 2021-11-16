@@ -30,18 +30,14 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class EnumerationDictionary : Dictionary<ulong, EnumerationDetails>
 {
-    public class EnumerationDictionary : Dictionary<ulong, EnumerationDetails>
-    {
-        public EnumerationDictionary() {
-        }
-
-        public EnumerationDictionary(IDictionary<ulong, EnumerationDetails> dictionary) : base(dictionary) {
-        }
-
-        public EnumerationItems AsEnumerationItems => Count == 0 ? null : new EnumerationItems(this);
+    public EnumerationDictionary() {
     }
+
+    public EnumerationDictionary(IDictionary<ulong, EnumerationDetails> dictionary) : base(dictionary) {
+    }
+
+    public EnumerationItems AsEnumerationItems => Count == 0 ? null : new EnumerationItems(this);
 }

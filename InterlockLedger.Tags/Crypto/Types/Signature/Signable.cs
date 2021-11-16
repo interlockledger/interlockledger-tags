@@ -30,27 +30,22 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ISignable
 {
-    public interface ISignable
-    {
-        ILTag ResolveSigned(ushort version, Stream s);
+    ILTag ResolveSigned(ushort version, Stream s);
+}
+
+public abstract class Signable<T> : VersionedValue<T>, ISignable where T : Signable<T>, new()
+{
+    public Signable() : base(0, 0) {
     }
 
-    public abstract class Signable<T> : VersionedValue<T>, ISignable where T : Signable<T>, new()
-    {
-        public Signable() : base(0, 0) {
-        }
+    public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
-        public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
+    public SignedValue<T> SignWith(ISigningContext context)
+        => new((T)this, context.Required().Key.SignWithId((T)this).AsSingle());
 
-        public SignedValue<T> SignWith(ISigningContext context)
-            => new((T)this, context.Required(nameof(context)).Key.SignWithId((T)this).AsSingle());
-
-        protected Signable(ulong tagId, ushort version) : base(tagId, version) {
-        }
+    protected Signable(ulong tagId, ushort version) : base(tagId, version) {
     }
 }

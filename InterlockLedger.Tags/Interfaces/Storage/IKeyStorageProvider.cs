@@ -30,24 +30,21 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IKeyStorageProvider : IKeyFileExporter
 {
-    public interface IKeyStorageProvider : IKeyFileExporter
-    {
-        string AppKeysFolderPath { get; }
-        IEnumerable<InterlockSigningKeyData> Keys { get; }
+    string AppKeysFolderPath { get; }
+    IEnumerable<InterlockSigningKeyData> Keys { get; }
 
-        InterlockSigningKeyData Create(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, Algorithm algorithm, KeyStrength strength, string name, string description, string password);
+    InterlockSigningKeyData Create(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, Algorithm algorithm, KeyStrength strength, string name, string description, string password);
 
-        X509Certificate2 CreateCertificate(string name, string password, string file, Algorithm algorithm, KeyStrength strength);
+    X509Certificate2 CreateCertificate(string name, string password, string file, Algorithm algorithm, KeyStrength strength);
 
-        InterlockSigningKeyData Import(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
+    InterlockSigningKeyData Import(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
 
-        InterlockSigningKey Open(InterlockSigningKeyData key, string password);
+    InterlockSigningKey Open(InterlockSigningKeyData key, string password);
 
-        InterlockSigningKey Resolve(string name, string password);
-    }
+    InterlockSigningKey Resolve(string name, string password);
 }

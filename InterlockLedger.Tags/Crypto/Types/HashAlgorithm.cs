@@ -30,34 +30,30 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
 using System.Security.Cryptography;
-using System.Text.Json.Serialization;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum HashAlgorithm : ushort
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum HashAlgorithm : ushort
-    {
-        SHA1 = 0,
-        SHA256 = 1,
-        SHA512 = 2,
-        SHA3_256 = 3,
-        SHA3_512 = 4,
-        SHA384 = 5,
+    SHA1 = 0,
+    SHA256 = 1,
+    SHA512 = 2,
+    SHA3_256 = 3,
+    SHA3_512 = 4,
+    SHA384 = 5,
 
-        Copy = 0xFFFF
+    Copy = 0xFFFF
 
-    }
+}
 
-    public static class HashAlgorithmExtensions
-    {
-        public static HashAlgorithmName ToName(this HashAlgorithm value) => value switch {
-            HashAlgorithm.SHA1 => HashAlgorithmName.SHA1,
-            HashAlgorithm.SHA256 => HashAlgorithmName.SHA256,
-            HashAlgorithm.SHA512 => HashAlgorithmName.SHA512,
-            HashAlgorithm.SHA384 => HashAlgorithmName.SHA384,
-            _ => throw new InvalidDataException()
-        };
-    }
+public static class HashAlgorithmExtensions
+{
+    public static HashAlgorithmName ToName(this HashAlgorithm value) => value switch {
+        HashAlgorithm.SHA1 => HashAlgorithmName.SHA1,
+        HashAlgorithm.SHA256 => HashAlgorithmName.SHA256,
+        HashAlgorithm.SHA512 => HashAlgorithmName.SHA512,
+        HashAlgorithm.SHA384 => HashAlgorithmName.SHA384,
+        _ => throw new InvalidDataException()
+    };
 }

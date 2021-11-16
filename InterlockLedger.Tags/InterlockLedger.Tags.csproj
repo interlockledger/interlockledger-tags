@@ -1,47 +1,53 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-      <LangVersion>preview</LangVersion>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <Authors>Rafael Teixeira</Authors>
-      <Company>InterlockLedger Network</Company>
-      <Copyright>Copyright (c) 2018-2021 InterlockLedger Network</Copyright>
-      <Description>This library implements the basic TLV/JSON encoding/decoding for core types.</Description>
-      <PackageLicenseFile>LICENSE</PackageLicenseFile>
-      <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
-      <Product>InterlockLedger</Product>
-      <RepositoryType>git</RepositoryType>
-      <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-      <Version>10.0.1</Version>
-      <PackageId>InterlockLedger.Tags</PackageId>
-      <PackageReleaseNotes>ILIntSigned support</PackageReleaseNotes>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Rafael Teixeira</Authors>
+        <Company>InterlockLedger Network</Company>
+        <Copyright>Copyright (c) 2018-2021 InterlockLedger Network</Copyright>
+        <Description>This library implements the basic TLV/JSON encoding/decoding for core types.</Description>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
+        <Product>InterlockLedger</Product>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
+        <Version>11.0.0</Version>
+        <PackageId>InterlockLedger.Tags</PackageId>
+        <PackageReleaseNotes>Moving to .NET 6.0 - Updating to InterlockLedger.Commons 2.0.0</PackageReleaseNotes>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG</DefineConstants>
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-  <ItemGroup>
-      <None Include="..\LICENSE">
-          <Pack>True</Pack>
-          <PackagePath></PackagePath>
-      </None>
-  </ItemGroup>
-  <Target Name="PublishLocally" AfterTargets="Pack" Condition="Exists('$(INTERLOCK_LOCAL_NUGETS_FOLDER)')">
-      <ItemGroup>
-          <NugetPackages Include="$(PackageOutputAbsolutePath)\$(PackageId).$(Version).nupkg" />
-      </ItemGroup>
-      <Message Importance="high" Text="Publish to Local Nugets Folder '$(INTERLOCK_LOCAL_NUGETS_FOLDER)'" />
-      <Copy DestinationFolder="$(INTERLOCK_LOCAL_NUGETS_FOLDER)" SourceFiles="@(NugetPackages)" ContinueOnError="true" SkipUnchangedFiles="false" />
-  </Target>
+    <ItemGroup>
+        <Using Include="System.Text"/>
+        <Using Include="System.Text.Json.Serialization"/>
+    </ItemGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>DEBUG</DefineConstants>
+        <DebugType>full</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="..\LICENSE">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
+    <Target Name="PublishLocally" AfterTargets="Pack" Condition="Exists('$(INTERLOCK_LOCAL_NUGETS_FOLDER)')">
+        <ItemGroup>
+            <NugetPackages Include="$(PackageOutputAbsolutePath)\$(PackageId).$(Version).nupkg" />
+        </ItemGroup>
+        <Message Importance="high" Text="Publish to Local Nugets Folder '$(INTERLOCK_LOCAL_NUGETS_FOLDER)'" />
+        <Copy DestinationFolder="$(INTERLOCK_LOCAL_NUGETS_FOLDER)" SourceFiles="@(NugetPackages)" ContinueOnError="true" SkipUnchangedFiles="false" />
+    </Target>
 
-  <ItemGroup>
-    <PackageReference Include="InterlockLedger.Commons" Version="1.3.1" />
-    <PackageReference Include="InterlockLedger.Tags.ILInt" Version="4.0.0" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
-    <PackageReference Include="System.Text.Json" Version="5.0.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="InterlockLedger.Commons" Version="2.0.0" />
+        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="5.0.0" />
+        <PackageReference Include="System.Memory" Version="4.5.4" />
+        <PackageReference Include="System.Text.Json" Version="6.0.0" />
+    </ItemGroup>
 
 </Project>

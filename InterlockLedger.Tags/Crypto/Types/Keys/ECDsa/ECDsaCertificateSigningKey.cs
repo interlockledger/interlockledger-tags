@@ -30,65 +30,61 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ECDsaCertificateSigningKey : InterlockSigningKey
 {
-    public class ECDsaCertificateSigningKey : InterlockSigningKey
-    {
-        public ECDsaCertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) : base(data) {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            if (data.EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
-                throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
-            _password = password.Required(nameof(password));
-            _certificateBytes = certificateBytes.Required(nameof(certificateBytes));
+    public ECDsaCertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) : base(data) {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+        if (data.EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
+            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
+        _password = password.Required();
+        _certificateBytes = certificateBytes.Required();
+    }
+
+    public override byte[] AsSessionState {
+        get {
+            using var ms = new MemoryStream();
+            ms.EncodeTag(_value);
+            ms.EncodeString(_password);
+            ms.EncodeByteArray(_certificateBytes);
+            return ms.ToArray();
         }
+    }
 
-        public override byte[] AsSessionState {
-            get {
-                using var ms = new MemoryStream();
-                ms.EncodeTag(_value);
-                ms.EncodeString(_password);
-                ms.EncodeByteArray(_certificateBytes);
-                return ms.ToArray();
-            }
-        }
+    public static new ECDsaCertificateSigningKey FromSessionState(byte[] bytes) {
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.Decode<InterlockSigningKeyData>();
+        var password = ms.DecodeString();
+        var certificateBytes = ms.DecodeByteArray();
+        return new ECDsaCertificateSigningKey(tag, certificateBytes, password);
+    }
 
-        public static new ECDsaCertificateSigningKey FromSessionState(byte[] bytes) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<InterlockSigningKeyData>();
-            var password = ms.DecodeString();
-            var certificateBytes = ms.DecodeByteArray();
-            return new ECDsaCertificateSigningKey(tag, certificateBytes, password);
-        }
+    public override byte[] Decrypt(byte[] bytes) {
+        using var x509Certificate = _certificateBytes.OpenCertificate(_password);
+        using var ecdsa = x509Certificate.GetECDsaPrivateKey();
+        throw new NotSupportedException();
+    }
 
-        public override byte[] Decrypt(byte[] bytes) {
-            using var x509Certificate = _certificateBytes.OpenCertificate(_password);
-            using var ecdsa = x509Certificate.GetECDsaPrivateKey();
-            throw new NotSupportedException();
-        }
+    public override TagSignature Sign(byte[] data) => new(Algorithm.EcDSA, HashAndSign(data));
 
-        public override TagSignature Sign(byte[] data) => new(Algorithm.EcDSA, HashAndSign(data));
+    public override TagSignature Sign<T>(T data) => new(Algorithm.EcDSA, HashAndSignBytes(data));
 
-        public override TagSignature Sign<T>(T data) => new(Algorithm.EcDSA, HashAndSignBytes(data));
+    private readonly byte[] _certificateBytes;
+    private readonly string _password;
 
-        private readonly byte[] _certificateBytes;
-        private readonly string _password;
+    private byte[] HashAndSign(byte[] dataToSign) {
+        using var x509Certificate = _certificateBytes.OpenCertificate(_password);
+        using var ecdsa = x509Certificate.GetECDsaPrivateKey();
+        return ecdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
+    }
 
-        private byte[] HashAndSign(byte[] dataToSign) {
-            using var x509Certificate = _certificateBytes.OpenCertificate(_password);
-            using var ecdsa = x509Certificate.GetECDsaPrivateKey();
-            return ecdsa.SignData(dataToSign, HashAlgorithmName.SHA256);
-        }
-
-        private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() {
-            using var x509Certificate = _certificateBytes.OpenCertificate(_password);
-            using var ecdsa = x509Certificate.GetECDsaPrivateKey();
-            return ecdsa.SignData(data.OpenReadingStreamAsync().Result, HashAlgorithmName.SHA256);
-        }
+    private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() {
+        using var x509Certificate = _certificateBytes.OpenCertificate(_password);
+        using var ecdsa = x509Certificate.GetECDsaPrivateKey();
+        return ecdsa.SignData(data.OpenReadingStreamAsync().Result, HashAlgorithmName.SHA256);
     }
 }

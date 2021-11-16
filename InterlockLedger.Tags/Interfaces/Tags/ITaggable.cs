@@ -30,13 +30,11 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ITaggable
 {
-    public interface ITaggable
-    {
-        ILTag AsILTag { get; }
+    ILTag AsILTag { get; }
 
-        DataField FieldModel { get; }
-        ulong TagId { get; }
-    }
+    DataField FieldModel { get; }
+    ulong TagId { get; }
 }

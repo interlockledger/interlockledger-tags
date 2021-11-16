@@ -30,40 +30,34 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagByteArray : ILTagOfExplicit<byte[]>
 {
-    public class ILTagByteArray : ILTagOfExplicit<byte[]>
-    {
-        public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
-        }
-
-        public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
-        }
-
-        public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
-        }
-
-        internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
-        }
-
-        protected override byte[] ValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
-
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            s.WriteBytes(Value);
-            return Task.FromResult(s);
-        }
-
-        protected override ulong CalcValueLength() => (ulong)(Value?.Length ?? 0);
-
-        private static byte[] Elicit(object opaqueValue)
-            => opaqueValue switch {
-                byte[] value => value,
-                string s => Convert.FromBase64String(s),
-                _ => Array.Empty<byte>()
-            };
+    public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
     }
+
+    public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
+    }
+
+    public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
+    }
+
+    internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
+    }
+
+    protected override byte[] ValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
+
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.WriteBytes(Value);
+        return Task.FromResult(s);
+    }
+
+    protected override ulong CalcValueLength() => (ulong)(Value?.Length ?? 0);
+
+    private static byte[] Elicit(object opaqueValue)
+        => opaqueValue switch {
+            byte[] value => value,
+            string s => Convert.FromBase64String(s),
+            _ => Array.Empty<byte>()
+        };
 }

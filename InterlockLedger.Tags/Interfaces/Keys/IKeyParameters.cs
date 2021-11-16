@@ -30,12 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IKeyParameters
 {
-    public interface IKeyParameters
-    {
-        byte[] EncodedBytes { get; }
-        TagPubKey PublicKey { get; }
-        KeyStrength Strength { get; }
-    }
+    byte[] EncodedBytes { get; }
+    TagPubKey PublicKey { get; }
+    KeyStrength Strength { get; }
 }

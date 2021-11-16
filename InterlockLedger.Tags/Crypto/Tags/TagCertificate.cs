@@ -30,21 +30,18 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
 using System.Security.Cryptography.X509Certificates;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class TagCertificate : ILTagExplicit<X509Certificate2>
 {
-    public class TagCertificate : ILTagExplicit<X509Certificate2>
-    {
-        public TagCertificate(X509Certificate2 value) : base(ILTagId.Certificate, value) {
-        }
-
-        public TagCertificate(Stream s) : base(ILTagId.Certificate, s) {
-        }
-
-        protected override X509Certificate2 FromBytes(byte[] bytes) => new(bytes);
-
-        protected override byte[] ToBytes(X509Certificate2 value) => value.RawData;
+    public TagCertificate(X509Certificate2 value) : base(ILTagId.Certificate, value) {
     }
+
+    public TagCertificate(Stream s) : base(ILTagId.Certificate, s) {
+    }
+
+    protected override X509Certificate2 FromBytes(byte[] bytes) => new(bytes);
+
+    protected override byte[] ToBytes(X509Certificate2 value) => value.RawData;
 }

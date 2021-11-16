@@ -30,25 +30,21 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public enum TimeStampStatus
 {
-    public enum TimeStampStatus
-    {
-        OK,
-        TooOld,
-        AheadOfTime
-    }
+    OK,
+    TooOld,
+    AheadOfTime
+}
 
-    public interface ITimeStamper
-    {
-        ulong Nonce { get; }
-        DateTimeOffset Now { get; }
-        TagHash Session { get; }
+public interface ITimeStamper
+{
+    ulong Nonce { get; }
+    DateTimeOffset Now { get; }
+    TagHash Session { get; }
 
-        void SwitchSession(SenderIdentity senderIdentity);
+    void SwitchSession(SenderIdentity senderIdentity);
 
-        TimeStampStatus Validate(DateTimeOffset timeStamp, SenderIdentity senderIdentity);
-    }
+    TimeStampStatus Validate(DateTimeOffset timeStamp, SenderIdentity senderIdentity);
 }

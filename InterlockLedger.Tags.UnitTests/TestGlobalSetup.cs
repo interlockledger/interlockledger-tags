@@ -30,25 +30,21 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[SetUpFixture]
+public class TestGlobalSetup : ITagRegistrar
 {
-    [SetUpFixture]
-    public class TestGlobalSetup : ITagRegistrar
-    {
-        [OneTimeSetUp]
-        public void OneTimeSetup() {
-            BaseKeyId.RegisterKeyIdTypes();
-            new TestSignable().RegisterAsField(this);
-        }
+    [OneTimeSetUp]
+    public void OneTimeSetup() {
+        BaseKeyId.RegisterKeyIdTypes();
+        new TestSignable().RegisterAsField(this);
+    }
 
-        bool ITagRegistrar.RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer) {
-            if (!TagProvider.HasDeserializer(tagId))
-                TagProvider.RegisterDeserializer(tagId, deserializer, jsonDeserializer);
-            return true;
-        }
+    bool ITagRegistrar.RegisterILTag(ulong tagId, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer) {
+        if (!TagProvider.HasDeserializer(tagId))
+            TagProvider.RegisterDeserializer(tagId, deserializer, jsonDeserializer);
+        return true;
     }
 }

@@ -30,14 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ITagDeserializersProvider
 {
-    public interface ITagDeserializersProvider
-    {
-        IEnumerable<(ulong id, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer)> Deserializers { get; }
-    }
+    IEnumerable<(ulong id, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer)> Deserializers { get; }
 }

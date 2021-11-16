@@ -30,10 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IVersion
 {
-    public interface IVersion
-    {
-        ushort Version { get; }
-    }
+    ushort Version { get; }
 }

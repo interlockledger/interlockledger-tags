@@ -30,18 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ISigningKey : IBaseKey
 {
-    public interface ISigningKey : IBaseKey
-    {
-        Algorithm SignAlgorithm { get; }
+    Algorithm SignAlgorithm { get; }
 
-        byte[] Decrypt(byte[] bytes);
+    byte[] Decrypt(byte[] bytes);
 
-        TagSignature Sign(byte[] data);
+    TagSignature Sign(byte[] data);
 
-        TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    TagSignature Sign<T>(T data) where T : Signable<T>, new();
 
-        IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), Id, PublicKey);
-    }
+    IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), Id, PublicKey);
 }

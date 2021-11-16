@@ -30,18 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IUpdatingKeyStorageProvider
 {
-    public interface IUpdatingKeyStorageProvider
-    {
-        bool FileExists { get; }
-        BaseKeyId OwnerId { get; }
-        InterlockUpdatableSigningKey Resolved { get; }
+    bool FileExists { get; }
+    BaseKeyId OwnerId { get; }
+    InterlockUpdatableSigningKey Resolved { get; }
 
-        InterlockUpdatableSigningKeyData Create();
+    InterlockUpdatableSigningKeyData Create();
 
-        byte[] Encrypt(byte[] secret);
+    byte[] Encrypt(byte[] secret);
 
-        void Save(InterlockUpdatableSigningKey key);
-    }
+    void Save(InterlockUpdatableSigningKey key);
 }

@@ -30,33 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagILInt : ILTagOfImplicit<ulong>, IEquatable<ILTagILInt>
 {
-    public class ILTagILInt : ILTagOfImplicit<ulong>, IEquatable<ILTagILInt>
-    {
-        public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
-        }
+    public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) {
+    }
 
-        public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
+    public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
 
-        public override bool Equals(object obj) => Equals(obj as ILTagILInt);
+    public override bool Equals(object obj) => Equals(obj as ILTagILInt);
 
-        public bool Equals(ILTagILInt other) => other != null && Value == other.Value;
+    public bool Equals(ILTagILInt other) => other != null && Value == other.Value;
 
-        public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
+    public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
 
-        internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
+    protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            s.ILIntEncode(Value);
-            return Task.FromResult(s);
-        }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.ILIntEncode(Value);
+        return Task.FromResult(s);
     }
 }

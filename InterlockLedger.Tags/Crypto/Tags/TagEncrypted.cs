@@ -30,48 +30,42 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public struct TagEncryptedParts : IEquatable<TagEncryptedParts>
 {
-    public struct TagEncryptedParts : IEquatable<TagEncryptedParts>
-    {
-        public CipherAlgorithm Algorithm;
-        public byte[] CipherData;
+    public CipherAlgorithm Algorithm;
+    public byte[] CipherData;
 
-        public static bool operator !=(TagEncryptedParts left, TagEncryptedParts right) => !(left == right);
+    public static bool operator !=(TagEncryptedParts left, TagEncryptedParts right) => !(left == right);
 
-        public static bool operator ==(TagEncryptedParts left, TagEncryptedParts right) => left.Equals(right);
+    public static bool operator ==(TagEncryptedParts left, TagEncryptedParts right) => left.Equals(right);
 
-        public override bool Equals(object obj) => obj is TagEncryptedParts parts && Equals(parts);
+    public override bool Equals(object obj) => obj is TagEncryptedParts parts && Equals(parts);
 
-        public bool Equals(TagEncryptedParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(CipherData, other.CipherData);
+    public bool Equals(TagEncryptedParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(CipherData, other.CipherData);
 
-        public override int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
+    public override int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
+}
+
+public class TagEncrypted : ILTagExplicit<TagEncryptedParts>
+{
+    public TagEncrypted(CipherAlgorithm algorithm, byte[] data) :
+        base(ILTagId.Encrypted, new TagEncryptedParts { Algorithm = algorithm, CipherData = data }) {
     }
 
-    public class TagEncrypted : ILTagExplicit<TagEncryptedParts>
-    {
-        public TagEncrypted(CipherAlgorithm algorithm, byte[] data) :
-            base(ILTagId.Encrypted, new TagEncryptedParts { Algorithm = algorithm, CipherData = data }) {
-        }
+    public CipherAlgorithm Algorithm => Value.Algorithm;
 
-        public CipherAlgorithm Algorithm => Value.Algorithm;
+    public byte[] CipherData => Value.CipherData;
 
-        public byte[] CipherData => Value.CipherData;
-
-        internal TagEncrypted(Stream s) : base(ILTagId.Encrypted, s) {
-        }
-
-        protected override TagEncryptedParts FromBytes(byte[] bytes) =>
-            FromBytesHelper(bytes, s => new TagEncryptedParts {
-                Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
-                CipherData = s.DecodeByteArray(),
-            });
-
-        protected override byte[] ToBytes(TagEncryptedParts value)
-            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).EncodeByteArray(Value.CipherData));
+    internal TagEncrypted(Stream s) : base(ILTagId.Encrypted, s) {
     }
+
+    protected override TagEncryptedParts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new TagEncryptedParts {
+            Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
+            CipherData = s.DecodeByteArray(),
+        });
+
+    protected override byte[] ToBytes(TagEncryptedParts value)
+        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).EncodeByteArray(Value.CipherData));
 }

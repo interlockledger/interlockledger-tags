@@ -30,33 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Collections;
-using System.IO;
-using System.Linq;
 
-namespace InterlockLedger.Tags
-{
+namespace InterlockLedger.Tags;
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
-    public class ILTagSequence : ILTagArrayOfILTag<ILTag>
+public class ILTagSequence : ILTagArrayOfILTag<ILTag>
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-    {
-        public ILTagSequence(params ILTag[] value) : base(ILTagId.Sequence, value) {
-        }
-
-        public ILTagSequence(object opaqueValue) : this(Elicit(opaqueValue)) {
-        }
-
-        public override object AsJson => Value.Select(e => new { e.TagId, Value = e.AsJson }).ToArray();
-        public int Length => Value.Length;
-        public new ILTag this[int i] => Value?[i];
-
-        public override bool Equals(object obj) => obj is ILTagSequence other && other.Length == Length && other.ToString().Equals(ToString(), StringComparison.InvariantCulture);
-
-        internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) {
-        }
-
-        private static ILTag[] Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : Array.Empty<ILTag>();
+{
+    public ILTagSequence(params ILTag[] value) : base(ILTagId.Sequence, value) {
     }
+
+    public ILTagSequence(object opaqueValue) : this(Elicit(opaqueValue)) {
+    }
+
+    public override object AsJson => Value.Select(e => new { e.TagId, Value = e.AsJson }).ToArray();
+    public int Length => Value.Length;
+    public new ILTag this[int i] => Value?[i];
+
+    public override bool Equals(object obj) => obj is ILTagSequence other && other.Length == Length && other.ToString().Equals(ToString(), StringComparison.InvariantCulture);
+
+    internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) {
+    }
+
+    private static ILTag[] Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : Array.Empty<ILTag>();
 }

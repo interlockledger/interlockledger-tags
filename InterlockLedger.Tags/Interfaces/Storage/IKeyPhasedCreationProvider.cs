@@ -30,14 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IKeyPhasedCreationProvider : IKeyFileExporter
 {
-    public interface IKeyPhasedCreationProvider : IKeyFileExporter
-    {
-        IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
+    IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
 
-        InterlockSigningKeyData CreateUsing(IKeyParameters emergencyKeyParameters, KeyStrength strength, BaseKeyId identity, string name, string description, string password, IEnumerable<AppPermissions> permissions, params KeyPurpose[] purposes);
-    }
+    InterlockSigningKeyData CreateUsing(IKeyParameters emergencyKeyParameters, KeyStrength strength, BaseKeyId identity, string name, string description, string password, IEnumerable<AppPermissions> permissions, params KeyPurpose[] purposes);
 }

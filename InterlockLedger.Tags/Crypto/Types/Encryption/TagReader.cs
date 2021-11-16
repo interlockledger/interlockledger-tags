@@ -30,55 +30,49 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
 {
-    public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
+    public TagReader(string name, TagPubKey publicKey) :
+        base(ILTagId.Reader, new Parts(name.Required(), publicKey.Required())) { }
+
+    public TagReader(IIdentifiedPublicKey ipk) : this(ipk.Required().Identifier, ipk.PublicKey) { }
+
+    BaseKeyId IIdentifiedPublicKey.Id { get; }
+    public string Name => Value.Name;
+    public TagPubKey PublicKey => Value.PublicKey;
+
+    public struct Parts : IEquatable<Parts>
     {
-        public TagReader(string name, TagPubKey publicKey) :
-            base(ILTagId.Reader, new Parts(name.Required(nameof(name)), publicKey.Required(nameof(publicKey)))) { }
+        public readonly string Name;
+        public readonly TagPubKey PublicKey;
 
-        public TagReader(IIdentifiedPublicKey ipk) : this(ipk.Required(nameof(ipk)).Identifier, ipk.PublicKey) { }
-
-        BaseKeyId IIdentifiedPublicKey.Id { get; }
-        public string Name => Value.Name;
-        public TagPubKey PublicKey => Value.PublicKey;
-
-        public struct Parts : IEquatable<Parts>
-        {
-            public readonly string Name;
-            public readonly TagPubKey PublicKey;
-
-            public Parts(string name, TagPubKey publicKey) {
-                if (string.IsNullOrWhiteSpace(name))
-                    throw new ArgumentException("Must provide a non-empty name for this reader", nameof(name));
-                Name = name;
-                PublicKey = publicKey.Required(nameof(publicKey));
-            }
-
-            public static bool operator !=(Parts left, Parts right) => !(left == right);
-
-            public static bool operator ==(Parts left, Parts right) => left.Equals(right);
-
-            public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
-
-            public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && Name == other.Name;
-
-            public override int GetHashCode() => HashCode.Combine(PublicKey, Name);
-
-            public override string ToString() => $"Reader '{Name}' with public key {PublicKey}";
+        public Parts(string name, TagPubKey publicKey) {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Must provide a non-empty name for this reader", nameof(name));
+            Name = name;
+            PublicKey = publicKey.Required();
         }
 
-        internal TagReader(Stream s) : base(ILTagId.Reader, s) {
-        }
+        public static bool operator !=(Parts left, Parts right) => !(left == right);
 
-        protected override Parts FromBytes(byte[] bytes)
-            => FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
+        public static bool operator ==(Parts left, Parts right) => left.Equals(right);
 
-        protected override byte[] ToBytes(Parts value)
-            => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.Name).EncodeTag(Value.PublicKey));
+        public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
+
+        public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && Name == other.Name;
+
+        public override int GetHashCode() => HashCode.Combine(PublicKey, Name);
+
+        public override string ToString() => $"Reader '{Name}' with public key {PublicKey}";
     }
+
+    internal TagReader(Stream s) : base(ILTagId.Reader, s) {
+    }
+
+    protected override Parts FromBytes(byte[] bytes)
+        => FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
+
+    protected override byte[] ToBytes(Parts value)
+        => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.Name).EncodeTag(Value.PublicKey));
 }

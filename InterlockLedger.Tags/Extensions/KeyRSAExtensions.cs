@@ -30,39 +30,36 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Security.Cryptography;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class KeyRSAExtensions
 {
-    public static class KeyRSAExtensions
-    {
-        //  enum KeyStrength
-        //  Normal = 0,         // RSA 2048
-        //  Strong = 1,         // RSA 3072
-        //  ExtraStrong = 2,    // RSA 4096
-        //  MegaStrong = 3,     // RSA 5120
-        //  SuperStrong = 4,    // RSA 6144
-        //  HyperStrong = 5,    // RSA 7172
-        //  UltraStrong = 6     // RSA 8192
+    //  enum KeyStrength
+    //  Normal = 0,         // RSA 2048
+    //  Strong = 1,         // RSA 3072
+    //  ExtraStrong = 2,    // RSA 4096
+    //  MegaStrong = 3,     // RSA 5120
+    //  SuperStrong = 4,    // RSA 6144
+    //  HyperStrong = 5,    // RSA 7172
+    //  UltraStrong = 6     // RSA 8192
 
-        public static KeyStrength KeyStrengthGuess(this RSA key) => Guess(key.Required(nameof(key)).KeySize);
+    public static KeyStrength KeyStrengthGuess(this RSA key) => Guess(key.Required().KeySize);
 
-        public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
+    public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
 
-        private static KeyStrength Guess(int size)
-            => size <= 2048
-                ? KeyStrength.Normal
-                : size <= 3072
-                    ? KeyStrength.Strong
-                    : size <= 4096
-                        ? KeyStrength.ExtraStrong
-                        : size <= 5120
-                            ? KeyStrength.MegaStrong
-                            : size <= 6144
-                                ? KeyStrength.SuperStrong
-                                : size <= 7172
-                                    ? KeyStrength.HyperStrong
-                                    : KeyStrength.UltraStrong;
-    }
+    private static KeyStrength Guess(int size)
+        => size <= 2048
+            ? KeyStrength.Normal
+            : size <= 3072
+                ? KeyStrength.Strong
+                : size <= 4096
+                    ? KeyStrength.ExtraStrong
+                    : size <= 5120
+                        ? KeyStrength.MegaStrong
+                        : size <= 6144
+                            ? KeyStrength.SuperStrong
+                            : size <= 7172
+                                ? KeyStrength.HyperStrong
+                                : KeyStrength.UltraStrong;
 }

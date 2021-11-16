@@ -30,13 +30,11 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IReader
 {
-    public interface IReader
-    {
-        string Id { get; }
-        TagHash PublicKeyHash { get; }
+    string Id { get; }
+    TagHash PublicKeyHash { get; }
 
-        (byte[] key, byte[] iv) OpenKeyAndIV(byte[] encryptedKey, byte[] encryptedIV);
-    }
+    (byte[] key, byte[] iv) OpenKeyAndIV(byte[] encryptedKey, byte[] encryptedIV);
 }

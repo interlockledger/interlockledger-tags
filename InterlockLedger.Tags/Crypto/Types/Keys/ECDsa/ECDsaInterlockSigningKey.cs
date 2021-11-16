@@ -30,50 +30,45 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ECDsaInterlockSigningKey : InterlockSigningKey
 {
-    public class ECDsaInterlockSigningKey : InterlockSigningKey
-    {
-        public ECDsaInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            if (data.EncryptedContentType != EncryptedContentType.EncryptedKey)
-                throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
-            using var ms = new MemoryStream(decrypted);
-            _keyParameters = ms.DecodeAny<ECDsaParameters>();
-        }
-
-        public override byte[] AsSessionState {
-            get {
-                using var ms = new MemoryStream();
-                ms.EncodeTag(_value);
-                ms.EncodeTag(_keyParameters.AsPayload);
-                return ms.ToArray();
-            }
-        }
-
-        public static new ECDsaInterlockSigningKey FromSessionState(byte[] bytes) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<InterlockSigningKeyData>();
-            var parameters = ms.DecodeAny<ECDsaParameters>();
-            return new ECDsaInterlockSigningKey(tag, parameters);
-        }
-
-        public override byte[] Decrypt(byte[] bytes) => throw new InvalidOperationException("ECDsa does not permit encryption");
-        // ECDsaHelper.Decrypt(bytes, _keyParameters.Parameters);
-
-        public override TagSignature Sign(byte[] data)
-            => new(Algorithm.EcDSA, ECDsaHelper.HashAndSign(data, _keyParameters.Parameters, _keyParameters.HashAlgorithm.ToName()));
-
-        public override TagSignature Sign<T>(T data)
-            => new(Algorithm.EcDSA, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Parameters, _keyParameters.HashAlgorithm.ToName()));
-
-        private readonly ECDsaParameters _keyParameters;
-
-        private ECDsaInterlockSigningKey(InterlockSigningKeyData tag, ECDsaParameters parameters) : base(tag)
-            => _keyParameters = parameters;
+    public ECDsaInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+        if (data.EncryptedContentType != EncryptedContentType.EncryptedKey)
+            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
+        using var ms = new MemoryStream(decrypted);
+        _keyParameters = ms.DecodeAny<ECDsaParameters>();
     }
+
+    public override byte[] AsSessionState {
+        get {
+            using var ms = new MemoryStream();
+            ms.EncodeTag(_value);
+            ms.EncodeTag(_keyParameters.AsPayload);
+            return ms.ToArray();
+        }
+    }
+
+    public static new ECDsaInterlockSigningKey FromSessionState(byte[] bytes) {
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.Decode<InterlockSigningKeyData>();
+        var parameters = ms.DecodeAny<ECDsaParameters>();
+        return new ECDsaInterlockSigningKey(tag, parameters);
+    }
+
+    public override byte[] Decrypt(byte[] bytes) => throw new InvalidOperationException("ECDsa does not permit encryption");
+    // ECDsaHelper.Decrypt(bytes, _keyParameters.Parameters);
+
+    public override TagSignature Sign(byte[] data)
+        => new(Algorithm.EcDSA, ECDsaHelper.HashAndSign(data, _keyParameters.Parameters, _keyParameters.HashAlgorithm.ToName()));
+
+    public override TagSignature Sign<T>(T data)
+        => new(Algorithm.EcDSA, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Parameters, _keyParameters.HashAlgorithm.ToName()));
+
+    private readonly ECDsaParameters _keyParameters;
+
+    private ECDsaInterlockSigningKey(InterlockSigningKeyData tag, ECDsaParameters parameters) : base(tag)
+        => _keyParameters = parameters;
 }

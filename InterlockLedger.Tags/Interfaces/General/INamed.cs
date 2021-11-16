@@ -30,10 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface INamed
 {
-    public interface INamed
-    {
-        string TypeName { get; }
-    }
+    string TypeName { get; }
 }

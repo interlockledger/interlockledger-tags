@@ -30,11 +30,9 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class BlacklistedMessageSignerException : InterlockLedgerException
 {
-    public class BlacklistedMessageSignerException : InterlockLedgerException
-    {
-        public BlacklistedMessageSignerException(SenderIdentity senderIdentity) : base($"{senderIdentity} is blacklisted!") {
-        }
+    public BlacklistedMessageSignerException(SenderIdentity senderIdentity) : base($"{senderIdentity} is blacklisted!") {
     }
 }

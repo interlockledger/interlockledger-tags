@@ -30,47 +30,41 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public struct TagSignatureParts : IEquatable<TagSignatureParts>
 {
-    public struct TagSignatureParts : IEquatable<TagSignatureParts>
-    {
-        public Algorithm Algorithm;
-        public byte[] Data;
+    public Algorithm Algorithm;
+    public byte[] Data;
 
-        public static bool operator !=(TagSignatureParts left, TagSignatureParts right) => !(left == right);
+    public static bool operator !=(TagSignatureParts left, TagSignatureParts right) => !(left == right);
 
-        public static bool operator ==(TagSignatureParts left, TagSignatureParts right) => left.Equals(right);
+    public static bool operator ==(TagSignatureParts left, TagSignatureParts right) => left.Equals(right);
 
-        public override bool Equals(object obj) => obj is TagSignatureParts parts && Equals(parts);
+    public override bool Equals(object obj) => obj is TagSignatureParts parts && Equals(parts);
 
-        public bool Equals(TagSignatureParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
+    public bool Equals(TagSignatureParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
 
-        public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
+    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
+}
+
+public class TagSignature : ILTagExplicit<TagSignatureParts>
+{
+    public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts { Algorithm = algorithm, Data = data }) {
     }
 
-    public class TagSignature : ILTagExplicit<TagSignatureParts>
-    {
-        public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts { Algorithm = algorithm, Data = data }) {
-        }
+    public Algorithm Algorithm => Value.Algorithm;
 
-        public Algorithm Algorithm => Value.Algorithm;
+    public byte[] Data => Value.Data;
 
-        public byte[] Data => Value.Data;
-
-        internal TagSignature(Stream s) : base(ILTagId.Signature, s) {
-        }
-
-        protected override TagSignatureParts FromBytes(byte[] bytes) =>
-            FromBytesHelper(bytes, s => new TagSignatureParts {
-                Algorithm = (Algorithm)s.BigEndianReadUShort(),
-                Data = s.ReadBytes(bytes.Length - sizeof(ushort))
-            });
-
-        protected override byte[] ToBytes(TagSignatureParts value)
-            => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
+    internal TagSignature(Stream s) : base(ILTagId.Signature, s) {
     }
+
+    protected override TagSignatureParts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new TagSignatureParts {
+            Algorithm = (Algorithm)s.BigEndianReadUShort(),
+            Data = s.ReadBytes(bytes.Length - sizeof(ushort))
+        });
+
+    protected override byte[] ToBytes(TagSignatureParts value)
+        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
 }

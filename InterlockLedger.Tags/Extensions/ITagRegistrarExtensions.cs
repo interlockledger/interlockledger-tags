@@ -30,11 +30,9 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class ITagRegistrarExtensions
 {
-    public static class ITagRegistrarExtensions
-    {
-        public static bool RegisterAsField<TV>(this ITagRegistrar registrar) where TV : VersionedValue<TV>, new()
-            => new TV().RegisterAsField(registrar);
-    }
+    public static bool RegisterAsField<TV>(this ITagRegistrar registrar) where TV : VersionedValue<TV>, new()
+        => new TV().RegisterAsField(registrar);
 }

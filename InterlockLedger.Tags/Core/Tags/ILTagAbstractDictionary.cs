@@ -30,50 +30,44 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T>> where T : class
 {
-    public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T>> where T : class
-    {
-        public T this[string key] => Value?[key];
+    public T this[string key] => Value?[key];
 
-        public override bool Equals(object obj)
-            => obj is ILTagAbstractDictionary<T> other && EncodedBytes.SequenceEqual(other.EncodedBytes);
+    public override bool Equals(object obj)
+        => obj is ILTagAbstractDictionary<T> other && EncodedBytes.SequenceEqual(other.EncodedBytes);
 
-        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+    public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
-        protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T> value) : base(tagId, value) {
-        }
-
-        protected ILTagAbstractDictionary(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
-        }
-
-        protected abstract T DecodeValue(Stream s);
-
-        protected abstract void EncodeValue(Stream s, T value);
-
-        protected override Dictionary<string, T> FromBytes(byte[] bytes)
-            => FromBytesHelper(bytes, s => {
-                var length = (int)s.ILIntDecode();
-                var result = new Dictionary<string, T>();
-                for (var i = 0; i < length; i++) {
-                    result[s.DecodeString()] = DecodeValue(s);
-                }
-                return result;
-            });
-
-        protected override byte[] ToBytes(Dictionary<string, T> value)
-            => TagHelpers.ToBytesHelper(s => {
-                if (value != null) {
-                    s.ILIntEncode((ulong)value.Count);
-                    foreach (var pair in value) {
-                        s.EncodeString(pair.Key);
-                        EncodeValue(s, pair.Value);
-                    }
-                }
-            });
+    protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T> value) : base(tagId, value) {
     }
+
+    protected ILTagAbstractDictionary(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
+    }
+
+    protected abstract T DecodeValue(Stream s);
+
+    protected abstract void EncodeValue(Stream s, T value);
+
+    protected override Dictionary<string, T> FromBytes(byte[] bytes)
+        => FromBytesHelper(bytes, s => {
+            var length = (int)s.ILIntDecode();
+            var result = new Dictionary<string, T>();
+            for (var i = 0; i < length; i++) {
+                result[s.DecodeString()] = DecodeValue(s);
+            }
+            return result;
+        });
+
+    protected override byte[] ToBytes(Dictionary<string, T> value)
+        => TagHelpers.ToBytesHelper(s => {
+            if (value != null) {
+                s.ILIntEncode((ulong)value.Count);
+                foreach (var pair in value) {
+                    s.EncodeString(pair.Key);
+                    EncodeValue(s, pair.Value);
+                }
+            }
+        });
 }

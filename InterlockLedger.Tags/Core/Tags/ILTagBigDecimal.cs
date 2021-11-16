@@ -30,18 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagBigDecimal : ILTag
 {
-    public class ILTagBigDecimal : ILTag
-    {
-        public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal) => throw new NotImplementedException();
+    public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal) => throw new NotImplementedException();
 
-        public override object AsJson => throw new NotSupportedException();
+    public override object AsJson => throw new NotSupportedException();
 
-        protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
-    }
+    protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
 }

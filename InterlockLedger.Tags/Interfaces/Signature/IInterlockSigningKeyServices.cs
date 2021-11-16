@@ -30,20 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IInterlockSigningKeyServices
 {
-    public interface IInterlockSigningKeyServices
-    {
-        IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
+    IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
 
-        InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, IKeyParameters keyParameters, string name, string description, KeyStrength strength, string password);
+    InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, IKeyParameters keyParameters, string name, string description, KeyStrength strength, string password);
 
-        InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
+    InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
 
-        InterlockSigningKey Open(InterlockSigningKeyData key, string password);
+    InterlockSigningKey Open(InterlockSigningKeyData key, string password);
 
-        bool SupportsAlgorithm(Algorithm algorithm);
-    }
+    bool SupportsAlgorithm(Algorithm algorithm);
 }

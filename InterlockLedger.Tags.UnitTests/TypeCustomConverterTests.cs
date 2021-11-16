@@ -32,56 +32,55 @@
 
 using System.ComponentModel;
 using System.Globalization;
+
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class TypeCustomConverterTests
 {
-    public class TypeCustomConverterTests
-    {
-        [Test]
-        public void CanConvertFrom() {
-            var converter = new TypeCustomConverter<AppPermissions>();
-            Assert.AreEqual(true, converter.CanConvertFrom(null, typeof(string)));
-            Assert.AreEqual(false, converter.CanConvertFrom(null, typeof(int)));
-        }
-
-        [Test]
-        public void CanConvertTo() {
-            var converter = new TypeCustomConverter<AppPermissions>();
-            Assert.AreEqual(true, converter.CanConvertTo(null, typeof(string)));
-            Assert.AreEqual(false, converter.CanConvertTo(null, typeof(int)));
-        }
-
-        [Test]
-        public void ConvertFrom() {
-            var converter = new TypeCustomConverter<AppPermissions>();
-            ConvertFromStringAndAssert(converter, "#3", _permissionsApp3All);
-            ConvertFromStringAndAssert(converter, "#4,1000,1001", _permissionsApp4Docs);
-        }
-
-        [Test]
-        public void ConvertTo() {
-            var converter = new TypeCustomConverter<AppPermissions>();
-            ConvertToStringAndAssert(converter, _permissionsApp3All);
-            ConvertToStringAndAssert(converter, _permissionsApp4Docs);
-        }
-
-        [Test]
-        public void TypeDescriptor_GetConverter() {
-            var converter = TypeDescriptor.GetConverter(typeof(AppPermissions));
-            Assert.IsNotNull(converter);
-            Assert.IsInstanceOf<TypeCustomConverter<AppPermissions>>(converter);
-        }
-
-        private readonly AppPermissions _permissionsApp3All = new AppPermissions(3, null);
-        private readonly AppPermissions _permissionsApp4Docs = new AppPermissions(4, 1000, 1001);
-
-        private static void ConvertFromStringAndAssert(TypeCustomConverter<AppPermissions> converter, string value, AppPermissions expectedAppPermissions) {
-            Assert.AreEqual(expectedAppPermissions, (AppPermissions)converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
-            Assert.AreEqual(expectedAppPermissions, new AppPermissions(value));
-        }
-
-        private static void ConvertToStringAndAssert(TypeCustomConverter<AppPermissions> converter, AppPermissions permissions)
-            => Assert.AreEqual(permissions.TextualRepresentation, converter.ConvertTo(null, CultureInfo.InvariantCulture, permissions, typeof(string)));
+    [Test]
+    public void CanConvertFrom() {
+        var converter = new TypeCustomConverter<AppPermissions>();
+        Assert.AreEqual(true, converter.CanConvertFrom(null, typeof(string)));
+        Assert.AreEqual(false, converter.CanConvertFrom(null, typeof(int)));
     }
+
+    [Test]
+    public void CanConvertTo() {
+        var converter = new TypeCustomConverter<AppPermissions>();
+        Assert.AreEqual(true, converter.CanConvertTo(null, typeof(string)));
+        Assert.AreEqual(false, converter.CanConvertTo(null, typeof(int)));
+    }
+
+    [Test]
+    public void ConvertFrom() {
+        var converter = new TypeCustomConverter<AppPermissions>();
+        ConvertFromStringAndAssert(converter, "#3", _permissionsApp3All);
+        ConvertFromStringAndAssert(converter, "#4,1000,1001", _permissionsApp4Docs);
+    }
+
+    [Test]
+    public void ConvertTo() {
+        var converter = new TypeCustomConverter<AppPermissions>();
+        ConvertToStringAndAssert(converter, _permissionsApp3All);
+        ConvertToStringAndAssert(converter, _permissionsApp4Docs);
+    }
+
+    [Test]
+    public void TypeDescriptor_GetConverter() {
+        var converter = TypeDescriptor.GetConverter(typeof(AppPermissions));
+        Assert.IsNotNull(converter);
+        Assert.IsInstanceOf<TypeCustomConverter<AppPermissions>>(converter);
+    }
+
+    private readonly AppPermissions _permissionsApp3All = new(3, null);
+    private readonly AppPermissions _permissionsApp4Docs = new(4, 1000, 1001);
+
+    private static void ConvertFromStringAndAssert(TypeCustomConverter<AppPermissions> converter, string value, AppPermissions expectedAppPermissions) {
+        Assert.AreEqual(expectedAppPermissions, (AppPermissions)converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
+        Assert.AreEqual(expectedAppPermissions, new AppPermissions(value));
+    }
+
+    private static void ConvertToStringAndAssert(TypeCustomConverter<AppPermissions> converter, AppPermissions permissions)
+        => Assert.AreEqual(permissions.TextualRepresentation, converter.ConvertTo(null, CultureInfo.InvariantCulture, permissions, typeof(string)));
 }

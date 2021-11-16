@@ -30,21 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public abstract class ILTagOfImplicit<T> : ILTagOf<T>
 {
-    public abstract class ILTagOfImplicit<T> : ILTagOf<T>
-    {
-        protected ILTagOfImplicit(ulong tagId, T value) : base(tagId, value) {
-        }
-
-        protected ILTagOfImplicit(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
-        }
-
-        protected sealed override T DeserializeInner(Stream s) => ValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
-
-        protected sealed override Task<Stream> SerializeInnerAsync(Stream s) => ValueToStreamAsync(s);
+    protected ILTagOfImplicit(ulong tagId, T value) : base(tagId, value) {
     }
+
+    protected ILTagOfImplicit(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
+    }
+
+    protected sealed override T DeserializeInner(Stream s) => ValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
+
+    protected sealed override Task<Stream> SerializeInnerAsync(Stream s) => ValueToStreamAsync(s);
 }

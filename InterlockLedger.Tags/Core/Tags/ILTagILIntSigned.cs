@@ -30,33 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagILIntSigned : ILTagOfImplicit<long>, IEquatable<ILTagILIntSigned>
 {
-    public class ILTagILIntSigned : ILTagOfImplicit<long>, IEquatable<ILTagILIntSigned>
-    {
-        public ILTagILIntSigned(long value) : base(ILTagId.ILIntSigned, value) {
-        }
+    public ILTagILIntSigned(long value) : base(ILTagId.ILIntSigned, value) {
+    }
 
-        public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
+    public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
 
-        public override bool Equals(object obj) => Equals(obj as ILTagILIntSigned);
+    public override bool Equals(object obj) => Equals(obj as ILTagILIntSigned);
 
-        public bool Equals(ILTagILIntSigned other) => other != null && Value == other.Value;
+    public bool Equals(ILTagILIntSigned other) => other != null && Value == other.Value;
 
-        public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
+    public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
 
-        internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override long ValueFromStream(StreamSpan s) => s.ILIntDecode().AsSignedILInt();
+    protected override long ValueFromStream(StreamSpan s) => s.ILIntDecode().AsSignedILInt();
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            s.ILIntEncode(Value.AsUnsignedILInt());
-            return Task.FromResult(s);
-        }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.ILIntEncode(Value.AsUnsignedILInt());
+        return Task.FromResult(s);
     }
 }

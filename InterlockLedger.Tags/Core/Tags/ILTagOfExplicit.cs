@@ -30,55 +30,48 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public abstract class ILTagOfExplicit<T> : ILTagOf<T>
 {
-    public abstract class ILTagOfExplicit<T> : ILTagOf<T>
-    {
-        public const int MaxEncodedValueLength = int.MaxValue / 16;
+    public const int MaxEncodedValueLength = int.MaxValue / 16;
 
-        [JsonIgnore]
-        public ulong ValueLength => _valueLength ??= CalcValueLength();
+    [JsonIgnore]
+    public ulong ValueLength => _valueLength ??= CalcValueLength();
 
-        protected ILTagOfExplicit(ulong tagId, T value) : base(tagId, value) {
-        }
-
-        protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
-            : base(alreadyDeserializedTagId, s, setup) {
-        }
-
-        protected static void SetLength(ITag it, ulong length) => ((ILTagOfExplicit<T>)it)._valueLength = length;
-
-        protected virtual ulong CalcValueLength() {
-            using var stream = new MemoryStream();
-            ValueToStreamAsync(stream);
-            stream.Flush();
-            return (ulong)stream.ToArray().Length;
-        }
-
-        protected sealed override T DeserializeInner(Stream s) {
-            if ((_valueLength ??= s.ILIntDecode()) > int.MaxValue && KeepEncodedBytesInMemory)
-                throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
-            using var ss = new StreamSpan(s, _valueLength.Value);
-            return ValueFromStream(ss);
-        }
-
-        protected sealed override void OnChanged() {
-            base.OnChanged();
-            _valueLength = null;
-        }
-
-        protected sealed override Task<Stream> SerializeInnerAsync(Stream s) {
-            s.ILIntEncode(ValueLength);
-            if (ValueLength > 0)
-                ValueToStreamAsync(s);
-            return Task.FromResult(s);
-        }
-
-        private ulong? _valueLength;
+    protected ILTagOfExplicit(ulong tagId, T value) : base(tagId, value) {
     }
+
+    protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
+        : base(alreadyDeserializedTagId, s, setup) {
+    }
+
+    protected static void SetLength(ITag it, ulong length) => ((ILTagOfExplicit<T>)it)._valueLength = length;
+
+    protected virtual ulong CalcValueLength() {
+        using var stream = new MemoryStream();
+        ValueToStreamAsync(stream);
+        stream.Flush();
+        return (ulong)stream.ToArray().Length;
+    }
+
+    protected sealed override T DeserializeInner(Stream s) {
+        if ((_valueLength ??= s.ILIntDecode()) > int.MaxValue && KeepEncodedBytesInMemory)
+            throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
+        using var ss = new StreamSpan(s, _valueLength.Value);
+        return ValueFromStream(ss);
+    }
+
+    protected sealed override void OnChanged() {
+        base.OnChanged();
+        _valueLength = null;
+    }
+
+    protected sealed override Task<Stream> SerializeInnerAsync(Stream s) {
+        s.ILIntEncode(ValueLength);
+        if (ValueLength > 0)
+            ValueToStreamAsync(s);
+        return Task.FromResult(s);
+    }
+
+    private ulong? _valueLength;
 }

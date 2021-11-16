@@ -30,28 +30,22 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum KeyPurpose : ulong
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum KeyPurpose : ulong
-    {
-        InvalidKey = 0,
-        KeyManagement = 1,
-        Action = 2,
-        ClaimSigner = 3,
-        Encryption = 4,
-        Protocol = 5,
-        ChainOperation = 7,
-        ForceInterlock = 8
-        // EmergencyClosing = 6, Now use specific action id
-    }
+    InvalidKey = 0,
+    KeyManagement = 1,
+    Action = 2,
+    ClaimSigner = 3,
+    Encryption = 4,
+    Protocol = 5,
+    ChainOperation = 7,
+    ForceInterlock = 8
+    // EmergencyClosing = 6, Now use specific action id
+}
 
-    public static class KeyPurposeExtensions
-    {
-        public static string ToStringAsList(this IEnumerable<KeyPurpose> purposes) => purposes.OrderBy(p => p).WithCommas();
-    }
+public static class KeyPurposeExtensions
+{
+    public static string ToStringAsList(this IEnumerable<KeyPurpose> purposes) => purposes.OrderBy(p => p).WithCommas();
 }

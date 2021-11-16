@@ -32,17 +32,14 @@
 
 #nullable enable
 
-using System;
 using System.Security.Cryptography.X509Certificates;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public static class X509Certificate2Extensions
 {
-    public static class X509Certificate2Extensions
-    {
-        public static KeyStrength KeyStrengthGuess(this X509Certificate2 certificate)
-            => certificate.Required(nameof(certificate)).GetRSAPublicKey().KeyStrengthGuess();
+    public static KeyStrength KeyStrengthGuess(this X509Certificate2 certificate)
+        => certificate.Required().GetRSAPublicKey().KeyStrengthGuess();
 
-        public static TagPubKey PubKey(this X509Certificate2 certificate)
-            => TagPubKey.Resolve(certificate);
-    }
+    public static TagPubKey PubKey(this X509Certificate2 certificate)
+        => TagPubKey.Resolve(certificate);
 }

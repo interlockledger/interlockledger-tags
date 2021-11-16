@@ -30,21 +30,17 @@
 //
 // ******************************************************************************************************************************
 
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IOwnerStorageProvider
 {
-    public interface IOwnerStorageProvider
-    {
-        IEnumerable<IOwnerData> Owners { get; }
-        IEnumerable<Owner> ResolvedOwners { get; }
+    IEnumerable<IOwnerData> Owners { get; }
+    IEnumerable<Owner> ResolvedOwners { get; }
 
-        Owner Create(string name, string password, string description, string email, Algorithm algorithm, KeyStrength strength, bool silent = true);
+    Owner Create(string name, string password, string description, string email, Algorithm algorithm, KeyStrength strength, bool silent = true);
 
-        Owner Resolve(string name, string password = null);
+    Owner Resolve(string name, string password = null);
 
-        Owner ResolveOrDummy(string name);
+    Owner ResolveOrDummy(string name);
 
-        Owner ResolveWithPassword(string name, ref string password);
-    }
+    Owner ResolveWithPassword(string name, ref string password);
 }

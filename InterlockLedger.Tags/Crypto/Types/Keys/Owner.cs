@@ -30,39 +30,34 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.Collections.Generic;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public abstract class Owner : ISigningKey, IPasswordProvider
 {
-    public abstract class Owner : ISigningKey, IPasswordProvider
-    {
-        public InterlockKey AsInterlockKey => new(this);
-        public string Description { get; protected set; }
-        public string Email { get; protected set; }
-        public BaseKeyId Id { get; protected set; }
-        public string Name { get; protected set; }
-        public OwnerId OwnerId => (OwnerId)Id;
-        public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
-        public TagPubKey PublicKey { get; protected set; }
-        public KeyPurpose[] Purposes => keyPurposes;
-        public Algorithm SignAlgorithm { get; protected set; }
-        public KeyStrength Strength { get; protected set; }
+    public InterlockKey AsInterlockKey => new(this);
+    public string Description { get; protected set; }
+    public string Email { get; protected set; }
+    public BaseKeyId Id { get; protected set; }
+    public string Name { get; protected set; }
+    public OwnerId OwnerId => (OwnerId)Id;
+    public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
+    public TagPubKey PublicKey { get; protected set; }
+    public KeyPurpose[] Purposes => keyPurposes;
+    public Algorithm SignAlgorithm { get; protected set; }
+    public KeyStrength Strength { get; protected set; }
 
-        public abstract byte[] Decrypt(byte[] bytes);
+    public abstract byte[] Decrypt(byte[] bytes);
 
-        public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required(nameof(id)).EncodedBytes).Data);
+    public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes).Data);
 
-        public abstract TagSignature Sign(byte[] data);
+    public abstract TagSignature Sign(byte[] data);
 
-        public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
 
-        public string ToListing() => $"'{Name}' {Id}";
+    public string ToListing() => $"'{Name}' {Id}";
 
-        public string ToShortString() => $"Owner {Name} using {SignAlgorithm} with {Strength} strength ({Id})";
+    public string ToShortString() => $"Owner {Name} using {SignAlgorithm} with {Strength} strength ({Id})";
 
-        public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {PublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
+    public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {PublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
 
-        protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.ChainOperation, KeyPurpose.Protocol };
-    }
+    protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.ChainOperation, KeyPurpose.Protocol };
 }

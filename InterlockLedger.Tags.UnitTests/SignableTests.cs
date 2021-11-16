@@ -30,33 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Linq;
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[TestFixture]
+public class SignableTests
 {
-    [TestFixture]
-    public class SignableTests
-    {
-        [TestCase(32ul, new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
-        public void NewSignableFromStream(ulong ilint, byte[] bytes) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.Decode<TestSignable.Payload>();
-            Assert.AreEqual(TestSignable.FieldTagId, tag.TagId);
-            Assert.AreEqual(ilint, tag.Value.SomeILInt);
-            Assert.IsTrue(tag.ValueIs<ISignable>(out _));
-            Assert.AreEqual(new TestSignable().FieldModel, tag.Value.FieldModel);
-            Assert.AreEqual(2, tag.Value.FieldModel.SubDataFields.SafeCount());
-            Assert.AreEqual(nameof(TestSignable.SomeILInt), tag.Value.FieldModel.SubDataFields.Last().Name);
-        }
+    [TestCase(32ul, new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
+    public void NewSignableFromStream(ulong ilint, byte[] bytes) {
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.Decode<TestSignable.Payload>();
+        Assert.AreEqual(TestSignable.FieldTagId, tag.TagId);
+        Assert.AreEqual(ilint, tag.Value.SomeILInt);
+        Assert.IsTrue(tag.ValueIs<ISignable>(out _));
+        Assert.AreEqual(new TestSignable().FieldModel, tag.Value.FieldModel);
+        Assert.AreEqual(2, tag.Value.FieldModel.SubDataFields.SafeCount());
+        Assert.AreEqual(nameof(TestSignable.SomeILInt), tag.Value.FieldModel.SubDataFields.Last().Name);
+    }
 
-        [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
-        public byte[] SerializeSignable(ulong someILInt) {
-            var encodedBytes = new TestSignable(someILInt).AsPayload.EncodedBytes;
-            TestContext.WriteLine(encodedBytes.AsLiteral());
-            return encodedBytes;
-        }
+    [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
+    public byte[] SerializeSignable(ulong someILInt) {
+        var encodedBytes = new TestSignable(someILInt).AsPayload.EncodedBytes;
+        TestContext.WriteLine(encodedBytes.AsLiteral());
+        return encodedBytes;
     }
 }

@@ -31,54 +31,51 @@
 // ******************************************************************************************************************************
 
 using System.Buffers;
-using System.Collections.Generic;
-using System.IO;
+
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class VersionedValueTests
 {
-    public class VersionedValueTests
+    [Test]
+    public void SerializeDeserialize() {
+        var vvt = new VersionedValueForTests("Yeah!");
+        var bytes = vvt.AsPayload.EncodedBytes;
+        byte[] expectedBytes = new byte[] { 27, 10, 5, 1, 0, 17, 5, (byte)'Y', (byte)'e', (byte)'a', (byte)'h', (byte)'!' };
+        CollectionAssert.AreEqual(expectedBytes, bytes);
+        TagProvider.RegisterDeserializer(27, s => new VersionedValueForTests.Payload(27, s));
+        AssertThings(vvt, (VersionedValueForTests.Payload)TagProvider.DeserializeFrom(new MemoryStream(bytes)));
+        AssertThings(vvt, new VersionedValueForTests.Payload(27, new ReadOnlySequence<byte>(bytes[2..])));
+
+        static void AssertThings(VersionedValueForTests vvt, VersionedValue<VersionedValueForTests>.Payload tag) {
+            Assert.AreEqual((ushort)1, tag.Version, "Version");
+            Assert.AreEqual((ulong)10, tag.ValueLength, "ValueLength");
+            var data = tag.Value;
+            Assert.AreEqual((ushort)1, data.Version, "Version");
+            Assert.AreSame(tag, data.AsPayload, "AsPayload");
+            Assert.AreNotSame(vvt, data, "vvt_x_data");
+            Assert.AreEqual(vvt.UserMessage, data.UserMessage, "Not the right UserMessage");
+        }
+    }
+
+    public class VersionedValueForTests : VersionedValue<VersionedValueForTests>
     {
-        [Test]
-        public void SerializeDeserialize() {
-            var vvt = new VersionedValueForTests("Yeah!");
-            var bytes = vvt.AsPayload.EncodedBytes;
-            byte[] expectedBytes = new byte[] { 27, 10, 5, 1, 0, 17, 5, (byte)'Y', (byte)'e', (byte)'a', (byte)'h', (byte)'!' };
-            CollectionAssert.AreEqual(expectedBytes, bytes);
-            TagProvider.RegisterDeserializer(27, s => new VersionedValueForTests.Payload(27, s));
-            AssertThings(vvt, (VersionedValueForTests.Payload)TagProvider.DeserializeFrom(new MemoryStream(bytes)));
-            AssertThings(vvt, new VersionedValueForTests.Payload(27, new ReadOnlySequence<byte>(bytes[2..])));
+        public VersionedValueForTests() : base(27, 1) { }
 
-            static void AssertThings(VersionedValueForTests vvt, VersionedValue<VersionedValueForTests>.Payload tag) {
-                Assert.AreEqual((ushort)1, tag.Version, "Version");
-                Assert.AreEqual((ulong)10, tag.ValueLength, "ValueLength");
-                var data = tag.Value;
-                Assert.AreEqual((ushort)1, data.Version, "Version");
-                Assert.AreSame(tag, data.AsPayload, "AsPayload");
-                Assert.AreNotSame(vvt, data, "vvt_x_data");
-                Assert.AreEqual(vvt.UserMessage, data.UserMessage, "Not the right UserMessage");
-            }
-        }
+        public VersionedValueForTests(string userMessage) : base(27, 1) => UserMessage = userMessage;
 
-        public class VersionedValueForTests : VersionedValue<VersionedValueForTests>
-        {
-            public VersionedValueForTests() : base(27, 1) { }
+        public override object AsJson { get; }
+        public override string Formatted => UserMessage;
+        public override string TypeName => nameof(VersionedValueForTests);
+        public string UserMessage { get; private set; }
 
-            public VersionedValueForTests(string userMessage) : base(27, 1) => UserMessage = userMessage;
+        public override VersionedValueForTests FromJson(object json) => throw new System.NotImplementedException();
 
-            public override object AsJson { get; }
-            public override string Formatted => UserMessage;
-            public override string TypeName => nameof(VersionedValueForTests);
-            public string UserMessage { get; private set; }
+        protected override IEnumerable<DataField> RemainingStateFields { get; }
+        protected override string TypeDescription { get; }
 
-            public override VersionedValueForTests FromJson(object json) => throw new System.NotImplementedException();
+        protected override void DecodeRemainingStateFrom(Stream s) => UserMessage = s.DecodeString();
 
-            protected override IEnumerable<DataField> RemainingStateFields { get; }
-            protected override string TypeDescription { get; }
-
-            protected override void DecodeRemainingStateFrom(Stream s) => UserMessage = s.DecodeString();
-
-            protected override void EncodeRemainingStateTo(Stream s) => s.EncodeString(UserMessage);
-        }
+        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeString(UserMessage);
     }
 }

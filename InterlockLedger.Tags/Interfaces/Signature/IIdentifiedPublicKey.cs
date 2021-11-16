@@ -32,15 +32,12 @@
 
 #nullable enable
 
-using System;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IIdentifiedPublicKey
 {
-    public interface IIdentifiedPublicKey
-    {
-        BaseKeyId? Id { get; }
-        string Identifier => (Id?.TextualRepresentation).WithDefault(Name!).WithDefault(PublicKey.Hash.TextualRepresentation);
-        string? Name { get; }
-        TagPubKey PublicKey { get; }
-    }
+    BaseKeyId? Id { get; }
+    string Identifier => (Id?.TextualRepresentation).WithDefault(Name!).WithDefault(PublicKey.Hash.TextualRepresentation);
+    string? Name { get; }
+    TagPubKey PublicKey { get; }
 }

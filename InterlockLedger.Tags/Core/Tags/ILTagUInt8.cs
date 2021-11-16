@@ -30,23 +30,18 @@
 //
 // ******************************************************************************************************************************
 
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagUInt8 : ILTagOfImplicit<byte>
 {
-    public class ILTagUInt8 : ILTagOfImplicit<byte>
-    {
-        public ILTagUInt8(byte value) : base(ILTagId.UInt8, value) {
-        }
+    public ILTagUInt8(byte value) : base(ILTagId.UInt8, value) {
+    }
 
-        internal ILTagUInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    internal ILTagUInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-        protected override byte ValueFromStream(StreamSpan s) => s.ReadSingleByte();
+    protected override byte ValueFromStream(StreamSpan s) => s.ReadSingleByte();
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            s.WriteSingleByte(Value);
-            return Task.FromResult(s);
-        }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.WriteSingleByte(Value);
+        return Task.FromResult(s);
     }
 }

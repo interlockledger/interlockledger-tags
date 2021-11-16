@@ -30,24 +30,18 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Text;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagString : ILTagExplicit<string>
 {
-    public class ILTagString : ILTagExplicit<string>
-    {
-        public ILTagString(string value) : base(ILTagId.String, value) {
-        }
-
-        public override string Formatted => Value;
-
-        internal ILTagString(Stream s) : base(ILTagId.String, s) {
-        }
-
-        protected override string FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
-
-        protected override byte[] ToBytes(string value) => value?.UTF8Bytes();
+    public ILTagString(string value) : base(ILTagId.String, value) {
     }
+
+    public override string Formatted => Value;
+
+    internal ILTagString(Stream s) : base(ILTagId.String, s) {
+    }
+
+    protected override string FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
+
+    protected override byte[] ToBytes(string value) => value?.UTF8Bytes();
 }

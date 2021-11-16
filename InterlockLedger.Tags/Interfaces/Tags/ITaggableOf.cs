@@ -30,10 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface ITaggableOf<T> : ITaggable where T : class, ITaggableOf<T>
 {
-    public interface ITaggableOf<T> : ITaggable where T : class, ITaggableOf<T>
-    {
-        ILTagOf<T> AsTag { get; }
-    }
+    ILTagOf<T> AsTag { get; }
 }

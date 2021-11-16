@@ -30,17 +30,13 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Linq;
 using NUnit.Framework;
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[TestFixture]
+public class SignedValueOfSignableTests
 {
-    [TestFixture]
-    public class SignedValueOfSignableTests
-    {
-        [TestCase(64ul, new byte[] {
+    [TestCase(64ul, new byte[] {
             50, 249, 1, 91,
                 5, 1, 0,
                 250, 15, 65, 72, 5,
@@ -82,25 +78,25 @@ namespace InterlockLedger.Tags
                             205, 99, 186, 198, 203, 170, 235, 37, 170, 21, 102, 35, 172, 194, 138, 101, 207, 75, 4,
                             176, 17, 92, 145, 16, 3, 1, 0, 1
         })]
-        public void NewSignedValueOfSignableFromStream(ulong ilint, byte[] bytes) {
-            using var ms = new MemoryStream(bytes);
-            var tag = ms.DecodeAny<SignedValue<TestSignable>>();
-            Assert.AreEqual(ILTagId.SignedValue, tag.TagId);
-            Assert.AreEqual(TestSignable.FieldTagId, tag.ContentTagId);
-            Assert.AreEqual(3, tag.FieldModel.SubDataFields.SafeCount());
-            Assert.AreEqual(nameof(SignedValue<TestSignable>.SignedContent), tag.FieldModel.SubDataFields.Skip(1).First().Name);
-            var signaturesFieldModel = tag.FieldModel.SubDataFields.Last();
-            Assert.AreEqual(ILTagId.IdentifiedSignature, signaturesFieldModel.ElementTagId);
-            Assert.AreEqual(4, signaturesFieldModel.SubDataFields.SafeCount());
-            Assert.AreEqual(nameof(SignedValue<TestSignable>.Signatures), signaturesFieldModel.Name);
-            var signedContent = tag.SignedContent;
-            Assert.AreEqual(ilint, signedContent.SomeILInt);
-            Assert.AreEqual(new TestSignable().FieldModel, signedContent.FieldModel);
-            Assert.AreEqual(2, signedContent.FieldModel.SubDataFields.SafeCount());
-            Assert.AreEqual(nameof(TestSignable.SomeILInt), signedContent.FieldModel.SubDataFields.Last().Name);
-        }
+    public void NewSignedValueOfSignableFromStream(ulong ilint, byte[] bytes) {
+        using var ms = new MemoryStream(bytes);
+        var tag = ms.DecodeAny<SignedValue<TestSignable>>();
+        Assert.AreEqual(ILTagId.SignedValue, tag.TagId);
+        Assert.AreEqual(TestSignable.FieldTagId, tag.ContentTagId);
+        Assert.AreEqual(3, tag.FieldModel.SubDataFields.SafeCount());
+        Assert.AreEqual(nameof(SignedValue<TestSignable>.SignedContent), tag.FieldModel.SubDataFields.Skip(1).First().Name);
+        var signaturesFieldModel = tag.FieldModel.SubDataFields.Last();
+        Assert.AreEqual(ILTagId.IdentifiedSignature, signaturesFieldModel.ElementTagId);
+        Assert.AreEqual(4, signaturesFieldModel.SubDataFields.SafeCount());
+        Assert.AreEqual(nameof(SignedValue<TestSignable>.Signatures), signaturesFieldModel.Name);
+        var signedContent = tag.SignedContent;
+        Assert.AreEqual(ilint, signedContent.SomeILInt);
+        Assert.AreEqual(new TestSignable().FieldModel, signedContent.FieldModel);
+        Assert.AreEqual(2, signedContent.FieldModel.SubDataFields.SafeCount());
+        Assert.AreEqual(nameof(TestSignable.SomeILInt), signedContent.FieldModel.SubDataFields.Last().Name);
+    }
 
-        [TestCase(64ul, ExpectedResult = new byte[] {
+    [TestCase(64ul, ExpectedResult = new byte[] {
             50, 249, 1, 91,
                 5, 1, 0,
                 250, 15, 65, 72, 5,
@@ -142,11 +138,10 @@ namespace InterlockLedger.Tags
                             205, 99, 186, 198, 203, 170, 235, 37, 170, 21, 102, 35, 172, 194, 138, 101, 207, 75, 4,
                             176, 17, 92, 145, 16, 3, 1, 0, 1
         })]
-        public byte[] SerializeSignedValueOfSignable(ulong someILInt) {
-            var signedValue = new TestSignable(someILInt).SignWith(TestFakeSigner.FixedKeysInstance);
-            var encodedBytes = signedValue.AsPayload.EncodedBytes;
-            TestContext.WriteLine(encodedBytes.AsLiteral());
-            return encodedBytes;
-        }
+    public byte[] SerializeSignedValueOfSignable(ulong someILInt) {
+        var signedValue = new TestSignable(someILInt).SignWith(TestFakeSigner.FixedKeysInstance);
+        var encodedBytes = signedValue.AsPayload.EncodedBytes;
+        TestContext.WriteLine(encodedBytes.AsLiteral());
+        return encodedBytes;
     }
 }

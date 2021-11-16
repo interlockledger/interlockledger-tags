@@ -30,15 +30,13 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IOwnerData
 {
-    public interface IOwnerData
-    {
-        Algorithm Algorithm { get; }
-        string Description { get; }
-        string Email { get; }
-        BaseKeyId Id { get; }
-        string Name { get; }
-        KeyStrength Strength { get; }
-    }
+    Algorithm Algorithm { get; }
+    string Description { get; }
+    string Email { get; }
+    BaseKeyId Id { get; }
+    string Name { get; }
+    KeyStrength Strength { get; }
 }

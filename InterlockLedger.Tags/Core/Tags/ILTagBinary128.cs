@@ -30,18 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public class ILTagBinary128 : ILTag
 {
-    public class ILTagBinary128 : ILTag
-    {
-        public ILTagBinary128(Stream s) : base(ILTagId.Binary128) => throw new NotImplementedException();
+    public ILTagBinary128(Stream s) : base(ILTagId.Binary128) => throw new NotImplementedException();
 
-        public override object AsJson => throw new NotSupportedException();
+    public override object AsJson => throw new NotSupportedException();
 
-        protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
-    }
+    protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
 }

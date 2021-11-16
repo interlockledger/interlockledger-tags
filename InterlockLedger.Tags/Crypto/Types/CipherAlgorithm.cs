@@ -30,14 +30,10 @@
 //
 // ******************************************************************************************************************************
 
-using System.Text.Json.Serialization;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum CipherAlgorithm : ushort
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum CipherAlgorithm : ushort
-    {
-        AES256 = 0,
-        None = 0xFFFF,
-    }
+    AES256 = 0,
+    None = 0xFFFF,
 }

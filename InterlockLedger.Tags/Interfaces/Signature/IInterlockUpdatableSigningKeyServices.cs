@@ -30,16 +30,14 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IInterlockUpdatableSigningKeyServices
 {
-    public interface IInterlockUpdatableSigningKeyServices
-    {
-        IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
+    IKeyParameters CreateKeyParameters(Algorithm algorithm, KeyStrength strength);
 
-        InterlockUpdatableSigningKeyData CreateUsing(KeyPurpose[] purposes, IKeyParameters keyParameters, string name, string description, KeyStrength strength, string password);
+    InterlockUpdatableSigningKeyData CreateUsing(KeyPurpose[] purposes, IKeyParameters keyParameters, string name, string description, KeyStrength strength, string password);
 
-        byte[] Encrypt(byte[] secret, string password);
+    byte[] Encrypt(byte[] secret, string password);
 
-        InterlockUpdatableSigningKey Open(InterlockUpdatableSigningKeyData key, string password);
-    }
+    InterlockUpdatableSigningKey Open(InterlockUpdatableSigningKeyData key, string password);
 }

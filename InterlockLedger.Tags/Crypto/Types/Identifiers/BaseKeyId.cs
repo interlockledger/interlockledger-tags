@@ -30,32 +30,26 @@
 //
 // ******************************************************************************************************************************
 
-using System;
-using System.IO;
-using System.Text.Json.Serialization;
-
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+[JsonConverter(typeof(JsonInterlockIdConverter))]
+public class BaseKeyId : InterlockId
 {
-    [JsonConverter(typeof(JsonInterlockIdConverter))]
-    public class BaseKeyId : InterlockId
-    {
-        public static BaseKeyId OptionalResolve(Stream s) {
-            s.Required(nameof(s));
-            return s.Position < s.Length ? Resolve(s) as BaseKeyId : null;
-        }
+    public static BaseKeyId OptionalResolve(Stream s) {
+        s.Required();
+        return s.Position < s.Length ? Resolve(s) as BaseKeyId : null;
+    }
 
-        public static void RegisterKeyIdTypes() {
-            OwnerId.RegisterResolver();
-            KeyId.RegisterResolver();
-        }
+    public static void RegisterKeyIdTypes() {
+        OwnerId.RegisterResolver();
+        KeyId.RegisterResolver();
+    }
 
-        protected BaseKeyId(string textualRepresentation) : base(textualRepresentation) {
-        }
+    protected BaseKeyId(string textualRepresentation) : base(textualRepresentation) {
+    }
 
-        protected BaseKeyId(byte type, TagHash hash) : base(type, hash.Required(nameof(hash)).Algorithm, hash.Data) {
-        }
+    protected BaseKeyId(byte type, TagHash hash) : base(type, hash.Required().Algorithm, hash.Data) {
+    }
 
-        protected BaseKeyId(Parts parts) : base(parts) {
-        }
+    protected BaseKeyId(Parts parts) : base(parts) {
     }
 }

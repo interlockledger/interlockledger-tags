@@ -30,14 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags
+namespace InterlockLedger.Tags;
+public interface IHasher
 {
-    public interface IHasher
-    {
-        HashAlgorithm DefaultHashAlgorithm { get; }
+    HashAlgorithm DefaultHashAlgorithm { get; }
 
-        TagHash Hash(byte[] data);
+    TagHash Hash(byte[] data);
 
-        TagHash Hash(byte[] data, HashAlgorithm hashAlgorithm);
-    }
+    TagHash Hash(byte[] data, HashAlgorithm hashAlgorithm);
 }
