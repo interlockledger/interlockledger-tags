@@ -144,4 +144,20 @@ public class SignedValueOfSignableTests
         TestContext.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }
+
+    [Test, Ignore("Not yet implemented")]
+    public void SignWithRSA() {
+        System.Security.Cryptography.X509Certificates.X509Certificate2 x509Certificate = null;
+        var rsakey = new RSACertificateSigningKey(new InterlockSigningKeyData(
+            new KeyPurpose[] { KeyPurpose.Protocol },
+            Array.Empty<AppPermissions>(),
+            $"{nameof(SignWithRSA)} test key",
+            Array.Empty<byte>(),
+            TagPubKey.Resolve(x509Certificate),
+            KeyStrength.Normal,
+            encryptedContentType: EncryptedContentType.EmbeddedCertificate
+            ), Array.Empty<byte>(), "password");
+
+        var signedValue = new TestSignable(112).SignWith(TestFakeSigner.FixedKeysInstance);
+    }
 }

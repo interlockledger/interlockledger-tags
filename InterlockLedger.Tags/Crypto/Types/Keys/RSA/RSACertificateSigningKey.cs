@@ -34,15 +34,19 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
+
 public class RSACertificateSigningKey : InterlockSigningKey
 {
     public RSACertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) : base(data) {
-        if (data == null)
-            throw new ArgumentNullException(nameof(data));
-        if (data.EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
+        if (data.Required().EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
             throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
         _password = password.Required();
         _certificateBytes = certificateBytes.Required();
+        using var x509Certificate = _certificateBytes.OpenCertificate(_password).Required();
+        if (!x509Certificate.HasPrivateKey)
+            throw new InvalidOperationException("The private key is missing");
+        if (x509Certificate.GetRSAPrivateKey() is null)
+            throw new InvalidOperationException($"The RSA private key is missing - certificate key type is {x509Certificate.GetKeyAlgorithm}");
     }
 
     public override byte[] AsSessionState {
@@ -63,11 +67,8 @@ public class RSACertificateSigningKey : InterlockSigningKey
         return new RSACertificateSigningKey(tag, certificateBytes, password);
     }
 
-    public override byte[] Decrypt(byte[] bytes) {
-        using var x509Certificate = _certificateBytes.OpenCertificate(_password);
-        using var rsa = x509Certificate.GetRSAPrivateKey();
-        return rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1);
-    }
+    public override byte[] Decrypt(byte[] bytes) =>
+        DoWithPrivateKey(rsa => rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1));
 
     public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, HashAndSign(data));
 
@@ -76,15 +77,19 @@ public class RSACertificateSigningKey : InterlockSigningKey
     private readonly byte[] _certificateBytes;
     private readonly string _password;
 
-    private byte[] HashAndSign(byte[] dataToSign) {
-        using var x509Certificate = _certificateBytes.OpenCertificate(_password);
+    private byte[] DoWithPrivateKey(Func<RSA, byte[]> action) {
+        using var x509Certificate = _certificateBytes.OpenCertificate(_password).Required();
+        if (!x509Certificate.HasPrivateKey)
+            throw new InvalidOperationException("The private key is missing- Can't sign");
         using var rsa = x509Certificate.GetRSAPrivateKey();
-        return rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        return action(rsa);
     }
 
-    private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() {
-        using var x509Certificate = _certificateBytes.OpenCertificate(_password);
-        using var rsa = x509Certificate.GetRSAPrivateKey();
-        return rsa.SignData(data.OpenReadingStreamAsync().Result, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-    }
+    private byte[] HashAndSign(byte[] dataToSign) =>
+        DoWithPrivateKey(rsa =>
+            rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+
+    private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() =>
+        DoWithPrivateKey(rsa =>
+            rsa.SignData(data.OpenReadingStreamAsync().Result, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
 }
