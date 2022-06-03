@@ -22,4 +22,10 @@
         <ProjectReference Include="..\InterlockLedger.Tags\InterlockLedger.Tags.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="unittest.pfx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

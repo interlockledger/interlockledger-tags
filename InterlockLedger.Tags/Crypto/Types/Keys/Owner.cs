@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public abstract class Owner : ISigningKey, IPasswordProvider
 {
     public InterlockKey AsInterlockKey => new(this);
@@ -46,6 +47,8 @@ public abstract class Owner : ISigningKey, IPasswordProvider
     public KeyStrength Strength { get; protected set; }
 
     public abstract byte[] Decrypt(byte[] bytes);
+
+    public abstract void Dispose();
 
     public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes).Data);
 

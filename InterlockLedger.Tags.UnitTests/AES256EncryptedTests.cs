@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,9 +30,11 @@
 //
 // ******************************************************************************************************************************
 
+using NUnit.Framework;
+
 using System.Diagnostics.CodeAnalysis;
 
-using NUnit.Framework;
+using static InterlockLedger.Tags.TestHelpers;
 
 namespace InterlockLedger.Tags;
 public class AES256EncryptedTests
@@ -40,9 +42,9 @@ public class AES256EncryptedTests
     [Test]
     [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "Delegate is for testing exception throwing")]
     public void ConstructorParameterValidation() {
-        AssertArgumentNullException(() => new AES256Encrypted<ILTagBool>(null, "password"), "value");
+        AssertRequiredException(() => new AES256Encrypted<ILTagBool>(null, "password"), "value");
         AssertPasswordMissing(() => new AES256Encrypted<ILTagBool>(ILTagBool.False, null));
-        AssertArgumentNullException(() => new AES256Encrypted<ILTagBool>(null), "s");
+        AssertRequiredException(() => new AES256Encrypted<ILTagBool>(null), "s");
     }
 
     [Test]
@@ -56,14 +58,14 @@ public class AES256EncryptedTests
 
     [Test]
     public void EncodedBytesFalse() => Assert.That(() =>
-        SerializeAES256Encrypted(false, "password"), Is.EquivalentTo(new byte[] { 42, 68, 0, 0, 16, 64,
+                SerializeAES256Encrypted(false, "password"), Is.EquivalentTo(new byte[] { 42, 68, 0, 0, 16, 64,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
                 82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }));
 
     [Test]
     public void EncodedBytesTrue() => Assert.That(() =>
-        SerializeAES256Encrypted(true, "password"), Is.EquivalentTo(new byte[] { 42, 68, 0, 0, 16, 64,
+                SerializeAES256Encrypted(true, "password"), Is.EquivalentTo(new byte[] { 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
             72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }));
@@ -82,14 +84,10 @@ public class AES256EncryptedTests
 
     private static bool AsBool(ILTagBool tag) => tag?.Value ?? throw new InvalidDataException("Not an ILTagBool");
 
-    private static void AssertArgumentNullException(TestDelegate code, string paramName)
-        => Assert.AreEqual(paramName, Assert.Throws<ArgumentNullException>(code).ParamName);
-
     private static void AssertPasswordMissing(TestDelegate code) {
-        const string expectedMessageStart = AES256Encrypted<ILTagBool>.MissingPasswordMessage;
         var ae = Assert.Throws<ArgumentException>(code);
         Assert.AreEqual("password", ae.ParamName);
-        Assert.IsTrue(ae.Message.StartsWith(expectedMessageStart, StringComparison.Ordinal), $"Exception message doesn't start with {expectedMessageStart}");
+        ae.AssertMessageStartsWith(AES256Encrypted<ILTagBool>.MissingPasswordMessage);
     }
 
     private static void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {

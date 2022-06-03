@@ -39,9 +39,7 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
     }
 
     public AES256Encrypted(Stream s) {
-        if (s is null)
-            throw new ArgumentNullException(nameof(s));
-        _encrypted = s.Decode<TagEncrypted>();
+        _encrypted = s.Required().Decode<TagEncrypted>();
         if (_encrypted.Algorithm != CipherAlgorithm.AES256)
             throw new InvalidDataException($"Not AES 256 encrypted!!! {_encrypted.Algorithm}");
     }
@@ -56,8 +54,7 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
     }
 
     protected AES256Encrypted(T value, string password, byte[] key, byte[] iv) {
-        if (value is null)
-            throw new ArgumentNullException(nameof(value));
+        value.Required();
         CheckMissingPassword(password);
         if (password.Length < 6)
             throw new ArgumentException($"Password '{password}' is too weak!!!", nameof(password));
@@ -95,18 +92,10 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
 public class AESCipher : ISymmetricCipher
 {
     public byte[] Decrypt(byte[] ownerBytes, string composedPassword) {
-        Check(ownerBytes);
-        using var ms = new MemoryStream(ownerBytes);
+        using var ms = new MemoryStream(ownerBytes.Required());
         return new AES256Encrypted<ILTagByteArray>(ms).Decrypt(composedPassword).Value;
     }
 
-    public byte[] Encrypt(byte[] ownerBytes, string composedPassword) {
-        Check(ownerBytes);
-        return new AES256Encrypted<ILTagByteArray>(new ILTagByteArray(ownerBytes), composedPassword).EncodedBytes;
-    }
-
-    private static void Check(byte[] ownerBytes) {
-        if (ownerBytes is null)
-            throw new ArgumentNullException(nameof(ownerBytes));
-    }
+    public byte[] Encrypt(byte[] ownerBytes, string composedPassword) =>
+        new AES256Encrypted<ILTagByteArray>(new ILTagByteArray(ownerBytes.Required()), composedPassword).EncodedBytes;
 }

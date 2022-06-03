@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,12 +31,11 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public class RSAInterlockSigningKey : InterlockSigningKey
 {
     public RSAInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
-        if (data == null)
-            throw new ArgumentNullException(nameof(data));
-        if (data.EncryptedContentType != EncryptedContentType.EncryptedKey)
+        if (data.Required().EncryptedContentType != EncryptedContentType.EncryptedKey)
             throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
         using var ms = new MemoryStream(decrypted);
         _keyParameters = ms.Decode<TagRSAParameters>();
@@ -45,7 +44,7 @@ public class RSAInterlockSigningKey : InterlockSigningKey
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
-            ms.EncodeTag(_value);
+            ms.EncodeTag(_data);
             ms.EncodeTag(_keyParameters);
             return ms.ToArray();
         }
@@ -61,8 +60,8 @@ public class RSAInterlockSigningKey : InterlockSigningKey
     public override byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters.Value.Parameters);
 
     public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSign(data, _keyParameters.Value.Parameters));
-    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
 
+    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
 
     private readonly TagRSAParameters _keyParameters;
 

@@ -34,12 +34,11 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
+
 public class ECDsaCertificateSigningKey : InterlockSigningKey
 {
     public ECDsaCertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) : base(data) {
-        if (data == null)
-            throw new ArgumentNullException(nameof(data));
-        if (data.EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
+        if (data.Required().EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
             throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
         _password = password.Required();
         _certificateBytes = certificateBytes.Required();
@@ -48,7 +47,7 @@ public class ECDsaCertificateSigningKey : InterlockSigningKey
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
-            ms.EncodeTag(_value);
+            ms.EncodeTag(_data);
             ms.EncodeString(_password);
             ms.EncodeByteArray(_certificateBytes);
             return ms.ToArray();
@@ -68,6 +67,7 @@ public class ECDsaCertificateSigningKey : InterlockSigningKey
         using var ecdsa = x509Certificate.GetECDsaPrivateKey();
         throw new NotSupportedException();
     }
+
 
     public override TagSignature Sign(byte[] data) => new(Algorithm.EcDSA, HashAndSign(data));
 

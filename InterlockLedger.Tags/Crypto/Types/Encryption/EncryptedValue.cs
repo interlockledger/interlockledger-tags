@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> where T : ILTag
 {
     public const int CurrentVersion = 1;
@@ -38,10 +39,8 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
     public EncryptedValue(ulong tagId) => TagId = tagId;
 
     public EncryptedValue(ulong tagId, CipherAlgorithm cipher, IEncryptor encryptor, T payloadInClearText, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this(tagId) {
-        if (author is null)
-            throw new ArgumentNullException(nameof(author));
-        if (readers is null)
-            throw new ArgumentNullException(nameof(readers));
+        author.Required();
+        readers.Required();
         byte[] key;
         byte[] iv;
         (CipherText, key, iv) = encryptor.Encrypt(cipher, payloadInClearText.Required());
@@ -74,10 +73,8 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
     }
 
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
-        if (reader is null)
-            throw new ArgumentNullException(nameof(reader));
-        if (findEngine is null)
-            throw new ArgumentNullException(nameof(findEngine));
+        reader.Required();
+        findEngine.Required();
         var readingKey = ReadingKeys.FirstOrDefault(rk => rk.PublicKeyHash == reader.PublicKeyHash && rk.ReaderId == reader.Id);
         if (readingKey is null)
             return null;

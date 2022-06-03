@@ -226,9 +226,7 @@ public sealed class DataField : IEquatable<DataField>
     internal bool? IsOptional_Deprecated;
 
     internal DataField(DataField source) {
-        if (source is null)
-            throw new ArgumentNullException(nameof(source));
-        Cast = source.Cast;
+        Cast = source.Required().Cast;
         Description = source.Description;
         ElementTagId = source.ElementTagId;
         EnumerationAsFlags = source.EnumerationAsFlags;

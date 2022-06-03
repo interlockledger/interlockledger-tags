@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 {
     public RSAInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper) : base(tag, timeStamper) {

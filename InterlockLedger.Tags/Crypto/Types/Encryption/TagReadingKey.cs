@@ -56,7 +56,7 @@ public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
                 throw new ArgumentException("Must provide a non-empty id for this reading key", nameof(id));
             ReaderId = id;
             PublicKeyHash = publicKeyHash;
-            EncryptedKey = encryptedKey ?? throw new System.ArgumentNullException(nameof(encryptedKey));
+            EncryptedKey = encryptedKey.Required();
             EncryptedIV = encryptedIV.Required();
         }
 

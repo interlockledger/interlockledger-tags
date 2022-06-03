@@ -33,6 +33,7 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
+
 public class ECDsaInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 {
     public ECDsaInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper) : base(tag, timeStamper) {

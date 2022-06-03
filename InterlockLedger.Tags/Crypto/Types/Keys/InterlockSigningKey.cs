@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public enum EncryptedContentType
 {
     EncryptedKey = 0,
@@ -40,28 +41,43 @@ public enum EncryptedContentType
 public abstract class InterlockSigningKey : ISigningKey
 {
     public abstract byte[] AsSessionState { get; }
-    public string Description => _value.Description;
-    protected EncryptedContentType EncryptedContentType => _value.EncryptedContentType;
-    public BaseKeyId Id => _value.Id;
-    public string Name => _value.Name;
-    public IEnumerable<AppPermissions> Permissions => _value.Permissions;
-    public TagPubKey PublicKey => _value.PublicKey;
-    public KeyPurpose[] Purposes => _value.Purposes;
-    public Algorithm SignAlgorithm => _value.PublicKey.Algorithm;
-    public KeyStrength Strength => _value.Strength;
+    public string Description => _data.Description;
+    public BaseKeyId Id => _data.Id;
+    public string Name => _data.Name;
+    public IEnumerable<AppPermissions> Permissions => _data.Permissions;
+    public TagPubKey PublicKey => _data.PublicKey;
+    public KeyPurpose[] Purposes => _data.Purposes;
+    public Algorithm SignAlgorithm => _data.PublicKey.Algorithm;
+    public KeyStrength Strength => _data.Strength;
 
     public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
 
     public abstract byte[] Decrypt(byte[] bytes);
 
+    public void Dispose() {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
     public abstract TagSignature Sign(byte[] data);
 
+    public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
 
     public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
 
-    protected readonly InterlockSigningKeyData _value;
+    protected readonly InterlockSigningKeyData _data;
 
-    protected InterlockSigningKey(InterlockSigningKeyData tag) => _value = tag;
+    protected InterlockSigningKey(InterlockSigningKeyData data) => _data = data.Required();
+
+    protected EncryptedContentType EncryptedContentType => _data.EncryptedContentType;
+
+    protected virtual void DisposeManagedResources() { }
+
+    protected virtual void DisposeUnmanagedResources() { }
+
+    private bool _disposedValue;
+
+    ~InterlockSigningKey() { Dispose(disposing: false); }
 
     private static InterlockSigningKey RCSKFrom(byte[] bytes) {
         try {
@@ -75,7 +91,16 @@ public abstract class InterlockSigningKey : ISigningKey
         } catch { return null; }
     }
 
-    public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    private void Dispose(bool disposing) {
+        if (!_disposedValue) {
+            if (disposing) {
+                DisposeManagedResources();
+            }
+
+            DisposeUnmanagedResources();
+            _disposedValue = true;
+        }
+    }
 }
 
 public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData

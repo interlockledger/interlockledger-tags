@@ -191,13 +191,8 @@ public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<Interloc
     protected InterlockId(Parts parts) : base(ILTagId.InterlockId, parts) {
     }
 
-    protected static void RegisterResolver(byte type, string typeName, Func<Parts, InterlockId> resolver) {
-        if (string.IsNullOrWhiteSpace(typeName))
-            throw new ArgumentNullException(nameof(typeName));
-        if (resolver is null)
-            throw new ArgumentNullException(nameof(resolver));
-        Parts.RegisterResolver(type, typeName, resolver);
-    }
+    protected static void RegisterResolver(byte type, string typeName, Func<Parts, InterlockId> resolver) =>
+        Parts.RegisterResolver(type, typeName.Required(), resolver.Required());
 
     protected void CheckType(byte type) {
         if (Type != type)

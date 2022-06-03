@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,18 +30,15 @@
 //
 // ******************************************************************************************************************************
 
-using System.Text.Json;
+using NUnit.Framework;
 
 namespace InterlockLedger.Tags;
 
-public class JsonInterlockIdConverter : JsonConverter<InterlockId>
+public static class TestHelpers
 {
-    public override bool CanConvert(Type typeToConvert) =>
-        typeToConvert.Required() == typeof(InterlockId) || typeToConvert.IsSubclassOf(typeof(InterlockId));
-
-    public override InterlockId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        reader.TokenType == JsonTokenType.String ? InterlockId.Resolve(reader.GetString()) : throw new NotSupportedException();
-
-    public override void Write(Utf8JsonWriter writer, InterlockId value, JsonSerializerOptions options) =>
-        writer.Required().WriteStringValue(value.Required().TextualRepresentation);
+    public static void AssertRequiredException(Action code, string paramName) {
+        var ae = Assert.Throws<ArgumentException>(() => code());
+        Assert.AreEqual(paramName, ae.ParamName);
+        ae.AssertMessageStartsWith("Required");
+    }
 }

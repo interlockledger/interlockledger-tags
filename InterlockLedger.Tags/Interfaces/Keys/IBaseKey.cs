@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//  
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,7 +31,8 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public interface IBaseKey
+
+public interface IBaseKey : IDisposable
 {
     string Description { get; }
     BaseKeyId Id { get; }

@@ -33,6 +33,7 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
+
 public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHasher, IReader, IEncryptor
 {
     public static readonly TestFakeSigner FixedKeysInstance = new(generateEmptySignatures: false);
@@ -66,8 +67,10 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
 
     public IUpdatingSigner DestroyKeys() => this;
 
+    public override void Dispose() { }
+
     public (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag
-        => cipher != CipherAlgorithm.AES256
+            => cipher != CipherAlgorithm.AES256
             ? throw new InvalidOperationException("Only AES256 is valid for now")
             : new AES256Engine().Encrypt(clearText.OpenReadingStreamAsync().Result, key: _fakeCipherKey, iv: _fakeCipherIV);
 

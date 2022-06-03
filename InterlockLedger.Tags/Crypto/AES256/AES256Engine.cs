@@ -33,19 +33,18 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
+
 public class AES256Engine : ISymmetricEngine
 {
-    public byte[] Decrypt(byte[] cipherData, byte[] key, byte[] iv)
-        => key is null
-            ? throw new ArgumentNullException(nameof(key))
-            : Decrypt(cipherData.Required(), readHeader: _ => (key, iv));
+    public byte[] Decrypt(byte[] cipherData, byte[] key, byte[] iv) {
+        key.Required();
+        iv.Required();
+        return Decrypt(cipherData.Required(), readHeader: _ => (key, iv));
+    }
 
     public byte[] Decrypt(byte[] cipherData, Func<MemoryStream, (byte[] key, byte[] iv)> readHeader) {
-        if (cipherData is null)
-            throw new ArgumentNullException(nameof(cipherData));
-        if (readHeader is null)
-            throw new ArgumentNullException(nameof(readHeader));
-        using var source = new MemoryStream(cipherData);
+        readHeader.Required();
+        using var source = new MemoryStream(cipherData.Required());
         (byte[] key, byte[] iv) = readHeader(source);
         using var algorithm = Aes.Create();
         algorithm.KeySize = 256;

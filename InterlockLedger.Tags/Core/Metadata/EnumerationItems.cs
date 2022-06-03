@@ -76,9 +76,7 @@ public class EnumerationItems : ITextual<EnumerationItems>
         public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
 
         internal FullEnumerationDetails FromTextualRepresentation(string s) {
-            if (s is null)
-                throw new ArgumentNullException(nameof(s));
-            var parts = s.Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
+            var parts = s.Required().Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
             Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
             Name = parts[1];
             Description = parts.Length > 2 ? parts[2] : null;

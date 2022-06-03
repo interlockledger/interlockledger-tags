@@ -87,8 +87,7 @@ public class FileBackedILTag<T> : ILTagOfExplicit<T>
     protected override ulong CalcValueLength() => Length;
 
     protected async Task CopyFromAsync(Stream source, long fileSizeLimit = 0, bool noRemoval = false, CancellationToken cancellationToken = default) {
-        if (source is null)
-            throw new ArgumentNullException(nameof(source));
+        source.Required();
         using (var fileStream = FileInfo.OpenWrite()) {
             await source.CopyToAsync(fileStream, fileSizeLimit, _bufferLength, cancellationToken).ConfigureAwait(false);
             fileStream.Flush(flushToDisk: true);

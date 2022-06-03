@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
 {
     public string Description => _data.Description;
@@ -51,6 +52,11 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
 
     public abstract void DestroyKeys();
 
+    public void Dispose() {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
     public abstract void GenerateNextKeys();
 
     public TagSignature Sign(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
@@ -64,12 +70,32 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     public string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
 
     protected readonly InterlockUpdatableSigningKeyData _data;
+
     protected readonly ITimeStamper _timeStamper;
 
     protected InterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, ITimeStamper timeStamper) {
         _data = tag.Required();
         _timeStamper = timeStamper.Required();
         _data.LastSignatureTimeStamp = _timeStamper.Now;
+    }
+
+    protected virtual void DisposeManagedResources() { }
+
+    protected virtual void DisposeUnmanagedResources() { }
+
+    private bool _disposedValue;
+
+    ~InterlockUpdatableSigningKey() { Dispose(disposing: false); }
+
+    private void Dispose(bool disposing) {
+        if (!_disposedValue) {
+            if (disposing) {
+                DisposeManagedResources();
+            }
+
+            DisposeUnmanagedResources();
+            _disposedValue = true;
+        }
     }
 }
 

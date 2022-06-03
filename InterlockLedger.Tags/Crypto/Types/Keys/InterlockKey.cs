@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<InterlockKey>, IBaseKey
 {
     public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
@@ -55,7 +56,6 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
 
     [JsonIgnore]
     public override object AsJson => Value;
-
     public string Description => Value.Description;
     public BaseKeyId Id => Value.Id;
     public BaseKeyId Identity => Value.Identity;
@@ -65,6 +65,12 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
     public KeyPurpose[] Purposes => Value.Purposes;
     public KeyStrength Strength => Value.Strength;
     public ushort Version => Value.Version;
+
+    public void Dispose() {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 
     public override bool Equals(object obj) => Equals(obj as InterlockKey);
 
@@ -165,6 +171,18 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
     internal InterlockKey(Stream s) : base(ILTagId.InterlockKey, s) {
     }
 
+    protected virtual void Dispose(bool disposing) {
+        if (!_disposedValue) {
+            if (disposing) {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposedValue = true;
+        }
+    }
+
     protected override Parts FromBytes(byte[] bytes) =>
         FromBytesHelper(bytes, s => {
             var version = s.DecodeUShort();
@@ -200,6 +218,15 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
         });
 
+    private bool _disposedValue;
+
     private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {
     }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~InterlockKey()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
 }
