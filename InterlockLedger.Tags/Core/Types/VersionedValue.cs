@@ -135,6 +135,8 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T>, IFormatted w
 
     protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);
 
+    protected bool FromVersion(ushort version) => Version >= version;
+
     protected VersionedValue(ulong tagId, ushort version) {
         TagId = tagId;
         Version = version;

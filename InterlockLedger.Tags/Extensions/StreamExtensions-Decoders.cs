@@ -71,9 +71,8 @@ public static partial class StreamExtensions
     public static byte[] DecodeByteArray(this Stream s) => s.Decode<ILTagByteArray>()?.Value;
 
     public static InterlockColor DecodeColor(this Stream s) => InterlockColor.From(s.Decode<ILTagUInt32>().Value);
-
     public static DateTimeOffset DecodeDateTimeOffset(this Stream s) => s.DecodeILInt().AsDateTime();
-
+    public static DateTimeOffset DecodeDateTimeOffset(this Stream s, bool doIt) => doIt ? s.DecodeDateTimeOffset() : DateTimeOffset.UnixEpoch;
     public static Dictionary<string, string> DecodeDictionary(this Stream s) => s.Decode<ILTagStringDictionary>()?.Value;
 
     public static Dictionary<string, T> DecodeDictionary<T>(this Stream s) where T : ILTag {
