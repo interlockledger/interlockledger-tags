@@ -275,8 +275,7 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
     private static byte Invert(byte component) => (byte)(255 - component);
 
     private static void LazyInitKnownColors() {
-        if (_knownColors == null) {
-            _knownColors = new Dictionary<uint, InterlockColor> {
+        _knownColors ??= new Dictionary<uint, InterlockColor> {
                 [Transparent.RGBA] = Transparent,
                 [AliceBlue.RGBA] = AliceBlue,
                 [AntiqueWhite.RGBA] = AntiqueWhite,
@@ -417,9 +416,7 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
                 [Yellow.RGBA] = Yellow,
                 [YellowGreen.RGBA] = YellowGreen,
             };
-        }
-        if (_knownColorsByName == null) {
-            _knownColorsByName = new Dictionary<string, InterlockColor>(StringComparer.InvariantCultureIgnoreCase) {
+        _knownColorsByName ??= new Dictionary<string, InterlockColor>(StringComparer.InvariantCultureIgnoreCase) {
                 [Transparent.Name] = Transparent,
                 [AliceBlue.Name] = AliceBlue,
                 [AntiqueWhite.Name] = AntiqueWhite,
@@ -560,7 +557,6 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
                 [Yellow.Name] = Yellow,
                 [YellowGreen.Name] = YellowGreen,
             };
-        }
     }
 
     private static string ToColorCode(byte r, byte g, byte b, byte a)
