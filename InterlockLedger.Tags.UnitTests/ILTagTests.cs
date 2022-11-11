@@ -185,7 +185,9 @@ public class ILTagTests
 
     [Test]
     public void ULongAsILintVariations() {
+#pragma warning disable IDE0230 // Use UTF-8 string literal
         var tag = (ILTagILInt)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 10, 32 }));
+#pragma warning restore IDE0230 // Use UTF-8 string literal
         Assert.AreEqual(32, tag.Value);
         Assert.IsTrue(tag.ValueIs<ulong>(out var v) && v == tag.Value, "Not an ulong value");
         Assert.IsFalse(tag.ValueIs<ushort>(out var l) || l != default, "An ushort value?");

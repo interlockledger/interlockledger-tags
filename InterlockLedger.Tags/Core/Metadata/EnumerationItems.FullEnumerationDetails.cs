@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -29,40 +29,34 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
-#nullable enable
 
+using System.Globalization;
 
 namespace InterlockLedger.Tags;
-public abstract class ILTagOf<T> : ILTag
+
+public partial class EnumerationItems
 {
-    [JsonIgnore]
-    public override object? AsJson => Value;
+    internal class FullEnumerationDetails : EnumerationDetails
+    {
+        public FullEnumerationDetails() { }
 
-    public override string Formatted => Value is IFormatted v ? v.Formatted : Value?.ToString() ?? "??";
+        public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
 
-    public T Value { get; set; }
+        public ulong Index { get; set; }
+        public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
 
-    public override bool ValueIs<TV>(out TV value) {
-        if (Value is TV tvalue) {
-            value = tvalue;
-            return true;
+        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
+
+        internal FullEnumerationDetails FromTextualRepresentation(string s) {
+            var parts = s.Required().Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
+            Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
+            Name = parts[1];
+            Description = parts.Length > 2 ? parts[2] : null;
+            return this;
         }
-#pragma warning disable CS8601 // Possible null reference assignment.
-        value = default;
-#pragma warning restore CS8601 // Possible null reference assignment.
-        return false;
+
+        private const char _fieldSeparator = '|';
+
+        private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
     }
-
-    protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
-
-    protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
-        setup?.Invoke(this);
-        Value = DeserializeInner(s);
-    }
-
-    protected abstract T DeserializeInner(Stream s);
-
-    protected abstract T ValueFromStream(StreamSpan s);
-
-    protected abstract Task<Stream> ValueToStreamAsync(Stream s);
 }

@@ -42,7 +42,7 @@ public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
     public string Name => Value.Name;
     public TagPubKey PublicKey => Value.PublicKey;
 
-    public struct Parts : IEquatable<Parts>
+    public readonly struct Parts : IEquatable<Parts>
     {
         public readonly string Name;
         public readonly TagPubKey PublicKey;

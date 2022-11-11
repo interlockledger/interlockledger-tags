@@ -31,13 +31,14 @@
 // ******************************************************************************************************************************
 
 using System.ComponentModel;
-using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<EnumerationItems>))]
 [JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
-public class EnumerationItems : ITextual<EnumerationItems>
+public partial class EnumerationItems : ITextual<EnumerationItems>
 {
     public EnumerationItems() { }
 
@@ -53,40 +54,21 @@ public class EnumerationItems : ITextual<EnumerationItems>
     [JsonIgnore]
     public bool IsEmpty => _details.None();
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid => false;
 
     [JsonIgnore]
     public string TextualRepresentation => IsEmpty ? null : $"{_detailSeparator}" + _details.JoinedBy($"{_detailSeparator}");
+
+    public static EnumerationItems Empty { get; } = new EnumerationItems();
+    public static EnumerationItems Invalid { get; } = new EnumerationItems();
+    public static Regex Mask { get; } = AnythingRegex();
+    public static string MessageForMissing { get; } = "No Enumeration Details";
 
     public EnumerationItems ResolveFrom(string textualRepresentation) => Resolve(textualRepresentation, ConvertFromString);
 
     internal const char _detailSeparator = '#';
 
     internal EnumerationDictionary UpdateFrom() => IsEmpty ? null : ToDictionary();
-
-    internal class FullEnumerationDetails : EnumerationDetails
-    {
-        public FullEnumerationDetails() { }
-
-        public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
-
-        public ulong Index { get; set; }
-        public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
-
-        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
-
-        internal FullEnumerationDetails FromTextualRepresentation(string s) {
-            var parts = s.Required().Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
-            Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
-            Name = parts[1];
-            Description = parts.Length > 2 ? parts[2] : null;
-            return this;
-        }
-
-        private const char _fieldSeparator = '|';
-
-        private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
-    }
 
     private readonly List<FullEnumerationDetails> _details = new();
 
@@ -104,4 +86,11 @@ public class EnumerationItems : ITextual<EnumerationItems>
     }
 
     private EnumerationDictionary ToDictionary() => new(_details.ToDictionary(d => d.Index, dd => dd.Shorter));
+    public static EnumerationItems Parse(string s, IFormatProvider provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out EnumerationItems result)
+        => ITextual<EnumerationItems>.TryParse(s, out result);
+    public static EnumerationItems FromString(string textualRepresentation) => new(textualRepresentation);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid Enumeration Details '{textualRepresentation}'";
+    [GeneratedRegex(".+")]
+    private static partial Regex AnythingRegex();
 }

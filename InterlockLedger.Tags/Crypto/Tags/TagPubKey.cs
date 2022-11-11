@@ -32,15 +32,17 @@
 
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 
 [TypeConverter(typeof(TagPubKeyConverter))]
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
-public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
+public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
 {
     public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) {
     }
@@ -67,7 +69,7 @@ public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITex
                 : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
     }
 
-    public static TagPubKey Resolve(string textualRepresentation) {
+    public static TagPubKey FromString(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
         var parts = textualRepresentation.Split('!', '#');
@@ -77,6 +79,19 @@ public class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITex
             ? throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation))
             : ResolveAs(algorithm, parts[1].FromSafeBase64());
     }
+
+    public static TagPubKey Empty { get; } = new TagPubKey();
+    public static TagPubKey Invalid { get; } = new TagPubKey();
+    public static Regex Mask { get; } = AnythingRegex();
+    public static string MessageForMissing { get; } = "No PubKey";
+
+    public static TagPubKey Parse(string s, IFormatProvider provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagPubKey result) =>
+        ITextual<TagPubKey>.TryParse(s, out result);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid PubKey '{textualRepresentation}'";
+
+    [GeneratedRegex(".+")]
+    private static partial Regex AnythingRegex();
 
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
@@ -128,7 +143,7 @@ public class TagPubKeyConverter : TypeConverter
     public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) {
         if (Value is string text) {
             text = text.Trim();
-            return TagPubKey.Resolve(text);
+            return TagPubKey.FromString(text);
         }
         return base.ConvertFrom(context, culture, Value);
     }

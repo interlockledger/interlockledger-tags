@@ -222,8 +222,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             }
 
             byte[] AppendRemainingBytes(byte[] tagsAsBytes) {
-                if (json.ContainsKey("_RemainingBytes_")) {
-                    var bytesValues = json["_RemainingBytes_"];
+                if (json.TryGetValue("_RemainingBytes_", out object bytesValues)) {
                     var remainingBytes = bytesValues switch {
                         string st => Convert.FromBase64String(st),
                         JsonElement je when je.ValueKind == JsonValueKind.String => je.GetBytesFromBase64(),

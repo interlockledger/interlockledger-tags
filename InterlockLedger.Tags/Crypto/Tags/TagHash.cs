@@ -32,16 +32,19 @@
 
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TagHashConverter))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
-public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
+public sealed partial class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
 {
-    public static readonly TagHash Empty = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
+    public static TagHash Empty { get; }  = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
+    public static TagHash Invalid { get; } = new();
 
     public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) {
     }
@@ -57,10 +60,11 @@ public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, 
     public byte[] Data => Value.Data;
     public override string Formatted => TextualRepresentation;
     public bool IsEmpty => Equals(Empty);
-    public bool IsInvalid { get; }
+    public bool IsInvalid => false;
     public string TextualRepresentation => ToString();
 
-    public static TagHash From(string textualRepresentation) => textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
+    public static TagHash FromString(string textualRepresentation) =>
+        textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
 
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
 
@@ -97,6 +101,9 @@ public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, 
 
     private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 
+    public static Regex Mask { get; } = AnythingRegex();
+    public static string MessageForMissing { get; } = "No hash";
+
     private static byte[] HashSha256(byte[] data) {
         using var hasher = SHA256.Create();
         hasher.Initialize();
@@ -113,7 +120,14 @@ public sealed class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, 
         return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
 
-    private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
+    private bool DataEquals(byte[] otherData) => IsNullOrEmpty(Data) && IsNullOrEmpty(otherData) || Data.HasSameBytesAs(otherData);
+    public static TagHash Parse(string s, IFormatProvider provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagHash result) =>
+        ITextual<TagHash>.TryParse(s, out result);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid hash '{textualRepresentation}'";
+
+    [GeneratedRegex(".+")]
+    private static partial Regex AnythingRegex();
 }
 
 public class TagHashConverter : TypeConverter
@@ -125,7 +139,7 @@ public class TagHashConverter : TypeConverter
 
     public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value)
         => Value is string text
-            ? TagHash.From(text.Trim())
+            ? TagHash.FromString(text.Trim())
             : base.ConvertFrom(context, culture, Value);
 
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)

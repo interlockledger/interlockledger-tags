@@ -42,7 +42,7 @@ public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
     public TagHash PublicKeyHash => Value.PublicKeyHash;
     public string ReaderId => Value.ReaderId;
 
-    public struct Parts : IEquatable<Parts>
+    public readonly struct Parts : IEquatable<Parts>
     {
         public readonly byte[] EncryptedIV;
         public readonly byte[] EncryptedKey;

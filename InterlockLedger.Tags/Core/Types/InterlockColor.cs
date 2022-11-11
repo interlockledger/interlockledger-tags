@@ -32,12 +32,14 @@
 
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(InterlockColorConverter))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
-public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockColor>
+public partial struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockColor>
 {
     public static readonly InterlockColor AliceBlue = new(240, 248, 255, "AliceBlue");
     public static readonly InterlockColor AntiqueWhite = new(250, 235, 215, "AntiqueWhite");
@@ -198,7 +200,7 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
     }
 
     public InterlockColor(string textualRepresentation) {
-        var color = FromText(textualRepresentation);
+        var color = FromString(textualRepresentation);
         R = color.R;
         G = color.G;
         B = color.B;
@@ -209,7 +211,7 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
     public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
 
     [JsonIgnore]
-    public string AsCSS => Name is null || (Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7) ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
+    public string AsCSS => Name is null || Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
 
     public bool IsEmpty => false;
 
@@ -223,23 +225,28 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
 
     public string TextualRepresentation => ToString();
 
+    public static InterlockColor Empty { get; } = Black;
+    public static InterlockColor Invalid { get; } = Transparent;
+    public static Regex Mask { get; } = AnythingRegex();
+    public static string MessageForMissing { get; } = "No color";
+
     public static InterlockColor From(uint value) {
         LazyInitKnownColors();
-        return _knownColors.ContainsKey(value) ? _knownColors[value] : new InterlockColor(value);
+        return _knownColors.TryGetValue(value, out var color) ? color : new InterlockColor(value);
     }
 
-    public static InterlockColor FromText(string value) {
+    public static InterlockColor FromString(string value) {
         value = value?.Trim() ?? string.Empty;
         LazyInitKnownColors();
         var colorCode = FromColorCode(value);
-        return _knownColorsByName.ContainsKey(value) ? _knownColorsByName[value] : From(colorCode);
+        return _knownColorsByName.TryGetValue(value, out var color) ? color : From(colorCode);
     }
 
     public static bool operator !=(InterlockColor left, InterlockColor right) => !(left == right);
 
     public static bool operator ==(InterlockColor left, InterlockColor right) => left.Equals(right);
 
-    public override bool Equals(object obj) => (obj is InterlockColor other) && Equals(other);
+    public override bool Equals(object obj) => obj is InterlockColor other && Equals(other);
 
     public bool Equals(InterlockColor other) => other.RGBA == RGBA;
 
@@ -254,15 +261,15 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
     private static Dictionary<string, InterlockColor> _knownColorsByName;
 
     private InterlockColor(uint value) {
-        R = (byte)((value >> 24) & 255);
-        G = (byte)((value >> 16) & 255);
-        B = (byte)((value >> 8) & 255);
+        R = (byte)(value >> 24 & 255);
+        G = (byte)(value >> 16 & 255);
+        B = (byte)(value >> 8 & 255);
         A = (byte)(value & 255);
         Name = ToColorCode(R, G, B, A);
     }
 
     private static uint FromColorCode(string colorCode) {
-        if (colorCode == null || (colorCode.Length != 9 && colorCode.Length != 7) || colorCode[0] != '#' ||
+        if (colorCode == null || colorCode.Length != 9 && colorCode.Length != 7 || colorCode[0] != '#' ||
             !uint.TryParse(colorCode[1..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var partial))
             return Transparent.RGBA;
         if (colorCode.Length == 7)
@@ -563,6 +570,12 @@ public struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockCol
         => "#" + ToHex(r) + ToHex(g) + ToHex(b) + (a < 255 ? ToHex(a) : "");
 
     private static string ToHex(byte b) => b.ToString("X2", CultureInfo.InvariantCulture);
+    public static InterlockColor Parse(string s, IFormatProvider provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out InterlockColor result) =>
+        ITextual<InterlockColor>.TryParse(s, out result);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid color '{textualRepresentation}'";
+    [GeneratedRegex(".+")]
+    private static partial Regex AnythingRegex();
 }
 
 public class InterlockColorConverter : TypeConverter
@@ -572,7 +585,7 @@ public class InterlockColorConverter : TypeConverter
     public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
     public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-        => value is string text ? InterlockColor.FromText(text) : base.ConvertFrom(context, culture, value);
+        => value is string text ? InterlockColor.FromString(text) : base.ConvertFrom(context, culture, value);
 
     public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         => destinationType == typeof(string) && value is InterlockColor color

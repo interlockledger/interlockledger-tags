@@ -53,8 +53,8 @@ public static class ObjectExtensions
         };
 
     private static object? AsILTag(object? o)
-        => o is Dictionary<string, object> dict && dict.Count == 2 && dict.ContainsKey("TagId") && dict.ContainsKey("Value")
-            ? TagProvider.DeserializeFromJson(Convert.ToUInt64(dict["TagId"], CultureInfo.InvariantCulture), dict["Value"])
+        => o is Dictionary<string, object> dict && dict.Count == 2 && dict.TryGetValue("TagId", out object? tagId) && dict.TryGetValue("Value", out object? value)
+            ? TagProvider.DeserializeFromJson(Convert.ToUInt64(tagId, CultureInfo.InvariantCulture), value)
             : o;
 
     private static object? FromJsonElement(JsonElement jo) {

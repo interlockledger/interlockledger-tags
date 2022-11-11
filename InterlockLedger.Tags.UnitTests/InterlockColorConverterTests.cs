@@ -78,7 +78,7 @@ public class InterlockColorConverterTests
         ConvertFromStringAndAssert(converter, "#010203FF", InterlockColor.From(0x010203FF));
         ConvertFromStringAndAssert(converter, "#01020300", InterlockColor.From(0x01020300));
         ConvertFromStringAndAssert(converter, "#01020380", InterlockColor.From(0x01020380));
-        Assert.AreEqual(InterlockColor.Transparent, InterlockColor.FromText(null));
+        Assert.AreEqual(InterlockColor.Transparent, InterlockColor.FromString(null));
     }
 
     [Test]
@@ -99,7 +99,7 @@ public class InterlockColorConverterTests
 
     private static void ConvertFromStringAndAssert(InterlockColorConverter converter, string colorValue, InterlockColor expectedColor) {
         Assert.AreEqual(expectedColor, (InterlockColor)converter.ConvertFrom(null, CultureInfo.InvariantCulture, colorValue));
-        Assert.AreEqual(expectedColor, InterlockColor.FromText(colorValue));
+        Assert.AreEqual(expectedColor, InterlockColor.FromString(colorValue));
     }
 
     private static void ConvertToStringAndAssert(InterlockColorConverter converter, InterlockColor color)

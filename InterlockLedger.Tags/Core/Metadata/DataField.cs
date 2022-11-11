@@ -34,7 +34,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
-public sealed class DataField : IEquatable<DataField>
+public sealed partial class DataField : IEquatable<DataField>
 {
     public const ushort CurrentVersion = 5;
 
@@ -97,7 +97,7 @@ public sealed class DataField : IEquatable<DataField>
     public static ulong AsNumber(ILTag tag)
         => tag is null
             ? throw new ArgumentNullException(nameof(tag))
-            : (tag.TagId switch {
+            : tag.TagId switch {
                 2 => (ulong)((ILTagInt8)tag).Value,
                 3 => ((ILTagUInt8)tag).Value,
                 4 => (ulong)((ILTagInt16)tag).Value,
@@ -108,7 +108,7 @@ public sealed class DataField : IEquatable<DataField>
                 9 => ((ILTagUInt64)tag).Value,
                 10 => ((ILTagILInt)tag).Value,
                 _ => throw new InvalidCastException("Not an integral numeric ILTag"),
-            });
+            };
 
     public static ILTag AsNumericTag(ulong tagId, ulong value) => tagId switch {
         2 => new ILTagInt8((sbyte)value),
@@ -137,7 +137,7 @@ public sealed class DataField : IEquatable<DataField>
 
             ulong FindKey(string value) {
                 try {
-                    return Regex.IsMatch(value, @"^\?\d+$")
+                    return NumbersRegex().IsMatch(value)
                         ? ulong.Parse(value[1..], CultureInfo.InvariantCulture)
                         : EnumerationDefinition.First(kp => kp.Value.Name.Equals(value, StringComparison.InvariantCultureIgnoreCase)).Key;
                 } catch (Exception e) {
@@ -162,19 +162,17 @@ public sealed class DataField : IEquatable<DataField>
                 ? "?"
                 : _isFlags
                     ? ToList(number)
-                    : EnumerationDefinition.ContainsKey(number) ? EnumerationDefinition[number].Name : $"?{number}";
+                    : EnumerationDefinition.TryGetValue(number, out var value) ? value.Name : $"?{number}";
         } catch {
             return "*error*";
         }
 
         string ToList(ulong number) {
             var names = new List<string>();
-            foreach (ulong k in EnumerationDefinition.Keys) {
-                if (number == k || ((number & k) == k && k > 0)) {
+            foreach (ulong k in EnumerationDefinition.Keys)                 if (number == k || (number & k) == k && k > 0) {
                     number ^= k;
                     names.Add(EnumerationDefinition[k].Name);
                 }
-            }
             if (number > 0)
                 names.Add($"?{number}");
             return names.JoinedBy("|");
@@ -243,6 +241,8 @@ public sealed class DataField : IEquatable<DataField>
     private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
 
     private bool CompareEnumeration(DataField other) => EnumerationDefinition.EquivalentTo(other.EnumerationDefinition);
+    [GeneratedRegex("^\\?\\d+$")]
+    private static partial Regex NumbersRegex();
 }
 
 public class ILTagDataField : ILTagExplicit<DataField>

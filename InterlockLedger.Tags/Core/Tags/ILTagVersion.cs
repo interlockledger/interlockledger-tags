@@ -31,6 +31,8 @@
 // ******************************************************************************************************************************
 
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
@@ -52,6 +54,11 @@ public class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEqu
 
     public bool IsInvalid => false;
     public string TextualRepresentation => Value.ToString();
+
+    public static ILTagVersion Empty { get; } = new((Version)null);
+    public static ILTagVersion Invalid { get; } = new((Version)null);
+    public static Regex Mask { get; }
+    public static string MessageForMissing => "Version is missing";
 
     public static ILTagVersion FromJson(object o) => new(new Version((string)o));
 
@@ -81,4 +88,12 @@ public class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEqu
 
     protected override byte[] ToBytes(Version value)
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(Value.Major).BigEndianWriteInt(Value.Minor).BigEndianWriteInt(Value.Build).BigEndianWriteInt(Value.Revision));
+    public static ILTagVersion Parse(string s, IFormatProvider provider) => new(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out ILTagVersion result) {
+        result = FromString(s);
+        return true;
+    }
+
+    public static ILTagVersion FromString(string textualRepresentation) => new(textualRepresentation);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid version '{textualRepresentation}'";
 }

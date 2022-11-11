@@ -33,10 +33,8 @@
 using System.Collections;
 
 namespace InterlockLedger.Tags;
-#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 public class ILTagSequence : ILTagArrayOfILTag<ILTag>
-#pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 {
     public ILTagSequence(params ILTag[] value) : base(ILTagId.Sequence, value) {
     }
@@ -54,4 +52,6 @@ public class ILTagSequence : ILTagArrayOfILTag<ILTag>
     }
 
     private static ILTag[] Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : Array.Empty<ILTag>();
+
+    public override int GetHashCode() => HashCode.Combine(Value);
 }

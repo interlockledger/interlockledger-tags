@@ -30,11 +30,13 @@
 //
 // ******************************************************************************************************************************
 
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
-public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, ITextual<TagHmac>
+public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, ITextual<TagHmac>
 {
     public TagHmac() : base(ILTagId.Hmac, null) {
     }
@@ -48,8 +50,8 @@ public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, 
     public HashAlgorithm Algorithm => Value?.Algorithm ?? HashAlgorithm.SHA256;
     public byte[] Data => Value?.Data;
     public override string Formatted => ToString();
-    public bool IsEmpty { get; }
-    public bool IsInvalid { get; }
+    public bool IsEmpty => Data.None();
+    public bool IsInvalid => false;
     public string TextualRepresentation => ToString();
 
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
@@ -66,7 +68,18 @@ public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, 
     public override int GetHashCode() => ToString().GetHashCode(StringComparison.InvariantCulture);
 
     public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
+    public static TagHmac Empty { get; } = new TagHmac();
+    public static TagHmac Invalid { get; } = new TagHmac();
+    public static Regex Mask { get; } = AnythingRegex();
+    public static string MessageForMissing { get; } = "No Hmac";
 
+    public static TagHmac Parse(string s, IFormatProvider provider) => new(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagHmac result) =>
+        ITextual<TagHmac>.TryParse(s, out result);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid Hmac '{textualRepresentation}'";
+
+    [GeneratedRegex(".+")]
+    private static partial Regex AnythingRegex();
     internal TagHmac(Stream s) : base(ILTagId.Hmac, s) {
     }
 
@@ -90,4 +103,5 @@ public sealed class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<TagHmac>, 
     }
 
     private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
+    static TagHmac ITextual<TagHmac>.FromString(string textualRepresentation) => throw new NotImplementedException();
 }

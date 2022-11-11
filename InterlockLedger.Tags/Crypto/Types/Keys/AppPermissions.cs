@@ -31,14 +31,15 @@
 // ******************************************************************************************************************************
 
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
 [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
-public struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissions>
+public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissions>
 {
-    public static readonly Regex Mask = new(@"^#[0-9]+(,[0-9]+)*$");
+    public static Regex Mask { get; } = PermissionsListRegex();
 
     public IEnumerable<ulong> ActionIds;
 
@@ -110,4 +111,16 @@ public struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissio
     }
 
     private bool _noActions => ActionIds.None();
+
+    public static AppPermissions Empty { get; } = new AppPermissions(0);
+    public static AppPermissions Invalid { get; } = new AppPermissions(0);
+    public static string MessageForMissing { get; } = "Missing app permissions";
+
+    [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
+    private static partial Regex PermissionsListRegex();
+    public static AppPermissions Parse(string s, IFormatProvider provider) => AppPermissions.FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out AppPermissions result) =>
+        ITextual<AppPermissions>.TryParse(s, out result);
+    public static AppPermissions FromString(string textualRepresentation) => new(textualRepresentation);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid app permissions '{textualRepresentation}'";
 }

@@ -141,8 +141,8 @@ public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<Interloc
             => _knownTypes[type] = (typeName, resolver.Required());
 
         internal InterlockId Resolve()
-            => _knownTypes.ContainsKey(Type)
-                ? _knownTypes[Type].resolver(this)
+            => _knownTypes.TryGetValue(Type, out var value)
+                ? value.resolver(this)
                 : throw new InvalidDataException($"Could not match this InterlockId type {Type}");
 
         internal string ToFullString() => $"{_typePrefix}{_dataInfix}{_algorithmSuffix}";
@@ -168,7 +168,7 @@ public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<Interloc
 
         private static byte ToType(string prefix) => _knownTypes.First(t => t.Value.typeName.Equals(prefix.Trim(), StringComparison.InvariantCultureIgnoreCase)).Key;
 
-        private static string ToTypeName(byte type) => _knownTypes.ContainsKey(type) ? _knownTypes[type].typeName : "?";
+        private static string ToTypeName(byte type) => _knownTypes.TryGetValue(type, out var value) ? value.typeName : "?";
 
         private void FromStream(Stream s, int length) {
             Type = s.ReadSingleByte();

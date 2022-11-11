@@ -31,6 +31,8 @@
 // ******************************************************************************************************************************
 
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
@@ -43,7 +45,7 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEq
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) {
     }
 
-    public ILTagRange(string textualRepresentation) : base(ILTagId.Range, new LimitedRange(textualRepresentation)) {
+    public ILTagRange(string textualRepresentation) : this(LimitedRange.FromString(textualRepresentation)) {
     }
 
     public override object AsJson => this;
@@ -51,6 +53,11 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEq
     public bool IsEmpty => Value.IsEmpty;
     public bool IsInvalid => Value.IsInvalid;
     public string TextualRepresentation => Value.TextualRepresentation;
+
+    public static ILTagRange Empty { get; } = new ILTagRange(LimitedRange.Empty);
+    public static ILTagRange Invalid { get; } = new ILTagRange(LimitedRange.Invalid);
+    public static Regex Mask => LimitedRange.Mask;
+    public static string MessageForMissing => LimitedRange.MessageForMissing;
 
     public static bool operator !=(ILTagRange left, ILTagRange right) => !(left == right);
 
@@ -70,4 +77,16 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEq
 
     protected override byte[] ToBytes(LimitedRange value)
         => TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
+    public static ILTagRange Parse(string s, IFormatProvider provider) => new(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out ILTagRange result) {
+        if (LimitedRange.TryParse(s, provider, out var range)) {
+            result = new ILTagRange(range);
+            return true;
+        }
+        result = default;
+        return false;
+    }
+
+    public static ILTagRange FromString(string textualRepresentation) => new(textualRepresentation);
+    public static string MessageForInvalid(string textualRepresentation) => LimitedRange.MessageForInvalid(textualRepresentation);
 }
