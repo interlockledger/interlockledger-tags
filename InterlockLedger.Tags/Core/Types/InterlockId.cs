@@ -32,13 +32,17 @@
 
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(InterlockIdConverter))]
 [JsonConverter(typeof(JsonInterlockIdConverter))]
-public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<InterlockId>, IComparable<InterlockId>
+public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<InterlockId>, IComparable<InterlockId>, ITextual<InterlockId>
 {
+
+
     public static IEnumerable<string> AllTypes => Parts.AllTypes;
 
     public static HashAlgorithm DefaultAlgorithm => Parts.DefaultAlgorithm;
@@ -72,7 +76,7 @@ public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<Interloc
 
     public static bool operator >=(InterlockId a, InterlockId b) => SafeCompare(a, b) >= 0;
 
-    public static InterlockId Resolve(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
+    public static InterlockId FromString(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
 
     public static InterlockId Resolve(Stream s) => new Parts(s).Resolve();
 
@@ -80,7 +84,7 @@ public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<Interloc
 
     public override bool Equals(object obj) => Equals(obj as InterlockId);
 
-    public bool Equals(InterlockId other) => (other is not null) && Type == other.Type && Algorithm == other.Algorithm && DataEquals(other.Data);
+    public bool Equals(InterlockId other) => other is not null && Type == other.Type && Algorithm == other.Algorithm && DataEquals(other.Data);
 
     public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
 
@@ -205,11 +209,26 @@ public class InterlockId : ILTagExplicit<InterlockId.Parts>, IEquatable<Interloc
 
     private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 
+    public static InterlockId Empty { get; } = new(DefaultType, TagHash.Empty);
+    public static InterlockId Invalid { get; } = new(byte.MaxValue, TagHash.Empty);
+    public bool IsInvalid => Type == byte.MaxValue;
+
+    public static Regex Mask { get; } = InterlockIdRegex();
+    public static string MessageForMissing { get; } = "Missing id";
+
     private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
 
-    private static int SafeCompare(InterlockId a, InterlockId b) => (a == null) ? ((b == null) ? 0 : -1) : a.CompareTo(b);
+    private static int SafeCompare(InterlockId a, InterlockId b) => a == null ? b == null ? 0 : -1 : a.CompareTo(b);
 
-    private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
+    private bool DataEquals(byte[] otherData) => IsNullOrEmpty(Data) && IsNullOrEmpty(otherData) || Data.HasSameBytesAs(otherData);
+    public static InterlockId Parse(string s, IFormatProvider provider) =>
+        ITextual<InterlockId>.Resolve(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out InterlockId result) =>
+        ITextual<InterlockId>.TryParse(s, out result);
+    static string ITextual<InterlockId>.MessageForInvalid(string textualRepresentation) => throw new NotImplementedException();
+
+    [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
+    private static partial Regex InterlockIdRegex();
 }
 
 public class InterlockIdConverter : TypeConverter
@@ -222,7 +241,7 @@ public class InterlockIdConverter : TypeConverter
     public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) {
         if (Value is string text) {
             text = text.Trim();
-            return InterlockId.Resolve(text);
+            return InterlockId.FromString(text);
         }
         return base.ConvertFrom(context, culture, Value);
     }

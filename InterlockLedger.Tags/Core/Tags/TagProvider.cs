@@ -110,7 +110,7 @@ public static class TagProvider
         [ILTagId.PublicRSAParameters] = (s => new TagPublicRSAParameters(s), NoJson),
         [ILTagId.RSAParameters] = (s => new TagRSAParameters(s), NoJson),
         [ILTagId.Encrypted] = (s => new TagEncrypted(s), NoJson),
-        [ILTagId.InterlockId] = (InterlockId.DeserializeAndResolve, o => InterlockId.Resolve((string)o)),
+        [ILTagId.InterlockId] = (InterlockId.DeserializeAndResolve, o => InterlockId.FromString((string)o)),
         [ILTagId.InterlockKey] = (s => new InterlockKey(s), NoJson),
         [ILTagId.InterlockSigningKey] = (s => new InterlockSigningKeyData(s), NoJson),
         [ILTagId.InterlockUpdatableSigningKey] = (s => new InterlockUpdatableSigningKeyData(s), NoJson),

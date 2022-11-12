@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>13.0.0</Version>
+        <Version>14.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>.NET 7</PackageReleaseNotes>
+        <PackageReleaseNotes>Upgrade InterlockLedger.Tags.ILInt/InterlockLedger.Commons with breaking changes</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 

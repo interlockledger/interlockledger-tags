@@ -68,7 +68,7 @@ public static class ListOfClaimsExtensions
                 => BuildFrom(ClaimValue(claims, _publicKeyClaimType), textual => TagPubKey.FromString(textual));
 
     internal static BaseKeyId Sender(this IEnumerable<Claim> claims)
-        => BuildFrom(ClaimValue(claims, _senderIdClaimType), textual => InterlockId.Resolve(textual) as BaseKeyId);
+        => BuildFrom(ClaimValue(claims, _senderIdClaimType), textual => InterlockId.FromString(textual) as BaseKeyId);
 
     private const string _publicKeyClaimType = "InterlockLedger.PublicKey";
     private const string _senderIdClaimType = "InterlockLedger.SenderId";

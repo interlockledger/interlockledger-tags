@@ -40,7 +40,7 @@ public class JsonInterlockIdConverter : JsonConverter<InterlockId>
         typeToConvert.Required() == typeof(InterlockId) || typeToConvert.IsSubclassOf(typeof(InterlockId));
 
     public override InterlockId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        reader.TokenType == JsonTokenType.String ? InterlockId.Resolve(reader.GetString()) : throw new NotSupportedException();
+        reader.TokenType == JsonTokenType.String ? InterlockId.FromString(reader.GetString()) : throw new NotSupportedException();
 
     public override void Write(Utf8JsonWriter writer, InterlockId value, JsonSerializerOptions options) =>
         writer.Required().WriteStringValue(value.Required().TextualRepresentation);

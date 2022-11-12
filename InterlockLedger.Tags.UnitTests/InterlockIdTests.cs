@@ -51,8 +51,8 @@ public class InterlockIdTests
 
     [Test]
     public void ResolveFromTextualRepresentation() {
-        Assert.IsInstanceOf<OwnerId>(InterlockId.Resolve("Owner!AAA#SHA1"));
-        Assert.IsInstanceOf<KeyId>(InterlockId.Resolve("Key!AAA#SHA1"));
+        Assert.IsInstanceOf<OwnerId>(InterlockId.FromString("Owner!AAA#SHA1"));
+        Assert.IsInstanceOf<KeyId>(InterlockId.FromString("Key!AAA#SHA1"));
     }
 
     [TestCase(HashAlgorithm.SHA512, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 4, 2, 0 }, TestName = "SerializeKeyIdFromParts#SHA512")]
