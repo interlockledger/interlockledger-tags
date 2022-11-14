@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v3.1.0
 
-    - name: Setup .NET 6.0
-      uses: actions/setup-dotnet@v1.9.0
+    - name: Setup .NET 7.0
+      uses: actions/setup-dotnet@v3.0.3
       with:
-        dotnet-version: 6.0.100
+        dotnet-version: 7.0.100
 
     - name: Setup nuget config
       run: sed 's/GITHUB_TOKEN/${{ secrets.REGISTRY_TOKEN }}/g' .nuget.config > nuget.config
