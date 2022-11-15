@@ -30,17 +30,15 @@
 //
 // ******************************************************************************************************************************
 
-using System.ComponentModel;
+#nullable enable
+
 using System.ComponentModel.Design.Serialization;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
+
 [TypeConverter(typeof(InterlockColorConverter))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
-public partial struct InterlockColor : ITextual<InterlockColor>, IEquatable<InterlockColor>
-{
+public partial struct InterlockColor : ITextual<InterlockColor> {
     public static readonly InterlockColor AliceBlue = new(240, 248, 255, "AliceBlue");
     public static readonly InterlockColor AntiqueWhite = new(250, 235, 215, "AntiqueWhite");
     public static readonly InterlockColor Aqua = new(0, 255, 255, "Aqua");
@@ -191,7 +189,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>, IEquatable<Inte
 
     public readonly byte R;
 
-    public InterlockColor(byte r, byte g, byte b, string name = null, byte a = 255) {
+    public InterlockColor(byte r, byte g, byte b, string? name = null, byte a = 255) {
         R = r;
         G = g;
         B = b;
@@ -215,7 +213,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>, IEquatable<Inte
 
     public bool IsEmpty => false;
 
-    public bool IsInvalid => false;
+    public bool IsInvalid => InvalidityCause is not null;
 
     [JsonIgnore]
     public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
@@ -224,41 +222,43 @@ public partial struct InterlockColor : ITextual<InterlockColor>, IEquatable<Inte
     public uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
 
     public string TextualRepresentation => ToString();
+    public bool EqualsForValidInstances(InterlockColor other) => RGBA == other.RGBA;
+    public static InterlockColor InvalidBy(string cause) => new(Transparent.RGBA) { InvalidityCause = cause };
 
     public static InterlockColor Empty { get; } = Black;
-    public static InterlockColor Invalid { get; } = Transparent;
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No color";
+    public string? InvalidityCause { get; private init; }
 
     public static InterlockColor From(uint value) {
         LazyInitKnownColors();
-        return _knownColors.TryGetValue(value, out var color) ? color : new InterlockColor(value);
+        return _knownColors!.TryGetValue(value, out var color) ? color : new InterlockColor(value);
     }
 
     public static InterlockColor FromString(string value) {
         value = value?.Trim() ?? string.Empty;
         LazyInitKnownColors();
         var colorCode = FromColorCode(value);
-        return _knownColorsByName.TryGetValue(value, out var color) ? color : From(colorCode);
+        return _knownColorsByName!.TryGetValue(value, out var color) ? color : From(colorCode);
     }
 
     public static bool operator !=(InterlockColor left, InterlockColor right) => !(left == right);
 
     public static bool operator ==(InterlockColor left, InterlockColor right) => left.Equals(right);
 
-    public override bool Equals(object obj) => obj is InterlockColor other && Equals(other);
+    public override bool Equals(object ?obj) => obj is InterlockColor other && Equals(other);
 
-    public bool Equals(InterlockColor other) => other.RGBA == RGBA;
-
+    public bool Equals(InterlockColor other) => _traits.EqualsForAnyInstances(other);
+    private ITextual<InterlockColor> _traits => this;
     public override int GetHashCode() => (int)RGBA;
 
     public override string ToString() => Name;
 
     public InterlockColor WithA(byte newA) => newA == A ? this : new InterlockColor(R, G, B, a: newA);
 
-    private static Dictionary<uint, InterlockColor> _knownColors;
+    private static Dictionary<uint, InterlockColor>? _knownColors;
 
-    private static Dictionary<string, InterlockColor> _knownColorsByName;
+    private static Dictionary<string, InterlockColor>? _knownColorsByName;
 
     private InterlockColor(uint value) {
         R = (byte)(value >> 24 & 255);
@@ -570,24 +570,25 @@ public partial struct InterlockColor : ITextual<InterlockColor>, IEquatable<Inte
         => "#" + ToHex(r) + ToHex(g) + ToHex(b) + (a < 255 ? ToHex(a) : "");
 
     private static string ToHex(byte b) => b.ToString("X2", CultureInfo.InvariantCulture);
-    public static InterlockColor Parse(string s, IFormatProvider provider) => FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out InterlockColor result) =>
+    public static InterlockColor Parse(string s, IFormatProvider? provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out InterlockColor result) =>
         ITextual<InterlockColor>.TryParse(s, out result);
-    public static string MessageForInvalid(string textualRepresentation) => $"Invalid color '{textualRepresentation}'";
+    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid color '{textualRepresentation}'";
+
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();
 }
 
 public class InterlockColorConverter : TypeConverter
 {
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) => sourceType == typeof(string);
 
-    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
+    public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType) => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
-    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         => value is string text ? InterlockColor.FromString(text) : base.ConvertFrom(context, culture, value);
 
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+    public override object ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
         => destinationType == typeof(string) && value is InterlockColor color
             ? color.Name
             : throw new InvalidOperationException("Can only convert InterlockColor to string!!!");

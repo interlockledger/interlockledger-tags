@@ -30,9 +30,7 @@
 //
 // ******************************************************************************************************************************
 
-using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
@@ -72,6 +70,7 @@ public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<Ta
     public static TagHmac Invalid { get; } = new TagHmac();
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No Hmac";
+    public string InvalidityCause { get; }
 
     public static TagHmac Parse(string s, IFormatProvider provider) => new(s);
     public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagHmac result) =>

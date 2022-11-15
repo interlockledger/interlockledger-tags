@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Globalization;
-
 namespace InterlockLedger.Tags;
 public sealed class ILTagBool : ILTagOfImplicit<bool>
 {

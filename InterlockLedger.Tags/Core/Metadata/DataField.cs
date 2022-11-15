@@ -30,9 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Globalization;
-using System.Text.RegularExpressions;
-
 namespace InterlockLedger.Tags;
 public sealed partial class DataField : IEquatable<DataField>
 {
@@ -56,7 +53,7 @@ public sealed partial class DataField : IEquatable<DataField>
 
     public EnumerationItems Enumeration {
         get => EnumerationDefinition?.AsEnumerationItems;
-        set => EnumerationDefinition = value?.UpdateFrom();
+        set => EnumerationDefinition = value?.ToDefinition();
     }
 
     public bool? EnumerationAsFlags { get; set; }

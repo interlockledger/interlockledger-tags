@@ -32,7 +32,6 @@
 
 #nullable enable
 
-using System.Globalization;
 using System.Text.Json;
 
 using IEnum = System.Collections.IEnumerable;

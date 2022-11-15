@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Globalization;
-
 namespace InterlockLedger.Tags;
 
 public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag

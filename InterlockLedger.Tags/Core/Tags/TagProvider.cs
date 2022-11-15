@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Globalization;
-
 namespace InterlockLedger.Tags;
 public static class TagProvider
 {
@@ -101,7 +99,7 @@ public static class TagProvider
         [ILTagId.ILTagArray] = (s => new ILTagArrayOfILTag<ILTag>(s), ILTagArrayOfILTag<ILTag>.FromJson),
         [ILTagId.Sequence] = (s => new ILTagSequence(s), o => new ILTagSequence(o)),
         [ILTagId.Version] = (s => new ILTagVersion(s), ILTagVersion.FromJson),
-        [ILTagId.Range] = (s => new ILTagRange(s), o => new ILTagRange((string)o)),
+        [ILTagId.Range] = (s => new ILTagRange(s), o => ILTagRange.FromString((string)o)),
         [ILTagId.Dictionary] = (s => new ILTagDictionary<ILTag>(s), o => new ILTagDictionary<ILTag>(o)),
         [ILTagId.StringDictionary] = (s => new ILTagStringDictionary(s), o => new ILTagStringDictionary(o)),
         [ILTagId.PubKey] = (TagPubKey.Resolve, o => TagPubKey.FromString((string)o)),

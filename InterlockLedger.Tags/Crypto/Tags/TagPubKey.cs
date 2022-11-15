@@ -30,12 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
 public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
@@ -84,6 +80,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKe
     public static TagPubKey Invalid { get; } = new TagPubKey();
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No PubKey";
+    public string InvalidityCause { get; }
 
     public static TagPubKey Parse(string s, IFormatProvider provider) => FromString(s);
     public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagPubKey result) =>

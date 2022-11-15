@@ -30,10 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
-
 namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
 [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
@@ -71,23 +67,37 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
         }
     }
 
-    public bool IsEmpty => AppId == 0 && ActionIds.None();
-
-    public bool IsInvalid => false;
-
     [JsonIgnore]
-    public string TextualRepresentation => $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
+    public bool IsEmpty => AppId == 0 && ActionIds.None();
+    [JsonIgnore]
+    public bool IsInvalid => AppId == ulong.MaxValue;
+    [JsonIgnore]
+    public string InvalidityCause { get; private init; }
+    [JsonIgnore]
+    public string TextualRepresentation => IsInvalid
+        ? $"#?{_traits.InvalidityCoda}"
+        : $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
 
+    public static AppPermissions Empty { get; } = new AppPermissions(0);
+    public static string MessageForMissing { get; } = "Missing app permissions";
+
+    public static AppPermissions Parse(string s, IFormatProvider provider) => AppPermissions.FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out AppPermissions result) =>
+        ITextual<AppPermissions>.TryParse(s, out result);
+    public static AppPermissions FromString(string textualRepresentation) => new(textualRepresentation);
+    public static string MessageForInvalid(string textualRepresentation) => $"Invalid app permissions '{textualRepresentation}'";
+    public static AppPermissions InvalidBy(string cause) => new(ulong.MaxValue) { InvalidityCause = cause};
     public static bool operator !=(AppPermissions left, AppPermissions right) => !(left == right);
 
     public static bool operator ==(AppPermissions left, AppPermissions right) => left.Equals(right);
 
     public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
 
-    public bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
+    public bool EqualsForValidInstances(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
     public override bool Equals(object obj) => obj is AppPermissions other && Equals(other);
-
+    public bool Equals(AppPermissions other) => _traits.EqualsForAnyInstances(other);
+    private readonly ITextual<AppPermissions> _traits => this;
     public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
 
     public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
@@ -97,6 +107,8 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
     public class Tag : ILTagExplicit<AppPermissions>
     {
         public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
+            if (value.IsInvalid)
+                throw new InvalidOperationException(value.ToString());
         }
 
         internal Tag(Stream s) : base(ILTagId.InterlockKeyAppPermission, s) {
@@ -112,15 +124,6 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
 
     private bool _noActions => ActionIds.None();
 
-    public static AppPermissions Empty { get; } = new AppPermissions(0);
-    public static AppPermissions Invalid { get; } = new AppPermissions(0);
-    public static string MessageForMissing { get; } = "Missing app permissions";
-
     [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
     private static partial Regex PermissionsListRegex();
-    public static AppPermissions Parse(string s, IFormatProvider provider) => AppPermissions.FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out AppPermissions result) =>
-        ITextual<AppPermissions>.TryParse(s, out result);
-    public static AppPermissions FromString(string textualRepresentation) => new(textualRepresentation);
-    public static string MessageForInvalid(string textualRepresentation) => $"Invalid app permissions '{textualRepresentation}'";
 }

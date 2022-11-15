@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Globalization;
-
 namespace InterlockLedger.Tags;
 public class ILTagILInt : ILTagOfImplicit<ulong>, IEquatable<ILTagILInt>
 {

@@ -30,55 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
+#nullable enable
 
 namespace InterlockLedger.Tags;
+
 [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
 [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
-public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEquatable<ILTagRange>
+public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
 {
-    public ILTagRange() : this(new LimitedRange()) {
-    }
-
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) {
     }
 
-    public ILTagRange(string textualRepresentation) : this(LimitedRange.FromString(textualRepresentation)) {
-    }
-
     public override object AsJson => this;
-    public override string Formatted => TextualRepresentation;
     public bool IsEmpty => Value.IsEmpty;
     public bool IsInvalid => Value.IsInvalid;
     public string TextualRepresentation => Value.TextualRepresentation;
-
     public static ILTagRange Empty { get; } = new ILTagRange(LimitedRange.Empty);
-    public static ILTagRange Invalid { get; } = new ILTagRange(LimitedRange.Invalid);
     public static Regex Mask => LimitedRange.Mask;
     public static string MessageForMissing => LimitedRange.MessageForMissing;
+    public string? InvalidityCause => Value.InvalidityCause;
 
-    public static bool operator !=(ILTagRange left, ILTagRange right) => !(left == right);
-
-    public static bool operator ==(ILTagRange left, ILTagRange right) => EqualityComparer<ILTagRange>.Default.Equals(left, right);
-
-    public override bool Equals(object obj) => Equals(obj as ILTagRange);
-
-    public bool Equals(ILTagRange other) => other != null && TextualRepresentation == other.TextualRepresentation;
-
-    public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
-
-    internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
-    }
-
-    protected override LimitedRange FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
-
-    protected override byte[] ToBytes(LimitedRange value)
-        => TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
-    public static ILTagRange Parse(string s, IFormatProvider provider) => new(s);
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out ILTagRange result) {
+    public static ILTagRange Parse(string s, IFormatProvider? provider) => new(LimitedRange.Parse(s, provider));
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagRange result) {
         if (LimitedRange.TryParse(s, provider, out var range)) {
             result = new ILTagRange(range);
             return true;
@@ -88,5 +61,31 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>, IEq
     }
 
     public static ILTagRange FromString(string textualRepresentation) => new(textualRepresentation);
-    public static string MessageForInvalid(string textualRepresentation) => LimitedRange.MessageForInvalid(textualRepresentation);
+    public static string MessageForInvalid(string? textualRepresentation) => LimitedRange.MessageForInvalid(textualRepresentation);
+    public static ILTagRange InvalidBy(string cause) => new(LimitedRange.InvalidBy(cause));
+
+    public bool EqualsForValidInstances(ILTagRange other) => TextualRepresentation == other.TextualRepresentation;
+    public static bool operator !=(ILTagRange left, ILTagRange right) => !(left == right);
+
+    public static bool operator ==(ILTagRange left, ILTagRange right) => EqualityComparer<ILTagRange>.Default.Equals(left, right);
+
+    public override bool Equals(object? obj) => Equals(obj as ILTagRange);
+
+    public bool Equals(ILTagRange? other) => _traits.EqualsForAnyInstances(other ?? Empty);
+
+    public override int GetHashCode() => Value.GetHashCode();
+
+    private ITextual<ILTagRange> _traits => this;
+
+    internal ILTagRange(Stream s) : base(ILTagId.Range, s) {
+    }
+
+    protected override LimitedRange FromBytes(byte[] bytes)
+        => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
+
+    protected override byte[] ToBytes(LimitedRange value)
+        => TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
+
+    private ILTagRange(string textualRepresentation) : this(LimitedRange.FromString(textualRepresentation)) {
+    }
 }

@@ -77,7 +77,9 @@ public abstract class ILTag : ITag
         return s;
     }
 
-    public override string ToString() => GetType().Name + $"#{TagId}: " + Formatted;
+    public override string ToString() => TagPrefix + Formatted;
+
+    public string TagPrefix => GetType().Name + $"[Tag#{TagId}]: ";
 
     public virtual bool ValueIs<TV>(out TV value) {
         value = default;

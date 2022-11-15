@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>14.0.0</Version>
+        <Version>15.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>Upgrade InterlockLedger.Tags.ILInt/InterlockLedger.Commons with breaking changes</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -22,8 +22,12 @@
     <ItemGroup>
         <Using Include="System.Text" />
         <Using Include="System.Text.Json.Serialization" />
+        <Using Include="System.Text.RegularExpressions" />
+        <Using Include="System.Globalization" />
+        <Using Include="System.ComponentModel" />
+        <Using Include="System.Diagnostics.CodeAnalysis" />
     </ItemGroup>
-    
+
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DefineConstants>DEBUG</DefineConstants>
         <DebugType>full</DebugType>
@@ -59,7 +63,8 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="6.0.0" />
+        <PackageReference Include="InterlockLedger.Commons" Version="6.0.0" />
+        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="8.0.0" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
     </ItemGroup>
 

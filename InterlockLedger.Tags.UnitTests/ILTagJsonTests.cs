@@ -109,11 +109,13 @@ public class ILTagJsonTests
 
     [Test]
     public void ILTagVersionConverter() {
+        TestTwiceWith(ILTagVersion.Empty);
+        TestTwiceWith(ILTagVersion.FromString("7.6.5"));
         TestTwiceWith(new ILTagVersion(new Version(1, 0, 0)));
         TestTwiceWith(new ILTagVersion(new Version(1, 2, 3, 4)));
         TestTwiceWith(new ILTagVersion(new Version(3, 0)));
         TestTwiceWith(new ILTagVersion(new Version()));
-        TestTwiceWith(new ILTagVersion());
+        TestTwiceWith(ILTagVersion.InvalidBy("Test"));
     }
 
     [TestCase("0", TestName = "Int8FromJson0", ExpectedResult = (sbyte)0)]
@@ -162,15 +164,16 @@ public class ILTagJsonTests
         TestTwiceWith(new KeyId("Tester".HashOf()));
     }
 
-    //[Test]
-    //public void LimitedRangeConverter() {
-    //    TestTwiceWith(new LimitedRange(100));
-    //    TestTwiceWith(new LimitedRange());
-    //    TestTwiceWith(new LimitedRange(200, 50));
-    //    TestTwiceWith(new ILTagRange(new LimitedRange(300, 50)));
-    //    TestTwiceWith(new ILTagRange(new LimitedRange(400)));
-    //    TestTwiceWith(new ILTagRange(new LimitedRange()));
-    //}
+    [Test]
+    public void LimitedRangeConverter() {
+        TestTwiceWith(new LimitedRange(100));
+        TestTwiceWith(LimitedRange.Empty);
+        TestTwiceWith(new LimitedRange(200, 50));
+        TestTwiceWith(LimitedRange.Parse("10-9", null));
+        TestTwiceWith(new ILTagRange(new LimitedRange(300, 50)));
+        TestTwiceWith(new ILTagRange(new LimitedRange(400)));
+        TestTwiceWith(new ILTagRange(LimitedRange.Empty));
+    }
 
     [TestCase("", TestName = "NullFromJsonStringEmpty")]
     [TestCase("null", TestName = "NullFromJsonStringLiteralNull")]
@@ -196,7 +199,6 @@ public class ILTagJsonTests
     public void TagHashConverter() {
         TestTwiceWith(TagHash.Empty);
         TestTwiceWith(new TagHash(HashAlgorithm.SHA3_256, TagHash.HashSha256Of(TagHash.Empty.Data).Data));
-        TestTwiceWith(new TagHash());
         TestTwiceWith(TagHash.HashSha256Of(new byte[] { 3, 2, 1 }));
     }
 
@@ -233,19 +235,21 @@ public class ILTagJsonTests
         IgnoreReadOnlyProperties = true
     };
 
-    private static void TestTwiceWith<T>(T id) {
-        var json = JsonSerializer.Serialize(id, _jsonOptions);
-        TestContext.WriteLine(json);
+    private static void TestTwiceWith<T>(T value) {
+        var json = JsonSerializer.Serialize(value, _jsonOptions);
         var payload = JsonSerializer.Deserialize<T>(json, _jsonOptions);
         Assert.IsInstanceOf<T>(payload);
-        Assert.AreEqual(id, payload);
-        var wrapper = new WrapperOf<T> { Item = id };
+        TestContext.WriteLine($"({NoLineBreaks(value)}) => {json} => {NoLineBreaks(payload)}");
+        Assert.AreEqual(value, payload);
+        var wrapper = new WrapperOf<T> { Item = value };
         var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
         TestContext.WriteLine(biggerJson);
         var biggerPayload = JsonSerializer.Deserialize<WrapperOf<T>>(biggerJson, _jsonOptions);
         Assert.IsInstanceOf<WrapperOf<T>>(biggerPayload);
         Assert.AreEqual(wrapper, biggerPayload);
     }
+
+    private static string NoLineBreaks<T>(T value) => value.ToString().Replace(Environment.NewLine, " ");
 
     private class ColorWrapper : IEquatable<ColorWrapper>
     {

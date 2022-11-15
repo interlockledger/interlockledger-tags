@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -30,7 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-using System.Globalization;
+#nullable enable
+
 
 namespace InterlockLedger.Tags;
 
@@ -40,23 +41,20 @@ public partial class EnumerationItems
     {
         public FullEnumerationDetails() { }
 
-        public FullEnumerationDetails(string textualRepresentation) => _ = FromTextualRepresentation(textualRepresentation);
-
-        public ulong Index { get; set; }
-        public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
-
-        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
-
-        internal FullEnumerationDetails FromTextualRepresentation(string s) {
-            var parts = s.Required().Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
+        public FullEnumerationDetails(string textualRepresentation) {
+            var parts = textualRepresentation.Required().Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
             Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
             Name = parts[1];
             Description = parts.Length > 2 ? parts[2] : null;
-            return this;
         }
+
+        public ulong Index { get; }
+        public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
+
+        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}";
 
         private const char _fieldSeparator = '|';
 
-        private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, '?');
+        private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, "?");
     }
 }

@@ -47,9 +47,7 @@ public abstract class ILTagOf<T> : ILTag
             value = tvalue;
             return true;
         }
-#pragma warning disable CS8601 // Possible null reference assignment.
-        value = default;
-#pragma warning restore CS8601 // Possible null reference assignment.
+        value = default!;
         return false;
     }
 

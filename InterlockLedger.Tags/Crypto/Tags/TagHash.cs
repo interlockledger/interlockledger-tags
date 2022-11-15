@@ -30,63 +30,65 @@
 //
 // ******************************************************************************************************************************
 
-using System.ComponentModel;
+#nullable enable
+
 using System.ComponentModel.Design.Serialization;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
 
 namespace InterlockLedger.Tags;
+
 [TypeConverter(typeof(TagHashConverter))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
-public sealed partial class TagHash : ILTagExplicit<TagHashParts>, IEquatable<TagHash>, ITextual<TagHash>
+public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagHash>
 {
     public static TagHash Empty { get; }  = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
-    public static TagHash Invalid { get; } = new();
 
-    public TagHash() : this(HashAlgorithm.Copy, Array.Empty<byte>()) {
-    }
-
-    public TagHash(HashAlgorithm algorithm, byte[] data) : base(ILTagId.Hash, new TagHashParts { Algorithm = algorithm, Data = data }) {
-    }
-
-    public TagHash(string textualRepresentation) : base(ILTagId.Hash, Split(textualRepresentation)) {
-    }
+    public TagHash(HashAlgorithm algorithm, byte[] data) : this(new TagHashParts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
     public override object AsJson => TextualRepresentation;
     public byte[] Data => Value.Data;
-    public override string Formatted => TextualRepresentation;
     public bool IsEmpty => Equals(Empty);
-    public bool IsInvalid => false;
-    public string TextualRepresentation => ToString();
+    public bool IsInvalid => Data.None();
+    public string TextualRepresentation { get; }
+    public static Regex Mask { get; } = AnythingRegex();
+    public static string MessageForMissing { get; } = "No hash";
+    public string? InvalidityCause { get; private init; }
 
-    public static TagHash FromString(string textualRepresentation) =>
-        textualRepresentation.SafeAny() ? new TagHash(textualRepresentation.Trim()) : null;
+    public static TagHash Parse(string s, IFormatProvider? provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagHash result) =>
+        ITextual<TagHash>.TryParse(s, out result);
+    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid hash '{textualRepresentation}'";
+
+    public static TagHash FromString(string textualRepresentation) =>        new(Split(textualRepresentation.Safe().Trim()));
+    public static TagHash InvalidBy(string cause) => new(HashAlgorithm.SHA1, Array.Empty<byte>() ) { InvalidityCause = cause };
 
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
 
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
 
-    public static implicit operator string(TagHash Value) => Value?.ToString();
+    public static implicit operator string(TagHash Value) => Value.ToString();
 
     public static bool operator !=(TagHash a, TagHash b) => !(a == b);
 
     public static bool operator ==(TagHash a, TagHash b) => a?.Equals(b) ?? b is null;
 
-    public override bool Equals(object obj) => Equals(obj as TagHash);
+    public override bool Equals(object? obj) => Equals(obj as TagHash);
 
-    public bool Equals(TagHash other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
+    public bool Equals(TagHash? other) => _traits.EqualsForAnyInstances(other ?? Empty);
 
-    public override int GetHashCode() => -1_574_110_226 + _dataHashCode + Algorithm.GetHashCode();
+    private ITextual<TagHash> _traits => this;
 
-    public override string ToString() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
+    public bool EqualsForValidInstances(TagHash other) => Algorithm == other.Algorithm && DataEquals(other.Data);
 
-    internal TagHash(Stream s) : base(ILTagId.Hash, s) {
-    }
+    public override int GetHashCode() => HashCode.Combine(_dataHashCode, Algorithm);
 
+    public override string ToString() => TextualRepresentation;
+
+    internal TagHash(Stream s) : base(ILTagId.Hash, s) => TextualRepresentation = $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
+  
     internal static TagHash HashFrom(X509Certificate2 certificate)
         => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
 
@@ -99,10 +101,9 @@ public sealed partial class TagHash : ILTagExplicit<TagHashParts>, IEquatable<Ta
     protected override byte[] ToBytes(TagHashParts value)
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
 
-    private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
+    private TagHash(TagHashParts parts) : base(ILTagId.Hash, parts) => TextualRepresentation = $"{Data.ToSafeBase64()}#{Algorithm}";
 
-    public static Regex Mask { get; } = AnythingRegex();
-    public static string MessageForMissing { get; } = "No hash";
+    private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
 
     private static byte[] HashSha256(byte[] data) {
         using var hasher = SHA256.Create();
@@ -112,37 +113,32 @@ public sealed partial class TagHash : ILTagExplicit<TagHashParts>, IEquatable<Ta
 
     private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
 
+
     private static TagHashParts Split(string textualRepresentation) {
-        if (string.IsNullOrWhiteSpace(textualRepresentation))
-            throw new ArgumentNullException(nameof(textualRepresentation));
         var parts = textualRepresentation.Split('#');
         var algorithm = parts.Length < 2 ? HashAlgorithm.SHA256 : (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), parts[1], ignoreCase: true);
         return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
 
     private bool DataEquals(byte[] otherData) => IsNullOrEmpty(Data) && IsNullOrEmpty(otherData) || Data.HasSameBytesAs(otherData);
-    public static TagHash Parse(string s, IFormatProvider provider) => FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagHash result) =>
-        ITextual<TagHash>.TryParse(s, out result);
-    public static string MessageForInvalid(string textualRepresentation) => $"Invalid hash '{textualRepresentation}'";
-
+    
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();
-}
+ }
 
 public class TagHashConverter : TypeConverter
 {
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) => sourceType == typeof(string);
 
-    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+    public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
         => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
 
-    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value)
+    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object Value)
         => Value is string text
             ? TagHash.FromString(text.Trim())
             : base.ConvertFrom(context, culture, Value);
 
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
+    public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? Value, Type destinationType)
         => destinationType == typeof(string) && Value is TagHash
             ? Value.ToString()
             : throw new InvalidOperationException("Can only convert TagHash to string!!!");
@@ -150,6 +146,6 @@ public class TagHashConverter : TypeConverter
 
 public class TagHashParts
 {
-    public HashAlgorithm Algorithm;
-    public byte[] Data;
+    public required HashAlgorithm Algorithm;
+    public required byte[] Data;
 }
