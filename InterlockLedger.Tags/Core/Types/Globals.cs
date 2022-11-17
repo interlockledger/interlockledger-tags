@@ -47,6 +47,6 @@ public static class Globals
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, IFormatted, new()
+    public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, new()
         => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
 }

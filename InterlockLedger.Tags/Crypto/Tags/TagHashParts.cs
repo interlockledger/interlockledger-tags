@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -30,8 +30,13 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
+
 namespace InterlockLedger.Tags;
-public interface IFormatted
+
+public class TagHashParts
 {
-    string Formatted { get; }
+    public required HashAlgorithm Algorithm;
+    public required byte[]? Data;
 }

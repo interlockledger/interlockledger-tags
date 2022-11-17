@@ -40,8 +40,6 @@ public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>
             : base(alreadyDeserializedTagId, s, setup) {
     }
 
-    public override string Formatted => this is ITextual it ? it.TextualRepresentation : base.Formatted;
-
     protected sealed override bool KeepEncodedBytesInMemory => true;
 
     protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {

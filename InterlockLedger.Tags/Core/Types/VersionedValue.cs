@@ -35,7 +35,7 @@
 using System.Buffers;
 
 namespace InterlockLedger.Tags;
-public abstract class VersionedValue<T> : IVersion, ITaggableOf<T>, IFormatted where T : VersionedValue<T>, new()
+public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : VersionedValue<T>, new()
 {
     [JsonIgnore]
     public ILTag AsILTag => AsPayload;

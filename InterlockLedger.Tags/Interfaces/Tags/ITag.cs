@@ -31,7 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public interface ITag : IFormatted
+public interface ITag
 {
     object AsJson { get; }
 

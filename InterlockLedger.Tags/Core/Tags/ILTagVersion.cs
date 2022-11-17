@@ -46,7 +46,6 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 
     public bool IsEmpty { get; }
     public bool IsInvalid { get; }
-    public string TextualRepresentation { get; }
     public static ILTagVersion Empty { get; } = new();
     public static Regex Mask { get; } = Version_Regex();
     public static string MessageForMissing => "Version is missing";
@@ -80,7 +79,6 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     public bool Equals(ILTagVersion? other) => _traits.EqualsForAnyInstances(other ?? Empty);
 
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
-    public override string Formatted => $"{TextualRepresentation}{_traits.InvalidityCoda}";
     private ITextual<ILTagVersion> _traits => this;
     private ILTagVersion(string? invalidityCause) : this(BlankVersion) {
         TextualRepresentation = "?";

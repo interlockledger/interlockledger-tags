@@ -40,8 +40,7 @@ public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
 public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
 {
-    public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) {
-    }
+    public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) => TextualRepresentation = $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
 
     public Algorithm Algorithm => Value.Algorithm;
     public byte[] Data => Value.Data;
@@ -49,8 +48,6 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKe
     public bool IsEmpty { get; }
     public bool IsInvalid { get; }
     public virtual KeyStrength Strength => KeyStrength.Normal;
-    public string TextualRepresentation => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
-
     public static bool operator !=(TagPubKey left, TagPubKey right) => !(left == right);
 
     public static bool operator ==(TagPubKey left, TagPubKey right) => left?.Equals(right) ?? right is null;

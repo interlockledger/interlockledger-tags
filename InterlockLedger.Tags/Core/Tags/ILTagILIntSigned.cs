@@ -33,10 +33,7 @@
 namespace InterlockLedger.Tags;
 public class ILTagILIntSigned : ILTagOfImplicit<long>, IEquatable<ILTagILIntSigned>
 {
-    public ILTagILIntSigned(long value) : base(ILTagId.ILIntSigned, value) {
-    }
-
-    public override string Formatted => Value.ToString("X16", CultureInfo.InvariantCulture);
+    public ILTagILIntSigned(long value) : base(ILTagId.ILIntSigned, value) => TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
 
     public override bool Equals(object obj) => Equals(obj as ILTagILIntSigned);
 
@@ -44,7 +41,10 @@ public class ILTagILIntSigned : ILTagOfImplicit<long>, IEquatable<ILTagILIntSign
 
     public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
 
-    internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) {
+        Traits.ValidateTagId(alreadyDeserializedTagId);
+        TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
+    }
 
     protected override long ValueFromStream(StreamSpan s) => s.ILIntDecode().AsSignedILInt();
 

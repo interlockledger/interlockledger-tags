@@ -52,7 +52,6 @@ public class FileBackedILTag<T> : ILTagOfExplicit<T>
     public override object AsJson => null;
 
     public FileInfo FileInfo => _fileInfo ?? throw new InvalidOperationException($"This instance of {TagTypeName} has not been set with a backing file");
-    public override string Formatted => TagTypeName;
 
     public ulong Length { get; private set; }
     public long Offset { get; private set; }

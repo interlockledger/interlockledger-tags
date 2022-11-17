@@ -566,16 +566,18 @@ public partial struct InterlockColor : ITextual<InterlockColor> {
             };
     }
 
-    private static string ToColorCode(byte r, byte g, byte b, byte a)
-        => "#" + ToHex(r) + ToHex(g) + ToHex(b) + (a < 255 ? ToHex(a) : "");
+    private static string ToColorCode(byte r, byte g, byte b, byte a) {
+        return "#" + ToHex(r) + ToHex(g) + ToHex(b) + (a < 255 ? ToHex(a) : "");
 
-    private static string ToHex(byte b) => b.ToString("X2", CultureInfo.InvariantCulture);
-    public static InterlockColor Parse(string s, IFormatProvider? provider) => FromString(s);
+        static string ToHex(byte b) => b.ToString("X2", CultureInfo.InvariantCulture);
+    }
+
+    public static InterlockColor Parse(string s, IFormatProvider? provider) => ITextual<InterlockColor>.Parse(s);
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out InterlockColor result) =>
         ITextual<InterlockColor>.TryParse(s, out result);
     public static string MessageForInvalid(string? textualRepresentation) => $"Invalid color '{textualRepresentation}'";
 
-    [GeneratedRegex(".+")]
+    [GeneratedRegex(@"(\w+|#[0-9a-fA-F]{6})")]
     private static partial Regex AnythingRegex();
 }
 

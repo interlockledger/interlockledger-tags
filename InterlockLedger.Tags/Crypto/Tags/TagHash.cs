@@ -32,27 +32,24 @@
 
 #nullable enable
 
-using System.ComponentModel.Design.Serialization;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
 
-[TypeConverter(typeof(TagHashConverter))]
+[TypeConverter(typeof(TypeCustomConverter<TagHash>))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
 public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagHash>
 {
     public static TagHash Empty { get; }  = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
 
-    public TagHash(HashAlgorithm algorithm, byte[] data) : this(new TagHashParts { Algorithm = algorithm, Data = data }) { }
+    public TagHash(HashAlgorithm algorithm, byte[]? data) : this(new TagHashParts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
     public override object AsJson => TextualRepresentation;
-    public byte[] Data => Value.Data;
+    public byte[]? Data => Value.Data;
     public bool IsEmpty => Equals(Empty);
     public bool IsInvalid => Data.None();
-    public string TextualRepresentation { get; }
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No hash";
     public string? InvalidityCause { get; private init; }
@@ -125,27 +122,3 @@ public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagH
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();
  }
-
-public class TagHashConverter : TypeConverter
-{
-    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) => sourceType == typeof(string);
-
-    public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
-        => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
-
-    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object Value)
-        => Value is string text
-            ? TagHash.FromString(text.Trim())
-            : base.ConvertFrom(context, culture, Value);
-
-    public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? Value, Type destinationType)
-        => destinationType == typeof(string) && Value is TagHash
-            ? Value.ToString()
-            : throw new InvalidOperationException("Can only convert TagHash to string!!!");
-}
-
-public class TagHashParts
-{
-    public required HashAlgorithm Algorithm;
-    public required byte[] Data;
-}

@@ -33,13 +33,9 @@
 namespace InterlockLedger.Tags;
 public class ILTagString : ILTagExplicit<string>
 {
-    public ILTagString(string value) : base(ILTagId.String, value) {
-    }
+    public ILTagString(string value) : base(ILTagId.String, value) => TextualRepresentation = Value;
 
-    public override string Formatted => Value;
-
-    internal ILTagString(Stream s) : base(ILTagId.String, s) {
-    }
+    internal ILTagString(Stream s) : base(ILTagId.String, s) => TextualRepresentation = Value;
 
     protected override string FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
 

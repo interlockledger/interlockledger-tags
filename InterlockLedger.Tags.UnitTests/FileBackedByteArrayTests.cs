@@ -60,7 +60,6 @@ public class FileBackedByteArrayTests
             }
             var fbba = new FileBackedByteArray(fi, bytesLength, (ulong)bytesLength);
             Assert.IsNotNull(fbba);
-            Assert.AreEqual("FileBackedByteArray#16", fbba.Formatted);
             Assert.AreEqual(bytesLength, fbba.Length);
             Assert.AreEqual(bytesLength, fbba.Offset);
             Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
@@ -122,9 +121,6 @@ public class FileBackedByteArrayTests
             using var ms = new MemoryStream(arrayBytes);
             var fbba = await createFrom(fi, ms);
             Assert.IsNotNull(fbba);
-            string formatted = fbba.Formatted;
-            StringAssert.EndsWith("#16", formatted);
-            StringAssert.StartsWith("FileBackedByteArray", formatted);
             Assert.AreEqual(bytesLength, fbba.Length);
             Assert.AreEqual(0, fbba.Offset);
             Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);

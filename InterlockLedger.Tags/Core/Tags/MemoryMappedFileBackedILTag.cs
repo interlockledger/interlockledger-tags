@@ -44,8 +44,6 @@ public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T>
 
     public override object AsJson => null;
 
-    public override string Formatted => TagTypeName;
-
     public ulong Length { get; private set; }
     public long Offset { get; private set; }
 

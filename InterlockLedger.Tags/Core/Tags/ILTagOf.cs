@@ -33,12 +33,11 @@
 
 
 namespace InterlockLedger.Tags;
-public abstract class ILTagOf<T> : ILTag
+
+public abstract class ILTagOf<T> : ILTag where T : notnull
 {
     [JsonIgnore]
     public override object? AsJson => Value;
-
-    public override string Formatted => Value is IFormatted v ? v.Formatted : Value?.ToString() ?? "??";
 
     public T Value { get; set; }
 
@@ -51,11 +50,17 @@ public abstract class ILTagOf<T> : ILTag
         return false;
     }
 
-    protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
+    protected ILTagOf(ulong tagId, T value) : base(tagId) {
+        Value = value;
+        if (Value is ITextual it)
+            TextualRepresentation = it.TextualRepresentation;
+    }
 
     protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
         setup?.Invoke(this);
         Value = DeserializeInner(s);
+        if (Value is ITextual it)
+            TextualRepresentation = it.TextualRepresentation;
     }
 
     protected abstract T DeserializeInner(Stream s);

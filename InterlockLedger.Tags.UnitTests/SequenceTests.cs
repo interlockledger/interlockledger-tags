@@ -46,7 +46,7 @@ public class SequenceTests
         var value = ((ILTagSequence)tagValue).Value;
 
         Assert.AreEqual(2, value.Length);
-        Assert.AreEqual(firstElement, value[0].AsString());
+        Assert.AreEqual(firstElement, value[0].TextualRepresentation);
         Assert.AreEqual(secondElement, (value[1] as ILTagILInt)?.Value);
     }
 

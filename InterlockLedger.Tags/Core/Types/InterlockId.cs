@@ -56,9 +56,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public HashAlgorithm Algorithm => Value.Algorithm;
     public override object AsJson => TextualRepresentation;
     public byte[] Data => Value.Data;
-    public override string Formatted => ToString();
     public bool IsEmpty => Data.HasSameBytesAs(TagHash.Empty.Data);
-    public string TextualRepresentation => ToString();
     public byte Type => Value.Type;
 
     public static bool operator !=(InterlockId a, InterlockId b) => !(a == b);

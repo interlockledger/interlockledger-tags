@@ -44,7 +44,6 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public override object AsJson => this;
     public bool IsEmpty => Value.IsEmpty;
     public bool IsInvalid => Value.IsInvalid;
-    public string TextualRepresentation => Value.TextualRepresentation;
     public static ILTagRange Empty { get; } = new ILTagRange(LimitedRange.Empty);
     public static Regex Mask => LimitedRange.Mask;
     public static string MessageForMissing => LimitedRange.MessageForMissing;

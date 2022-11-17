@@ -63,8 +63,8 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="6.0.0" />
-        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="8.0.0" />
+        <PackageReference Include="InterlockLedger.Commons" Version="6.1.0" />
+        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="8.1.0" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
     </ItemGroup>
 

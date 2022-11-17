@@ -40,15 +40,13 @@ public abstract class ILTag : ITag
     [JsonIgnore]
     public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
 
-    [JsonIgnore]
-    public virtual string Formatted => "?";
-
     public ulong TagId { get; set; }
 
     [JsonIgnore]
     public ITag Traits => this;
 
-    public string AsString() => (TagId == ILTagId.String) ? Formatted : ToString();
+    [JsonIgnore]
+    public string TextualRepresentation { get; protected init; }
 
     public void Changed() {
         _encodedBytes = null;
@@ -77,7 +75,7 @@ public abstract class ILTag : ITag
         return s;
     }
 
-    public override string ToString() => TagPrefix + Formatted;
+    public override string ToString() => TagPrefix + TextualRepresentation;
 
     public string TagPrefix => GetType().Name + $"[Tag#{TagId}]: ";
 
