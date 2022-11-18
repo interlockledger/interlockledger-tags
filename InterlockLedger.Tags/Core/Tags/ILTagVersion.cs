@@ -76,7 +76,7 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 
     public override bool Equals(object? obj) => Equals(obj as ILTagVersion);
 
-    public bool Equals(ILTagVersion? other) => _traits.EqualsForAnyInstances(other ?? Empty);
+    public bool Equals(ILTagVersion? other) => _traits.EqualsForAnyInstances(other);
 
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
     private ITextual<ILTagVersion> _traits => this;

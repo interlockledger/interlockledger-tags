@@ -48,13 +48,13 @@ public partial class EnumerationItems
             Description = parts.Length > 2 ? parts[2] : null;
         }
 
-        public ulong Index { get; }
+        public ulong Index { get; init; }
         public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
 
         public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}";
 
         private const char _fieldSeparator = '|';
 
-        private static string Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, "?");
+        private static string? Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, "?");
     }
 }

@@ -70,7 +70,7 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
 
     public override bool Equals(object? obj) => Equals(obj as ILTagRange);
 
-    public bool Equals(ILTagRange? other) => _traits.EqualsForAnyInstances(other ?? Empty);
+    public bool Equals(ILTagRange? other) => _traits.EqualsForAnyInstances(other);
 
     public override int GetHashCode() => Value.GetHashCode();
 

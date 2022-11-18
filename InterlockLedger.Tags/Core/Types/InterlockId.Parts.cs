@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -40,7 +40,7 @@ public partial class InterlockId
     public sealed class Parts
     {
         public HashAlgorithm Algorithm;
-        public byte[] Data;
+        public byte[]? Data;
         public byte Type;
 
         public Parts() { }
@@ -55,7 +55,9 @@ public partial class InterlockId
             FromStream(s, (int)s.ILIntDecode());
         }
 
-        internal Parts(HashAlgorithm algorithm, byte[] data, byte type) {
+        internal Parts(byte type, TagHash hash) : this(type, hash.Required().Algorithm, hash.Data.Required()) { }
+
+        internal Parts(byte type, HashAlgorithm algorithm, byte[]? data) {
             Algorithm = algorithm;
             Data = data.Required();
             Type = type;
@@ -98,7 +100,7 @@ public partial class InterlockId
 
         internal string ToShortString() => $"{_conditionalTypePrefix}{_dataInfix}{_conditionalAlgorithmSuffix}";
 
-        internal void ToStream(Stream s) => s.WriteSingleByte(Type).BigEndianWriteUShort((ushort)Algorithm).WriteBytes(Data);
+        internal void ToStream(Stream s) => s.WriteSingleByte(Type).BigEndianWriteUShort((ushort)Algorithm).WriteBytes(Data.OrEmpty());
 
         private const HashAlgorithm _defaultAlgorithm = HashAlgorithm.SHA256;
         private const char _prefixSeparator = '!';

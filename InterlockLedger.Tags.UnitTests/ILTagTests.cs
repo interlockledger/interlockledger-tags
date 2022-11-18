@@ -90,7 +90,7 @@ public class ILTagTests
     [TestCase(new byte[] { 17, 0 }, ExpectedResult = "", TestName = "AsString_")]
     public string AsString(byte[] bytes) => TagProvider.DeserializeFrom(new MemoryStream(bytes)).TextualRepresentation;
 
-    [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = "ILTagILInt#10: 00000000000001F7", TestName = "AsStringMixedTags_ILint:1F7")]
+    [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = "00000000000001F7", TestName = "AsStringMixedTags_ILint:1F7")]
     [TestCase(new byte[] { 17, 6, 0x41, 0xC3, 0xA7, 0xC3, 0xA3, 0x6F }, ExpectedResult = "Ação", TestName = "AsStringMixedTags_Ação")]
     [TestCase(new byte[] { 17, 2, 65, 66 }, ExpectedResult = "AB", TestName = "AsStringMixedTags_AB")]
     [TestCase(new byte[] { 17, 1, 65 }, ExpectedResult = "A", TestName = "AsStringMixedTags_A")]

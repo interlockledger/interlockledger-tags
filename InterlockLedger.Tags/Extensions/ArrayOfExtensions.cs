@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -30,37 +30,12 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
+
 namespace InterlockLedger.Tags;
 
-public abstract class ILTagExplicit<T> : ILTagOfExplicit<T>
+public static class ArrayOfExtensions
 {
-    protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
-    }
-
-    protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
-            : base(alreadyDeserializedTagId, s, setup) {
-    }
-
-    protected sealed override bool KeepEncodedBytesInMemory => true;
-
-    protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
-        if (bytes == null || bytes.Length == 0)
-            return default;
-        deserialize.Required();
-        using var s = new MemoryStream(bytes, writable: false);
-        return deserialize(s);
-    }
-
-    protected sealed override T ValueFromStream(StreamSpan s) => FromBytes(s.ReadAllBytesAsync().Result);
-
-    protected abstract T FromBytes(byte[] bytes);
-
-    protected sealed override Task<Stream> ValueToStreamAsync(Stream s) {
-        s.WriteBytes(ToBytes(Value));
-        return Task.FromResult(s);
-    }
-
-    protected abstract byte[] ToBytes(T Value);
-
-    protected override ulong CalcValueLength() => (ulong)(ToBytes(Value)?.Length ?? 0);
+    public static T[] OrEmpty<T>(this T[]? values) => values ?? Array.Empty<T>();
 }

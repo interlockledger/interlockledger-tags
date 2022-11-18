@@ -53,7 +53,7 @@ public class TagHashTests
     [TestCase("#SHA3_256", HashAlgorithm.SHA3_256, new byte[] { })]
     [TestCase("#SHA256", HashAlgorithm.SHA256, new byte[] { })]
     public void NewTagHashFromString(string textual, HashAlgorithm algorithm, byte[] data) {
-        DoAsserts(algorithm, data, new TagHash(textual));
+        DoAsserts(algorithm, data, TagHash.Parse(textual, null));
 
         static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHash tag) {
             Assert.AreEqual(ILTagId.Hash, tag.TagId);

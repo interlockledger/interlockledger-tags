@@ -47,6 +47,7 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
     [JsonIgnore]
     public string? InvalidityCause { get; }
 
+    public override string ToString() => TextualRepresentation;
     public static EnumerationItems Empty { get; } = new EnumerationItems(invalid: false);
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No Enumeration Details";
@@ -61,7 +62,7 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
 
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
     public bool EqualsForValidInstances(EnumerationItems other) => _details.EquivalentTo(other._details);
-    public bool Equals(EnumerationItems? other) => _traits.EqualsForAnyInstances(other ?? Empty);
+    public bool Equals(EnumerationItems? other) => _traits.EqualsForAnyInstances(other);
     public override bool Equals(object? obj) => Equals(obj as EnumerationItems);
 
     internal const string _detailSeparator = "#";
@@ -85,6 +86,6 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
 
     private readonly List<FullEnumerationDetails> _details = new();
 
-    [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]+)?)*$""")]
+    [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]*)?)*$""")]
     private static partial Regex AnythingRegex();
 }

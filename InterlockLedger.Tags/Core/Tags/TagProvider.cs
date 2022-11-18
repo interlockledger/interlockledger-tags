@@ -112,7 +112,7 @@ public static class TagProvider
         [ILTagId.InterlockKey] = (s => new InterlockKey(s), NoJson),
         [ILTagId.InterlockSigningKey] = (s => new InterlockSigningKeyData(s), NoJson),
         [ILTagId.InterlockUpdatableSigningKey] = (s => new InterlockUpdatableSigningKeyData(s), NoJson),
-        [ILTagId.Hmac] = (s => new TagHmac(s), o => new TagHmac((string)o)),
+        [ILTagId.Hmac] = (s => new TagHmac(s), o => TagHmac.FromString((string)o)),
         [ILTagId.Certificate] = (s => new TagCertificate(s), NoJson),
         [ILTagId.SignedValue] = (s => s.SignedValueFromStream(), NoJson),
         [ILTagId.IdentifiedSignature] = (s => new IdentifiedSignature.Payload(ILTagId.IdentifiedSignature, s), NoJson),

@@ -54,17 +54,17 @@ public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<Ta
 
     public override string ToString() => TextualRepresentation;
 
-    public bool Equals(TagHmac other) => (other is not null) && Algorithm == other.Algorithm && DataEquals(other.Data);
+    public bool Equals(TagHmac? other) => (other is not null) && Algorithm == other.Algorithm && DataEquals(other.Data);
 
     public override bool Equals(object? obj) => Equals(obj as TagHmac);
 
-    public override int GetHashCode() => ToString().GetHashCode(StringComparison.InvariantCulture);
+    public override int GetHashCode() => TextualRepresentation.GetHashCode(StringComparison.InvariantCulture);
 
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No Hmac";
     public string? InvalidityCause { get; private init; }
-    static TagHmac ITextual<TagHmac>.FromString(string textualRepresentation) => new(Split(textualRepresentation));
+    public static TagHmac FromString(string textualRepresentation) => new(Split(textualRepresentation));
     static TagHmac ITextual<TagHmac>.InvalidBy(string cause) => new(HashAlgorithm.SHA256, null) { InvalidityCause = cause};
     bool ITextual<TagHmac>.EqualsForValidInstances(TagHmac other) => throw new NotImplementedException();
 
@@ -88,9 +88,7 @@ public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<Ta
         });
 
     protected override byte[] ToBytes(TagHashParts value)
-        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
-
-    private static bool IsNullOrEmpty(byte[] data) => data is null || data.Length == 0;
+        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Data.OrEmpty()));
 
     private static TagHashParts Split(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
@@ -100,6 +98,6 @@ public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, IEquatable<Ta
         return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
 
-    private bool DataEquals(byte[] otherData) => (IsNullOrEmpty(Data) && IsNullOrEmpty(otherData)) || Data.HasSameBytesAs(otherData);
+    private bool DataEquals(byte[]? otherData) => (Data.None() && otherData.None()) || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
 
 }

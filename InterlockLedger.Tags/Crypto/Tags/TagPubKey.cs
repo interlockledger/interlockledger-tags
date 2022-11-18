@@ -30,15 +30,16 @@
 //
 // ******************************************************************************************************************************
 
-using System.ComponentModel.Design.Serialization;
+#nullable enable
+
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
 public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 
-[TypeConverter(typeof(TagPubKeyConverter))]
+[TypeConverter(typeof(TypeCustomConverter<TagPubKey>))]
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
-public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKey>, ITextual<TagPubKey>
+public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 {
     public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) => TextualRepresentation = $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
 
@@ -57,7 +58,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKe
         var ECDsa = certificate.GetECDsaPublicKey();
         return RSA != null
             ? new TagPubRSAKey(RSA.ExportParameters(false))
-            : ECDsa == null
+            : ECDsa != null
                 ? new TagPubECKey(ECDsa.ExportParameters(false))
                 : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
     }
@@ -77,21 +78,21 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKe
     public static TagPubKey Invalid { get; } = new TagPubKey();
     public static Regex Mask { get; } = AnythingRegex();
     public static string MessageForMissing { get; } = "No PubKey";
-    public string InvalidityCause { get; }
+    public string? InvalidityCause { get; }
 
-    public static TagPubKey Parse(string s, IFormatProvider provider) => FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out TagPubKey result) =>
+    public static TagPubKey Parse(string s, IFormatProvider? provider) => FromString(s);
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagPubKey result) =>
         ITextual<TagPubKey>.TryParse(s, out result);
-    public static string MessageForInvalid(string textualRepresentation) => $"Invalid PubKey '{textualRepresentation}'";
+    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid PubKey '{textualRepresentation}'";
 
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();
 
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
-    public override bool Equals(object obj) => Equals(obj as TagPubKey);
+    public override bool Equals(object? obj) => Equals(obj as TagPubKey);
 
-    public bool Equals(TagPubKey other) => (other != null) && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
+    public bool Equals(TagPubKey? other) => (other is not null) && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 
     public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
 
@@ -125,29 +126,6 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, IEquatable<TagPubKe
             Algorithm.EcDSA => TagPubECKey.From(data),
             _ => throw new NotSupportedException("Only support RSA/EcDSA certificates for now!!!")
         };
-}
-
-public class TagPubKeyConverter : TypeConverter
-{
-    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
-
-    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-        => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
-
-    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object Value) {
-        if (Value is string text) {
-            text = text.Trim();
-            return TagPubKey.FromString(text);
-        }
-        return base.ConvertFrom(context, culture, Value);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object Value, Type destinationType)
-        => destinationType == null
-            ? throw new ArgumentNullException(nameof(destinationType))
-            : Value == null
-                ? throw new ArgumentNullException(nameof(Value))
-                : destinationType != typeof(string) || Value is not TagPubKey
-                    ? throw new InvalidOperationException("Can only convert TagPubKey to string!!!")
-                    : Value.ToString();
+    public static TagPubKey InvalidBy(string cause) => throw new NotImplementedException();
+    bool ITextual<TagPubKey>.EqualsForValidInstances(TagPubKey other) => throw new NotImplementedException();
 }
