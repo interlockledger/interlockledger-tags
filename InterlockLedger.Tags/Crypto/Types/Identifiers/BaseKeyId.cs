@@ -31,7 +31,9 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-[JsonConverter(typeof(JsonInterlockIdConverter))]
+
+[TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
+[JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
 public class BaseKeyId : InterlockId
 {
     public static BaseKeyId OptionalResolve(Stream s) {
@@ -42,9 +44,6 @@ public class BaseKeyId : InterlockId
     public static void RegisterKeyIdTypes() {
         OwnerId.RegisterResolver();
         KeyId.RegisterResolver();
-    }
-
-    protected BaseKeyId(string textualRepresentation) : base(textualRepresentation) {
     }
 
     protected BaseKeyId(byte type, TagHash hash) : base(type, hash.Required().Algorithm, hash.Data) {

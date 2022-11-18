@@ -32,13 +32,14 @@
 
 #nullable enable
 
-using System.ComponentModel.Design.Serialization;
-
 namespace InterlockLedger.Tags;
 
-[TypeConverter(typeof(InterlockColorConverter))]
+[TypeConverter(typeof(TypeCustomConverter<InterlockColor>))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
-public partial struct InterlockColor : ITextual<InterlockColor> {
+#pragma warning disable CA2231 // Overload operator equals on overriding value type Equals
+public partial struct InterlockColor : ITextual<InterlockColor>
+{
+#pragma warning restore CA2231 // Overload operator equals on overriding value type Equals
     public static readonly InterlockColor AliceBlue = new(240, 248, 255, "AliceBlue");
     public static readonly InterlockColor AntiqueWhite = new(250, 235, 215, "AntiqueWhite");
     public static readonly InterlockColor Aqua = new(0, 255, 255, "Aqua");
@@ -207,28 +208,26 @@ public partial struct InterlockColor : ITextual<InterlockColor> {
     }
 
     public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
-
-    [JsonIgnore]
     public string AsCSS => Name is null || Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
-
-    public bool IsEmpty => false;
-
-    public bool IsInvalid => InvalidityCause is not null;
-
-    [JsonIgnore]
     public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
-
-    [JsonIgnore]
     public uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
-
-    public string TextualRepresentation => ToString();
+    public bool IsEmpty => false;
+    public string TextualRepresentation => Name;
     public bool EqualsForValidInstances(InterlockColor other) => RGBA == other.RGBA;
-    public static InterlockColor InvalidBy(string cause) => new(Transparent.RGBA) { InvalidityCause = cause };
-
     public static InterlockColor Empty { get; } = Black;
     public static Regex Mask { get; } = AnythingRegex();
-    public static string MessageForMissing { get; } = "No color";
-    public string? InvalidityCause { get; private init; }
+    public string? InvalidityCause {
+        get => _invalidityCause;
+        init {
+            _invalidityCause = value;
+            uint ic = Transparent.RGBA;
+            R = (byte)(ic >> 24 & 255);
+            G = (byte)(ic >> 16 & 255);
+            B = (byte)(ic >> 8 & 255);
+            A = (byte)(ic & 255);
+            Name = ToColorCode(R, G, B, A);
+        }
+    }
 
     public static InterlockColor From(uint value) {
         LazyInitKnownColors();
@@ -236,29 +235,24 @@ public partial struct InterlockColor : ITextual<InterlockColor> {
     }
 
     public static InterlockColor FromString(string value) {
-        value = value?.Trim() ?? string.Empty;
+        value = value.Safe().Trim();
         LazyInitKnownColors();
         var colorCode = FromColorCode(value);
         return _knownColorsByName!.TryGetValue(value, out var color) ? color : From(colorCode);
     }
 
-    public static bool operator !=(InterlockColor left, InterlockColor right) => !(left == right);
-
-    public static bool operator ==(InterlockColor left, InterlockColor right) => left.Equals(right);
-
-    public override bool Equals(object ?obj) => obj is InterlockColor other && Equals(other);
-
-    public bool Equals(InterlockColor other) => _traits.EqualsForAnyInstances(other);
-    private ITextual<InterlockColor> _traits => this;
+    public override bool Equals(object? obj) => obj is InterlockColor other && Equals(other);
+    public bool Equals(InterlockColor other) => Textual.EqualForAnyInstances(other);
+    public ITextual<InterlockColor> Textual => this;
     public override int GetHashCode() => (int)RGBA;
-
-    public override string ToString() => Name;
+    public override string ToString() => Textual.FullRepresentation;
 
     public InterlockColor WithA(byte newA) => newA == A ? this : new InterlockColor(R, G, B, a: newA);
 
     private static Dictionary<uint, InterlockColor>? _knownColors;
 
     private static Dictionary<string, InterlockColor>? _knownColorsByName;
+    private string? _invalidityCause;
 
     private InterlockColor(uint value) {
         R = (byte)(value >> 24 & 255);
@@ -269,7 +263,9 @@ public partial struct InterlockColor : ITextual<InterlockColor> {
     }
 
     private static uint FromColorCode(string colorCode) {
-        if (colorCode == null || colorCode.Length != 9 && colorCode.Length != 7 || colorCode[0] != '#' ||
+        if (colorCode.IsBlank())
+            return Black.RGBA;
+        if (colorCode.Length != 9 && colorCode.Length != 7 || colorCode[0] != '#' ||
             !uint.TryParse(colorCode[1..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var partial))
             return Transparent.RGBA;
         if (colorCode.Length == 7)
@@ -283,287 +279,287 @@ public partial struct InterlockColor : ITextual<InterlockColor> {
 
     private static void LazyInitKnownColors() {
         _knownColors ??= new Dictionary<uint, InterlockColor> {
-                [Transparent.RGBA] = Transparent,
-                [AliceBlue.RGBA] = AliceBlue,
-                [AntiqueWhite.RGBA] = AntiqueWhite,
-                [Aqua.RGBA] = Aqua,
-                [Aquamarine.RGBA] = Aquamarine,
-                [Azure.RGBA] = Azure,
-                [Beige.RGBA] = Beige,
-                [Bisque.RGBA] = Bisque,
-                [Black.RGBA] = Black,
-                [BlanchedAlmond.RGBA] = BlanchedAlmond,
-                [Blue.RGBA] = Blue,
-                [BlueViolet.RGBA] = BlueViolet,
-                [Brown.RGBA] = Brown,
-                [BurlyWood.RGBA] = BurlyWood,
-                [CadetBlue.RGBA] = CadetBlue,
-                [Chartreuse.RGBA] = Chartreuse,
-                [Chocolate.RGBA] = Chocolate,
-                [Coral.RGBA] = Coral,
-                [CornflowerBlue.RGBA] = CornflowerBlue,
-                [Cornsilk.RGBA] = Cornsilk,
-                [Crimson.RGBA] = Crimson,
-                [DarkBlue.RGBA] = DarkBlue,
-                [DarkCyan.RGBA] = DarkCyan,
-                [DarkGoldenrod.RGBA] = DarkGoldenrod,
-                [DarkGray.RGBA] = DarkGray,
-                [DarkGreen.RGBA] = DarkGreen,
-                [DarkKhaki.RGBA] = DarkKhaki,
-                [DarkMagenta.RGBA] = DarkMagenta,
-                [DarkOliveGreen.RGBA] = DarkOliveGreen,
-                [DarkOrange.RGBA] = DarkOrange,
-                [DarkOrchid.RGBA] = DarkOrchid,
-                [DarkRed.RGBA] = DarkRed,
-                [DarkSalmon.RGBA] = DarkSalmon,
-                [DarkSeaGreen.RGBA] = DarkSeaGreen,
-                [DarkSlateBlue.RGBA] = DarkSlateBlue,
-                [DarkSlateGray.RGBA] = DarkSlateGray,
-                [DarkTurquoise.RGBA] = DarkTurquoise,
-                [DarkViolet.RGBA] = DarkViolet,
-                [DeepPink.RGBA] = DeepPink,
-                [DeepSkyBlue.RGBA] = DeepSkyBlue,
-                [DimGray.RGBA] = DimGray,
-                [DodgerBlue.RGBA] = DodgerBlue,
-                [Firebrick.RGBA] = Firebrick,
-                [FloralWhite.RGBA] = FloralWhite,
-                [ForestGreen.RGBA] = ForestGreen,
-                [Fuchsia.RGBA] = Fuchsia,
-                [Gainsboro.RGBA] = Gainsboro,
-                [GhostWhite.RGBA] = GhostWhite,
-                [Gold.RGBA] = Gold,
-                [Goldenrod.RGBA] = Goldenrod,
-                [Gray.RGBA] = Gray,
-                [Green.RGBA] = Green,
-                [GreenYellow.RGBA] = GreenYellow,
-                [Honeydew.RGBA] = Honeydew,
-                [HotPink.RGBA] = HotPink,
-                [IndianRed.RGBA] = IndianRed,
-                [Indigo.RGBA] = Indigo,
-                [Ivory.RGBA] = Ivory,
-                [Khaki.RGBA] = Khaki,
-                [Lavender.RGBA] = Lavender,
-                [LavenderBlush.RGBA] = LavenderBlush,
-                [LawnGreen.RGBA] = LawnGreen,
-                [LemonChiffon.RGBA] = LemonChiffon,
-                [LightBlue.RGBA] = LightBlue,
-                [LightCoral.RGBA] = LightCoral,
-                [LightCyan.RGBA] = LightCyan,
-                [LightGoldenrodYellow.RGBA] = LightGoldenrodYellow,
-                [LightGreen.RGBA] = LightGreen,
-                [LightGray.RGBA] = LightGray,
-                [LightPink.RGBA] = LightPink,
-                [LightSalmon.RGBA] = LightSalmon,
-                [LightSeaGreen.RGBA] = LightSeaGreen,
-                [LightSkyBlue.RGBA] = LightSkyBlue,
-                [LightSlateGray.RGBA] = LightSlateGray,
-                [LightSteelBlue.RGBA] = LightSteelBlue,
-                [LightYellow.RGBA] = LightYellow,
-                [Lime.RGBA] = Lime,
-                [LimeGreen.RGBA] = LimeGreen,
-                [Linen.RGBA] = Linen,
-                [Maroon.RGBA] = Maroon,
-                [MediumAquamarine.RGBA] = MediumAquamarine,
-                [MediumBlue.RGBA] = MediumBlue,
-                [MediumOrchid.RGBA] = MediumOrchid,
-                [MediumPurple.RGBA] = MediumPurple,
-                [MediumSeaGreen.RGBA] = MediumSeaGreen,
-                [MediumSlateBlue.RGBA] = MediumSlateBlue,
-                [MediumSpringGreen.RGBA] = MediumSpringGreen,
-                [MediumTurquoise.RGBA] = MediumTurquoise,
-                [MediumVioletRed.RGBA] = MediumVioletRed,
-                [MidnightBlue.RGBA] = MidnightBlue,
-                [MintCream.RGBA] = MintCream,
-                [MistyRose.RGBA] = MistyRose,
-                [Moccasin.RGBA] = Moccasin,
-                [NavajoWhite.RGBA] = NavajoWhite,
-                [Navy.RGBA] = Navy,
-                [OldLace.RGBA] = OldLace,
-                [Olive.RGBA] = Olive,
-                [OliveDrab.RGBA] = OliveDrab,
-                [Orange.RGBA] = Orange,
-                [OrangeRed.RGBA] = OrangeRed,
-                [Orchid.RGBA] = Orchid,
-                [PaleGoldenrod.RGBA] = PaleGoldenrod,
-                [PaleGreen.RGBA] = PaleGreen,
-                [PaleTurquoise.RGBA] = PaleTurquoise,
-                [PaleVioletRed.RGBA] = PaleVioletRed,
-                [PapayaWhip.RGBA] = PapayaWhip,
-                [PeachPuff.RGBA] = PeachPuff,
-                [Peru.RGBA] = Peru,
-                [Pink.RGBA] = Pink,
-                [Plum.RGBA] = Plum,
-                [PowderBlue.RGBA] = PowderBlue,
-                [Purple.RGBA] = Purple,
-                [Red.RGBA] = Red,
-                [RosyBrown.RGBA] = RosyBrown,
-                [RoyalBlue.RGBA] = RoyalBlue,
-                [SaddleBrown.RGBA] = SaddleBrown,
-                [Salmon.RGBA] = Salmon,
-                [SandyBrown.RGBA] = SandyBrown,
-                [SeaGreen.RGBA] = SeaGreen,
-                [SeaShell.RGBA] = SeaShell,
-                [Sienna.RGBA] = Sienna,
-                [Silver.RGBA] = Silver,
-                [SkyBlue.RGBA] = SkyBlue,
-                [SlateBlue.RGBA] = SlateBlue,
-                [SlateGray.RGBA] = SlateGray,
-                [Snow.RGBA] = Snow,
-                [SpringGreen.RGBA] = SpringGreen,
-                [SteelBlue.RGBA] = SteelBlue,
-                [Tan.RGBA] = Tan,
-                [Teal.RGBA] = Teal,
-                [Thistle.RGBA] = Thistle,
-                [Tomato.RGBA] = Tomato,
-                [Turquoise.RGBA] = Turquoise,
-                [Violet.RGBA] = Violet,
-                [Wheat.RGBA] = Wheat,
-                [White.RGBA] = White,
-                [WhiteSmoke.RGBA] = WhiteSmoke,
-                [Yellow.RGBA] = Yellow,
-                [YellowGreen.RGBA] = YellowGreen,
-            };
+            [Transparent.RGBA] = Transparent,
+            [AliceBlue.RGBA] = AliceBlue,
+            [AntiqueWhite.RGBA] = AntiqueWhite,
+            [Aqua.RGBA] = Aqua,
+            [Aquamarine.RGBA] = Aquamarine,
+            [Azure.RGBA] = Azure,
+            [Beige.RGBA] = Beige,
+            [Bisque.RGBA] = Bisque,
+            [Black.RGBA] = Black,
+            [BlanchedAlmond.RGBA] = BlanchedAlmond,
+            [Blue.RGBA] = Blue,
+            [BlueViolet.RGBA] = BlueViolet,
+            [Brown.RGBA] = Brown,
+            [BurlyWood.RGBA] = BurlyWood,
+            [CadetBlue.RGBA] = CadetBlue,
+            [Chartreuse.RGBA] = Chartreuse,
+            [Chocolate.RGBA] = Chocolate,
+            [Coral.RGBA] = Coral,
+            [CornflowerBlue.RGBA] = CornflowerBlue,
+            [Cornsilk.RGBA] = Cornsilk,
+            [Crimson.RGBA] = Crimson,
+            [DarkBlue.RGBA] = DarkBlue,
+            [DarkCyan.RGBA] = DarkCyan,
+            [DarkGoldenrod.RGBA] = DarkGoldenrod,
+            [DarkGray.RGBA] = DarkGray,
+            [DarkGreen.RGBA] = DarkGreen,
+            [DarkKhaki.RGBA] = DarkKhaki,
+            [DarkMagenta.RGBA] = DarkMagenta,
+            [DarkOliveGreen.RGBA] = DarkOliveGreen,
+            [DarkOrange.RGBA] = DarkOrange,
+            [DarkOrchid.RGBA] = DarkOrchid,
+            [DarkRed.RGBA] = DarkRed,
+            [DarkSalmon.RGBA] = DarkSalmon,
+            [DarkSeaGreen.RGBA] = DarkSeaGreen,
+            [DarkSlateBlue.RGBA] = DarkSlateBlue,
+            [DarkSlateGray.RGBA] = DarkSlateGray,
+            [DarkTurquoise.RGBA] = DarkTurquoise,
+            [DarkViolet.RGBA] = DarkViolet,
+            [DeepPink.RGBA] = DeepPink,
+            [DeepSkyBlue.RGBA] = DeepSkyBlue,
+            [DimGray.RGBA] = DimGray,
+            [DodgerBlue.RGBA] = DodgerBlue,
+            [Firebrick.RGBA] = Firebrick,
+            [FloralWhite.RGBA] = FloralWhite,
+            [ForestGreen.RGBA] = ForestGreen,
+            [Fuchsia.RGBA] = Fuchsia,
+            [Gainsboro.RGBA] = Gainsboro,
+            [GhostWhite.RGBA] = GhostWhite,
+            [Gold.RGBA] = Gold,
+            [Goldenrod.RGBA] = Goldenrod,
+            [Gray.RGBA] = Gray,
+            [Green.RGBA] = Green,
+            [GreenYellow.RGBA] = GreenYellow,
+            [Honeydew.RGBA] = Honeydew,
+            [HotPink.RGBA] = HotPink,
+            [IndianRed.RGBA] = IndianRed,
+            [Indigo.RGBA] = Indigo,
+            [Ivory.RGBA] = Ivory,
+            [Khaki.RGBA] = Khaki,
+            [Lavender.RGBA] = Lavender,
+            [LavenderBlush.RGBA] = LavenderBlush,
+            [LawnGreen.RGBA] = LawnGreen,
+            [LemonChiffon.RGBA] = LemonChiffon,
+            [LightBlue.RGBA] = LightBlue,
+            [LightCoral.RGBA] = LightCoral,
+            [LightCyan.RGBA] = LightCyan,
+            [LightGoldenrodYellow.RGBA] = LightGoldenrodYellow,
+            [LightGreen.RGBA] = LightGreen,
+            [LightGray.RGBA] = LightGray,
+            [LightPink.RGBA] = LightPink,
+            [LightSalmon.RGBA] = LightSalmon,
+            [LightSeaGreen.RGBA] = LightSeaGreen,
+            [LightSkyBlue.RGBA] = LightSkyBlue,
+            [LightSlateGray.RGBA] = LightSlateGray,
+            [LightSteelBlue.RGBA] = LightSteelBlue,
+            [LightYellow.RGBA] = LightYellow,
+            [Lime.RGBA] = Lime,
+            [LimeGreen.RGBA] = LimeGreen,
+            [Linen.RGBA] = Linen,
+            [Maroon.RGBA] = Maroon,
+            [MediumAquamarine.RGBA] = MediumAquamarine,
+            [MediumBlue.RGBA] = MediumBlue,
+            [MediumOrchid.RGBA] = MediumOrchid,
+            [MediumPurple.RGBA] = MediumPurple,
+            [MediumSeaGreen.RGBA] = MediumSeaGreen,
+            [MediumSlateBlue.RGBA] = MediumSlateBlue,
+            [MediumSpringGreen.RGBA] = MediumSpringGreen,
+            [MediumTurquoise.RGBA] = MediumTurquoise,
+            [MediumVioletRed.RGBA] = MediumVioletRed,
+            [MidnightBlue.RGBA] = MidnightBlue,
+            [MintCream.RGBA] = MintCream,
+            [MistyRose.RGBA] = MistyRose,
+            [Moccasin.RGBA] = Moccasin,
+            [NavajoWhite.RGBA] = NavajoWhite,
+            [Navy.RGBA] = Navy,
+            [OldLace.RGBA] = OldLace,
+            [Olive.RGBA] = Olive,
+            [OliveDrab.RGBA] = OliveDrab,
+            [Orange.RGBA] = Orange,
+            [OrangeRed.RGBA] = OrangeRed,
+            [Orchid.RGBA] = Orchid,
+            [PaleGoldenrod.RGBA] = PaleGoldenrod,
+            [PaleGreen.RGBA] = PaleGreen,
+            [PaleTurquoise.RGBA] = PaleTurquoise,
+            [PaleVioletRed.RGBA] = PaleVioletRed,
+            [PapayaWhip.RGBA] = PapayaWhip,
+            [PeachPuff.RGBA] = PeachPuff,
+            [Peru.RGBA] = Peru,
+            [Pink.RGBA] = Pink,
+            [Plum.RGBA] = Plum,
+            [PowderBlue.RGBA] = PowderBlue,
+            [Purple.RGBA] = Purple,
+            [Red.RGBA] = Red,
+            [RosyBrown.RGBA] = RosyBrown,
+            [RoyalBlue.RGBA] = RoyalBlue,
+            [SaddleBrown.RGBA] = SaddleBrown,
+            [Salmon.RGBA] = Salmon,
+            [SandyBrown.RGBA] = SandyBrown,
+            [SeaGreen.RGBA] = SeaGreen,
+            [SeaShell.RGBA] = SeaShell,
+            [Sienna.RGBA] = Sienna,
+            [Silver.RGBA] = Silver,
+            [SkyBlue.RGBA] = SkyBlue,
+            [SlateBlue.RGBA] = SlateBlue,
+            [SlateGray.RGBA] = SlateGray,
+            [Snow.RGBA] = Snow,
+            [SpringGreen.RGBA] = SpringGreen,
+            [SteelBlue.RGBA] = SteelBlue,
+            [Tan.RGBA] = Tan,
+            [Teal.RGBA] = Teal,
+            [Thistle.RGBA] = Thistle,
+            [Tomato.RGBA] = Tomato,
+            [Turquoise.RGBA] = Turquoise,
+            [Violet.RGBA] = Violet,
+            [Wheat.RGBA] = Wheat,
+            [White.RGBA] = White,
+            [WhiteSmoke.RGBA] = WhiteSmoke,
+            [Yellow.RGBA] = Yellow,
+            [YellowGreen.RGBA] = YellowGreen,
+        };
         _knownColorsByName ??= new Dictionary<string, InterlockColor>(StringComparer.InvariantCultureIgnoreCase) {
-                [Transparent.Name] = Transparent,
-                [AliceBlue.Name] = AliceBlue,
-                [AntiqueWhite.Name] = AntiqueWhite,
-                [Aqua.Name] = Aqua,
-                [Aquamarine.Name] = Aquamarine,
-                [Azure.Name] = Azure,
-                [Beige.Name] = Beige,
-                [Bisque.Name] = Bisque,
-                [Black.Name] = Black,
-                [BlanchedAlmond.Name] = BlanchedAlmond,
-                [Blue.Name] = Blue,
-                [BlueViolet.Name] = BlueViolet,
-                [Brown.Name] = Brown,
-                [BurlyWood.Name] = BurlyWood,
-                [CadetBlue.Name] = CadetBlue,
-                [Chartreuse.Name] = Chartreuse,
-                [Chocolate.Name] = Chocolate,
-                [Coral.Name] = Coral,
-                [CornflowerBlue.Name] = CornflowerBlue,
-                [Cornsilk.Name] = Cornsilk,
-                [Crimson.Name] = Crimson,
-                [DarkBlue.Name] = DarkBlue,
-                [DarkCyan.Name] = DarkCyan,
-                [DarkGoldenrod.Name] = DarkGoldenrod,
-                [DarkGray.Name] = DarkGray,
-                [DarkGreen.Name] = DarkGreen,
-                [DarkKhaki.Name] = DarkKhaki,
-                [DarkMagenta.Name] = DarkMagenta,
-                [DarkOliveGreen.Name] = DarkOliveGreen,
-                [DarkOrange.Name] = DarkOrange,
-                [DarkOrchid.Name] = DarkOrchid,
-                [DarkRed.Name] = DarkRed,
-                [DarkSalmon.Name] = DarkSalmon,
-                [DarkSeaGreen.Name] = DarkSeaGreen,
-                [DarkSlateBlue.Name] = DarkSlateBlue,
-                [DarkSlateGray.Name] = DarkSlateGray,
-                [DarkTurquoise.Name] = DarkTurquoise,
-                [DarkViolet.Name] = DarkViolet,
-                [DeepPink.Name] = DeepPink,
-                [DeepSkyBlue.Name] = DeepSkyBlue,
-                [DimGray.Name] = DimGray,
-                [DodgerBlue.Name] = DodgerBlue,
-                [Firebrick.Name] = Firebrick,
-                [FloralWhite.Name] = FloralWhite,
-                [ForestGreen.Name] = ForestGreen,
-                [Fuchsia.Name] = Fuchsia,
-                [Gainsboro.Name] = Gainsboro,
-                [GhostWhite.Name] = GhostWhite,
-                [Gold.Name] = Gold,
-                [Goldenrod.Name] = Goldenrod,
-                [Gray.Name] = Gray,
-                [Green.Name] = Green,
-                [GreenYellow.Name] = GreenYellow,
-                [Honeydew.Name] = Honeydew,
-                [HotPink.Name] = HotPink,
-                [IndianRed.Name] = IndianRed,
-                [Indigo.Name] = Indigo,
-                [Ivory.Name] = Ivory,
-                [Khaki.Name] = Khaki,
-                [Lavender.Name] = Lavender,
-                [LavenderBlush.Name] = LavenderBlush,
-                [LawnGreen.Name] = LawnGreen,
-                [LemonChiffon.Name] = LemonChiffon,
-                [LightBlue.Name] = LightBlue,
-                [LightCoral.Name] = LightCoral,
-                [LightCyan.Name] = LightCyan,
-                [LightGoldenrodYellow.Name] = LightGoldenrodYellow,
-                [LightGreen.Name] = LightGreen,
-                [LightGray.Name] = LightGray,
-                [LightPink.Name] = LightPink,
-                [LightSalmon.Name] = LightSalmon,
-                [LightSeaGreen.Name] = LightSeaGreen,
-                [LightSkyBlue.Name] = LightSkyBlue,
-                [LightSlateGray.Name] = LightSlateGray,
-                [LightSteelBlue.Name] = LightSteelBlue,
-                [LightYellow.Name] = LightYellow,
-                [Lime.Name] = Lime,
-                [LimeGreen.Name] = LimeGreen,
-                [Linen.Name] = Linen,
-                [Maroon.Name] = Maroon,
-                [MediumAquamarine.Name] = MediumAquamarine,
-                [MediumBlue.Name] = MediumBlue,
-                [MediumOrchid.Name] = MediumOrchid,
-                [MediumPurple.Name] = MediumPurple,
-                [MediumSeaGreen.Name] = MediumSeaGreen,
-                [MediumSlateBlue.Name] = MediumSlateBlue,
-                [MediumSpringGreen.Name] = MediumSpringGreen,
-                [MediumTurquoise.Name] = MediumTurquoise,
-                [MediumVioletRed.Name] = MediumVioletRed,
-                [MidnightBlue.Name] = MidnightBlue,
-                [MintCream.Name] = MintCream,
-                [MistyRose.Name] = MistyRose,
-                [Moccasin.Name] = Moccasin,
-                [NavajoWhite.Name] = NavajoWhite,
-                [Navy.Name] = Navy,
-                [OldLace.Name] = OldLace,
-                [Olive.Name] = Olive,
-                [OliveDrab.Name] = OliveDrab,
-                [Orange.Name] = Orange,
-                [OrangeRed.Name] = OrangeRed,
-                [Orchid.Name] = Orchid,
-                [PaleGoldenrod.Name] = PaleGoldenrod,
-                [PaleGreen.Name] = PaleGreen,
-                [PaleTurquoise.Name] = PaleTurquoise,
-                [PaleVioletRed.Name] = PaleVioletRed,
-                [PapayaWhip.Name] = PapayaWhip,
-                [PeachPuff.Name] = PeachPuff,
-                [Peru.Name] = Peru,
-                [Pink.Name] = Pink,
-                [Plum.Name] = Plum,
-                [PowderBlue.Name] = PowderBlue,
-                [Purple.Name] = Purple,
-                [Red.Name] = Red,
-                [RosyBrown.Name] = RosyBrown,
-                [RoyalBlue.Name] = RoyalBlue,
-                [SaddleBrown.Name] = SaddleBrown,
-                [Salmon.Name] = Salmon,
-                [SandyBrown.Name] = SandyBrown,
-                [SeaGreen.Name] = SeaGreen,
-                [SeaShell.Name] = SeaShell,
-                [Sienna.Name] = Sienna,
-                [Silver.Name] = Silver,
-                [SkyBlue.Name] = SkyBlue,
-                [SlateBlue.Name] = SlateBlue,
-                [SlateGray.Name] = SlateGray,
-                [Snow.Name] = Snow,
-                [SpringGreen.Name] = SpringGreen,
-                [SteelBlue.Name] = SteelBlue,
-                [Tan.Name] = Tan,
-                [Teal.Name] = Teal,
-                [Thistle.Name] = Thistle,
-                [Tomato.Name] = Tomato,
-                [Turquoise.Name] = Turquoise,
-                [Violet.Name] = Violet,
-                [Wheat.Name] = Wheat,
-                [White.Name] = White,
-                [WhiteSmoke.Name] = WhiteSmoke,
-                [Yellow.Name] = Yellow,
-                [YellowGreen.Name] = YellowGreen,
-            };
+            [Transparent.Name] = Transparent,
+            [AliceBlue.Name] = AliceBlue,
+            [AntiqueWhite.Name] = AntiqueWhite,
+            [Aqua.Name] = Aqua,
+            [Aquamarine.Name] = Aquamarine,
+            [Azure.Name] = Azure,
+            [Beige.Name] = Beige,
+            [Bisque.Name] = Bisque,
+            [Black.Name] = Black,
+            [BlanchedAlmond.Name] = BlanchedAlmond,
+            [Blue.Name] = Blue,
+            [BlueViolet.Name] = BlueViolet,
+            [Brown.Name] = Brown,
+            [BurlyWood.Name] = BurlyWood,
+            [CadetBlue.Name] = CadetBlue,
+            [Chartreuse.Name] = Chartreuse,
+            [Chocolate.Name] = Chocolate,
+            [Coral.Name] = Coral,
+            [CornflowerBlue.Name] = CornflowerBlue,
+            [Cornsilk.Name] = Cornsilk,
+            [Crimson.Name] = Crimson,
+            [DarkBlue.Name] = DarkBlue,
+            [DarkCyan.Name] = DarkCyan,
+            [DarkGoldenrod.Name] = DarkGoldenrod,
+            [DarkGray.Name] = DarkGray,
+            [DarkGreen.Name] = DarkGreen,
+            [DarkKhaki.Name] = DarkKhaki,
+            [DarkMagenta.Name] = DarkMagenta,
+            [DarkOliveGreen.Name] = DarkOliveGreen,
+            [DarkOrange.Name] = DarkOrange,
+            [DarkOrchid.Name] = DarkOrchid,
+            [DarkRed.Name] = DarkRed,
+            [DarkSalmon.Name] = DarkSalmon,
+            [DarkSeaGreen.Name] = DarkSeaGreen,
+            [DarkSlateBlue.Name] = DarkSlateBlue,
+            [DarkSlateGray.Name] = DarkSlateGray,
+            [DarkTurquoise.Name] = DarkTurquoise,
+            [DarkViolet.Name] = DarkViolet,
+            [DeepPink.Name] = DeepPink,
+            [DeepSkyBlue.Name] = DeepSkyBlue,
+            [DimGray.Name] = DimGray,
+            [DodgerBlue.Name] = DodgerBlue,
+            [Firebrick.Name] = Firebrick,
+            [FloralWhite.Name] = FloralWhite,
+            [ForestGreen.Name] = ForestGreen,
+            [Fuchsia.Name] = Fuchsia,
+            [Gainsboro.Name] = Gainsboro,
+            [GhostWhite.Name] = GhostWhite,
+            [Gold.Name] = Gold,
+            [Goldenrod.Name] = Goldenrod,
+            [Gray.Name] = Gray,
+            [Green.Name] = Green,
+            [GreenYellow.Name] = GreenYellow,
+            [Honeydew.Name] = Honeydew,
+            [HotPink.Name] = HotPink,
+            [IndianRed.Name] = IndianRed,
+            [Indigo.Name] = Indigo,
+            [Ivory.Name] = Ivory,
+            [Khaki.Name] = Khaki,
+            [Lavender.Name] = Lavender,
+            [LavenderBlush.Name] = LavenderBlush,
+            [LawnGreen.Name] = LawnGreen,
+            [LemonChiffon.Name] = LemonChiffon,
+            [LightBlue.Name] = LightBlue,
+            [LightCoral.Name] = LightCoral,
+            [LightCyan.Name] = LightCyan,
+            [LightGoldenrodYellow.Name] = LightGoldenrodYellow,
+            [LightGreen.Name] = LightGreen,
+            [LightGray.Name] = LightGray,
+            [LightPink.Name] = LightPink,
+            [LightSalmon.Name] = LightSalmon,
+            [LightSeaGreen.Name] = LightSeaGreen,
+            [LightSkyBlue.Name] = LightSkyBlue,
+            [LightSlateGray.Name] = LightSlateGray,
+            [LightSteelBlue.Name] = LightSteelBlue,
+            [LightYellow.Name] = LightYellow,
+            [Lime.Name] = Lime,
+            [LimeGreen.Name] = LimeGreen,
+            [Linen.Name] = Linen,
+            [Maroon.Name] = Maroon,
+            [MediumAquamarine.Name] = MediumAquamarine,
+            [MediumBlue.Name] = MediumBlue,
+            [MediumOrchid.Name] = MediumOrchid,
+            [MediumPurple.Name] = MediumPurple,
+            [MediumSeaGreen.Name] = MediumSeaGreen,
+            [MediumSlateBlue.Name] = MediumSlateBlue,
+            [MediumSpringGreen.Name] = MediumSpringGreen,
+            [MediumTurquoise.Name] = MediumTurquoise,
+            [MediumVioletRed.Name] = MediumVioletRed,
+            [MidnightBlue.Name] = MidnightBlue,
+            [MintCream.Name] = MintCream,
+            [MistyRose.Name] = MistyRose,
+            [Moccasin.Name] = Moccasin,
+            [NavajoWhite.Name] = NavajoWhite,
+            [Navy.Name] = Navy,
+            [OldLace.Name] = OldLace,
+            [Olive.Name] = Olive,
+            [OliveDrab.Name] = OliveDrab,
+            [Orange.Name] = Orange,
+            [OrangeRed.Name] = OrangeRed,
+            [Orchid.Name] = Orchid,
+            [PaleGoldenrod.Name] = PaleGoldenrod,
+            [PaleGreen.Name] = PaleGreen,
+            [PaleTurquoise.Name] = PaleTurquoise,
+            [PaleVioletRed.Name] = PaleVioletRed,
+            [PapayaWhip.Name] = PapayaWhip,
+            [PeachPuff.Name] = PeachPuff,
+            [Peru.Name] = Peru,
+            [Pink.Name] = Pink,
+            [Plum.Name] = Plum,
+            [PowderBlue.Name] = PowderBlue,
+            [Purple.Name] = Purple,
+            [Red.Name] = Red,
+            [RosyBrown.Name] = RosyBrown,
+            [RoyalBlue.Name] = RoyalBlue,
+            [SaddleBrown.Name] = SaddleBrown,
+            [Salmon.Name] = Salmon,
+            [SandyBrown.Name] = SandyBrown,
+            [SeaGreen.Name] = SeaGreen,
+            [SeaShell.Name] = SeaShell,
+            [Sienna.Name] = Sienna,
+            [Silver.Name] = Silver,
+            [SkyBlue.Name] = SkyBlue,
+            [SlateBlue.Name] = SlateBlue,
+            [SlateGray.Name] = SlateGray,
+            [Snow.Name] = Snow,
+            [SpringGreen.Name] = SpringGreen,
+            [SteelBlue.Name] = SteelBlue,
+            [Tan.Name] = Tan,
+            [Teal.Name] = Teal,
+            [Thistle.Name] = Thistle,
+            [Tomato.Name] = Tomato,
+            [Turquoise.Name] = Turquoise,
+            [Violet.Name] = Violet,
+            [Wheat.Name] = Wheat,
+            [White.Name] = White,
+            [WhiteSmoke.Name] = WhiteSmoke,
+            [Yellow.Name] = Yellow,
+            [YellowGreen.Name] = YellowGreen,
+        };
     }
 
     private static string ToColorCode(byte r, byte g, byte b, byte a) {
@@ -572,26 +568,6 @@ public partial struct InterlockColor : ITextual<InterlockColor> {
         static string ToHex(byte b) => b.ToString("X2", CultureInfo.InvariantCulture);
     }
 
-    public static InterlockColor Parse(string s, IFormatProvider? provider) => ITextual<InterlockColor>.Parse(s);
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out InterlockColor result) =>
-        ITextual<InterlockColor>.TryParse(s, out result);
-    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid color '{textualRepresentation}'";
-
     [GeneratedRegex(@"(\w+|#[0-9a-fA-F]{6})")]
     private static partial Regex AnythingRegex();
-}
-
-public class InterlockColorConverter : TypeConverter
-{
-    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) => sourceType == typeof(string);
-
-    public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType) => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
-
-    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
-        => value is string text ? InterlockColor.FromString(text) : base.ConvertFrom(context, culture, value);
-
-    public override object ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
-        => destinationType == typeof(string) && value is InterlockColor color
-            ? color.Name
-            : throw new InvalidOperationException("Can only convert InterlockColor to string!!!");
 }

@@ -33,11 +33,11 @@
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
-[JsonConverter(typeof(JsonInterlockIdConverter))]
+
+[TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
+[JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
 public class KeyId : BaseKeyId
 {
-    public KeyId(string textualRepresentation) : base(textualRepresentation) => CheckType(_keyId);
-
     public KeyId(TagHash hash) : base(_keyId, hash) {
     }
 

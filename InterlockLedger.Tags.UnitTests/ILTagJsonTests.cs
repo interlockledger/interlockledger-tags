@@ -30,25 +30,27 @@
 //
 // ******************************************************************************************************************************
 
+using NUnit.Framework;
+
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-
-using NUnit.Framework;
 
 namespace InterlockLedger.Tags;
 [TestFixture]
 public class ILTagJsonTests
 {
     [Test]
-    public void AppPermissions() {
+    public void AppPermissionsCtors() {
         TestTwiceWith(new AppPermissions(0));
         TestTwiceWith(new AppPermissions(0, null));
         TestTwiceWith(new AppPermissions(1, 100));
         TestTwiceWith(new AppPermissions(2, 100, 101));
-        var ap = new AppPermissions("#3,1,2,3");
+        var ap = AppPermissions.FromString("#3,1,2,3");
         Assert.AreEqual("#3,1,2,3", ap.TextualRepresentation);
         TestTwiceWith(ap);
         TestTwiceWith(new AppPermissions(4, 100, 4, 101, 3));
+        TestTwiceWith(AppPermissions.Empty);
+        TestTwiceWith(new AppPermissions() { InvalidityCause = "Test" });
     }
 
     [TestCase("true", TestName = "BoolFromJsonTrue", ExpectedResult = true)]
@@ -115,7 +117,7 @@ public class ILTagJsonTests
         TestTwiceWith(new ILTagVersion(new Version(1, 2, 3, 4)));
         TestTwiceWith(new ILTagVersion(new Version(3, 0)));
         TestTwiceWith(new ILTagVersion(new Version()));
-        TestTwiceWith(ILTagVersion.InvalidBy("Test"));
+        TestTwiceWith(new ILTagVersion() { InvalidityCause = "Test" });
     }
 
     [TestCase("0", TestName = "Int8FromJson0", ExpectedResult = (sbyte)0)]
@@ -169,7 +171,8 @@ public class ILTagJsonTests
         TestTwiceWith(new LimitedRange(100));
         TestTwiceWith(LimitedRange.Empty);
         TestTwiceWith(new LimitedRange(200, 50));
-        TestTwiceWith(LimitedRange.Parse("10-9", null));
+        TestTwiceWith(ITextual<LimitedRange>.Parse("[10-19]"));
+        TestTwiceWith(ITextual<LimitedRange>.Parse("10-9"));
         TestTwiceWith(new ILTagRange(new LimitedRange(300, 50)));
         TestTwiceWith(new ILTagRange(new LimitedRange(400)));
         TestTwiceWith(new ILTagRange(LimitedRange.Empty));

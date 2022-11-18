@@ -31,12 +31,12 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-[JsonConverter(typeof(JsonInterlockIdConverter))]
+
+[TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
+[JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
 public class OwnerId : BaseKeyId
 {
     public const byte TypeId = 1;
-
-    public OwnerId(string textualRepresentation) : base(textualRepresentation) => CheckType(TypeId);
 
     public OwnerId(TagHash hash) : base(TypeId, hash) { }
 

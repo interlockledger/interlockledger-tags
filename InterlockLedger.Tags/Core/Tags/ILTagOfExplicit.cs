@@ -30,8 +30,10 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
 namespace InterlockLedger.Tags;
-public abstract class ILTagOfExplicit<T> : ILTagOf<T>
+public abstract class ILTagOfExplicit<T> : ILTagOf<T> where T : notnull
 {
     public const int MaxEncodedValueLength = int.MaxValue / 16;
 
@@ -41,7 +43,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T>
     protected ILTagOfExplicit(ulong tagId, T value) : base(tagId, value) {
     }
 
-    protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag> setup = null)
+    protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null)
         : base(alreadyDeserializedTagId, s, setup) {
     }
 
@@ -66,11 +68,11 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T>
         _valueLength = null;
     }
 
-    protected sealed override Task<Stream> SerializeInnerAsync(Stream s) {
+    protected sealed async override Task<Stream> SerializeInnerAsync(Stream s) {
         s.ILIntEncode(ValueLength);
         if (ValueLength > 0)
-            ValueToStreamAsync(s);
-        return Task.FromResult(s);
+            await ValueToStreamAsync(s);
+        return s;
     }
 
     private ulong? _valueLength;

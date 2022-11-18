@@ -34,7 +34,7 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class ILTagOf<T> : ILTag where T : notnull
+public abstract class ILTagOf<T>: ILTag where T : notnull
 {
     [JsonIgnore]
     public override object? AsJson => Value;
@@ -49,18 +49,11 @@ public abstract class ILTagOf<T> : ILTag where T : notnull
         value = default!;
         return false;
     }
-
-    protected ILTagOf(ulong tagId, T value) : base(tagId) {
-        Value = value;
-        if (Value is ITextual it)
-            TextualRepresentation = it.TextualRepresentation;
-    }
+    protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
 
     protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
         setup?.Invoke(this);
         Value = DeserializeInner(s);
-        if (Value is ITextual it)
-            TextualRepresentation = it.TextualRepresentation;
     }
 
     protected abstract T DeserializeInner(Stream s);
@@ -69,3 +62,4 @@ public abstract class ILTagOf<T> : ILTag where T : notnull
 
     protected abstract Task<Stream> ValueToStreamAsync(Stream s);
 }
+

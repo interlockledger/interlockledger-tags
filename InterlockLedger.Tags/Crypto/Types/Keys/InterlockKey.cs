@@ -128,7 +128,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         $@"-- Key '{Name}' - {Description}
 ++ Id: {Id}
 ++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
-++ with purposes: {_displayablePurposes}  {GetPermissions(Environment.NewLine + "++++ ", formatter: p => p.Formatted).ToLowerInvariant()}
+++ with purposes: {_displayablePurposes}  {GetPermissions(Environment.NewLine + "++++ ", formatter: p => p.VerboseRepresentation).ToLowerInvariant()}
 ++ from: {Identity}
 ++ with strength {Strength}";
 

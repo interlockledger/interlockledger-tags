@@ -39,66 +39,46 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
 public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
 {
+    public ILTagVersion() : this(BlankVersion) { }
 
     public ILTagVersion(Version version) : base(ILTagId.Version, version) => TextualRepresentation = version.ToString();
-
     public override object AsJson => TextualRepresentation;
-
-    public bool IsEmpty { get; }
-    public bool IsInvalid { get; }
-    public static ILTagVersion Empty { get; } = new();
+    public bool IsEmpty { get; init; }
+    public static ILTagVersion Empty { get; } = new() { TextualRepresentation = string.Empty, IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
-    public static string MessageForMissing => "Version is missing";
-    public string? InvalidityCause { get; }
-
-    public static ILTagVersion Parse(string s, IFormatProvider? provider) => FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagVersion result) =>
-        ITextual<ILTagVersion>.TryParse(s, out result);
-
+    public string? InvalidityCause {
+        get => _invalidityCause;
+        init {
+            _invalidityCause = value;
+            TextualRepresentation = "?";
+        }
+    }
     public static ILTagVersion FromString(string textualRepresentation) {
         try {
             var parsedVersion = Version.Parse(textualRepresentation);
             return new(parsedVersion);
         } catch (Exception ex) {
-            return new(ex.Message);
+            return new() { InvalidityCause = ex.Message };
         }
     }
 
-    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid version '{textualRepresentation}'";
     public bool EqualsForValidInstances(ILTagVersion other) => TextualRepresentation == other.TextualRepresentation;
-    public static ILTagVersion InvalidBy(string cause) => new(cause);
-
     public static ILTagVersion FromJson(object o) => FromString((string)o);
-
-    public static bool operator !=(ILTagVersion left, ILTagVersion right) => !(left == right);
-
-    public static bool operator ==(ILTagVersion left, ILTagVersion right) => left?.Equals(right) ?? right is null;
 
     public override bool Equals(object? obj) => Equals(obj as ILTagVersion);
 
-    public bool Equals(ILTagVersion? other) => _traits.EqualsForAnyInstances(other);
+    public bool Equals(ILTagVersion? other) => Textual.EqualForAnyInstances(other);
 
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
-    private ITextual<ILTagVersion> _traits => this;
-    private ILTagVersion(string? invalidityCause) : this(BlankVersion) {
-        TextualRepresentation = "?";
-        IsInvalid = true;
-        InvalidityCause = invalidityCause;
-    }
-
-    private ILTagVersion() : this(BlankVersion) {
-        TextualRepresentation = string.Empty;
-        IsEmpty = true;
-    }
+    public ITextual<ILTagVersion> Textual => this;
 
     public static Version BlankVersion => _blankVersion ??= Version.Parse("0.0.0.0".AsSpan());
     private static Version? _blankVersion;
+    private string? _invalidityCause;
 
     internal ILTagVersion(Stream s) : base(ILTagId.Version, s) => TextualRepresentation = Value.ToString();
-
     protected override Version FromBytes(byte[] bytes) {
         return FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
-
         static Version Build(int major, int minor, int build, int revision)
             => revision >= 0
                 ? new Version(major, minor, build, revision)

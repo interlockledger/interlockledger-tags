@@ -39,8 +39,8 @@ public class InterlockIdTests
     [Test]
     public void IsEmpty() {
         InterlockId.DefaultType = OwnerId.TypeId;
-        Assert.AreEqual(true, new OwnerId("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty);
-        Assert.AreEqual(false, new OwnerId("#SHA3_256").IsEmpty);
+        Assert.AreEqual(true, InterlockId.FromString("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty);
+        Assert.AreEqual(false, InterlockId.FromString("#SHA3_256").IsEmpty);
     }
 
     [Test]

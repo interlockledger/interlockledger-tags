@@ -32,13 +32,15 @@
 
 #nullable enable
 
-using System.ComponentModel.Design.Serialization;
 
 namespace InterlockLedger.Tags;
-[TypeConverter(typeof(InterlockIdConverter))]
-[JsonConverter(typeof(JsonInterlockIdConverter))]
+
+[TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
+[JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
 public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
 {
+
+    public InterlockId() : this(DefaultType, HashAlgorithm.Invalid, Array.Empty<byte>()) { }
 
     public static IEnumerable<string> AllTypes => Parts.AllTypes;
 
@@ -52,20 +54,15 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
             Parts.DefaultType = value;
         }
     }
-
     public HashAlgorithm Algorithm => Value.Algorithm;
     public override object AsJson => TextualRepresentation;
     public byte[]? Data => Value?.Data;
-    public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
     public byte Type => Value.Type;
 
-    public static bool operator !=(InterlockId a, InterlockId b) => !(a == b);
-
+    public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
     public static bool operator <(InterlockId a, InterlockId b) => SafeCompare(a, b) < 0;
 
     public static bool operator <=(InterlockId a, InterlockId b) => SafeCompare(a, b) <= 0;
-
-    public static bool operator ==(InterlockId a, InterlockId b) => a?.Equals(b) ?? b is null;
 
     public static bool operator >(InterlockId a, InterlockId b) => SafeCompare(a, b) > 0;
 
@@ -79,25 +76,18 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     public override bool Equals(object? obj) => Equals(obj as InterlockId);
 
-    public bool Equals(InterlockId? other) => _traits.EqualsForAnyInstances(other);
-    private ITextual<InterlockId> _traits => this;
+    public bool Equals(InterlockId? other) => Textual.EqualForAnyInstances(other);
+    public ITextual<InterlockId> Textual => this;
     public bool EqualsForValidInstances(InterlockId other) =>
         Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
 
-    public static InterlockId InvalidBy(string cause) => new(byte.MaxValue, HashAlgorithm.SHA1, Array.Empty<byte>()) {
-        InvalidityCause = cause
-    };
-
-    public override int GetHashCode() => HashCode.Combine(Type, _dataHashCode, Algorithm);
+     public override int GetHashCode() => HashCode.Combine(Type, Data, Algorithm);
 
     public string ToFullString() => Value.ToFullString();
 
     public override string ToString() => TextualRepresentation;
 
     internal static ILTag DeserializeAndResolve(Stream s) => new Parts(s, (int)s.ILIntDecode()).Resolve();
-
-    protected InterlockId(string textualRepresentation) : this(new Parts(textualRepresentation)) {
-    }
 
     protected InterlockId(byte type, HashAlgorithm algorithm, byte[]? data) : this(new Parts(type, algorithm, data)) {
     }
@@ -106,7 +96,6 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     protected static void RegisterResolver(byte type, string typeName, Func<Parts, InterlockId> resolver) =>
         Parts.RegisterResolver(type, typeName.Required(), resolver.Required());
-
     protected void CheckType(byte type) {
         if (Type != type)
             throw new InvalidDataException($"This is not a {GetType().Name}");
@@ -116,43 +105,12 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     protected override byte[] ToBytes(Parts value) => TagHelpers.ToBytesHelper(s => value.ToStream(s));
 
-    private int _dataHashCode => Data?.Aggregate(19, (sum, b) => sum + b) ?? 19;
-
     public static InterlockId Empty { get; } = new(new Parts(DefaultType, TagHash.Empty));
-    public bool IsInvalid => InvalidityCause is not null;
-
     public static Regex Mask { get; } = InterlockIdRegex();
-    public static string MessageForMissing { get; } = "Missing id";
-    public string? InvalidityCause { get; private init; }
+    public string? InvalidityCause { get; init; }
 
     private static int SafeCompare(InterlockId? a, InterlockId? b) => a is null ? b is null ? 0 : -1 : a.CompareTo(b);
-    public static InterlockId Parse(string s, IFormatProvider? provider) =>
-        ITextual<InterlockId>.Resolve(s);
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out InterlockId result) =>
-        ITextual<InterlockId>.TryParse(s, out result);
-    static string ITextual<InterlockId>.MessageForInvalid(string? textualRepresentation) => $"Invalid id '{textualRepresentation}'";
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();
-}
-
-public class InterlockIdConverter : TypeConverter
-{
-    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) => sourceType == typeof(string);
-
-    public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
-        => destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string);
-
-    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object Value) {
-        if (Value is string text) {
-            text = text.Trim();
-            return InterlockId.FromString(text);
-        }
-        return base.ConvertFrom(context, culture, Value);
-    }
-
-    public override object ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? Value, Type destinationType)
-        => destinationType.Required() == typeof(string) && Value is InterlockId id
-            ? id.TextualRepresentation
-            : throw new InvalidOperationException("Can only convert InterlockId to string!!!");
 }

@@ -75,11 +75,13 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
         reader.Required();
         findEngine.Required();
-        var readingKey = ReadingKeys.FirstOrDefault(rk => rk.PublicKeyHash == reader.PublicKeyHash && rk.ReaderId == reader.Id);
-        if (readingKey is null)
-            return null;
-        (byte[] key, byte[] iv) = reader.OpenKeyAndIV(readingKey.EncryptedKey, readingKey.EncryptedIV);
-        return findEngine(Cipher)?.Decrypt(CipherText, key, iv);
+        foreach (var readingKey in ReadingKeys.Safe()) {
+            if (readingKey.PublicKeyHash.Equals(reader.PublicKeyHash) && readingKey.ReaderId == reader.Id) {
+                (byte[] key, byte[] iv) = reader.OpenKeyAndIV(readingKey.EncryptedKey, readingKey.EncryptedIV);
+                return findEngine(Cipher)?.Decrypt(CipherText, key, iv);
+            }
+        }
+        return null;
     }
 
     public void EncodeRemainingStateTo(Stream s) => s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);

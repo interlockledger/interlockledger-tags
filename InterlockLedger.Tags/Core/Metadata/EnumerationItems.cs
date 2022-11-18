@@ -38,51 +38,29 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
 public partial class EnumerationItems : ITextual<EnumerationItems>
 {
-    [JsonIgnore]
+    public EnumerationItems() { }
     public bool IsEmpty => _details.None();
-    [JsonIgnore]
-    public bool IsInvalid { get; }
-    [JsonIgnore]
-    public string TextualRepresentation => IsEmpty || IsInvalid ? null! : $"{_detailSeparator}{_details.JoinedBy(_detailSeparator)}";
-    [JsonIgnore]
-    public string? InvalidityCause { get; }
-
-    public override string ToString() => TextualRepresentation;
-    public static EnumerationItems Empty { get; } = new EnumerationItems(invalid: false);
+    public string TextualRepresentation => IsEmpty || Textual.IsInvalid ? null! : $"{_detailSeparator}{_details.JoinedBy(_detailSeparator)}";
+    public string? InvalidityCause { get; init; }
+    public static EnumerationItems Empty { get; } = new EnumerationItems();
     public static Regex Mask { get; } = AnythingRegex();
-    public static string MessageForMissing { get; } = "No Enumeration Details";
-    public static EnumerationItems InvalidBy(string cause) => new(true, cause);
-    public static EnumerationItems Parse(string s, IFormatProvider? provider) => ITextual<EnumerationItems>.Parse(s);
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out EnumerationItems result)
-        => ITextual<EnumerationItems>.TryParse(s, out result);
-    public static EnumerationItems FromString(string textualRepresentation) => new(textualRepresentation);
-    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid Enumeration Details '{textualRepresentation}'";
-    public static bool operator ==(EnumerationItems? left, EnumerationItems? right) => left?.Equals(right) ?? right is null;
-    public static bool operator !=(EnumerationItems? left, EnumerationItems? right) => !(left == right);
-
-    public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
+    public static EnumerationItems FromString(string textualRepresentation) =>
+        new(textualRepresentation.Safe()
+                                 .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(t => new FullEnumerationDetails(t)));
     public bool EqualsForValidInstances(EnumerationItems other) => _details.EquivalentTo(other._details);
-    public bool Equals(EnumerationItems? other) => _traits.EqualsForAnyInstances(other);
+    public bool Equals(EnumerationItems? other) => Textual.EqualForAnyInstances(other);
+    public ITextual<EnumerationItems> Textual => this;
+    public override string ToString() => Textual.FullRepresentation;
     public override bool Equals(object? obj) => Equals(obj as EnumerationItems);
+    public override int GetHashCode() => HashCode.Combine(Textual.FullRepresentation);
 
     internal const string _detailSeparator = "#";
-
     internal EnumerationDictionary? ToDefinition() =>
-        IsEmpty || IsInvalid ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
-
-    internal EnumerationItems(EnumerationDictionary values) =>
-        _details.AddRange(values.Safe().Select(p => p.Value.ToFull(p.Key)));
-
-    private EnumerationItems(bool invalid, string? cause = null) {
-        IsInvalid = invalid;
-        InvalidityCause = cause;
-    }
-
-    private EnumerationItems(string textualRepresentation) =>
-        _details.AddRange(textualRepresentation.Safe()
-                                               .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
-                                               .Select(t => new FullEnumerationDetails(t)));
-    private ITextual<EnumerationItems> _traits => this;
+        IsEmpty || Textual.IsInvalid ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
+    internal EnumerationItems(EnumerationDictionary values) : this(values.Safe().Select(p => p.Value.ToFull(p.Key))) { }
+    private EnumerationItems(IEnumerable<FullEnumerationDetails> values) =>
+        _details.AddRange(values);
 
     private readonly List<FullEnumerationDetails> _details = new();
 

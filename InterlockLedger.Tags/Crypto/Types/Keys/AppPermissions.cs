@@ -31,15 +31,17 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
 [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
+#pragma warning disable CA2231 // Overload operator equals on overriding value type Equals
 public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissions>
+#pragma warning restore CA2231 // Overload operator equals on overriding value type Equals
 {
-    public static Regex Mask { get; } = PermissionsListRegex();
-
+    public ulong AppId;
     public IEnumerable<ulong> ActionIds;
 
-    public ulong AppId;
+    public AppPermissions() : this(ulong.MaxValue) { }
 
     public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }
 
@@ -48,79 +50,40 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
         ActionIds = actionIds ?? Array.Empty<ulong>();
     }
 
-    public AppPermissions(string textualRepresentation) {
-        if (string.IsNullOrWhiteSpace(textualRepresentation) || !Mask.IsMatch(textualRepresentation))
-            throw new ArgumentException($"Invalid textual representation '{textualRepresentation}'", nameof(textualRepresentation));
-        var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
-        AppId = parts.First();
-        ActionIds = parts.Skip(1).ToArray();
-    }
+    public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
+    public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
 
-    [JsonIgnore]
     public Tag AsTag => new(this);
 
-    [JsonIgnore]
-    public string Formatted {
+    public string VerboseRepresentation {
         get {
             var plural = ActionIds.SafeCount() == 1 ? "" : "s";
             return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
         }
     }
-
-    [JsonIgnore]
     public bool IsEmpty => AppId == 0 && ActionIds.None();
-    [JsonIgnore]
-    public bool IsInvalid => AppId == ulong.MaxValue;
-    [JsonIgnore]
-    public string InvalidityCause { get; private init; }
-    [JsonIgnore]
-    public string TextualRepresentation => IsInvalid
-        ? $"#?{_traits.InvalidityCoda}"
+    public string InvalidityCause { get; init; }
+    public string TextualRepresentation => Textual.IsInvalid
+        ? $"#?{Textual.InvalidityCause}"
         : $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
 
     public static AppPermissions Empty { get; } = new AppPermissions(0);
-    public static string MessageForMissing { get; } = "Missing app permissions";
+    public static Regex Mask { get; } = PermissionsListRegex();
 
-    public static AppPermissions Parse(string s, IFormatProvider provider) => AppPermissions.FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string s, IFormatProvider provider, [MaybeNullWhen(false)] out AppPermissions result) =>
-        ITextual<AppPermissions>.TryParse(s, out result);
-    public static AppPermissions FromString(string textualRepresentation) => new(textualRepresentation);
-    public static string MessageForInvalid(string textualRepresentation) => $"Invalid app permissions '{textualRepresentation}'";
-    public static AppPermissions InvalidBy(string cause) => new(ulong.MaxValue) { InvalidityCause = cause};
-    public static bool operator !=(AppPermissions left, AppPermissions right) => !(left == right);
+    public static AppPermissions FromString(string textualRepresentation) {
+        if (textualRepresentation.IsBlank() || !Mask.IsMatch(textualRepresentation))
+            throw new ArgumentException($"Invalid textual representation '{textualRepresentation}'", nameof(textualRepresentation));
+        var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
+        return new AppPermissions(parts.First(), parts.Skip(1));
+    }
 
-    public static bool operator ==(AppPermissions left, AppPermissions right) => left.Equals(right);
-
-    public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
-
-    public bool EqualsForValidInstances(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
+     public bool EqualsForValidInstances(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
     public override bool Equals(object obj) => obj is AppPermissions other && Equals(other);
-    public bool Equals(AppPermissions other) => _traits.EqualsForAnyInstances(other);
-    private readonly ITextual<AppPermissions> _traits => this;
+    public bool Equals(AppPermissions other) => Textual.EqualForAnyInstances(other);
+    public ITextual<AppPermissions> Textual => this;
     public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
-
-    public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
-
-    public override string ToString() => TextualRepresentation;
-
-    public class Tag : ILTagExplicit<AppPermissions>
-    {
-        public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
-            if (value.IsInvalid)
-                throw new InvalidOperationException(value.ToString());
-        }
-
-        internal Tag(Stream s) : base(ILTagId.InterlockKeyAppPermission, s) {
-        }
-
-        protected override AppPermissions FromBytes(byte[] bytes) => FromBytesHelper(bytes,
-            s => new AppPermissions(s.DecodeILInt(), s.DecodeILIntArray())
-        );
-
-        protected override byte[] ToBytes(AppPermissions value)
-            => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
-    }
+    public override string ToString() => Textual.FullRepresentation;
 
     private bool _noActions => ActionIds.None();
 

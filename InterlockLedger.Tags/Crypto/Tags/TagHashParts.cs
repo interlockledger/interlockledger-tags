@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -38,5 +38,5 @@ namespace InterlockLedger.Tags;
 public class TagHashParts
 {
     public required HashAlgorithm Algorithm;
-    public required byte[]? Data;
+    public required byte[] Data;
 }

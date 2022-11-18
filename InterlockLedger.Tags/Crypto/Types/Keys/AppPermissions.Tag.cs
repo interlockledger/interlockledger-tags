@@ -1,5 +1,5 @@
-// ******************************************************************************************************************************
-//  
+﻿// ******************************************************************************************************************************
+//
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -30,18 +30,25 @@
 //
 // ******************************************************************************************************************************
 
-using System.Text.Json;
-
 namespace InterlockLedger.Tags;
 
-public class JsonInterlockIdConverter : JsonConverter<InterlockId>
+public partial struct AppPermissions
 {
-    public override bool CanConvert(Type typeToConvert) =>
-        typeToConvert.Required() == typeof(InterlockId) || typeToConvert.IsSubclassOf(typeof(InterlockId));
+    public class Tag : ILTagExplicit<AppPermissions>
+    {
+        public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
+            if (value.Textual.IsInvalid)
+                throw new InvalidOperationException(value.ToString());
+        }
 
-    public override InterlockId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
-        reader.TokenType == JsonTokenType.String ? InterlockId.FromString(reader.GetString()) : throw new NotSupportedException();
+        internal Tag(Stream s) : base(ILTagId.InterlockKeyAppPermission, s) {
+        }
 
-    public override void Write(Utf8JsonWriter writer, InterlockId value, JsonSerializerOptions options) =>
-        writer.Required().WriteStringValue(value.Required().TextualRepresentation);
+        protected override AppPermissions FromBytes(byte[] bytes) => FromBytesHelper(bytes,
+            s => new AppPermissions(s.DecodeILInt(), s.DecodeILIntArray())
+        );
+
+        protected override byte[] ToBytes(AppPermissions value)
+            => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
+    }
 }

@@ -41,17 +41,13 @@ public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
 public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 {
-    public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) => TextualRepresentation = $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
 
+    public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
     public Algorithm Algorithm => Value.Algorithm;
     public byte[] Data => Value.Data;
     public TagHash Hash => TagHash.HashSha256Of(Data);
-    public bool IsEmpty { get; }
-    public bool IsInvalid { get; }
     public virtual KeyStrength Strength => KeyStrength.Normal;
-    public static bool operator !=(TagPubKey left, TagPubKey right) => !(left == right);
-
-    public static bool operator ==(TagPubKey left, TagPubKey right) => left?.Equals(right) ?? right is null;
+    public bool IsEmpty { get; private init; }
 
     public static TagPubKey Resolve(X509Certificate2 certificate) {
         var RSA = certificate.GetRSAPublicKey();
@@ -63,6 +59,21 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
                 : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
     }
 
+
+    public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
+    public static Regex Mask { get; } = AnythingRegex();
+    public string? InvalidityCause { get; init; }
+    public ITextual<TagPubKey> Textual => this;
+
+    [GeneratedRegex(".+")]
+    private static partial Regex AnythingRegex();
+
+    public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
+
+    public override bool Equals(object? obj) => Equals(obj as TagPubKey);
+    public bool Equals(TagPubKey? other) => Textual.EqualForAnyInstances(other);
+    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
+    public override string ToString() => Textual.FullRepresentation;
     public static TagPubKey FromString(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
@@ -74,29 +85,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
             : ResolveAs(algorithm, parts[1].FromSafeBase64());
     }
 
-    public static TagPubKey Empty { get; } = new TagPubKey();
-    public static TagPubKey Invalid { get; } = new TagPubKey();
-    public static Regex Mask { get; } = AnythingRegex();
-    public static string MessageForMissing { get; } = "No PubKey";
-    public string? InvalidityCause { get; }
-
-    public static TagPubKey Parse(string s, IFormatProvider? provider) => FromString(s);
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagPubKey result) =>
-        ITextual<TagPubKey>.TryParse(s, out result);
-    public static string MessageForInvalid(string? textualRepresentation) => $"Invalid PubKey '{textualRepresentation}'";
-
-    [GeneratedRegex(".+")]
-    private static partial Regex AnythingRegex();
-
-    public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
-
-    public override bool Equals(object? obj) => Equals(obj as TagPubKey);
-
-    public bool Equals(TagPubKey? other) => (other is not null) && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
-
-    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
-
-    public override string ToString() => TextualRepresentation;
+    bool ITextual<TagPubKey>.EqualsForValidInstances(TagPubKey other) => (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 
     public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
 
@@ -107,25 +96,20 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
         return ResolveAs(pubKey.Algorithm, pubKey.Data);
     }
 
-    protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) {
-    }
+    protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) =>
+        TextualRepresentation = BuildTextualRepresentation();
 
     protected override TagKeyParts FromBytes(byte[] bytes)
         => FromBytesHelper(bytes,
             s => new TagKeyParts((Algorithm)s.BigEndianReadUShort(), s.ReadBytes(bytes.Length - sizeof(ushort))));
-
     protected override byte[] ToBytes(TagKeyParts value)
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
-
-    private TagPubKey(Stream s) : base(ILTagId.PubKey, s) {
-    }
-
+    private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
+    private string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
     private static TagPubKey ResolveAs(Algorithm algorithm, byte[] data)
         => algorithm switch {
             Algorithm.RSA => new TagPubRSAKey(data),
             Algorithm.EcDSA => TagPubECKey.From(data),
             _ => throw new NotSupportedException("Only support RSA/EcDSA certificates for now!!!")
         };
-    public static TagPubKey InvalidBy(string cause) => throw new NotImplementedException();
-    bool ITextual<TagPubKey>.EqualsForValidInstances(TagPubKey other) => throw new NotImplementedException();
 }

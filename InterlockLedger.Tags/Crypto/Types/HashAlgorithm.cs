@@ -43,8 +43,8 @@ public enum HashAlgorithm : ushort
     SHA3_512 = 4,
     SHA384 = 5,
 
+    Invalid = 0xFFFE,
     Copy = 0xFFFF
-
 }
 
 public static class HashAlgorithmExtensions

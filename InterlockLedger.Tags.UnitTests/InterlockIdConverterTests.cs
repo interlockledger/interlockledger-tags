@@ -41,21 +41,23 @@ public class InterlockIdConverterTests
 {
     [Test]
     public void CanConvertFrom() {
-        var converter = new InterlockIdConverter();
+        var converter = BuildConverter();
         Assert.AreEqual(true, converter.CanConvertFrom(null, typeof(string)));
         Assert.AreEqual(false, converter.CanConvertFrom(null, typeof(int)));
     }
 
+    private static TypeCustomConverter<InterlockId> BuildConverter() => new();
+
     [Test]
     public void CanConvertTo() {
-        var converter = new InterlockIdConverter();
+        var converter = BuildConverter();
         Assert.AreEqual(true, converter.CanConvertTo(null, typeof(string)));
         Assert.AreEqual(false, converter.CanConvertTo(null, typeof(int)));
     }
 
     [Test]
     public void ConvertFrom() {
-        var converter = new InterlockIdConverter();
+        var converter = BuildConverter();
         var id = converter.ConvertFrom(null, CultureInfo.InvariantCulture, "Key!AAA#SHA3_512") as InterlockId;
         Assert.IsNotNull(id);
         Assert.AreEqual("Key!AAA#SHA3_512", id.ToString());
@@ -66,7 +68,7 @@ public class InterlockIdConverterTests
 
     [Test]
     public void ConvertTo() {
-        var converter = new InterlockIdConverter();
+        var converter = BuildConverter();
         Assert.AreEqual("Key!47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU",
             converter.ConvertTo(null, CultureInfo.InvariantCulture, new KeyId(TagHash.Empty), typeof(string)));
     }
@@ -75,6 +77,6 @@ public class InterlockIdConverterTests
     public void TypeDescriptor_GetConverter() {
         var converter = TypeDescriptor.GetConverter(typeof(InterlockId));
         Assert.IsNotNull(converter);
-        Assert.IsInstanceOf<InterlockIdConverter>(converter);
+        Assert.IsInstanceOf<TypeCustomConverter<InterlockId>>(converter);
     }
 }
