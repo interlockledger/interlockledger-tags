@@ -42,8 +42,6 @@ public class OwnerId : BaseKeyId
 
     public OwnerId(Parts parts) : base(parts) => CheckType(TypeId);
 
-    public string AsBase64 => Value.Data.ToSafeBase64();
-
     internal static void RegisterResolver() => RegisterResolver(TypeId, _typeName, (parts) => new OwnerId(parts));
 
     private const string _typeName = "Owner";

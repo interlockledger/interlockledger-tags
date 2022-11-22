@@ -41,9 +41,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 {
 
     public InterlockId() : this(DefaultType, HashAlgorithm.Invalid, Array.Empty<byte>()) { }
-
     public static IEnumerable<string> AllTypes => Parts.AllTypes;
-
     public static HashAlgorithm DefaultAlgorithm => Parts.DefaultAlgorithm;
 
     public static byte DefaultType {
@@ -69,6 +67,8 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public override bool Equals(object? obj) => Equals(obj as InterlockId);
     public bool Equals(InterlockId? other) => Textual.EqualForAnyInstances(other);
     public ITextual<InterlockId> Textual => this;
+
+    public string AsBase64 => Value.Data.ToSafeBase64();
     public bool EqualsForValidInstances(InterlockId other) => Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
     public override int GetHashCode() => HashCode.Combine(Type, Data, Algorithm);
     public string ToFullString() => Value.ToFullString();
@@ -80,6 +80,8 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public static bool operator >=(InterlockId a, InterlockId b) => SafeCompare(a, b) >= 0;
     public static InterlockId FromString(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
     public static InterlockId Resolve(Stream s) => new Parts(s).Resolve();
+
+    protected InterlockId(string textualRepresentation) : this(new Parts(textualRepresentation)) { }
     protected InterlockId(byte type, HashAlgorithm algorithm, byte[]? data) : this(new Parts(type, algorithm, data)) { }
     protected InterlockId(Parts parts) : base(ILTagId.InterlockId, parts) => TextualRepresentation = Value.ToShortString();
     protected static void RegisterResolver(byte type, string typeName, Func<Parts, InterlockId> resolver) =>
