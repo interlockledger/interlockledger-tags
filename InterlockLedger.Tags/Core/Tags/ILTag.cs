@@ -35,7 +35,7 @@ namespace InterlockLedger.Tags;
 public abstract class ILTag : ITag
 {
     [JsonIgnore]
-    public abstract object AsJson { get; }
+    public abstract object? AsJson { get; }
 
     [JsonIgnore]
     public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
@@ -46,7 +46,7 @@ public abstract class ILTag : ITag
     public ITag Traits => this;
 
     [JsonIgnore]
-    public string TextualRepresentation { get; protected init; }
+    public string TextualRepresentation { get; init; }
 
     public void Changed() {
         _encodedBytes = null;

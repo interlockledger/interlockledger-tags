@@ -50,7 +50,7 @@ public class ILTagJsonTests
         TestTwiceWith(ap);
         TestTwiceWith(new AppPermissions(4, 100, 4, 101, 3));
         TestTwiceWith(AppPermissions.Empty);
-        TestTwiceWith(new AppPermissions() { InvalidityCause = "Test" });
+        TestTwiceWith(ITextual<AppPermissions>.InvalidBy("Test"));
     }
 
     [TestCase("true", TestName = "BoolFromJsonTrue", ExpectedResult = true)]
@@ -113,11 +113,12 @@ public class ILTagJsonTests
     public void ILTagVersionConverter() {
         TestTwiceWith(ILTagVersion.Empty);
         TestTwiceWith(ILTagVersion.FromString("7.6.5"));
+        TestTwiceWith(ITextual<ILTagVersion>.Parse("7.6.5"));
         TestTwiceWith(new ILTagVersion(new Version(1, 0, 0)));
         TestTwiceWith(new ILTagVersion(new Version(1, 2, 3, 4)));
         TestTwiceWith(new ILTagVersion(new Version(3, 0)));
         TestTwiceWith(new ILTagVersion(new Version()));
-        TestTwiceWith(new ILTagVersion() { InvalidityCause = "Test" });
+        TestTwiceWith(ITextual<ILTagVersion>.InvalidBy("Test"));
     }
 
     [TestCase("0", TestName = "Int8FromJson0", ExpectedResult = (sbyte)0)]

@@ -70,7 +70,6 @@ public class InterlockColorConverterTests
         ConvertFromStringAndAssert(converter, "Transparent", InterlockColor.Transparent);
         ConvertFromStringAndAssert(converter, "#FFFFFF00", InterlockColor.Transparent);
         ConvertFromStringAndAssert(converter, "Zany", InterlockColor.Transparent);
-        ConvertFromStringAndAssert(converter, string.Empty, InterlockColor.Black);
         ConvertFromStringAndAssert(converter, "#010203", new InterlockColor(1, 2, 3));
         ConvertFromStringAndAssert(converter, "#01020300", new InterlockColor(1, 2, 3, a: 0));
         ConvertFromStringAndAssert(converter, "#01020380", new InterlockColor(1, 2, 3, a: 128));
@@ -86,7 +85,6 @@ public class InterlockColorConverterTests
         Assert.AreEqual(InterlockColor.Transparent, InterlockColor.FromString("#12345"));
         Assert.AreEqual(InterlockColor.Transparent, InterlockColor.FromString("#1234567"));
         Assert.AreEqual(InterlockColor.Transparent, InterlockColor.FromString("#123AZT"));
-        Assert.AreEqual(InterlockColor.Black, InterlockColor.FromString(""));
     }
 
     [Test]

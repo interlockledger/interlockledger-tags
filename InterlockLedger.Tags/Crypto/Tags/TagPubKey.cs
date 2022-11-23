@@ -62,6 +62,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 
     public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
     public static Regex Mask { get; } = AnythingRegex();
+    public static string InvalidTextualRepresentation { get; } = "?";
     public string? InvalidityCause { get; init; }
     public ITextual<TagPubKey> Textual => this;
 
@@ -71,7 +72,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
     public override bool Equals(object? obj) => Equals(obj as TagPubKey);
-    public bool Equals(TagPubKey? other) => Textual.EqualForAnyInstances(other);
+    public bool Equals(TagPubKey? other) => Textual.EqualsForAnyInstances(other);
     public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     public override string ToString() => Textual.FullRepresentation;
     public static TagPubKey FromString(string textualRepresentation) {

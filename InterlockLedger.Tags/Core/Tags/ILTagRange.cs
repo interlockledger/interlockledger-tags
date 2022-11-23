@@ -48,6 +48,7 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public static Regex Mask => LimitedRange.Mask;
     public bool IsEmpty => Value.IsEmpty;
     public string? InvalidityCause { get => Value.InvalidityCause; init => _ = value; }
+    public static string InvalidTextualRepresentation => LimitedRange.InvalidTextualRepresentation;
     public static ILTagRange FromString(string textualRepresentation) => new(LimitedRange.FromString(textualRepresentation));
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) => TextualRepresentation = Value.TextualRepresentation;
     protected override LimitedRange FromBytes(byte[] bytes)

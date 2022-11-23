@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -50,5 +50,7 @@ public partial struct AppPermissions
 
         protected override byte[] ToBytes(AppPermissions value)
             => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value.AppId).EncodeILIntArray(Value.ActionIds));
+
+
     }
 }

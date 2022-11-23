@@ -49,10 +49,11 @@ public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, ITextual<TagH
     public override string ToString() => Textual.FullRepresentation;
     public override bool Equals(object? obj) => Equals(obj as TagHmac);
     public override int GetHashCode() => TextualRepresentation.GetHashCode(StringComparison.InvariantCulture);
-    public bool Equals(TagHmac? other) => Textual.EqualForAnyInstances(other);
+    public bool Equals(TagHmac? other) => Textual.EqualsForAnyInstances(other);
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
     public static Regex Mask { get; } = AnythingRegex();
+    public static string InvalidTextualRepresentation { get; } = "?";
     public static TagHmac FromString(string textualRepresentation) => new(Split(textualRepresentation));
     bool ITextual<TagHmac>.EqualsForValidInstances(TagHmac other) => Algorithm == other.Algorithm && DataEquals(other.Data);
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {

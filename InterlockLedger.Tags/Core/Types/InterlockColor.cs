@@ -195,7 +195,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         G = g;
         B = b;
         A = a;
-        Name = name ?? ToColorCode(r, g, b, a);
+        TextualRepresentation = Name = name ?? ToColorCode(r, g, b, a);
     }
 
     public InterlockColor(string textualRepresentation) {
@@ -204,7 +204,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         G = color.G;
         B = color.B;
         A = color.A;
-        Name = color.Name;
+        TextualRepresentation = Name = color.Name;
     }
 
     public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
@@ -212,7 +212,6 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
     public uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
     public bool IsEmpty => false;
-    public string TextualRepresentation => Name;
     public bool EqualsForValidInstances(InterlockColor other) => RGBA == other.RGBA;
     public static InterlockColor Empty { get; } = Black;
     public static Regex Mask { get; } = AnythingRegex();
@@ -225,7 +224,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>
             G = (byte)(ic >> 16 & 255);
             B = (byte)(ic >> 8 & 255);
             A = (byte)(ic & 255);
-            Name = ToColorCode(R, G, B, A);
+            TextualRepresentation = Name = ToColorCode(R, G, B, A);
         }
     }
 
@@ -242,8 +241,12 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     }
 
     public override bool Equals(object? obj) => obj is InterlockColor other && Equals(other);
-    public bool Equals(InterlockColor other) => Textual.EqualForAnyInstances(other);
+    public bool Equals(InterlockColor other) => Textual.EqualsForAnyInstances(other);
     public ITextual<InterlockColor> Textual => this;
+
+    public string TextualRepresentation { get; init; }
+    public static string InvalidTextualRepresentation { get; } = string.Empty;
+
     public override int GetHashCode() => (int)RGBA;
     public override string ToString() => Textual.FullRepresentation;
 
@@ -259,7 +262,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         G = (byte)(value >> 16 & 255);
         B = (byte)(value >> 8 & 255);
         A = (byte)(value & 255);
-        Name = ToColorCode(R, G, B, A);
+        TextualRepresentation = Name = ToColorCode(R, G, B, A);
     }
 
     private static uint FromColorCode(string colorCode) {

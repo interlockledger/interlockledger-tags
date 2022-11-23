@@ -50,13 +50,15 @@ public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagH
     public bool IsEmpty => Data.EqualTo(Empty.Data);
     public string? InvalidityCause { get; init; }
     public override bool Equals(object? obj) => Equals(obj as TagHash);
-    public bool Equals(TagHash? other) => Textual.EqualForAnyInstances(other);
+    public bool Equals(TagHash? other) => Textual.EqualsForAnyInstances(other);
     public ITextual<TagHash> Textual => this;
     public bool EqualsForValidInstances(TagHash other) => Algorithm == other.Algorithm && DataEquals(other.Data);
     public override int GetHashCode() => HashCode.Combine(Data, Algorithm);
     public override string ToString() => Textual.FullRepresentation;
     public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
     public static Regex Mask { get; } = AnythingRegex();
+    public static string InvalidTextualRepresentation { get; } = "?";
+
     public static TagHash FromString(string textualRepresentation) => new(Split(textualRepresentation.Safe().Trim()));
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());

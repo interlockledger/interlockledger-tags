@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
 [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
-public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>
+public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IEquatable<ILTagVersion>, IComparable<ILTagVersion>
 {
     public ILTagVersion() : this(BlankVersion) { }
 
@@ -46,19 +46,13 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     public bool IsEmpty { get; init; }
     public static ILTagVersion Empty { get; } = new() { TextualRepresentation = string.Empty, IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
-    public string? InvalidityCause {
-        get => _invalidityCause;
-        init {
-            _invalidityCause = value;
-            TextualRepresentation = "?";
-        }
-    }
+    public string? InvalidityCause { get; init; }
     public static ILTagVersion FromString(string textualRepresentation) {
         try {
             var parsedVersion = Version.Parse(textualRepresentation);
             return new(parsedVersion);
         } catch (Exception ex) {
-            return new() { InvalidityCause = ex.Message };
+            return ITextual<ILTagVersion>.InvalidBy(ex.Message);
         }
     }
 
@@ -67,14 +61,16 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 
     public override bool Equals(object? obj) => Equals(obj as ILTagVersion);
 
-    public bool Equals(ILTagVersion? other) => Textual.EqualForAnyInstances(other);
+    public bool Equals(ILTagVersion? other) => Textual.EqualsForAnyInstances(other);
 
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
     public ITextual<ILTagVersion> Textual => this;
 
     public static Version BlankVersion => _blankVersion ??= Version.Parse("0.0.0.0".AsSpan());
+
+    public static string InvalidTextualRepresentation { get; } = "?";
+
     private static Version? _blankVersion;
-    private string? _invalidityCause;
 
     internal ILTagVersion(Stream s) : base(ILTagId.Version, s) => TextualRepresentation = Value.ToString();
     protected override Version FromBytes(byte[] bytes) {
@@ -95,4 +91,17 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 
     [GeneratedRegex("""^\d+(\.\d+){1,3}$""")]
     private static partial Regex Version_Regex();
+    public int CompareTo(ILTagVersion? other) => Value.CompareTo(other?.Value);
+    public static bool operator ==(ILTagVersion left, ILTagVersion right) =>
+        left is null ? right is null : left.Equals(right);
+    public static bool operator !=(ILTagVersion left, ILTagVersion right) =>
+        !(left == right);
+    public static bool operator <(ILTagVersion left, ILTagVersion right) =>
+        left is null ? right is not null : left.CompareTo(right) < 0;
+    public static bool operator <=(ILTagVersion left, ILTagVersion right) =>
+        left is null || left.CompareTo(right) <= 0;
+    public static bool operator >(ILTagVersion left, ILTagVersion right) =>
+        left is not null && left.CompareTo(right) > 0;
+    public static bool operator >=(ILTagVersion left, ILTagVersion right) =>
+        left is null ? right is null : left.CompareTo(right) >= 0;
 }

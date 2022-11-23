@@ -33,7 +33,7 @@
 namespace InterlockLedger.Tags;
 public interface ITag
 {
-    object AsJson { get; }
+    object? AsJson { get; }
 
     bool IsNull => TagId == ILTagId.Null;
 
