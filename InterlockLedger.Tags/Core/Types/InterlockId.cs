@@ -60,7 +60,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     public static InterlockId Empty { get; } = new(new Parts(DefaultType, TagHash.Empty));
     public static Regex Mask { get; } = InterlockIdRegex();
-    public string? InvalidityCause { get; private init; }
+    public string? InvalidityCause { get; protected init; }
     public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
 
     public int CompareTo(InterlockId? other) => string.CompareOrdinal(ToFullString(), other?.ToFullString());
