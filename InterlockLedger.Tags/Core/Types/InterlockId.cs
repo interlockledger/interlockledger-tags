@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags;
 public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
 {
 
-    public InterlockId() : this(DefaultType, HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    private InterlockId() : this(DefaultType, HashAlgorithm.Invalid, Array.Empty<byte>()) { }
     public static IEnumerable<string> AllTypes => Parts.AllTypes;
     public static HashAlgorithm DefaultAlgorithm => Parts.DefaultAlgorithm;
 
@@ -60,12 +60,11 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     public static InterlockId Empty { get; } = new(new Parts(DefaultType, TagHash.Empty));
     public static Regex Mask { get; } = InterlockIdRegex();
-    public string? InvalidityCause { get; init; }
+    public string? InvalidityCause { get; private init; }
     public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
 
     public int CompareTo(InterlockId? other) => string.CompareOrdinal(ToFullString(), other?.ToFullString());
-    public override bool Equals(object? obj) => Equals(obj as InterlockId);
-    public bool Equals(InterlockId? other) => Textual.EqualsForAnyInstances(other);
+    public override bool Equals(object? obj) => Textual.Equals(obj as InterlockId);
     public ITextual<InterlockId> Textual => this;
 
     public string AsBase64 => Value.Data.Safe().ToSafeBase64();
@@ -100,4 +99,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();
+    static InterlockId ITextual<InterlockId>.New(string? invalidityCause, string textualRepresentation) =>
+        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
+
 }

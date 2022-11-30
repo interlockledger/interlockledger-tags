@@ -34,12 +34,10 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<AppPermissions>))]
 [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
-public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppPermissions>, IComparable<AppPermissions>
+public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<AppPermissions>
 {
     public ulong AppId;
     public IEnumerable<ulong> ActionIds;
-
-    public AppPermissions() : this(ulong.MaxValue) { }
 
     public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }
 
@@ -61,10 +59,10 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
         }
     }
     public bool IsEmpty => AppId == 0 && ActionIds.None();
-    public string? InvalidityCause { get; init; }
-    public string TextualRepresentation { get; init; }
+    public string? InvalidityCause { get; private init; }
+    public string TextualRepresentation { get; private init; }
     private string BuildTextualRepresentation() => Textual.IsInvalid
-            ? $"#?{Textual.InvalidityCause}"
+            ? $"#?{InvalidityCause}"
             : $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
 
     public static AppPermissions Empty { get; } = new AppPermissions(0);
@@ -81,7 +79,7 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
     public bool EqualsForValidInstances(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
     public override bool Equals(object? obj) => obj is AppPermissions other && Equals(other);
-    public bool Equals(AppPermissions other) => Textual.EqualsForAnyInstances(other);
+    public bool Equals(AppPermissions other) => Textual.Equals(other);
     public ITextual<AppPermissions> Textual => this;
     public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
     public override string ToString() => Textual.FullRepresentation;
@@ -103,4 +101,7 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IEquatable<AppP
     [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
     private static partial Regex PermissionsListRegex();
     public int CompareTo(AppPermissions other) => Equals(other) ? 0 : AppId.CompareTo(other.AppId);
+    static AppPermissions ITextual<AppPermissions>.New(string? invalidityCause, string textualRepresentation) =>
+        new(ulong.MaxValue) { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
+
 }

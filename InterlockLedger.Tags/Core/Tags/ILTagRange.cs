@@ -41,21 +41,21 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public ILTagRange() : this(LimitedRange.Empty) { }
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) => TextualRepresentation = Value.TextualRepresentation;
     public override object AsJson => this;
-    public bool Equals(ILTagRange? other) => Value.Equals(other?.Value);
-    public override bool Equals(object? obj) => Equals(obj as ILTagRange);
+    public override bool Equals(object? obj) => ((IEquatable<ILTagRange>)this).Equals(obj as ILTagRange);
     public override int GetHashCode() => Value.GetHashCode();
     public static ILTagRange Empty { get; } = new ILTagRange();
     public static Regex Mask => LimitedRange.Mask;
     public bool IsEmpty => Value.IsEmpty;
-    public string? InvalidityCause { get => Value.InvalidityCause; init => _ = value; }
+    public string? InvalidityCause => Value.InvalidityCause;
     public static string InvalidTextualRepresentation => LimitedRange.InvalidTextualRepresentation;
     public static ILTagRange FromString(string textualRepresentation) => new(LimitedRange.FromString(textualRepresentation));
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) => TextualRepresentation = Value.TextualRepresentation;
-    protected override LimitedRange FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
-    protected override byte[] ToBytes(LimitedRange value)
-        => TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
+    protected override LimitedRange FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
+    protected override byte[] ToBytes(LimitedRange value) =>
+        TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
 
     bool ITextual<ILTagRange>.EqualsForValidInstances(ILTagRange other) => Value.EqualsForValidInstances(other.Value);
-
+    static ILTagRange ITextual<ILTagRange>.New(string? invalidityCause, string textualRepresentation) =>
+        throw new NotSupportedException();
 }

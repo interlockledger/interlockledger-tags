@@ -36,7 +36,7 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
 public class BaseKeyId : InterlockId
 {
-    public static BaseKeyId OptionalResolve(Stream s) {
+    public static BaseKeyId? OptionalResolve(Stream s) {
         s.Required();
         return s.Position < s.Length ? Resolve(s) as BaseKeyId : null;
     }

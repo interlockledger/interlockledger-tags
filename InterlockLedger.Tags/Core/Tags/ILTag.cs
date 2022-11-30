@@ -46,7 +46,7 @@ public abstract class ILTag : ITag
     public ITag Traits => this;
 
     [JsonIgnore]
-    public string TextualRepresentation { get; init; }
+    public string TextualRepresentation { get; protected set; }
 
     public void Changed() {
         _encodedBytes = null;
@@ -66,7 +66,7 @@ public abstract class ILTag : ITag
         return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
     }
 
-    public async Task<Stream> SerializeIntoAsync(Stream s) {
+    public async Task<Stream?> SerializeIntoAsync(Stream? s) {
         if (s is not null) {
             s.ILIntEncode(TagId);
             await SerializeInnerAsync(s);
@@ -79,7 +79,7 @@ public abstract class ILTag : ITag
 
     public string TagPrefix => GetType().Name + $"[Tag#{TagId}]: ";
 
-    public virtual bool ValueIs<TV>(out TV value) {
+    public virtual bool ValueIs<TV>(out TV? value) {
         value = default;
         return false;
     }
@@ -92,7 +92,7 @@ public abstract class ILTag : ITag
 
     protected abstract Task SerializeInnerAsync(Stream s);
 
-    private byte[] _encodedBytes;
+    private byte[]? _encodedBytes;
 
     private byte[] ToBytes() {
         using var stream = new MemoryStream();

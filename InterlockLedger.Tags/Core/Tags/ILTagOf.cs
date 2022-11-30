@@ -33,7 +33,7 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class ILTagOf<T>: ILTag where T : notnull
+public abstract class ILTagOf<T>: ILTag
 {
     [JsonIgnore]
     public override object? AsJson => Value;

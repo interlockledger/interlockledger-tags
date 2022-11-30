@@ -38,10 +38,9 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<EnumerationItems>))]
 public partial class EnumerationItems : ITextual<EnumerationItems>
 {
-    public EnumerationItems() => TextualRepresentation = null!;
     public bool IsEmpty => _details.None();
-    public string TextualRepresentation { get; init; }
-    public string? InvalidityCause { get; init; }
+    public string TextualRepresentation { get; private init; }
+    public string? InvalidityCause { get; private init; }
     public static EnumerationItems Empty { get; } = new EnumerationItems();
     public static Regex Mask { get; } = AnythingRegex();
     public static EnumerationItems FromString(string textualRepresentation) =>
@@ -49,17 +48,20 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
                                  .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
                                  .Select(t => new FullEnumerationDetails(t)));
     public bool EqualsForValidInstances(EnumerationItems other) => _details.EquivalentTo(other._details);
-    public bool Equals(EnumerationItems? other) => Textual.EqualsForAnyInstances(other);
     public ITextual<EnumerationItems> Textual => this;
     public static string InvalidTextualRepresentation => null!;
     public override string ToString() => Textual.FullRepresentation;
-    public override bool Equals(object? obj) => Equals(obj as EnumerationItems);
+    public override bool Equals(object? obj) => Textual.Equals(obj as EnumerationItems);
     public override int GetHashCode() => HashCode.Combine(Textual.FullRepresentation);
 
     internal const string _detailSeparator = "#";
     internal EnumerationDictionary? ToDefinition() =>
         IsEmpty || Textual.IsInvalid ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
     internal EnumerationItems(EnumerationDictionary values) : this(values.Safe().Select(p => p.Value.ToFull(p.Key))) { }
+    static EnumerationItems ITextual<EnumerationItems>.New(string? invalidityCause, string textualRepresentation) =>
+        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
+
+    private EnumerationItems() => TextualRepresentation = null!;
     private EnumerationItems(IEnumerable<FullEnumerationDetails> values) {
         _details.AddRange(values);
         TextualRepresentation = BuildTextualRepresentation();

@@ -217,7 +217,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     public static Regex Mask { get; } = AnythingRegex();
     public string? InvalidityCause {
         get => _invalidityCause;
-        init {
+        private init {
             _invalidityCause = value;
             uint ic = Transparent.RGBA;
             R = (byte)(ic >> 24 & 255);
@@ -241,10 +241,10 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     }
 
     public override bool Equals(object? obj) => obj is InterlockColor other && Equals(other);
-    public bool Equals(InterlockColor other) => Textual.EqualsForAnyInstances(other);
+    public bool Equals(InterlockColor other) => Textual.Equals(other);
     public ITextual<InterlockColor> Textual => this;
 
-    public string TextualRepresentation { get; init; }
+    public string TextualRepresentation { get; private init; }
     public static string InvalidTextualRepresentation { get; } = string.Empty;
 
     public override int GetHashCode() => (int)RGBA;
@@ -256,6 +256,8 @@ public partial struct InterlockColor : ITextual<InterlockColor>
 
     private static Dictionary<string, InterlockColor>? _knownColorsByName;
     private string? _invalidityCause;
+    static InterlockColor ITextual<InterlockColor>.New(string? invalidityCause, string textualRepresentation) =>
+        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
 
     private InterlockColor(uint value) {
         R = (byte)(value >> 24 & 255);

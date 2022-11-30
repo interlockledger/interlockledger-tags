@@ -41,16 +41,18 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
 public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagHash>
 {
-    public TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    private TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    static TagHash ITextual<TagHash>.New(string? invalidityCause, string textualRepresentation) =>
+         new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
     public TagHash(HashAlgorithm algorithm, byte[] data) : this(new TagHashParts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
     public override object AsJson => TextualRepresentation;
     public byte[] Data => Value.Data;
     public bool IsEmpty => Data.EqualTo(Empty.Data);
-    public string? InvalidityCause { get; init; }
+    public string? InvalidityCause { get; private init; }
     public override bool Equals(object? obj) => Equals(obj as TagHash);
-    public bool Equals(TagHash? other) => Textual.EqualsForAnyInstances(other);
+    public bool Equals(TagHash? other) => Textual.Equals(other);
     public ITextual<TagHash> Textual => this;
     public bool EqualsForValidInstances(TagHash other) => Algorithm == other.Algorithm && DataEquals(other.Data);
     public override int GetHashCode() => HashCode.Combine(Data, Algorithm);

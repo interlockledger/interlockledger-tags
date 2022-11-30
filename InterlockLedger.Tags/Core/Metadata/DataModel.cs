@@ -252,8 +252,8 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             ? throw new InvalidCastException($"Value for field {field.Name} is a tag {tag.TagId} != {field.TagId}")
             : tag;
 
-    private static Dictionary<string, object> ToJson(Span<byte> bytes, ulong expectedTagId, IEnumerable<DataField> dataFields, ref ulong offset) {
-        var json = new Dictionary<string, object>();
+    private static Dictionary<string, object?> ToJson(Span<byte> bytes, ulong expectedTagId, IEnumerable<DataField> dataFields, ref ulong offset) {
+        var json = new Dictionary<string, object?>();
         ulong tagId = DecodePartialILInt(bytes, ref offset);
         if (tagId != expectedTagId)
             throw new InvalidOperationException($"Expecting tagId {expectedTagId} but came {tagId}");
@@ -272,7 +272,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
                 var value = DecodePartial(field.TagId, bytes, ref offset);
                 json[field.Name] = field.IsEnumeration && !value.Traits.IsNull ? field.EnumerationToString(value) : value.AsJson;
                 if (isVersioned && firstField && field.IsVersion)
-                    version = (ushort)value.AsJson;
+                    version = (ushort)value.AsJson!;
             }
             firstField = false;
         }

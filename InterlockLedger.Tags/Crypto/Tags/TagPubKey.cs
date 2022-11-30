@@ -42,7 +42,6 @@ public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 {
 
-    public TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
     public Algorithm Algorithm => Value.Algorithm;
     public byte[] Data => Value.Data;
     public TagHash Hash => TagHash.HashSha256Of(Data);
@@ -63,7 +62,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
     public static Regex Mask { get; } = AnythingRegex();
     public static string InvalidTextualRepresentation { get; } = "?";
-    public string? InvalidityCause { get; init; }
+    public string? InvalidityCause { get; private init; }
     public ITextual<TagPubKey> Textual => this;
 
     [GeneratedRegex(".+")]
@@ -72,7 +71,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
     public override bool Equals(object? obj) => Equals(obj as TagPubKey);
-    public bool Equals(TagPubKey? other) => Textual.EqualsForAnyInstances(other);
+    public bool Equals(TagPubKey? other) => Textual.Equals(other);
     public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     public override string ToString() => Textual.FullRepresentation;
     public static TagPubKey FromString(string textualRepresentation) {
@@ -113,4 +112,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
             Algorithm.EcDSA => TagPubECKey.From(data),
             _ => throw new NotSupportedException("Only support RSA/EcDSA certificates for now!!!")
         };
+    private TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
+    static TagPubKey ITextual<TagPubKey>.New(string? invalidityCause, string textualRepresentation) =>
+         new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
 }

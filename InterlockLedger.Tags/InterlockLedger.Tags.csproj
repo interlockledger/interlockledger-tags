@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>18.0.0</Version>
+        <Version>19.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>Upgrade InterlockLedger.Tags.ILInt/InterlockLedger.Commons with breaking changes</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -64,8 +64,8 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="9.0.0" />
-        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="9.0.0" />
+        <PackageReference Include="InterlockLedger.Commons" Version="10.0.0" />
+        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="10.0.0" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
     </ItemGroup>
 

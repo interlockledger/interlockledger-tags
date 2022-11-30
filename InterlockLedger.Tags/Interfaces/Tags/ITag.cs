@@ -41,12 +41,12 @@ public interface ITag
 
     T As<T>() where T : ITag => this is T tag ? tag : throw new InvalidDataException($"Not an {typeof(T).Name}");
 
-    Task<Stream> SerializeIntoAsync(Stream s);
+    Task<Stream?> SerializeIntoAsync(Stream? s);
 
     void ValidateTagId(ulong decodedTagId) {
         if (decodedTagId != TagId)
             throw new InvalidDataException($"This is not an {GetType().Name}");
     }
 
-    bool ValueIs<TV>(out TV value);
+    bool ValueIs<TV>(out TV? value);
 }
