@@ -63,16 +63,18 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public string? InvalidityCause { get; protected init; }
     public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
 
-    public int CompareTo(InterlockId? other) => string.CompareOrdinal(ToFullString(), other?.ToFullString());
-    public override bool Equals(object? obj) => Textual.Equals(obj as InterlockId);
+    public int CompareTo(InterlockId? other) => SafeCompare(this, other);
+    public sealed override bool Equals(object? obj) => Textual.Equals(obj as InterlockId);
     public ITextual<InterlockId> Textual => this;
     public string AsBase64 => Value.Data.Safe().ToSafeBase64();
     public static string InvalidTextualRepresentation { get; } = "?";
     bool ITextual<InterlockId>.EqualsForValidInstances(InterlockId other) => Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
-    public override int GetHashCode() => HashCode.Combine(Type, Data, Algorithm);
+    public sealed override int GetHashCode() => HashCode.Combine(Type, Data.Safe().Sum(b => (uint)b), Algorithm);
+    public sealed override string ToString() => TextualRepresentation;
     public string ToFullString() => Value.ToFullString();
-    public override string ToString() => TextualRepresentation;
 
+    public static bool operator ==(InterlockId a, InterlockId b) => SafeCompare(a, b) == 0;
+    public static bool operator !=(InterlockId a, InterlockId b) => !(a == b);
     public static bool operator <(InterlockId a, InterlockId b) => SafeCompare(a, b) < 0;
     public static bool operator <=(InterlockId a, InterlockId b) => SafeCompare(a, b) <= 0;
     public static bool operator >(InterlockId a, InterlockId b) => SafeCompare(a, b) > 0;
@@ -92,7 +94,21 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     protected override Parts FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Parts(s, bytes.Length));
     protected override byte[] ToBytes(Parts value) => TagHelpers.ToBytesHelper(s => value.ToStream(s));
     internal static ILTag DeserializeAndResolve(Stream s) => new Parts(s, (int)s.ILIntDecode()).Resolve();
-    private static int SafeCompare(InterlockId? a, InterlockId? b) => a is null ? b is null ? 0 : -1 : a.CompareTo(b);
+    private static int SafeCompare(InterlockId? a, InterlockId? b) {
+        if (a is null)
+            return b is null ? 0 : -1;
+        if (b is null)
+            return 1;
+        var tc = a.Type.CompareTo(b.Type);
+        if (tc != 0) return tc;
+        var ta = a.Algorithm.CompareTo(b.Algorithm);
+        if (ta != 0) return ta;
+        if (a.Data.None())
+            return b.Data.None() ? 0 : -1;
+        if (b.Data.None())
+            return 1;
+        return a.Data.CompareTo(b.Data);
+    }
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();

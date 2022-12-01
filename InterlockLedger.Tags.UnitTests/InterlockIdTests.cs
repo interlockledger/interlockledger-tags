@@ -50,6 +50,22 @@ public class InterlockIdTests
     }
 
     [Test]
+    public void CompareFromTextualRepresentation() {
+        var a = InterlockId.FromString("Key!AAA#SHA1");
+        var b = InterlockId.FromString("Owner!AAA#SHA1");
+        var c = (KeyId)a;
+        Assert.IsTrue(a > b);
+        Assert.IsTrue(a >= b);
+        Assert.IsTrue(a != b);
+        Assert.IsTrue(b < a);
+        Assert.IsTrue(b <= a);
+        Assert.IsTrue(a == c);
+        Assert.AreNotEqual(a,b);
+        Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
+        Assert.AreEqual(a.GetHashCode(), c.GetHashCode());
+    }
+
+    [Test]
     public void ResolveFromTextualRepresentation() {
         Assert.IsInstanceOf<OwnerId>(InterlockId.FromString("Owner!AAA#SHA1"));
         Assert.IsInstanceOf<KeyId>(InterlockId.FromString("Key!AAA#SHA1"));
