@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>19.3.0</Version>
+        <Version>19.4.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>InterlockId fixes</PackageReleaseNotes>
+        <PackageReleaseNotes>EnumerationDetails fixes</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>

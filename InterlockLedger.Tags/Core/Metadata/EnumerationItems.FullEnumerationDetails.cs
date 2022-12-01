@@ -45,13 +45,13 @@ public partial class EnumerationItems
             var parts = textualRepresentation.Required().Split(_fieldSeparator, StringSplitOptions.RemoveEmptyEntries);
             Index = Convert.ToUInt64(parts[0], CultureInfo.InvariantCulture);
             Name = parts[1];
-            Description = parts.Length > 2 ? parts[2] : null;
+            Description = parts.Length > 2 ? parts[2] : null!;
         }
 
         public ulong Index { get; init; }
         public EnumerationDetails Shorter => new() { Name = Name, Description = Description };
 
-        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}";
+        public override string ToString() => $"{Index}{_fieldSeparator}{Normalize(Name)}{_fieldSeparator}{Normalize(Description)}{_fieldSeparator}";
 
         private const char _fieldSeparator = '|';
 
