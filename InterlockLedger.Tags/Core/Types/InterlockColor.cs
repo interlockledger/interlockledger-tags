@@ -240,10 +240,8 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         return _knownColorsByName!.TryGetValue(value, out var color) ? color : From(colorCode);
     }
 
-    public override bool Equals(object? obj) => obj is InterlockColor other && Equals(other);
-    public bool Equals(InterlockColor other) => Textual.Equals(other);
+    public override bool Equals(object? obj) => obj is InterlockColor other && Textual.Equals(other);
     public ITextual<InterlockColor> Textual => this;
-
     public string TextualRepresentation { get; private init; }
     public static string InvalidTextualRepresentation { get; } = string.Empty;
 

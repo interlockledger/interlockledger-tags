@@ -37,21 +37,20 @@ using System.Security.Cryptography;
 namespace InterlockLedger.Tags;
 
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
-public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, ITextual<TagHmac>
+public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<TagHmac>
 {
     private TagHmac(): this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
     static TagHmac ITextual<TagHmac>.New(string? invalidityCause, string textualRepresentation) =>
         new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
-    public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHashParts { Algorithm = algorithm, Data = data }) { }
+    public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
     public byte[] Data => Value.Data;
     public bool IsEmpty => Data is not null && Data.None();
     public string? InvalidityCause { get; init; }
     public override string ToString() => Textual.FullRepresentation;
-    public override bool Equals(object? obj) => Equals(obj as TagHmac);
+    public override bool Equals(object? obj) => Textual.Equals(obj as TagHmac);
     public override int GetHashCode() => TextualRepresentation.GetHashCode(StringComparison.InvariantCulture);
-    public bool Equals(TagHmac? other) => Textual.Equals(other);
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
     public static Regex Mask { get; } = AnythingRegex();
@@ -64,21 +63,21 @@ public sealed partial class TagHmac : ILTagExplicit<TagHashParts>, ITextual<TagH
     }
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();
-    private TagHmac(TagHashParts parts) : base(ILTagId.Hmac, parts) => TextualRepresentation = BuildTextualRepresentation();
+    private TagHmac(TagHash.Parts parts) : base(ILTagId.Hmac, parts) => TextualRepresentation = BuildTextualRepresentation();
     internal TagHmac(Stream s) : base(ILTagId.Hmac, s) => TextualRepresentation = BuildTextualRepresentation();
-    protected override TagHashParts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new TagHashParts {
+    protected override TagHash.Parts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new TagHash.Parts {
             Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
             Data = s.ReadBytes(bytes.Length - sizeof(ushort))
         });
-    protected override byte[] ToBytes(TagHashParts value)
+    protected override byte[] ToBytes(TagHash.Parts value)
          => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Data.OrEmpty()));
-    private static TagHashParts Split(string textualRepresentation) {
+    private static TagHash.Parts Split(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentNullException(nameof(textualRepresentation));
         var parts = textualRepresentation.Split(new string[] { "#HMAC-" }, StringSplitOptions.None);
         var algorithm = parts.Length < 2 ? HashAlgorithm.SHA256 : (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), parts[1], ignoreCase: true);
-        return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
+        return new TagHash.Parts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
     private bool DataEquals(byte[]? otherData) => (Data.None() && otherData.None()) || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
     private string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";

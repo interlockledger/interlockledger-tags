@@ -78,8 +78,7 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<App
 
     public bool EqualsForValidInstances(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
-    public override bool Equals(object? obj) => obj is AppPermissions other && Equals(other);
-    public bool Equals(AppPermissions other) => Textual.Equals(other);
+    public override bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
     public ITextual<AppPermissions> Textual => this;
     public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
     public override string ToString() => Textual.FullRepresentation;

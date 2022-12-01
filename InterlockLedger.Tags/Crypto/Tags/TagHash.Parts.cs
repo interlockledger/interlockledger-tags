@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
@@ -35,8 +35,11 @@
 
 namespace InterlockLedger.Tags;
 
-public class TagHashParts
+public sealed partial class TagHash
 {
-    public required HashAlgorithm Algorithm;
-    public required byte[] Data;
+    public class Parts
+    {
+        public required HashAlgorithm Algorithm;
+        public required byte[] Data;
+    }
 }

@@ -39,20 +39,19 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<TagHash>))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
-public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagHash>
+public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<TagHash>
 {
     private TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
     static TagHash ITextual<TagHash>.New(string? invalidityCause, string textualRepresentation) =>
          new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
-    public TagHash(HashAlgorithm algorithm, byte[] data) : this(new TagHashParts { Algorithm = algorithm, Data = data }) { }
+    public TagHash(HashAlgorithm algorithm, byte[] data) : this(new Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
     public override object AsJson => TextualRepresentation;
     public byte[] Data => Value.Data;
     public bool IsEmpty => Data.EqualTo(Empty.Data);
     public string? InvalidityCause { get; private init; }
-    public override bool Equals(object? obj) => Equals(obj as TagHash);
-    public bool Equals(TagHash? other) => Textual.Equals(other);
+    public override bool Equals(object? obj) => Textual.Equals(obj as TagHash);
     public ITextual<TagHash> Textual => this;
     public bool EqualsForValidInstances(TagHash other) => Algorithm == other.Algorithm && DataEquals(other.Data);
     public override int GetHashCode() => HashCode.Combine(Data, Algorithm);
@@ -66,23 +65,23 @@ public sealed partial class TagHash : ILTagExplicit<TagHashParts>, ITextual<TagH
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
     internal TagHash(Stream s) : base(ILTagId.Hash, s) => TextualRepresentation = BuildTextualRepresentation();
     internal static TagHash HashFrom(X509Certificate2 certificate) => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
-    protected override TagHashParts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new TagHashParts {
+    protected override Parts FromBytes(byte[] bytes) =>
+        FromBytesHelper(bytes, s => new Parts {
             Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
             Data = s.ReadBytes(bytes.Length - sizeof(ushort))
         });
-    protected override byte[] ToBytes(TagHashParts value)
+    protected override byte[] ToBytes(Parts value)
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Data.OrEmpty()));
-    private TagHash(TagHashParts parts) : base(ILTagId.Hash, parts) => TextualRepresentation = BuildTextualRepresentation();
+    private TagHash(Parts parts) : base(ILTagId.Hash, parts) => TextualRepresentation = BuildTextualRepresentation();
     private static byte[] HashSha256(byte[] data) {
         using var hasher = SHA256.Create();
         hasher.Initialize();
         return hasher.ComputeHash(data);
     }
-    private static TagHashParts Split(string textualRepresentation) {
+    private static Parts Split(string textualRepresentation) {
         var parts = textualRepresentation.Split('#');
         var algorithm = parts.Length < 2 ? HashAlgorithm.SHA256 : (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), parts[1], ignoreCase: true);
-        return new TagHashParts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
+        return new Parts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
     private bool DataEquals(byte[]? otherData) => Data.None() && otherData.None() || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
     private string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";

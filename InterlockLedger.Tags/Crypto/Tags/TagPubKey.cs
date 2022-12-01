@@ -70,8 +70,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
-    public override bool Equals(object? obj) => Equals(obj as TagPubKey);
-    public bool Equals(TagPubKey? other) => Textual.Equals(other);
+    public override bool Equals(object? obj) => Textual.Equals(obj as TagPubKey);
     public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     public override string ToString() => Textual.FullRepresentation;
     public static TagPubKey FromString(string textualRepresentation) {

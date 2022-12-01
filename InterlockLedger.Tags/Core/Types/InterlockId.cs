@@ -66,12 +66,9 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public int CompareTo(InterlockId? other) => string.CompareOrdinal(ToFullString(), other?.ToFullString());
     public override bool Equals(object? obj) => Textual.Equals(obj as InterlockId);
     public ITextual<InterlockId> Textual => this;
-
     public string AsBase64 => Value.Data.Safe().ToSafeBase64();
-
     public static string InvalidTextualRepresentation { get; } = "?";
-
-    public bool EqualsForValidInstances(InterlockId other) => Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
+    bool ITextual<InterlockId>.EqualsForValidInstances(InterlockId other) => Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
     public override int GetHashCode() => HashCode.Combine(Type, Data, Algorithm);
     public string ToFullString() => Value.ToFullString();
     public override string ToString() => TextualRepresentation;

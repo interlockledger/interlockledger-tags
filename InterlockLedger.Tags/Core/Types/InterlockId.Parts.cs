@@ -94,7 +94,7 @@ public partial class InterlockId
         internal InterlockId Resolve()
             => _knownTypes.TryGetValue(Type, out var value)
                 ? value.resolver(this)
-                : throw new InvalidDataException($"Could not match this InterlockId type {Type}");
+                : new InterlockId(this);
 
         internal string ToFullString() => $"{_typePrefix}{_dataInfix}{_algorithmSuffix}";
 
@@ -117,8 +117,8 @@ public partial class InterlockId
 
         private static string BuildTypePrefix(byte type) => $"{ToTypeName(type)}{_prefixSeparator}";
 
-        private static byte ToType(string prefix) => _knownTypes.First(t => t.Value.typeName.Equals(prefix.Trim(), StringComparison.InvariantCultureIgnoreCase)).Key;
-
+        private static byte ToType(string prefix) => _knownTypes.NonEmpty().First(t => Matches(t.Value.typeName, prefix)).Key;
+        private static bool Matches(string typeName, string prefix) => typeName.Equals(prefix.Trim(), StringComparison.OrdinalIgnoreCase);
         private static string ToTypeName(byte type) => _knownTypes.TryGetValue(type, out var value) ? value.typeName : "?";
 
         private void FromStream(Stream s, int length) {

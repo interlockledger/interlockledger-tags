@@ -42,7 +42,7 @@ namespace InterlockLedger.Tags;
 public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IComparable<ILTagVersion>
 {
 
-    public ILTagVersion(Version version) : base(ILTagId.Version, version) => TextualRepresentation = version.ToString();
+    public ILTagVersion(Version version) : base(ILTagId.Version, version) => TextualRepresentation = version.Required().ToString();
     public override object AsJson => TextualRepresentation;
     public bool IsEmpty { get; private init; }
     public static ILTagVersion Empty { get; } = new() { TextualRepresentation = string.Empty, IsEmpty = true };
@@ -59,9 +59,7 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 
     public bool EqualsForValidInstances(ILTagVersion other) => TextualRepresentation == other.TextualRepresentation;
     public static ILTagVersion FromJson(object o) => FromString((string)o);
-
     public override bool Equals(object? obj) => Textual.Equals(obj as ILTagVersion);
-
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
     public ITextual<ILTagVersion> Textual => this;
 
@@ -102,6 +100,5 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     private static partial Regex Version_Regex();
     static ILTagVersion ITextual<ILTagVersion>.New(string? invalidityCause, string textualRepresentation) =>
         new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
-    private ILTagVersion() : this(_blankVersion) { }
-    private static readonly Version _blankVersion = Version.Parse("0.0.0.0".AsSpan());
+    private ILTagVersion() : this(Version.Parse("0.0.0.0".AsSpan())) { }
 }
