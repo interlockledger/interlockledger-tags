@@ -198,15 +198,6 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         TextualRepresentation = Name = name ?? ToColorCode(r, g, b, a);
     }
 
-    public InterlockColor(string textualRepresentation) {
-        var color = FromString(textualRepresentation);
-        R = color.R;
-        G = color.G;
-        B = color.B;
-        A = color.A;
-        TextualRepresentation = Name = color.Name;
-    }
-
     public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
     public string AsCSS => Name is null || Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
     public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
@@ -227,13 +218,15 @@ public partial struct InterlockColor : ITextual<InterlockColor>
             TextualRepresentation = Name = ToColorCode(R, G, B, A);
         }
     }
+    public static bool operator ==(InterlockColor a, InterlockColor b) => a.Equals(b);
+    public static bool operator !=(InterlockColor a, InterlockColor b) => !(a == b);
 
     public static InterlockColor From(uint value) {
         LazyInitKnownColors();
         return _knownColors!.TryGetValue(value, out var color) ? color : new InterlockColor(value);
     }
 
-    public static InterlockColor FromString(string value) {
+    static InterlockColor ITextual<InterlockColor>.FromString(string value) {
         value = value.Safe().Trim();
         LazyInitKnownColors();
         var colorCode = FromColorCode(value);
