@@ -42,8 +42,8 @@ namespace InterlockLedger.Tags;
 public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<TagHash>
 {
     private TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
-    static TagHash ITextual<TagHash>.New(string? invalidityCause, string textualRepresentation) =>
-         new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
+    public static TagHash InvalidBy(string cause) =>
+         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public TagHash(HashAlgorithm algorithm, byte[] data) : this(new Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
@@ -53,14 +53,14 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public string? InvalidityCause { get; private init; }
     public override bool Equals(object? obj) => Textual.Equals(obj as TagHash);
     public ITextual<TagHash> Textual => this;
-    public bool EqualsForValidInstances(TagHash other) => Algorithm == other.Algorithm && DataEquals(other.Data);
+    public bool Equals(TagHash? other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
     public override int GetHashCode() => HashCode.Combine(Data, Algorithm);
     public override string ToString() => Textual.FullRepresentation;
     public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
     public static Regex Mask { get; } = AnythingRegex();
-    public static string InvalidTextualRepresentation { get; } = "?";
+    private static readonly string _invalidTextualRepresentation = "?";
 
-    public static TagHash FromString(string textualRepresentation) => new(Split(textualRepresentation.Safe().Trim()));
+    public static TagHash Build(string textualRepresentation) => new(Split(textualRepresentation.Safe().Trim()));
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
     internal TagHash(Stream s) : base(ILTagId.Hash, s) => TextualRepresentation = BuildTextualRepresentation();

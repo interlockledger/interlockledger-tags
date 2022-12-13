@@ -40,8 +40,8 @@ namespace InterlockLedger.Tags;
 public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<TagHmac>
 {
     private TagHmac(): this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
-    static TagHmac ITextual<TagHmac>.New(string? invalidityCause, string textualRepresentation) =>
-        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
+    public static TagHmac InvalidBy(string cause) =>
+        new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
@@ -54,9 +54,9 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
     public static Regex Mask { get; } = AnythingRegex();
-    public static string InvalidTextualRepresentation { get; } = "?";
-    public static TagHmac FromString(string textualRepresentation) => new(Split(textualRepresentation));
-    bool ITextual<TagHmac>.EqualsForValidInstances(TagHmac other) => Algorithm == other.Algorithm && DataEquals(other.Data);
+    private static readonly string _invalidTextualRepresentation = "?";
+    public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
+    public bool Equals(TagHmac? other) => other is not null &&  Algorithm == other.Algorithm && DataEquals(other.Data);
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
         using var hash = new HMACSHA256(key);
         return new TagHmac(HashAlgorithm.SHA256, hash.ComputeHash(content));

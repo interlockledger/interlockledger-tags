@@ -36,10 +36,8 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<InterlockColor>))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockColor>))]
-#pragma warning disable CA2231 // Overload operator equals on overriding value type Equals
 public partial struct InterlockColor : ITextual<InterlockColor>
 {
-#pragma warning restore CA2231 // Overload operator equals on overriding value type Equals
     public static readonly InterlockColor AliceBlue = new(240, 248, 255, "AliceBlue");
     public static readonly InterlockColor AntiqueWhite = new(250, 235, 215, "AntiqueWhite");
     public static readonly InterlockColor Aqua = new(0, 255, 255, "Aqua");
@@ -203,7 +201,16 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
     public uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
     public bool IsEmpty => false;
-    public bool EqualsForValidInstances(InterlockColor other) => RGBA == other.RGBA;
+    public static InterlockColor InvalidBy(string cause) =>
+        new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+
+    public static InterlockColor Build(string value) {
+        value = value.Safe().Trim();
+        LazyInitKnownColors();
+        var colorCode = FromColorCode(value);
+        return _knownColorsByName!.TryGetValue(value, out var color) ? color : From(colorCode);
+    }
+    public bool Equals(InterlockColor other) => RGBA == other.RGBA;
     public static InterlockColor Empty { get; } = Black;
     public static Regex Mask { get; } = AnythingRegex();
     public string? InvalidityCause {
@@ -226,17 +233,11 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         return _knownColors!.TryGetValue(value, out var color) ? color : new InterlockColor(value);
     }
 
-    static InterlockColor ITextual<InterlockColor>.FromString(string value) {
-        value = value.Safe().Trim();
-        LazyInitKnownColors();
-        var colorCode = FromColorCode(value);
-        return _knownColorsByName!.TryGetValue(value, out var color) ? color : From(colorCode);
-    }
 
     public override bool Equals(object? obj) => obj is InterlockColor other && Textual.Equals(other);
     public ITextual<InterlockColor> Textual => this;
     public string TextualRepresentation { get; private init; }
-    public static string InvalidTextualRepresentation { get; } = string.Empty;
+    private static readonly string _invalidTextualRepresentation = string.Empty;
 
     public override int GetHashCode() => (int)RGBA;
     public override string ToString() => Textual.FullRepresentation;
@@ -247,8 +248,6 @@ public partial struct InterlockColor : ITextual<InterlockColor>
 
     private static Dictionary<string, InterlockColor>? _knownColorsByName;
     private string? _invalidityCause;
-    static InterlockColor ITextual<InterlockColor>.New(string? invalidityCause, string textualRepresentation) =>
-        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
 
     private InterlockColor(uint value) {
         R = (byte)(value >> 24 & 255);

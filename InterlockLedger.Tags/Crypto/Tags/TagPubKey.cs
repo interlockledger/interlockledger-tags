@@ -58,10 +58,22 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
                 : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
     }
 
+    public static TagPubKey InvalidBy(string cause)=>
+         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation};
+    public static TagPubKey Build(string textualRepresentation) {
+        if (string.IsNullOrWhiteSpace(textualRepresentation))
+            throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
+        var parts = textualRepresentation.Split('!', '#');
+        return parts.Length != 3
+               || (!parts[0].Equals("PubKey", StringComparison.OrdinalIgnoreCase))
+               || !Enum.TryParse(parts[2], ignoreCase: true, out Algorithm algorithm)
+            ? throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation))
+            : ResolveAs(algorithm, parts[1].FromSafeBase64());
+    }
 
     public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
     public static Regex Mask { get; } = AnythingRegex();
-    public static string InvalidTextualRepresentation { get; } = "?";
+    private static readonly string _invalidTextualRepresentation = "?";
     public string? InvalidityCause { get; private init; }
     public ITextual<TagPubKey> Textual => this;
 
@@ -73,18 +85,8 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     public override bool Equals(object? obj) => Textual.Equals(obj as TagPubKey);
     public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     public override string ToString() => Textual.FullRepresentation;
-    public static TagPubKey FromString(string textualRepresentation) {
-        if (string.IsNullOrWhiteSpace(textualRepresentation))
-            throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
-        var parts = textualRepresentation.Split('!', '#');
-        return parts.Length != 3
-               || (!parts[0].Equals("PubKey", StringComparison.OrdinalIgnoreCase))
-               || !Enum.TryParse(parts[2], ignoreCase: true, out Algorithm algorithm)
-            ? throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation))
-            : ResolveAs(algorithm, parts[1].FromSafeBase64());
-    }
 
-    bool ITextual<TagPubKey>.EqualsForValidInstances(TagPubKey other) => (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
+    public bool Equals(TagPubKey? other) => other is not null && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 
     public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
 
@@ -112,6 +114,4 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
             _ => throw new NotSupportedException("Only support RSA/EcDSA certificates for now!!!")
         };
     private TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
-    static TagPubKey ITextual<TagPubKey>.New(string? invalidityCause, string textualRepresentation) =>
-         new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
 }

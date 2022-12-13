@@ -47,7 +47,7 @@ public sealed partial class DataField : IEquatable<DataField>
 
     public CastType? Cast { get; set; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     public ulong? ElementTagId { get; set; }
 

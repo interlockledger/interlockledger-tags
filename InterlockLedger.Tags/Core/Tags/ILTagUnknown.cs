@@ -47,9 +47,9 @@ public class ILTagUnknown : ILTagExplicit<byte[]>
         : base(model.Required().PayloadTagId, bytes)
         => Model = model;
 
-    public override object AsJson => (object)Model?.ToJson(EncodedBytes) ?? Value;
+    public override object AsJson => (object?)Model?.ToJson(EncodedBytes) ?? Value;
 
-    public IDataModel Model { get; }
+    public IDataModel? Model { get; }
 
     protected override byte[] FromBytes(byte[] bytes) => bytes;
 

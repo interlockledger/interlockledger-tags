@@ -39,8 +39,8 @@ public class InterlockIdTests
     [Test]
     public void IsEmpty() {
         InterlockId.DefaultType = OwnerId.TypeId;
-        Assert.AreEqual(true, InterlockId.FromString("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty);
-        Assert.AreEqual(false, InterlockId.FromString("#SHA3_256").IsEmpty);
+        Assert.AreEqual(true, InterlockId.Build("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty);
+        Assert.AreEqual(false, InterlockId.Build("#SHA3_256").IsEmpty);
     }
 
     [Test]
@@ -51,8 +51,8 @@ public class InterlockIdTests
 
     [Test]
     public void CompareFromTextualRepresentation() {
-        var a = InterlockId.FromString("Key!AAA#SHA1");
-        var b = InterlockId.FromString("Owner!AAA#SHA1");
+        var a = InterlockId.Build("Key!AAA#SHA1");
+        var b = InterlockId.Build("Owner!AAA#SHA1");
         var c = (KeyId)a;
         Assert.IsTrue(a > b);
         Assert.IsTrue(a >= b);
@@ -67,8 +67,8 @@ public class InterlockIdTests
 
     [Test]
     public void ResolveFromTextualRepresentation() {
-        Assert.IsInstanceOf<OwnerId>(InterlockId.FromString("Owner!AAA#SHA1"));
-        Assert.IsInstanceOf<KeyId>(InterlockId.FromString("Key!AAA#SHA1"));
+        Assert.IsInstanceOf<OwnerId>(InterlockId.Build("Owner!AAA#SHA1"));
+        Assert.IsInstanceOf<KeyId>(InterlockId.Build("Key!AAA#SHA1"));
     }
 
     [TestCase(HashAlgorithm.SHA512, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 4, 2, 0 }, TestName = "SerializeKeyIdFromParts#SHA512")]

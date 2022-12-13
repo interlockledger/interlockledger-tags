@@ -67,16 +67,16 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<App
 
     public static AppPermissions Empty { get; } = new AppPermissions(0);
     public static Regex Mask { get; } = PermissionsListRegex();
-    public static string InvalidTextualRepresentation { get; } = "#?";
-
-    public static AppPermissions FromString(string textualRepresentation) {
+    private static readonly string _invalidTextualRepresentation = "#?";
+    public static AppPermissions InvalidBy(string cause) =>
+        new(ulong.MaxValue) { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+    public static AppPermissions Build(string textualRepresentation) {
         if (textualRepresentation.FirstOrDefault() != '#')
-            ITextual<AppPermissions>.InvalidBy(Mask.InvalidityByNotMatching(textualRepresentation));
+            InvalidBy(Mask.InvalidityByNotMatching(textualRepresentation));
         var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
         return new AppPermissions(parts.First(), parts.Skip(1));
     }
-
-    public bool EqualsForValidInstances(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
+    public bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
     public override bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
     public ITextual<AppPermissions> Textual => this;
@@ -100,7 +100,5 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<App
     [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
     private static partial Regex PermissionsListRegex();
     public int CompareTo(AppPermissions other) => Equals(other) ? 0 : AppId.CompareTo(other.AppId);
-    static AppPermissions ITextual<AppPermissions>.New(string? invalidityCause, string textualRepresentation) =>
-        new(ulong.MaxValue) { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
 
 }

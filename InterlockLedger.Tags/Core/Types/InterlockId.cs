@@ -67,8 +67,11 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public sealed override bool Equals(object? obj) => Textual.Equals(obj as InterlockId);
     public ITextual<InterlockId> Textual => this;
     public string AsBase64 => Value.Data.Safe().ToSafeBase64();
-    public static string InvalidTextualRepresentation { get; } = "?";
-    bool ITextual<InterlockId>.EqualsForValidInstances(InterlockId other) => Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
+    private static readonly string _invalidTextualRepresentation = "?";
+        
+    public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+    public static InterlockId Build(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
+    public bool Equals(InterlockId? other) => other is not null && Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
     public sealed override int GetHashCode() => HashCode.Combine(Type, Data.Safe().Sum(b => (uint)b), Algorithm);
     public sealed override string ToString() => TextualRepresentation;
     public string ToFullString() => Value.ToFullString();
@@ -79,7 +82,6 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public static bool operator <=(InterlockId a, InterlockId b) => SafeCompare(a, b) <= 0;
     public static bool operator >(InterlockId a, InterlockId b) => SafeCompare(a, b) > 0;
     public static bool operator >=(InterlockId a, InterlockId b) => SafeCompare(a, b) >= 0;
-    public static InterlockId FromString(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
     public static InterlockId Resolve(Stream s) => new Parts(s).Resolve();
 
     protected InterlockId(string textualRepresentation) : this(new Parts(textualRepresentation)) { }
@@ -102,17 +104,17 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
         var tc = a.Type.CompareTo(b.Type);
         if (tc != 0) return tc;
         var ta = a.Algorithm.CompareTo(b.Algorithm);
-        if (ta != 0) return ta;
-        if (a.Data.None())
-            return b.Data.None() ? 0 : -1;
-        if (b.Data.None())
-            return 1;
-        return a.Data.CompareTo(b.Data);
+        return ta != 0
+            ? ta
+            : a.Data.None()
+                ? b.Data.None()
+                    ? 0
+                    : -1
+                : b.Data.None()
+                    ? 1
+                    : a.Data.CompareTo(b.Data);
     }
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();
-    static InterlockId ITextual<InterlockId>.New(string? invalidityCause, string textualRepresentation) =>
-        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
-
 }

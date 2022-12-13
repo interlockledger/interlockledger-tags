@@ -42,7 +42,7 @@ public static class ListOfClaimsExtensions
             claims.Add(new Claim(_senderIdClaimType, KeyId.Resolve(certificate).TextualRepresentation));
             claims.Add(new Claim(_senderNameClaimType, certificate.FriendlyName));
         }
-        return claims;
+        return claims!;
     }
 
     public static List<Claim> AddKey(this List<Claim> claims, InterlockKey key) {
@@ -51,30 +51,30 @@ public static class ListOfClaimsExtensions
             claims.Add(new Claim(_senderIdClaimType, key.Id.TextualRepresentation));
             claims.Add(new Claim(_senderNameClaimType, key.Name));
         }
-        return claims;
+        return claims!;
     }
 
     public static List<Claim> AddRoles(this List<Claim> claims, string[] roles) {
         if (claims != null && roles != null)
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
-        return claims;
+        return claims!;
     }
 
-    internal static string Name(this IEnumerable<Claim> claims)
+    internal static string? Name(this IEnumerable<Claim> claims)
         => BuildFrom(ClaimValue(claims, _senderNameClaimType), textual => textual);
 
-    internal static TagPubKey PublicKey(this IEnumerable<Claim> claims)
-                => BuildFrom(ClaimValue(claims, _publicKeyClaimType), textual => TagPubKey.FromString(textual));
+    internal static TagPubKey? PublicKey(this IEnumerable<Claim> claims)
+        => BuildFrom(ClaimValue(claims, _publicKeyClaimType), textual => TagPubKey.Build(textual));
 
-    internal static BaseKeyId Sender(this IEnumerable<Claim> claims)
-        => BuildFrom(ClaimValue(claims, _senderIdClaimType), textual => InterlockId.FromString(textual) as BaseKeyId);
+    internal static BaseKeyId? Sender(this IEnumerable<Claim> claims)
+        => BuildFrom(ClaimValue(claims, _senderIdClaimType), textual => InterlockId.Build(textual) as BaseKeyId);
 
     private const string _publicKeyClaimType = "InterlockLedger.PublicKey";
     private const string _senderIdClaimType = "InterlockLedger.SenderId";
     private const string _senderNameClaimType = "InterlockLedger.SenderName";
 
-    private static T BuildFrom<T>(string value, Func<string, T> build) where T : class => value == null ? null : build(value);
+    private static T? BuildFrom<T>(string? value, Func<string, T?> build) where T : class => value == null ? null : build(value);
 
-    private static string ClaimValue(IEnumerable<Claim> claims, string claimType) => claims?.FirstOrDefault(c => c.Type == claimType)?.Value;
+    private static string? ClaimValue(IEnumerable<Claim> claims, string claimType) => claims?.FirstOrDefault(c => c.Type == claimType)?.Value;
 }

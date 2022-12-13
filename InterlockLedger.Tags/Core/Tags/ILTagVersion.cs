@@ -48,22 +48,23 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     public static ILTagVersion Empty { get; } = new() { TextualRepresentation = string.Empty, IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
     public string? InvalidityCause { get; private init; }
-    public static ILTagVersion FromString(string textualRepresentation) {
+    public static ILTagVersion Build(string textualRepresentation) {
         try {
             var parsedVersion = Version.Parse(textualRepresentation);
             return new(parsedVersion);
         } catch (Exception ex) {
-            return ITextual<ILTagVersion>.InvalidBy(ex.Message);
+            return ILTagVersion.InvalidBy(ex.Message);
         }
     }
-
-    public bool EqualsForValidInstances(ILTagVersion other) => TextualRepresentation == other.TextualRepresentation;
-    public static ILTagVersion FromJson(object o) => FromString((string)o);
+    public static ILTagVersion InvalidBy(string cause) =>
+        new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+    public bool Equals(ILTagVersion? other) => other is not null && TextualRepresentation == other.TextualRepresentation;
+    public static ILTagVersion FromJson(object o) => Build((string)o);
     public override bool Equals(object? obj) => Textual.Equals(obj as ILTagVersion);
     public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
     public ITextual<ILTagVersion> Textual => this;
 
-    public static string InvalidTextualRepresentation { get; } = "?";
+    private static readonly string _invalidTextualRepresentation = "?";
     public int CompareTo(ILTagVersion? other) => Value.CompareTo(other?.Value);
 
     public static bool operator ==(ILTagVersion left, ILTagVersion right) =>
@@ -98,7 +99,5 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 
     [GeneratedRegex("""^\d+(\.\d+){1,3}$""")]
     private static partial Regex Version_Regex();
-    static ILTagVersion ITextual<ILTagVersion>.New(string? invalidityCause, string textualRepresentation) =>
-        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
     private ILTagVersion() : this(Version.Parse("0.0.0.0".AsSpan())) { }
 }

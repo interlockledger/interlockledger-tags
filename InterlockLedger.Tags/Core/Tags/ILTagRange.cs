@@ -47,15 +47,13 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public static Regex Mask => LimitedRange.Mask;
     public bool IsEmpty => Value.IsEmpty;
     public string? InvalidityCause => Value.InvalidityCause;
-    public static string InvalidTextualRepresentation => LimitedRange.InvalidTextualRepresentation;
-    public static ILTagRange FromString(string textualRepresentation) => new(LimitedRange.FromString(textualRepresentation));
+    public ITextual<ILTagRange> Textual => this;
+    public static ILTagRange Build(string textualRepresentation) => new(LimitedRange.Build(textualRepresentation));
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) => TextualRepresentation = Value.TextualRepresentation;
     protected override LimitedRange FromBytes(byte[] bytes) =>
         FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
     protected override byte[] ToBytes(LimitedRange value) =>
         TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
-
-    bool ITextual<ILTagRange>.EqualsForValidInstances(ILTagRange other) => Value.EqualsForValidInstances(other.Value);
-    static ILTagRange ITextual<ILTagRange>.New(string? invalidityCause, string textualRepresentation) =>
-        throw new NotSupportedException();
+    static ILTagRange ITextual<ILTagRange>.InvalidBy(string cause) => new(LimitedRange.InvalidBy(cause));
+    public bool Equals(ILTagRange? other) => other is not null && Value.Equals(other.Value);
 }

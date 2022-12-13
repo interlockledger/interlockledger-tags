@@ -39,40 +39,37 @@ namespace InterlockLedger.Tags;
 public partial class EnumerationItems : ITextual<EnumerationItems>
 {
     public bool IsEmpty => _details.None();
-    public string TextualRepresentation { get; private init; }
+    public string TextualRepresentation { get; }
     public string? InvalidityCause { get; private init; }
     public static EnumerationItems Empty { get; } = new EnumerationItems();
     public static Regex Mask { get; } = AnythingRegex();
-    public static EnumerationItems FromString(string textualRepresentation) =>
+    public static EnumerationItems Build(string textualRepresentation) =>
         new(textualRepresentation.Safe()
                                  .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
                                  .Select(t => new FullEnumerationDetails(t)));
-    public bool EqualsForValidInstances(EnumerationItems other) => _details.EquivalentTo(other._details);
+    public static EnumerationItems InvalidBy(string cause) => new() { InvalidityCause = cause };
+
+    public bool Equals(EnumerationItems? other) => other is not null && _details.EquivalentTo(other._details);
     public ITextual<EnumerationItems> Textual => this;
-    public static string InvalidTextualRepresentation => null!;
     public override string ToString() => Textual.FullRepresentation;
-    public override bool Equals(object? obj) => Textual.Equals(obj as EnumerationItems);
+    public override bool Equals(object? obj) => Equals(obj as EnumerationItems);
     public override int GetHashCode() => HashCode.Combine(Textual.FullRepresentation);
 
     internal const string _detailSeparator = "#";
     internal EnumerationDictionary? ToDefinition() =>
         IsEmpty || Textual.IsInvalid ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
     internal EnumerationItems(EnumerationDictionary values) : this(values.Safe().Select(p => p.Value.ToFull(p.Key))) { }
-    static EnumerationItems ITextual<EnumerationItems>.New(string? invalidityCause, string textualRepresentation) =>
-        new() { InvalidityCause = invalidityCause, TextualRepresentation = textualRepresentation };
-
     private EnumerationItems() => TextualRepresentation = null!;
     private EnumerationItems(IEnumerable<FullEnumerationDetails> values) {
         _details.AddRange(values);
-        TextualRepresentation = BuildTextualRepresentation();
+        TextualRepresentation = IsEmpty || Textual.IsInvalid
+            ? null!
+            : $"{_detailSeparator}{_details.JoinedBy(_detailSeparator)}";
     }
 
     private readonly List<FullEnumerationDetails> _details = new();
-    private string BuildTextualRepresentation() => IsEmpty || Textual.IsInvalid
-        ? null!
-        : $"{_detailSeparator}{_details.JoinedBy(_detailSeparator)}";
-
 
     [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]*)?\|)*$""")]
     private static partial Regex AnythingRegex();
+
 }
