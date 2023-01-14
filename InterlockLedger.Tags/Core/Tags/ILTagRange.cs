@@ -41,8 +41,6 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public ILTagRange() : this(LimitedRange.Empty) { }
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) => TextualRepresentation = Value.TextualRepresentation;
     public override object AsJson => this;
-    public override bool Equals(object? obj) => ((IEquatable<ILTagRange>)this).Equals(obj as ILTagRange);
-    public override int GetHashCode() => Value.GetHashCode();
     public static ILTagRange Empty { get; } = new ILTagRange();
     public static Regex Mask => LimitedRange.Mask;
     public bool IsEmpty => Value.IsEmpty;
@@ -55,5 +53,5 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     protected override byte[] ToBytes(LimitedRange value) =>
         TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
     static ILTagRange ITextual<ILTagRange>.InvalidBy(string cause) => new(LimitedRange.InvalidBy(cause));
-    public bool Equals(ILTagRange? other) => other is not null && Value.Equals(other.Value);
+    public bool Equals(ILTagRange? other) => base.Equals(other);
 }

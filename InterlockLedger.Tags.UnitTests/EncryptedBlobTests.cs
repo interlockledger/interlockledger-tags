@@ -200,22 +200,22 @@ public class EncryptedBlobTests
         Assert.AreEqual(ILTagId.UInt16, fieldVersion.TagId);
         Assert.AreEqual((ushort)1, fieldVersion.Version);
         Assert.IsTrue(fieldVersion.IsVersion);
-        Assert.IsFalse(fieldVersion.IsDeprecated.GetValueOrDefault());
-        Assert.IsFalse(fieldVersion.IsOpaque.GetValueOrDefault());
+        Assert.IsFalse(fieldVersion.IsDeprecated);
+        Assert.IsFalse(fieldVersion.IsOpaque);
         var fieldCipherText = fd.SubDataFields.Skip(1).First();
         Assert.AreEqual(nameof(EncryptedBlob.CipherText), fieldCipherText.Name);
         Assert.AreEqual(ILTagId.ByteArray, fieldCipherText.TagId);
         Assert.AreEqual((ushort)1, fieldCipherText.Version);
         Assert.IsFalse(fieldCipherText.IsVersion);
-        Assert.IsFalse(fieldCipherText.IsDeprecated.GetValueOrDefault());
-        Assert.IsTrue(fieldCipherText.IsOpaque.GetValueOrDefault());
+        Assert.IsFalse(fieldCipherText.IsDeprecated);
+        Assert.IsTrue(fieldCipherText.IsOpaque);
         var fieldKeys = fd.SubDataFields.Skip(2).First();
         Assert.AreEqual(nameof(EncryptedBlob.ReadingKeys), fieldKeys.Name);
         Assert.AreEqual(ILTagId.ILTagArray, fieldKeys.TagId);
         Assert.AreEqual((ushort)1, fieldKeys.Version);
         Assert.IsFalse(fieldKeys.IsVersion);
-        Assert.IsFalse(fieldKeys.IsDeprecated.GetValueOrDefault());
-        Assert.IsFalse(fieldKeys.IsOpaque.GetValueOrDefault());
-        Assert.AreEqual(ILTagId.ReadingKey, fieldKeys.ElementTagId.GetValueOrDefault());
+        Assert.IsFalse(fieldKeys.IsDeprecated);
+        Assert.IsFalse(fieldKeys.IsOpaque);
+        Assert.AreEqual(ILTagId.ReadingKey, fieldKeys.ElementTagId);
     }
 }

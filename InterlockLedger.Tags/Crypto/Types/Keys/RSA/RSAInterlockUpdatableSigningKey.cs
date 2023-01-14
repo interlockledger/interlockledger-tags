@@ -66,7 +66,7 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             var encryptionHandler = encrypt;
             if (encryptionHandler == null)
                 throw new ArgumentNullException(nameof(encrypt));
-            if (_nextKeyParameters != null) {
+            if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
                 _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
                 _data.Value.PublicKey = NextPublicKey;

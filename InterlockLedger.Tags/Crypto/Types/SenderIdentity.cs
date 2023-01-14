@@ -57,7 +57,7 @@ public class SenderIdentity : IEquatable<SenderIdentity?>, IIdentifiedPublicKey
 
     public override bool Equals(object? obj) => Equals(obj as SenderIdentity);
 
-    public bool Equals(SenderIdentity? other) => other != null && Id == other.Id && PublicKey == other.PublicKey;
+    public bool Equals(SenderIdentity? other) => other is not null && Id == other.Id && PublicKey == other.PublicKey;
 
     public override int GetHashCode() => HashCode.Combine(Id, PublicKey);
 

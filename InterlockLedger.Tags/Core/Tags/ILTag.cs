@@ -84,7 +84,10 @@ public abstract class ILTag : ITag
         return false;
     }
 
-    protected ILTag(ulong tagId) => TagId = tagId;
+    protected ILTag(ulong tagId, string textualRepresentation) {
+        TagId = tagId;
+        TextualRepresentation = textualRepresentation;
+    }
 
     protected virtual bool KeepEncodedBytesInMemory => true;
 

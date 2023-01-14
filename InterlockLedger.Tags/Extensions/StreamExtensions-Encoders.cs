@@ -36,7 +36,7 @@ public static partial class StreamExtensions
     public static Stream EncodeAny<T>(this Stream s, T value) where T : ITaggable
         => s.EncodeTag(value?.AsILTag);
 
-    public static Stream EncodeArray<T>(this Stream s, IEnumerable<T> values) where T : class, ITaggableOf<T>
+    public static Stream EncodeArray<T>(this Stream s, IEnumerable<T>? values) where T : class, ITaggableOf<T>
         => s.EncodeTag(new ILTagArrayOfILTag<ILTagOf<T>>(values?.Select(v => v.AsTag).ToArray()));
 
     public static Stream EncodeBool(this Stream s, bool value)
@@ -45,7 +45,7 @@ public static partial class StreamExtensions
     public static Stream EncodeByte(this Stream s, byte value)
         => s.EncodeTag(new ILTagUInt8(value));
 
-    public static Stream EncodeByteArray(this Stream s, byte[] value)
+    public static Stream EncodeByteArray(this Stream s, byte[]? value)
         => value == null ? s.EncodeNull() : s.EncodeTag(new ILTagByteArray(value));
 
     public static Stream EncodeByteArray(this Stream s, Span<byte> value)
@@ -54,6 +54,7 @@ public static partial class StreamExtensions
     public static Stream EncodeColor(this Stream s, InterlockColor value)
         => s.EncodeTag(new ILTagUInt32(value.RGBA));
 
+    [Obsolete("Use EncodeTimestamp: needs field to be defined as ILTagTimestamp")]
     public static Stream EncodeDateTimeOffset(this Stream s, DateTimeOffset value)
         => s.EncodeILInt(value.AsMilliseconds());
 
@@ -63,31 +64,28 @@ public static partial class StreamExtensions
     public static Stream EncodeILInt(this Stream s, ulong value)
         => s.EncodeTag(new ILTagILInt(value));
 
-    public static Stream EncodeILIntArray(this Stream s, IEnumerable<ulong> values)
+    public static Stream EncodeILIntArray(this Stream s, IEnumerable<ulong>? values)
         => s.EncodeTag(new ILTagArrayOfILInt(values?.ToArray()));
 
     public static Stream EncodeInt(this Stream s, int value)
         => s.EncodeTag(new ILTagInt32(value));
 
-    public static Stream EncodeNull(this Stream s) => ILTagNull.Instance.SerializeIntoAsync(s).Result;
+    public static Stream EncodeNull(this Stream s) => ILTagNull.Instance.SerializeIntoAsync(s).Result!;
 
-    public static Stream EncodeOptionalILInt(this Stream s, ulong? optionalValue)
-        => optionalValue.HasValue ? s.EncodeILInt(optionalValue.Value) : s.EncodeNull();
-
-    public static Stream EncodeOptionalTailingByteArray(this Stream s, byte[] value)
-        => value != null ? s.EncodeByteArray(value) : s;
-
-    public static Stream EncodeSequence(this Stream s, IEnumerable<ILTag> values)
+    public static Stream EncodeSequence(this Stream s, IEnumerable<ILTag>? values)
         => s.EncodeTag(new ILTagSequence(values?.ToArray()));
 
-    public static Stream EncodeString(this Stream s, string value)
+    public static Stream EncodeString(this Stream s, string? value)
         => s.EncodeTag(new ILTagString(value));
 
-    public static Stream EncodeTag(this Stream s, ILTag tag)
-        => tag == null ? s.EncodeNull() : tag.SerializeIntoAsync(s).Result;
+    public static Stream EncodeTag(this Stream s, ILTag? tag)
+        => tag is null ? s.EncodeNull() : tag.SerializeIntoAsync(s).Result!;
 
-    public static Stream EncodeTagArray<T>(this Stream s, IEnumerable<T> values) where T : ILTag
+    public static Stream EncodeTagArray<T>(this Stream s, IEnumerable<T>? values) where T : ILTag
         => s.EncodeTag(new ILTagArrayOfILTag<T>(values?.ToArray()));
+
+    public static Stream EncodeTimestamp(this Stream s, DateTimeOffset value)
+        => s.EncodeTag(new ILTagTimestamp(value));
 
     public static Stream EncodeUShort(this Stream s, ushort value)
         => s.EncodeTag(new ILTagUInt16(value));

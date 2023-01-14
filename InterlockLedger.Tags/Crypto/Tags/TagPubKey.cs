@@ -41,7 +41,6 @@ public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
 public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 {
-
     public Algorithm Algorithm => Value.Algorithm;
     public byte[] Data => Value.Data;
     public TagHash Hash => TagHash.HashSha256Of(Data);
@@ -51,9 +50,9 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     public static TagPubKey Resolve(X509Certificate2 certificate) {
         var RSA = certificate.GetRSAPublicKey();
         var ECDsa = certificate.GetECDsaPublicKey();
-        return RSA != null
+        return RSA is not null
             ? new TagPubRSAKey(RSA.ExportParameters(false))
-            : ECDsa != null
+            : ECDsa is not null
                 ? new TagPubECKey(ECDsa.ExportParameters(false))
                 : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
     }
@@ -82,8 +81,6 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
-    public override bool Equals(object? obj) => Textual.Equals(obj as TagPubKey);
-    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
     public override string ToString() => Textual.FullRepresentation;
 
     public bool Equals(TagPubKey? other) => other is not null && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);

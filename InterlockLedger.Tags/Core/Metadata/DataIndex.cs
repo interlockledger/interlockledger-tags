@@ -51,7 +51,7 @@ public class DataIndex : IEquatable<DataIndex>
     public override bool Equals(object obj) => Equals(obj as DataIndex);
 
     public bool Equals(DataIndex other) =>
-        other != null &&
+        other is not null &&
         ElementsAsString == other.ElementsAsString &&
         IsUnique == other.IsUnique &&
         Name == other.Name;

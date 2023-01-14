@@ -58,19 +58,14 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     }
     public static ILTagVersion InvalidBy(string cause) =>
         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
-    public bool Equals(ILTagVersion? other) => other is not null && TextualRepresentation == other.TextualRepresentation;
+    public bool Equals(ILTagVersion? other) => base.Equals(other);
+    protected override bool AreEquivalent(ILTagOf<Version> other) => TextualRepresentation == other.TextualRepresentation;
     public static ILTagVersion FromJson(object o) => Build((string)o);
-    public override bool Equals(object? obj) => Textual.Equals(obj as ILTagVersion);
-    public override int GetHashCode() => HashCode.Combine(TextualRepresentation);
     public ITextual<ILTagVersion> Textual => this;
 
     private static readonly string _invalidTextualRepresentation = "?";
     public int CompareTo(ILTagVersion? other) => Value.CompareTo(other?.Value);
 
-    public static bool operator ==(ILTagVersion left, ILTagVersion right) =>
-        left is null ? right is null : left.Equals(right);
-    public static bool operator !=(ILTagVersion left, ILTagVersion right) =>
-        !(left == right);
     public static bool operator <(ILTagVersion left, ILTagVersion right) =>
         left is null ? right is not null : left.CompareTo(right) < 0;
     public static bool operator <=(ILTagVersion left, ILTagVersion right) =>

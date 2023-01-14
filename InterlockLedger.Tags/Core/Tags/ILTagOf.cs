@@ -33,7 +33,7 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class ILTagOf<T>: ILTag
+public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 {
     [JsonIgnore]
     public override object? AsJson => Value;
@@ -48,9 +48,9 @@ public abstract class ILTagOf<T>: ILTag
         value = default!;
         return false;
     }
-    protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
+    protected ILTagOf(ulong tagId, T value) : base(tagId, string.Empty) => Value = value;
 
-    protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
+    protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId, string.Empty) {
         setup?.Invoke(this);
         Value = DeserializeInner(s);
     }
@@ -60,5 +60,28 @@ public abstract class ILTagOf<T>: ILTag
     protected abstract T ValueFromStream(StreamSpan s);
 
     protected abstract Task<Stream> ValueToStreamAsync(Stream s);
+
+    public sealed override int GetHashCode() => HashCode.Combine(Value);
+    public override bool Equals(object? obj) => Equals(obj as ILTagOf<T>);
+    public bool Equals(ILTagOf<T>? other) =>
+        other is not null && TagId == other.TagId && AreEquivalent(other);
+    public bool Equals(T? otherValue) =>
+        (Value is null && otherValue is null) ||
+        (Value is not null && otherValue is not null && Value.Equals(otherValue));
+    protected virtual bool AreEquivalent(ILTagOf<T> other) => Equals(other.Value);
+
+    public static bool operator ==(ILTagOf<T> left, ILTagOf<T> right) =>
+        left is null ? right is null : left.Equals(right);
+    public static bool operator !=(ILTagOf<T> left, ILTagOf<T> right) =>
+        !(left == right);
+
+    public static bool operator ==(ILTagOf<T> left, T right) =>
+        left is null ? right is null : left.Equals(right);
+    public static bool operator !=(ILTagOf<T> left, T right) =>
+        !(left == right);
+    public static bool operator ==(T left, ILTagOf<T> right) =>
+        right is null ? left is null : right.Equals(left);
+    public static bool operator !=(T left, ILTagOf<T> right) =>
+        !(left == right);
 }
 

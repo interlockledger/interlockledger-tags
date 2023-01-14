@@ -31,11 +31,12 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public sealed partial class DataField : IEquatable<DataField>
 {
     public const ushort CurrentVersion = 5;
 
-    public DataField(string name, ulong tagId, string description = null) : this() {
+    public DataField(string name, ulong tagId, string? description = null) : this() {
         name.Required();
         Description = description.TrimToNull();
         Name = name;
@@ -43,38 +44,41 @@ public sealed partial class DataField : IEquatable<DataField>
         Version = 1;
     }
 
-    public DataField() => Version = 1;
+    public DataField() {
+        Name = "Invalid";
+        Version = 1;
+    }
 
-    public CastType? Cast { get; set; }
+    public CastType Cast { get; set; }
 
     public string? Description { get; set; }
 
-    public ulong? ElementTagId { get; set; }
+    public ulong ElementTagId { get; set; }
 
-    public EnumerationItems Enumeration {
+    public EnumerationItems? Enumeration {
         get => EnumerationDefinition?.AsEnumerationItems;
         set => EnumerationDefinition = value?.ToDefinition();
     }
 
-    public bool? EnumerationAsFlags { get; set; }
+    public bool EnumerationAsFlags { get; set; }
 
     [JsonIgnore]
-    public EnumerationDictionary EnumerationDefinition { get; set; }
+    public EnumerationDictionary? EnumerationDefinition { get; set; }
 
     // tags that have children
     [JsonIgnore]
     public bool HasSubFields => SubDataFields.SafeAny();
 
     [JsonIgnore]
-    public bool IsArray => ElementTagId != null && TagId == ILTagId.ILTagArray;
+    public bool IsArray => ElementTagId > 0 && TagId == ILTagId.ILTagArray;
 
-    public bool? IsDeprecated { get; set; }
+    public bool IsDeprecated { get; set; }
 
     [JsonIgnore]
     public bool IsEnumeration => EnumerationDefinition.SafeAny();
 
     // treat as opaque byte array
-    public bool? IsOpaque { get; set; }
+    public bool IsOpaque { get; set; }
 
     [JsonIgnore]
     public bool IsVersion => Name.Equals("Version", StringComparison.OrdinalIgnoreCase) && TagId == ILTagId.UInt16;
@@ -85,7 +89,7 @@ public sealed partial class DataField : IEquatable<DataField>
     [JsonIgnore]
     public ushort SerializationVersion { get; set; } = CurrentVersion;
 
-    public IEnumerable<DataField> SubDataFields { get; set; }
+    public IEnumerable<DataField>? SubDataFields { get; set; }
 
     public ulong TagId { get; set; }
 
@@ -122,7 +126,7 @@ public sealed partial class DataField : IEquatable<DataField>
 
     public static bool operator !=(DataField left, DataField right) => !(left == right);
 
-    public static bool operator ==(DataField left, DataField right) => EqualityComparer<DataField>.Default.Equals(left, right);
+    public static bool operator ==(DataField left, DataField right) => left.Equals(right);
 
     public ILTag EnumerationFromString(string value) {
         return string.IsNullOrWhiteSpace(value) || EnumerationDefinition is null || EnumerationDefinition.Count == 0 || value == "?"
@@ -130,7 +134,7 @@ public sealed partial class DataField : IEquatable<DataField>
             : AsNumericTag(TagId, Parse(value));
 
         ulong Parse(string value) {
-            return !_isFlags ? FindKey(value) : SplitAndParse(value);
+            return !EnumerationAsFlags ? FindKey(value) : SplitAndParse(value);
 
             ulong FindKey(string value) {
                 try {
@@ -157,16 +161,16 @@ public sealed partial class DataField : IEquatable<DataField>
         try {
             return EnumerationDefinition is null || EnumerationDefinition.Count == 0
                 ? "?"
-                : _isFlags
+                : EnumerationAsFlags
                     ? ToList(number)
                     : EnumerationDefinition.TryGetValue(number, out var value) ? value.Name : $"?{number}";
         } catch {
-            return "*error*";
+            return "*ERROR*";
         }
 
         string ToList(ulong number) {
             var names = new List<string>();
-            foreach (ulong k in EnumerationDefinition.Keys)                 if (number == k || (number & k) == k && k > 0) {
+            foreach (ulong k in EnumerationDefinition.Keys) if (number == k || (number & k) == k && k > 0) {
                     number ^= k;
                     names.Add(EnumerationDefinition[k].Name);
                 }
@@ -176,20 +180,20 @@ public sealed partial class DataField : IEquatable<DataField>
         }
     }
 
-    public override bool Equals(object obj) => Equals(obj as DataField);
+    public override bool Equals(object? obj) => Equals(obj as DataField);
 
-    public bool Equals(DataField other) =>
-        other != null &&
+    public bool Equals(DataField? other) =>
+        other is not null &&
         TagId == other.TagId &&
         Cast == other.Cast &&
-        Description.SafeTrimmedEqualsTo(other.Description) &&
+        Description.Safe().SafeTrimmedEqualsTo(other.Description.Safe()) &&
         ElementTagId == other.ElementTagId &&
         EnumerationAsFlags == other.EnumerationAsFlags &&
         IsDeprecated == other.IsDeprecated &&
         IsOpaque == other.IsOpaque &&
         Name.SafeEqualsTo(other.Name) &&
         SerializationVersion == other.SerializationVersion &&
-        SubDataFields.EqualTo(other.SubDataFields) &&
+        SubDataFields.Safe().EqualTo(other.SubDataFields.Safe()) &&
         Version == other.Version &&
         CompareEnumeration(other);
 
@@ -210,7 +214,7 @@ public sealed partial class DataField : IEquatable<DataField>
         return hash.ToHashCode();
     }
 
-    public bool IsVisibleMatch(string name) => Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !IsOpaque.GetValueOrDefault();
+    public bool IsVisibleMatch(string name) => Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) && !IsOpaque;
 
     public override string ToString() => $"{Name} #{TagId} {EnumerationDefinition?.Values.JoinedBy(",")}";
 
@@ -218,7 +222,7 @@ public sealed partial class DataField : IEquatable<DataField>
         Name = newName.Required()
     };
 
-    internal bool? IsOptional_Deprecated;
+    internal bool IsOptional_Deprecated;
 
     internal DataField(DataField source) {
         Cast = source.Required().Cast;
@@ -235,89 +239,10 @@ public sealed partial class DataField : IEquatable<DataField>
         Version = source.Version;
     }
 
-    private bool _isFlags => EnumerationAsFlags.GetValueOrDefault();
+    private bool CompareEnumeration(DataField other) =>
+        (EnumerationDefinition.None() && other.EnumerationDefinition.None()) ||
+        ((EnumerationDefinition.SafeAny() && other.EnumerationDefinition.SafeAny()) && EnumerationDefinition.EquivalentTo(other.EnumerationDefinition));
 
-    private bool CompareEnumeration(DataField other) => EnumerationDefinition.EquivalentTo(other.EnumerationDefinition);
     [GeneratedRegex("^\\?\\d+$")]
     private static partial Regex NumbersRegex();
-}
-
-public class ILTagDataField : ILTagExplicit<DataField>
-{
-    public ILTagDataField(DataField field) : base(ILTagId.DataField, field) {
-    }
-
-    public ILTagDataField(Stream s) : base(ILTagId.DataField, s) {
-    }
-
-    protected override DataField FromBytes(byte[] bytes) {
-        ushort serVersion = 0;
-        return FromBytesHelper(bytes, s => new DataField {
-            Version = s.DecodeUShort(),
-            TagId = s.DecodeILInt(),
-            Name = s.DecodeString(),
-            IsOptional_Deprecated = s.DecodeNullableBool(),
-            IsOpaque = s.DecodeNullableBool(),
-            ElementTagId = s.DecodeNullableILInt(),
-            SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
-            Cast = s.HasBytes() ? (CastType?)s.DecodeNullableByte() : null,
-            SerializationVersion = serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0,
-            Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
-            EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
-            EnumerationAsFlags = (serVersion > 3) ? s.DecodeNullableBool() : null,
-            IsDeprecated = (serVersion > 4) ? s.DecodeNullableBool() : null,
-        });
-    }
-
-    protected override byte[] ToBytes(DataField value)
-        => TagHelpers.ToBytesHelper(s => {
-            s.EncodeUShort(Value.Version);
-            s.EncodeILInt(Value.TagId);
-            s.EncodeString(Value.Name);
-            s.EncodeBool(false);
-            s.EncodeBool(Value.IsOpaque.GetValueOrDefault());
-            s.EncodeILInt(Value.ElementTagId.GetValueOrDefault());
-            s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
-            s.EncodeByte((byte)value.Cast.GetValueOrDefault());
-            s.EncodeUShort(Value.SerializationVersion);
-            s.EncodeString(Value.Description);
-            EncodeEnumeration(s, value.EnumerationDefinition);
-            s.EncodeBool(Value.EnumerationAsFlags.GetValueOrDefault());
-            s.EncodeBool(Value.IsDeprecated.GetValueOrDefault());
-        });
-
-    private static EnumerationDictionary DecodeEnumeration(Stream s) {
-        var triplets = s.DecodeArray<Triplet, Triplet.Tag>(s => new Triplet.Tag(s));
-        return new EnumerationDictionary(triplets.SkipNulls().ToDictionary(t => t.Value, t => new EnumerationDetails(t.Name, t.Description)));
-    }
-
-    private static void EncodeEnumeration(Stream s, EnumerationDictionary enumeration)
-        => s.EncodeTagArray(enumeration?.Select(p => new Triplet(p.Key, p.Value.Name, p.Value.Description).AsTag));
-
-    private class Triplet : EnumerationDetails
-    {
-        public readonly ulong Value;
-
-        public Triplet(ulong value, string name, string description) : base(name, description) => Value = value;
-
-        public Tag AsTag => new(this);
-
-        public class Tag : ILTagExplicit<Triplet>
-        {
-            public Tag(Triplet v) : base(0, v) {
-            }
-
-            public Tag(Stream s) : base(s.DecodeTagId(), s) {
-            }
-
-            protected override Triplet FromBytes(byte[] bytes) => FromBytesHelper(bytes,
-                s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
-
-            protected override byte[] ToBytes(Triplet value) => TagHelpers.ToBytesHelper(s => {
-                s.EncodeILInt(Value.Value);
-                s.EncodeString(Value.Name);
-                s.EncodeString(Value.Description);
-            });
-        }
-    }
 }

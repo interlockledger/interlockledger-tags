@@ -34,6 +34,6 @@ namespace InterlockLedger.Tags;
 public static class DictionaryExtensions
 {
 
-    internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary oldEnumeration, EnumerationDictionary newEnumeration)
+    internal static bool IsSameAsOrExpandedBy(this EnumerationDictionary? oldEnumeration, EnumerationDictionary? newEnumeration)
         => oldEnumeration.None() || oldEnumeration.EqualTo(newEnumeration?.Take(oldEnumeration.Count));
 }

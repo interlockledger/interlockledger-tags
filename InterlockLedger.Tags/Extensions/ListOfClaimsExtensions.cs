@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags;
 public static class ListOfClaimsExtensions
 {
     public static List<Claim> AddCertificate(this List<Claim> claims, X509Certificate2 certificate) {
-        if (claims != null && certificate != null) {
+        if (claims is not null && certificate is not null) {
             claims.Add(new Claim(_publicKeyClaimType, TagPubKey.Resolve(certificate).TextualRepresentation));
             claims.Add(new Claim(_senderIdClaimType, KeyId.Resolve(certificate).TextualRepresentation));
             claims.Add(new Claim(_senderNameClaimType, certificate.FriendlyName));
@@ -46,7 +46,7 @@ public static class ListOfClaimsExtensions
     }
 
     public static List<Claim> AddKey(this List<Claim> claims, InterlockKey key) {
-        if (claims != null && key != null) {
+        if (claims is not null && key is not null) {
             claims.Add(new Claim(_publicKeyClaimType, key.PublicKey.TextualRepresentation));
             claims.Add(new Claim(_senderIdClaimType, key.Id.TextualRepresentation));
             claims.Add(new Claim(_senderNameClaimType, key.Name));
@@ -55,7 +55,7 @@ public static class ListOfClaimsExtensions
     }
 
     public static List<Claim> AddRoles(this List<Claim> claims, string[] roles) {
-        if (claims != null && roles != null)
+        if (claims is not null && roles is not null)
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
         return claims!;

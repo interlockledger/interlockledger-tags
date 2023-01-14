@@ -36,7 +36,7 @@
 namespace InterlockLedger.Tags;
 public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
 {
-    public ILTagArrayOfILInt(ulong[] Value) : base(ILTagId.ILIntArray, Value ?? Array.Empty<ulong>()) {
+    public ILTagArrayOfILInt(ulong[]? Value) : base(ILTagId.ILIntArray, Value ?? Array.Empty<ulong>()) {
     }
 
     public ulong this[int i] => Value[i];
@@ -45,6 +45,7 @@ public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
     }
 
     internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
+    protected override bool AreEquivalent(ILTagOf<ulong[]> other) => Value.EquivalentTo(other.Value);
 
     protected override ulong[] FromBytes(byte[] bytes) =>
        FromBytesHelper(bytes, s => {

@@ -33,7 +33,7 @@
 namespace InterlockLedger.Tags;
 public class ILTagBigDecimal : ILTag
 {
-    public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal) => throw new NotImplementedException();
+    public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal, string.Empty) => throw new NotImplementedException();
 
     public override object AsJson => throw new NotSupportedException();
 

@@ -29,15 +29,15 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
-
 namespace InterlockLedger.Tags;
+
 public sealed class ILTagNull : ILTag
 {
     public static readonly ILTagNull Instance = new();
 
-    public override object AsJson => null;
+    public override object? AsJson => null;
 
     protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
 
-    private ILTagNull() : base(ILTagId.Null) => TextualRepresentation = "null";
+    private ILTagNull() : base(ILTagId.Null, "null") { }
 }

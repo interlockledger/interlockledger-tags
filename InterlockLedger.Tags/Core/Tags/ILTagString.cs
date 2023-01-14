@@ -31,13 +31,15 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagString : ILTagExplicit<string>
+public class ILTagString : ILTagExplicit<string?>
 {
-    public ILTagString(string value) : base(ILTagId.String, value) => TextualRepresentation = Value;
+    public ILTagString(string? value) : base(ILTagId.String, value) => TextualRepresentation = Value.Safe();
 
-    internal ILTagString(Stream s) : base(ILTagId.String, s) => TextualRepresentation = Value;
+    internal ILTagString(Stream s) : base(ILTagId.String, s) => TextualRepresentation = Value.Safe();
 
-    protected override string FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
+    protected override bool AreEquivalent(ILTagOf<string?> other) => Value.Safe().Equals(other.Value.Safe());
 
-    protected override byte[] ToBytes(string value) => value?.UTF8Bytes();
+    protected override string? FromBytes(byte[] bytes) => bytes == null ? null : Encoding.UTF8.GetString(bytes);
+
+    protected override byte[] ToBytes(string? value) => value?.UTF8Bytes() ?? Array.Empty<byte>();
 }

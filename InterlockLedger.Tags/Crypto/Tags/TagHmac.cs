@@ -49,8 +49,6 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public bool IsEmpty => Data is not null && Data.None();
     public string? InvalidityCause { get; init; }
     public override string ToString() => Textual.FullRepresentation;
-    public override bool Equals(object? obj) => Textual.Equals(obj as TagHmac);
-    public override int GetHashCode() => TextualRepresentation.GetHashCode(StringComparison.InvariantCulture);
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
     public static Regex Mask { get; } = AnythingRegex();

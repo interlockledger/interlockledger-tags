@@ -88,6 +88,7 @@ public static class TagProvider
         [ILTagId.UInt64] = (s => new ILTagUInt64(s, ILTagId.UInt64), o => new ILTagUInt64(Convert.ToUInt64(o, CultureInfo.InvariantCulture))),
         [ILTagId.ILInt] = (s => new ILTagILInt(s, ILTagId.ILInt), o => new ILTagILInt(Convert.ToUInt64(o, CultureInfo.InvariantCulture))),
         [ILTagId.ILIntSigned] = (s => new ILTagILIntSigned(s, ILTagId.ILIntSigned), o => new ILTagILIntSigned(Convert.ToInt64(o, CultureInfo.InvariantCulture))),
+        [ILTagId.Timestamp] = (s => new ILTagTimestamp(s, ILTagId.Timestamp), o => new ILTagTimestamp(DateTimeOffset.Parse(Convert.ToString(o).Safe(), CultureInfo.InvariantCulture))),
         [ILTagId.Binary32] = (s => new ILTagBinary32(s), NoJson),
         [ILTagId.Binary64] = (s => new ILTagBinary64(s), NoJson),
         [ILTagId.Binary128] = (s => new ILTagBinary128(s), NoJson),

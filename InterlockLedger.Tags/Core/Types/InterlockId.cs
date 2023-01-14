@@ -64,20 +64,17 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
 
     public int CompareTo(InterlockId? other) => SafeCompare(this, other);
-    public sealed override bool Equals(object? obj) => Textual.Equals(obj as InterlockId);
     public ITextual<InterlockId> Textual => this;
     public string AsBase64 => Value.Data.Safe().ToSafeBase64();
     private static readonly string _invalidTextualRepresentation = "?";
         
     public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public static InterlockId Build(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
-    public bool Equals(InterlockId? other) => other is not null && Type == other.Type && Algorithm == other.Algorithm && Data.EqualTo(other.Data);
-    public sealed override int GetHashCode() => HashCode.Combine(Type, Data.Safe().Sum(b => (uint)b), Algorithm);
+    public bool Equals(InterlockId? other) => base.Equals(other);
+    protected override bool AreEquivalent(ILTagOf<Parts> other) => Type == other.Value.Type && Algorithm == other.Value.Algorithm && Data.EqualTo(other.Value.Data);
     public sealed override string ToString() => TextualRepresentation;
     public string ToFullString() => Value.ToFullString();
 
-    public static bool operator ==(InterlockId a, InterlockId b) => SafeCompare(a, b) == 0;
-    public static bool operator !=(InterlockId a, InterlockId b) => !(a == b);
     public static bool operator <(InterlockId a, InterlockId b) => SafeCompare(a, b) < 0;
     public static bool operator <=(InterlockId a, InterlockId b) => SafeCompare(a, b) <= 0;
     public static bool operator >(InterlockId a, InterlockId b) => SafeCompare(a, b) > 0;

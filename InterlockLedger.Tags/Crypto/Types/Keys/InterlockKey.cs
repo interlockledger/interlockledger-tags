@@ -72,11 +72,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         GC.SuppressFinalize(this);
     }
 
-    public override bool Equals(object obj) => Equals(obj as InterlockKey);
-
-    public bool Equals(InterlockKey other) => other != null && Id == other.Id;
-
-    public override int GetHashCode() => 2_108_858_624 + Id.GetHashCode();
+    public bool Equals(InterlockKey? other) => other is not null && Id == other.Id;
 
     public bool Matches(BaseKeyId senderId, TagPubKey publicKey) => Id == senderId && PublicKey.Equals(publicKey);
 
@@ -112,15 +108,15 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         [JsonIgnore]
         public bool Actionable => Purposes?.Contains(KeyPurpose.Action) ?? false;
 
-        public string Description { get; set; }
-        public BaseKeyId Id { get; set; }
-        public BaseKeyId Identity { get; set; }
-        public string Name { get; set; }
+        public string? Description { get; init; }
+        public BaseKeyId Id { get; init; }
+        public BaseKeyId Identity { get; init; }
+        public string? Name { get; init; }
         public IEnumerable<AppPermissions> Permissions { get; set; } = NoPermissions;
         public TagPubKey PublicKey { get; set; }
-        public KeyPurpose[] Purposes { get; set; }
-        public KeyStrength Strength { get; set; }
-        public ushort Version { get; set; }
+        public KeyPurpose[] Purposes { get; set; } = Array.Empty<KeyPurpose>();
+        public KeyStrength Strength { get; init; }
+        public ushort Version { get; init; }
 
         public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
 

@@ -159,15 +159,17 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
 
     protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
     protected override UpdatableParts ValueFromStream(StreamSpan s) {
         var version = s.DecodeUShort();
         return new UpdatableParts {
             Version = version,                                // Field index 0 //
-            Name = s.DecodeString(),                          // Field index 1 //
+            Name = s.DecodeString().Safe(),                   // Field index 1 //
             PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
             Id = s.Decode<KeyId>(),                           // Field index 3 //
             Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
-            Description = s.DecodeString(),                   // Field index 5 //
+            Description = s.DecodeString().Safe(),            // Field index 5 //
             PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
             Encrypted = s.DecodeByteArray(),                  // Field index 7 //
             LastSignatureTimeStamp = s.DecodeDateTimeOffset(),// Field index 8 //
@@ -190,6 +192,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         s.EncodeILInt((ulong)Value.Strength);                   // Field index 10 //
         return Task.FromResult(s);
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 
     private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStreamAsync(s));
 }

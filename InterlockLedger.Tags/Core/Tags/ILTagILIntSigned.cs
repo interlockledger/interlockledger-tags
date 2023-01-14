@@ -31,15 +31,9 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagILIntSigned : ILTagOfImplicit<long>, IEquatable<ILTagILIntSigned>
+public class ILTagILIntSigned : ILTagOfImplicit<long>
 {
     public ILTagILIntSigned(long value) : base(ILTagId.ILIntSigned, value) => TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
-
-    public override bool Equals(object obj) => Equals(obj as ILTagILIntSigned);
-
-    public bool Equals(ILTagILIntSigned other) => other != null && Value == other.Value;
-
-    public override int GetHashCode() => HashCode.Combine(TagId, Value.GetHashCode());
 
     internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) {
         Traits.ValidateTagId(alreadyDeserializedTagId);

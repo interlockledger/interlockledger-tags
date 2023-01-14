@@ -66,7 +66,7 @@ public class ECDsaInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             _data.Value.PublicKey = null;
         } else {
             var encryptionHandler = encrypt.Required();
-            if (_nextKeyParameters != null) {
+            if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
                 _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
                 _data.Value.PublicKey = NextPublicKey;

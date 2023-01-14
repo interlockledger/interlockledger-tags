@@ -42,7 +42,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
     public T this[int i] => Value?[i];
 
     public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
-
+    protected override bool AreEquivalent(ILTagOf<T[]> other) => Value.EquivalentTo(other.Value);
     internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
     }
 

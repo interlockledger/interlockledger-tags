@@ -33,7 +33,7 @@
 namespace InterlockLedger.Tags;
 public class ILTagBinary64 : ILTag
 {
-    public ILTagBinary64(Stream s) : base(ILTagId.Binary64) => throw new NotImplementedException();
+    public ILTagBinary64(Stream s) : base(ILTagId.Binary64, string.Empty) => throw new NotImplementedException();
 
     public override object AsJson => throw new NotSupportedException();
 

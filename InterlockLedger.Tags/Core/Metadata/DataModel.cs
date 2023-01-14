@@ -53,7 +53,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
     public override bool Equals(object obj) => Equals(obj as DataModel);
 
     public bool Equals(DataModel other) =>
-        other != null &&
+        other is not null &&
         PayloadName.SafeEqualsTo(other.PayloadName) &&
         PayloadTagId == other.PayloadTagId &&
         DataFields.EqualTo(other.DataFields) &&
@@ -77,13 +77,13 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
     public bool HasField(string fieldName) {
         return Find(DataFields, fieldName?.Split('.'));
 
-        static bool Find(IEnumerable<DataField> fields, string[] names) {
+        static bool Find(IEnumerable<DataField> fields, string[]? names) {
             return !(names is null || names.AnyNullOrWhiteSpace()) && FindFieldInPath(fields, names.AsEnumerable().GetEnumerator());
-            static bool FindFieldInPath(IEnumerable<DataField> fields, IEnumerator<string> names) {
+            static bool FindFieldInPath(IEnumerable<DataField>? fields, IEnumerator<string> names) {
                 bool result = true;
                 if (names.MoveNext()) {
                     var field = fields?.FirstOrDefault(df => df.IsVisibleMatch(names.Current));
-                    result = field != null && FindFieldInPath(field.SubDataFields, names);
+                    result = field is not null && FindFieldInPath(field.SubDataFields, names);
                 }
                 names.Dispose();
                 return result;
@@ -92,7 +92,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
     }
 
     public bool IsCompatible(DataModel other)
-        => other != null
+        => other is not null
            && other.PayloadName == PayloadName
            && other.PayloadTagId == PayloadTagId
            && CompareFields(other.DataFields, DataFields)
@@ -114,17 +114,17 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
         => Compare(oldFields,
                    newFields,
                    (o, n) => o.Name == n.Name // Names diverge
-                             && (o.TagId == n.TagId || o.IsOpaque.GetValueOrDefault()) // Changing type is only allowed if previously it was an opaque type
+                             && (o.TagId == n.TagId || o.IsOpaque) // Changing type is only allowed if previously it was an opaque type
                              && o.Version <= n.Version // Misversioning
                              && o.ElementTagId == n.ElementTagId // Changing type of array elements is bad
-                             && (!n.IsOpaque.GetValueOrDefault() || o.IsOpaque.GetValueOrDefault()) // Can't make field opaque afterwards
-                             && (n.IsDeprecated.GetValueOrDefault() || !o.IsDeprecated.GetValueOrDefault()) // Can't undeprecate field
+                             && (!n.IsOpaque || o.IsOpaque) // Can't make field opaque afterwards
+                             && (n.IsDeprecated || !o.IsDeprecated) // Can't undeprecate field
                              && (!o.HasSubFields || CompareFields(o.SubDataFields, n.SubDataFields)) // Incompatible subfields
                              && o.EnumerationDefinition.IsSameAsOrExpandedBy(n.EnumerationDefinition)); // Incompatible enumerations
 
-    private static bool CompareIndexes(IEnumerable<DataIndex> oldIndexes, IEnumerable<DataIndex> newIndexes)
-        => Compare(oldIndexes,
-                   newIndexes,
+    private static bool CompareIndexes(IEnumerable<DataIndex>? oldIndexes, IEnumerable<DataIndex>? newIndexes)
+        => Compare(oldIndexes.Safe(),
+                   newIndexes.Safe(),
                    (o, n) => o.Name == n.Name
                              && o.IsUnique == n.IsUnique
                              && o.ElementsAsString == n.ElementsAsString);

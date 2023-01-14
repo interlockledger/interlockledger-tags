@@ -1,5 +1,5 @@
 // ******************************************************************************************************************************
-//
+//  
 // Copyright (c) 2018-2021 InterlockLedger Network
 // All rights reserved.
 //
@@ -31,19 +31,21 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagILInt : ILTagOfImplicit<ulong>
-{
-    public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) => TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
 
-    internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) {
+public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>
+{
+    internal ILTagTimestamp(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Timestamp, s) {
         Traits.ValidateTagId(alreadyDeserializedTagId);
-        TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
+        TextualRepresentation = Value.ToString("u");
     }
 
-    protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
+    protected override DateTimeOffset ValueFromStream(StreamSpan s) =>
+        DateTimeOffset.FromUnixTimeMilliseconds(s.ILIntDecode().AsSignedILInt());
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
-        s.ILIntEncode(Value);
+        s.ILIntEncode(Value.ToUnixTimeMilliseconds().AsUnsignedILInt());
         return Task.FromResult(s);
     }
+    public ILTagTimestamp(DateTimeOffset value) : base(ILTagId.Timestamp, value)
+        => TextualRepresentation = Value.ToString("u");
 }

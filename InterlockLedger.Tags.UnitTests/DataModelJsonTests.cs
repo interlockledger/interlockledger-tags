@@ -284,7 +284,7 @@ public class DataModelJsonTests
         var encodedBytes = data.EncodedBytes;
         var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
         var expected = JsonSerializer.Serialize(data.AsJson, _options);
-        if (adjustExpected != null)
+        if (adjustExpected is not null)
             expected = adjustExpected(expected);
         var actual = JsonSerializer.Serialize(modelJson, _options);
         TestContext.WriteLine("===== Expected");

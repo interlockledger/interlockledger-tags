@@ -273,7 +273,7 @@ public class ILTagJsonTests
 
         public override bool Equals(object obj) => Equals(obj as ColorWrapper);
 
-        public bool Equals([AllowNull] ColorWrapper other) => other != null && EqualityComparer<InterlockColor>.Default.Equals(Background, other.Background) && EqualityComparer<InterlockColor>.Default.Equals(Foreground, other.Foreground);
+        public bool Equals([AllowNull] ColorWrapper other) => other is not null && EqualityComparer<InterlockColor>.Default.Equals(Background, other.Background) && EqualityComparer<InterlockColor>.Default.Equals(Foreground, other.Foreground);
 
         public override int GetHashCode() => HashCode.Combine(Background, Foreground);
     }
@@ -284,11 +284,11 @@ public class ILTagJsonTests
 
         public static bool operator !=(WrapperOf<T> left, WrapperOf<T> right) => !(left == right);
 
-        public static bool operator ==(WrapperOf<T> left, WrapperOf<T> right) => EqualityComparer<WrapperOf<T>>.Default.Equals(left, right);
+        public static bool operator ==(WrapperOf<T> left, WrapperOf<T> right) => left.Equals(right);
 
         public override bool Equals(object obj) => Equals(obj as WrapperOf<T>);
 
-        public bool Equals([AllowNull] WrapperOf<T> other) => other != null && EqualityComparer<T>.Default.Equals(Item, other.Item);
+        public bool Equals([AllowNull] WrapperOf<T> other) => other is not null && Item.Equals(other.Item);
 
         public override int GetHashCode() => HashCode.Combine(Item);
     }
