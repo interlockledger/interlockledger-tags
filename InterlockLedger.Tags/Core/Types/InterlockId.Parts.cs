@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags;
 
 public partial class InterlockId
 {
-    public sealed class Parts
+    public sealed class Parts : IEquatable<Parts>
     {
         public HashAlgorithm Algorithm;
         public byte[]? Data;
@@ -46,7 +46,9 @@ public partial class InterlockId
         public Parts() { }
 
         public override string ToString() => ToShortString();
-
+        public override int GetHashCode() => HashCode.Combine(Algorithm,Data,Type);
+        public override bool Equals(object? obj) => Equals(obj as Parts);
+        public bool Equals(Parts? other) => other is not null && Algorithm == other.Algorithm && Type == other.Type && Data.EqualTo(other.Data);
         internal static byte DefaultType;
 
         internal Parts(Stream s) {
@@ -126,5 +128,6 @@ public partial class InterlockId
             Algorithm = (HashAlgorithm)s.BigEndianReadUShort();
             Data = s.ReadBytes(length - sizeof(ushort) - 1);
         }
+
     }
 }
