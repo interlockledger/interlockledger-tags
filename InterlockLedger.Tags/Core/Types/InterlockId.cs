@@ -71,7 +71,6 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public static InterlockId Build(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
     public bool Equals(InterlockId? other) => base.Equals(other);
-    protected override bool AreEquivalent(ILTagOf<Parts> other) => Type == other.Value.Type && Algorithm == other.Value.Algorithm && Data.EqualTo(other.Value.Data);
     public sealed override string ToString() => TextualRepresentation;
     public string ToFullString() => Value.ToFullString();
 

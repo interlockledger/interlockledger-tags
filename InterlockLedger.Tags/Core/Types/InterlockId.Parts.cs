@@ -32,7 +32,6 @@
 
 #nullable enable
 
-
 namespace InterlockLedger.Tags;
 
 public partial class InterlockId
@@ -46,7 +45,14 @@ public partial class InterlockId
         public Parts() { }
 
         public override string ToString() => ToShortString();
-        public override int GetHashCode() => HashCode.Combine(Algorithm,Data,Type);
+        public override int GetHashCode() {
+            var hash = new HashCode();
+            hash.Add(Algorithm);
+            hash.AddBytes(Data ?? _noBytes);
+            hash.Add(Type);
+            return hash.ToHashCode();
+        }
+        private static readonly byte[] _noBytes  = Array.Empty<byte>();
         public override bool Equals(object? obj) => Equals(obj as Parts);
         public bool Equals(Parts? other) => other is not null && Algorithm == other.Algorithm && Type == other.Type && Data.EqualTo(other.Data);
         internal static byte DefaultType;

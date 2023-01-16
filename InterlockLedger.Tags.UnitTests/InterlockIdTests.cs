@@ -33,12 +33,38 @@
 using NUnit.Framework;
 
 namespace InterlockLedger.Tags;
+
+
+
+public class InterlockIdPlus : InterlockId
+{
+    public const byte Chain = 0;
+    public const byte Owner = 1;
+    public const byte Node = 2;
+    public const byte Role = 3;
+    public const byte Key = 4;
+    public const byte Contract = 5;
+
+    public static void Register() {
+        RegisterResolver(Chain, nameof(Chain), parts => new InterlockIdPlus(parts));
+        RegisterResolver(Node, nameof(Node), parts => new InterlockIdPlus(parts));
+        RegisterResolver(Role, nameof(Role), parts => new InterlockIdPlus(parts));
+        RegisterResolver(Contract, nameof(Contract), parts => new InterlockIdPlus(parts));
+        DefaultType = Chain;
+    }
+
+    protected InterlockIdPlus(Parts parts) : base(parts) {
+    }
+}
+
 [TestFixture]
 public class InterlockIdTests
 {
+    [OneTimeSetUp]
+    public void Setup() => InterlockIdPlus.Register();
+
     [Test]
     public void IsEmpty() {
-        InterlockId.DefaultType = OwnerId.TypeId;
         Assert.AreEqual(true, InterlockId.Build("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty);
         Assert.AreEqual(false, InterlockId.Build("#SHA3_256").IsEmpty);
     }
@@ -60,7 +86,7 @@ public class InterlockIdTests
         Assert.IsTrue(b < a);
         Assert.IsTrue(b <= a);
         Assert.IsTrue(a == c);
-        Assert.AreNotEqual(a,b);
+        Assert.AreNotEqual(a, b);
         Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
         Assert.AreEqual(a.GetHashCode(), c.GetHashCode());
     }
@@ -78,6 +104,59 @@ public class InterlockIdTests
     [TestCase(HashAlgorithm.SHA256, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 1, 1, 0 }, TestName = "SerializeOwnerIdFromParts#SHA512")]
     public byte[] SerializeOwnerIdFromParts(HashAlgorithm algorithm, byte[] data)
         => new OwnerId(new TagHash(algorithm, data)).EncodedBytes;
+
+    [TestCase(new byte[] { 43, 5, 0, 0, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "AAA#SHA1", "Chain!AAA#SHA1", TestName = "NewChainIdFromShortStringWithSHA1Suffix")]
+    [TestCase(new byte[] { 43, 5, 0, 1, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA256, new byte[] { 0, 0 }, "AAA", "Chain!AAA#SHA256", TestName = "NewChainIdFromShortStringWithSHA256Suffix")]
+    [TestCase(new byte[] { 43, 5, 0, 2, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA512, new byte[] { 0, 0 }, "AAA#SHA512", "Chain!AAA#SHA512", TestName = "NewChainIdFromShortStringWithSHA512Suffix")]
+    [TestCase(new byte[] { 43, 5, 0, 3, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA3_256, new byte[] { 0, 0 }, "AAA#SHA3_256", "Chain!AAA#SHA3_256", TestName = "NewChainIdFromShortStringWithSHA3_256Suffix")]
+    [TestCase(new byte[] { 43, 5, 0, 4, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, "AAA#SHA3_512", "Chain!AAA#SHA3_512", TestName = "NewChainIdFromShortStringWithSHA3_512Suffix")]
+    [TestCase(new byte[] { 43, 5, 0, 255, 255, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.Copy, new byte[] { 0, 0 }, "AAA#Copy", "Chain!AAA#Copy", TestName = "NewChainIdFromShortStringWithCopySuffix")]
+    [TestCase(new byte[] { 43, 3, 0, 3, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA3_256, new byte[] { }, "#SHA3_256", "Chain!#SHA3_256", TestName = "NewChainIdFromStringWithJustTheSuffix")]
+    [TestCase(new byte[] { 43, 35, 0, 1, 0, 227, 176, 196, 66, 152, 252, 28, 20, 154, 251, 244, 200, 153, 111, 185, 36, 39, 174, 65, 228, 100, 155, 147, 76, 164, 149, 153, 27, 120, 82, 184, 85 },
+InterlockIdPlus.Chain, HashAlgorithm.SHA256, new byte[] { 227, 176, 196, 66, 152, 252, 28, 20, 154, 251, 244, 200, 153, 111, 185, 36, 39, 174, 65, 228, 100, 155, 147, 76, 164, 149, 153, 27, 120, 82, 184, 85 },
+"47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU", "Chain!47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU#SHA256", TestName = "NewChainIdFromLargeStringWithoutPrefixOrSuffix")]
+    [TestCase(new byte[] { 43, 5, 0, 0, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "Chain!AAA#SHA1", "Chain!AAA#SHA1", TestName = "NewChainIdFromStringWithPrefix")]
+    [TestCase(new byte[] { 43, 5, 1, 0, 0, 0, 0 }, InterlockIdPlus.Owner, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "Owner!AAA#SHA1", "Owner!AAA#SHA1", TestName = "NewOwnerIdFromString")]
+    [TestCase(new byte[] { 43, 5, 2, 0, 0, 0, 0 }, InterlockIdPlus.Node, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "Node!AAA#SHA1", "Node!AAA#SHA1", TestName = "NewNodeIdFromString")]
+    [TestCase(new byte[] { 43, 5, 3, 0, 0, 0, 0 }, InterlockIdPlus.Role, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "Role!AAA#SHA1", "Role!AAA#SHA1", TestName = "NewRoleIdFromString")]
+    [TestCase(new byte[] { 43, 5, 4, 0, 0, 0, 0 }, InterlockIdPlus.Key, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "Key!AAA#SHA1", "Key!AAA#SHA1", TestName = "NewKeyIdFromString")]
+    public void NewInterlockIdFromString(byte[] bytes, byte type, HashAlgorithm algorithm, byte[] data, string textualRepresentation, string fullTextual) {
+        _ = data.Required();
+        var id = InterlockId.Build(textualRepresentation);
+        Assert.Multiple(() => {
+            Assert.That(id.TagId, Is.EqualTo(ILTagId.InterlockId));
+            Assert.That(id.Algorithm, Is.EqualTo(algorithm));
+            Assert.That(id.Data?.Length ?? 0, Is.EqualTo(data.Length));
+            Assert.That(id.Data, Is.EqualTo(data));
+            Assert.That(id.Type, Is.EqualTo(type));
+            Assert.That(id.ToString(), Is.EqualTo(RemoveOptionalParts(textualRepresentation)));
+            Assert.That(id.ToFullString(), Is.EqualTo(fullTextual));
+            Assert.That(id.EncodedBytes, Is.EqualTo(bytes));
+        });
+        using var ms = new MemoryStream(bytes);
+        var idFromBytes = InterlockId.Resolve(ms);
+        Assert.Multiple(() => {
+            Assert.That(id, Is.EqualTo(idFromBytes));
+            int hashCode = id.GetHashCode();
+            int expectedHashCode = idFromBytes.GetHashCode();
+            Assert.That(hashCode, Is.EqualTo(expectedHashCode), "GetHashCode()");
+#pragma warning disable NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
+            Assert.That(idFromBytes == id); //operators
+            Assert.That(idFromBytes != id, Is.False); //operators
+#pragma warning restore NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
+        });
+    }
+
+    private static string RemoveOptionalParts(string id) {
+        if (id is null)
+            return null;
+        if (id.StartsWith("Chain!", StringComparison.OrdinalIgnoreCase))
+            id = id[6..];
+        if (id.EndsWith("#SHA256", StringComparison.OrdinalIgnoreCase))
+            id = id[0..^7];
+        return id;
+    }
+
 
     private static MemoryStream ToStream(byte[] bytes) => new(bytes);
 }

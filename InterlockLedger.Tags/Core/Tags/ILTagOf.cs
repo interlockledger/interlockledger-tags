@@ -61,8 +61,8 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 
     protected abstract Task<Stream> ValueToStreamAsync(Stream s);
 
-    public sealed override int GetHashCode() => HashCode.Combine(Value);
-    public override bool Equals(object? obj) => Equals(obj as ILTagOf<T>);
+    public sealed override int GetHashCode() => HashCode.Combine(TagId, Value);
+    public sealed override bool Equals(object? obj) => Equals(obj as ILTagOf<T>);
     public bool Equals(ILTagOf<T>? other) =>
         other is not null && TagId == other.TagId && AreEquivalent(other);
     public bool Equals(T? otherValue) =>
@@ -74,7 +74,6 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
         left is null ? right is null : left.Equals(right);
     public static bool operator !=(ILTagOf<T> left, ILTagOf<T> right) =>
         !(left == right);
-
     public static bool operator ==(ILTagOf<T> left, T right) =>
         left is null ? right is null : left.Equals(right);
     public static bool operator !=(ILTagOf<T> left, T right) =>
