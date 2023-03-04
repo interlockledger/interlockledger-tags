@@ -86,6 +86,8 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
             var array = new T[arrayLength];
             for (var i = 0; i < arrayLength; i++) {
                 try {
+                    if (i > 9)
+                        Console.WriteLine(i);
                     array[i] = _decoder(s);
                 } catch (Exception e) {
                     Console.WriteLine($"Error decoding ILTagArrayOfILTag<{typeof(T).FullName}>, expecting {arrayLength} items but failed at item {i} with: {e}");

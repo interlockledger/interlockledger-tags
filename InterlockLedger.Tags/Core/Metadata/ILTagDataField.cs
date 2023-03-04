@@ -88,11 +88,11 @@ public class ILTagDataField : ILTagExplicit<DataField>
     {
         public readonly ulong Value;
 
-        public Triplet(ulong value, string name, string description) : base(name, description) => Value = value;
+        public Triplet(ulong value, string? name, string? description) : base(name.Required(), description.Required()) => Value = value;
 
         public Tag AsTag => new(this);
 
-        public class Tag : ILTagExplicit<Triplet>
+        public class Tag : ILTagOfExplicit<Triplet>
         {
             public Tag(Triplet v) : base(0, v) {
             }
@@ -100,14 +100,14 @@ public class ILTagDataField : ILTagExplicit<DataField>
             public Tag(Stream s) : base(s.DecodeTagId(), s) {
             }
 
-            protected override Triplet FromBytes(byte[] bytes) => FromBytesHelper(bytes,
-                s => new Triplet(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
-
-            protected override byte[] ToBytes(Triplet value) => TagHelpers.ToBytesHelper(s => {
+            protected override Triplet ValueFromStream(StreamSpan s) =>
+                new(s.DecodeILInt(), s.DecodeString(), s.DecodeString());
+            protected override Task<Stream> ValueToStreamAsync(Stream s) {
                 s.EncodeILInt(Value.Value);
                 s.EncodeString(Value.Name);
                 s.EncodeString(Value.Description);
-            });
+                return Task.FromResult(s);
+            }
         }
     }
 }

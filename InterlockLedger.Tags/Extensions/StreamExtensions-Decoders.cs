@@ -50,18 +50,17 @@ public static partial class StreamExtensions
                 : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
     }
 
-    public static T?[]? DecodeArray<T>(this Stream s) where T : class, ITaggableOf<T> {
-        var tagId = s.DecodeTagId();
-        return tagId == ILTagId.ILTagArray
-            ? (new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s).Value?.Select(element => element?.Value).ToArray())
-            : throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagOfExplicit<T>>).Name}");
-    }
+    public static T[]? DecodeArray<T>(this Stream s) where T : ITaggableOf<T> =>
+        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s));
 
-    public static T?[]? DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where T : notnull where TT : ILTagOfExplicit<T> {
+    public static T[]? DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where T : notnull where TT : ILTagOfExplicit<T> =>
+        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s, decoder));
+
+    private static T[]? DecodeArrayInternal<T>(Stream s, Func<Stream, ILTagArrayOfILTag<ILTagOfExplicit<T>>> decodeTagArray) where T : notnull {
         var tagId = s.DecodeTagId();
-        return tagId == ILTagId.ILTagArray
-            ? (new ILTagArrayOfILTag<TT>(s, decoder).Value?.Select(element => element.Value).ToArray())
-            : throw new InvalidDataException($"Not a {typeof(ILTagArrayOfILTag<TT>).Name}");
+        return tagId != ILTagId.ILTagArray
+            ? throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagOfExplicit<T>>).Name}")
+            : (decodeTagArray(s).Value?.SkipDefaults().Select(element => element.Value).SkipDefaults().ToArray());
     }
 
     public static bool DecodeBool(this Stream s) => s.Decode<ILTagBool>()?.Value ?? false;
