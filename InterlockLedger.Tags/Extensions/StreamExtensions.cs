@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 public static partial class StreamExtensions
 {
     public static async Task<byte[]> BuildPayloadBytesAsync(this Stream s, ulong tagId) {
@@ -43,11 +44,11 @@ public static partial class StreamExtensions
         return await ms.ReadAllBytesAsync().ConfigureAwait(false);
     }
 
-    public static BaseKeyId DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
+    public static BaseKeyId? DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
 
-    public static OwnerId DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
+    public static OwnerId? DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
 
-    public static Stream EncodeInterlockId(this Stream s, InterlockId value) => s.EncodeTag(value);
+    public static Stream EncodeInterlockId(this Stream s, InterlockId? value) => s.EncodeTag(value);
 
     /*
 

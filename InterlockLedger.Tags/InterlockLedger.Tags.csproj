@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>23.2.1</Version>
+        <Version>23.2.2</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>New ILTagTimestamp class and other breaking changes</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -64,7 +64,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="12.0.0" />
+        <PackageReference Include="InterlockLedger.Commons" Version="12.1.0" />
         <PackageReference Include="InterlockLedger.Tags.ILInt" Version="12.0.0" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
     </ItemGroup>
