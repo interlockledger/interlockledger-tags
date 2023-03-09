@@ -30,11 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
-
-
-using System;
-
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
@@ -53,7 +48,7 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
             var parsedVersion = Version.Parse(textualRepresentation);
             return new(parsedVersion);
         } catch (Exception ex) {
-            return ILTagVersion.InvalidBy(ex.Message);
+            return InvalidBy(ex.Message);
         }
     }
     public static ILTagVersion InvalidBy(string cause) =>

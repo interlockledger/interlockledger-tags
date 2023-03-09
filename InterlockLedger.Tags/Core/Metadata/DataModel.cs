@@ -38,32 +38,32 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
 {
     public const ushort CurrentVersion = 2;
 
-    public IEnumerable<DataField> DataFields { get; set; }
+    public IEnumerable<DataField> DataFields { get; set; } = Enumerable.Empty<DataField>();
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
-    public IEnumerable<DataIndex> Indexes { get; set; }
+    public IEnumerable<DataIndex> Indexes { get; set; } = Enumerable.Empty<DataIndex>();
 
-    public string PayloadName { get; set; }
+    public string? PayloadName { get; set; }
 
     public ulong PayloadTagId { get; set; }
 
     public ushort Version { get; set; } = CurrentVersion;
 
-    public override bool Equals(object obj) => Equals(obj as DataModel);
+    public override bool Equals(object? obj) => Equals(obj as DataModel);
 
-    public bool Equals(DataModel other) =>
+    public bool Equals(DataModel? other) =>
         other is not null &&
         PayloadName.SafeEqualsTo(other.PayloadName) &&
         PayloadTagId == other.PayloadTagId &&
         DataFields.EqualTo(other.DataFields) &&
         Indexes.EqualTo(other.Indexes) &&
         Version.Equals(other.Version) &&
-        Description.SafeTrimmedEqualsTo(other.Description);
+        Description.SafeEqualsTo(other.Description);
 
-    public ILTag FromJson(object o) => FromNavigable(o.AsNavigable() as Dictionary<string, object>);
+    public ILTag FromJson(object o) => FromNavigable(o.AsNavigable() as Dictionary<string, object?>);
 
-    public ILTag FromNavigable(Dictionary<string, object> json)
+    public ILTag FromNavigable(Dictionary<string, object?>? json)
         => FromPartialNavigable(json, PayloadTagId, DataFields, this);
 
     public override int GetHashCode()
@@ -98,19 +98,19 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
            && CompareFields(other.DataFields, DataFields)
            && CompareIndexes(other.Indexes, Indexes);
 
-    public Dictionary<string, object> ToJson(byte[] bytes) {
+    public Dictionary<string, object?> ToJson(byte[] bytes) {
         ulong offset = 0;
         return ToJson(bytes, PayloadTagId, DataFields, ref offset);
     }
 
     public override string ToString() => $"{PayloadName ?? "Unnamed"} #{PayloadTagId}";
 
-    private static bool Compare<T>(IEnumerable<T> older, IEnumerable<T> newer, Func<T, T, bool> areCompatible)
+    private static bool Compare<T>(IEnumerable<T>? older, IEnumerable<T>? newer, Func<T, T, bool> areCompatible)
         => older.None() // true as anything is acceptable if there was nothing from the previous version
            || newer.Safe().Count() >= older.Count() // false if too few elements in the new version
-           && older.Zip(newer, areCompatible).AllTrue(); // true only if all pre-existing elements are compatible
+           && older.Zip(newer!, areCompatible).AllTrue(); // true only if all pre-existing elements are compatible
 
-    private static bool CompareFields(IEnumerable<DataField> oldFields, IEnumerable<DataField> newFields)
+    private static bool CompareFields(IEnumerable<DataField>? oldFields, IEnumerable<DataField>? newFields)
         => Compare(oldFields,
                    newFields,
                    (o, n) => o.Name == n.Name // Names diverge
@@ -145,10 +145,12 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
         return ilint;
     }
 
-    private static ILTag DeserializeItem(DataField field, object fieldValue) {
+    private static ILTag DeserializeItem(DataField field, object? fieldValue) {
         try {
+            if (fieldValue is null)
+                return ILTagNull.Instance;
             if (fieldValue is JsonElement je) {
-                fieldValue = FromJsonElement(field, je);
+                fieldValue = FromJsonElement(field, je).Required();
             }
             return field.IsEnumeration && fieldValue is string value
                 ? field.EnumerationFromString(value)
@@ -159,7 +161,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             throw new InvalidOperationException($"Could not deserialize from json field {field.Name} of type {field.TagId}\r\nfrom {fieldValue}", e);
         }
 
-        static object FromJsonElement(DataField field, JsonElement je) {
+        static object? FromJsonElement(DataField field, JsonElement je) {
             return FromJsonElement(je, field.TagId, field.IsArray);
 
             static object ToTypedArray(ulong tagId, JsonElement.ArrayEnumerator items)
@@ -175,7 +177,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             static Dictionary<string, JsonElement> ToDictionary(JsonElement je)
                 => je.EnumerateObject().ToDictionary(prop => prop.Name, prop => prop.Value);
 
-            static object FromJsonElement(JsonElement je, ulong tagId, bool isArray)
+            static object? FromJsonElement(JsonElement je, ulong tagId, bool isArray)
                 => je.ValueKind switch {
                     JsonValueKind.Number => tagId.In(ILTagId.Int8, ILTagId.Int16, ILTagId.Int32, ILTagId.Int64)
                                                 ? je.GetInt64()
@@ -195,25 +197,28 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
     }
 
     private static ILTag DeserializePartialFromJson(DataField field, object fieldValue) => field.HasSubFields
-        ? FromPartialNavigable(fieldValue as Dictionary<string, object>, field.TagId, field.SubDataFields, null)
+        ? FromPartialNavigable(fieldValue as Dictionary<string, object?>, field.TagId, field.SubDataFields, null)
         : throw new InvalidDataException($"Unknown tagId {field.TagId}");
 
-    private static ILTag FromPartialNavigable(Dictionary<string, object> json, ulong tagId, IEnumerable<DataField> dataFields, DataModel dataModel) {
+    private static ILTag FromPartialNavigable(Dictionary<string, object?>? json, ulong tagId, IEnumerable<DataField>? dataFields, DataModel? dataModel) {
         if (json is null || json.Count == 0)
             return ILTagNull.Instance;
         byte[] tagsAsBytes = JsonToBytes(json, dataFields);
         return dataModel is null ? new ILTagUnknown(tagId, tagsAsBytes) : new ILTagUnknown(dataModel, tagsAsBytes);
 
-        byte[] JsonToBytes(Dictionary<string, object> json, IEnumerable<DataField> dataFields) {
+        byte[] JsonToBytes(Dictionary<string, object?> json, IEnumerable<DataField>? dataFields) {
             const ushort minVersion = 0;
             var tags = new List<ILTag>();
             ushort version = minVersion;
+            if (dataFields is null)
+                return Array.Empty<byte>();
             bool isVersioned = IsVersioned(dataFields);
             ScanFieldsToTags(ExtractVersion());
             return AppendRemainingBytes(tags.Select(t => t.EncodedBytes).SelectMany(b => b).ToArray());
+
             IEnumerable<DataField> ExtractVersion() {
                 if (!isVersioned) return dataFields;
-                if (json.TryGetValue(dataFields.First().Name, out var fieldValue)) {
+                if (json.TryGetValue(dataFields.First().Name, out var fieldValue) && fieldValue is not null) {
                     version = ToUInt16(fieldValue);
                 }
                 tags.Add(new ILTagUInt16(version));
@@ -252,7 +257,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             ? throw new InvalidCastException($"Value for field {field.Name} is a tag {tag.TagId} != {field.TagId}")
             : tag;
 
-    private static Dictionary<string, object?> ToJson(Span<byte> bytes, ulong expectedTagId, IEnumerable<DataField> dataFields, ref ulong offset) {
+    private static Dictionary<string, object?> ToJson(Span<byte> bytes, ulong expectedTagId, IEnumerable<DataField>? dataFields, ref ulong offset) {
         var json = new Dictionary<string, object?>();
         ulong tagId = DecodePartialILInt(bytes, ref offset);
         if (tagId != expectedTagId)
@@ -261,20 +266,22 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
         if (length > (((ulong)bytes.Length) - offset))
             throw new InvalidOperationException($"Invalid number of bytes, expected {length + offset} but came {bytes.Length} ");
         ushort version = 0;
-        var isVersioned = IsVersioned(dataFields);
-        var firstField = true;
-        foreach (var field in dataFields) {
-            if (isVersioned && field.Version > version)
-                break;
-            if (field.HasSubFields) {
-                json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
-            } else {
-                var value = DecodePartial(field.TagId, bytes, ref offset);
-                json[field.Name] = field.IsEnumeration && !value.Traits.IsNull ? field.EnumerationToString(value) : value.AsJson;
-                if (isVersioned && firstField && field.IsVersion)
-                    version = (ushort)value.AsJson!;
+        if (dataFields != null) {
+            var isVersioned = IsVersioned(dataFields);
+            var firstField = true;
+            foreach (var field in dataFields) {
+                if (isVersioned && field.Version > version)
+                    break;
+                if (field.HasSubFields) {
+                    json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
+                } else {
+                    var value = DecodePartial(field.TagId, bytes, ref offset);
+                    json[field.Name] = field.IsEnumeration && !value.Traits.IsNull ? field.EnumerationToString(value) : value.AsJson;
+                    if (isVersioned && firstField && field.IsVersion)
+                        version = (ushort)value.AsJson!;
+                }
+                firstField = false;
             }
-            firstField = false;
         }
         if (offset < length)
             json["_RemainingBytes_"] = bytes.Slice((int)offset, (int)((ulong)bytes.Length - offset)).ToArray();
@@ -303,8 +310,8 @@ public class ILTagDataModel : ILTagExplicit<DataModel>
             s.DecodeILInt(); // drop deprecated field
             return new DataModel {
                 PayloadTagId = payloadTagId,
-                DataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
-                Indexes = s.DecodeTagArray<ILTagDataIndex>()?.Select(t => t.Value),
+                DataFields = s.DecodeTagArray<ILTagDataField>().Safe().Select(t => t.Value),
+                Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Value),
                 PayloadName = s.DecodeString(),
                 Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
                 Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null
@@ -315,8 +322,8 @@ public class ILTagDataModel : ILTagExplicit<DataModel>
         => TagHelpers.ToBytesHelper(s => {
             s.EncodeILInt(Value.PayloadTagId);
             s.EncodeILInt(0); // deprecated field
-            s.EncodeTagArray(Value.DataFields?.Select(df => new ILTagDataField(df)));
-            s.EncodeTagArray(Value.Indexes?.Select(index => new ILTagDataIndex(index)));
+            s.EncodeTagArray(Value.DataFields.Select(df => new ILTagDataField(df)));
+            s.EncodeTagArray(Value.Indexes.Select(index => new ILTagDataIndex(index)));
             s.EncodeString(Value.PayloadName);
             s.EncodeUShort(Value.Version);
             s.EncodeString(Value.Description.TrimToNull());

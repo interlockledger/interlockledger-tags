@@ -41,12 +41,12 @@ public class EnumerationDetails : IEquatable<EnumerationDetails>
         Description = description;
     }
 
-    public string Description { get; set; }
-    public string Name { get; set; }
+    public string? Description { get; set; }
+    public string Name { get; set; } = "?";
 
-    public override bool Equals(object obj) => Equals(obj as EnumerationDetails);
+    public override bool Equals(object? obj) => Equals(obj as EnumerationDetails);
 
-    public bool Equals(EnumerationDetails other) => other is not null && Description == other.Description && Name == other.Name;
+    public bool Equals(EnumerationDetails? other) => other is not null && Description.SafeEqualsTo(other.Description) && Name == other.Name;
 
     public override int GetHashCode() => HashCode.Combine(Description, Name);
 

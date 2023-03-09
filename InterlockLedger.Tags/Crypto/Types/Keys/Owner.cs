@@ -35,13 +35,15 @@ namespace InterlockLedger.Tags;
 public abstract class Owner : ISigningKey, IPasswordProvider
 {
     public InterlockKey AsInterlockKey => new(this);
-    public string Description { get; protected set; }
-    public string Email { get; protected set; }
+    public string? Description { get; protected set; }
+    public string? Email { get; protected set; }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public BaseKeyId Id { get; protected set; }
-    public string Name { get; protected set; }
+    public string Name { get; set; }
+    public TagPubKey PublicKey { get; protected set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public OwnerId OwnerId => (OwnerId)Id;
     public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
-    public TagPubKey PublicKey { get; protected set; }
     public KeyPurpose[] Purposes => keyPurposes;
     public Algorithm SignAlgorithm { get; protected set; }
     public KeyStrength Strength { get; protected set; }

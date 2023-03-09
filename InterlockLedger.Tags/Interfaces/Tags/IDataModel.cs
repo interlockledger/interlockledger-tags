@@ -37,7 +37,7 @@ public interface IDataModel
 
     ILTag FromJson(object o);
 
-    ILTag FromNavigable(Dictionary<string, object> json);
+    ILTag FromNavigable(Dictionary<string, object?>? json);
 
-    Dictionary<string, object> ToJson(byte[] bytes);
+    Dictionary<string, object?> ToJson(byte[] bytes);
 }

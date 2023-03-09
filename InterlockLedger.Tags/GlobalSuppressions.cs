@@ -30,10 +30,4 @@
 //
 // ******************************************************************************************************************************
 
-using System.Security.Claims;
-
-namespace InterlockLedger.Tags;
-public static class ClaimsIdentityExtensions
-{
-    public static SenderIdentity Sender(this ClaimsIdentity identity) => new(identity?.Claims ?? Enumerable.Empty<Claim>());
-}
+[assembly: SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>")]

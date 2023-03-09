@@ -35,14 +35,14 @@ using System.IO.MemoryMappedFiles;
 
 namespace InterlockLedger.Tags;
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T>
+public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
 {
     public MemoryMappedFileBackedILTag(ulong tagId, MemoryMappedViewStream mmvs, long offset, ulong length) : base(tagId, default) {
         _mmvs = mmvs.Required();
         Initialize(offset, length, mmvs.Length);
     }
 
-    public override object AsJson => null;
+    public override object AsJson => null!;
 
     public ulong Length { get; private set; }
     public long Offset { get; private set; }

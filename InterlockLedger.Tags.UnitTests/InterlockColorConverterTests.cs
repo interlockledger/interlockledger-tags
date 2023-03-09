@@ -30,10 +30,10 @@
 //
 // ******************************************************************************************************************************
 
+using NUnit.Framework;
+
 using System.ComponentModel;
 using System.Globalization;
-
-using NUnit.Framework;
 
 namespace InterlockLedger.Tags;
 public class InterlockColorConverterTests

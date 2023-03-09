@@ -30,9 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
-
-
 namespace InterlockLedger.Tags;
 public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
 {
@@ -43,25 +40,32 @@ public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
 
     internal ILTagArrayOfILInt(Stream s) : base(ILTagId.ILIntArray, s) {
     }
-
     internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
     protected override bool AreEquivalent(ILTagOf<ulong[]> other) => Value.EquivalentTo(other.Value);
 
     protected override ulong[] FromBytes(byte[] bytes) =>
-       FromBytesHelper(bytes, s => {
-           var length = (int)s.ILIntDecode();
-           var result = new ulong[length];
-           for (var i = 0; i < length; i++) {
-               result[i] = s.ILIntDecode();
-           }
-           return result;
-       });
+        FromBytesHelper(bytes, s =>
+            s.Length switch {
+                > 0 => DecodeArray(s),
+                _ => Array.Empty<ulong>(),
+            });
+
+    private static ulong[] DecodeArray(Stream s) {
+        var length = (int)s.ILIntDecode();
+        var result = new ulong[length];
+        for (var i = 0; i < length; i++) {
+            result[i] = s.ILIntDecode();
+        }
+        return result;
+    }
 
     protected override byte[] ToBytes(ulong[] value)
         => TagHelpers.ToBytesHelper(s => {
-            s.ILIntEncode((ulong)value.Length);
-            foreach (var ilint in value)
-                s.ILIntEncode(ilint);
+            if (value.Length > 0) {
+                s.ILIntEncode((ulong)value.Length);
+                foreach (var ilint in value)
+                    s.ILIntEncode(ilint);
+            }
         });
 
     private static ulong[] Elicit(object? opaqueValue)

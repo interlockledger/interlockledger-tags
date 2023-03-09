@@ -59,6 +59,9 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T> where T : notnull
     protected sealed override T DeserializeInner(Stream s) {
         if ((_valueLength ??= s.ILIntDecode()) > int.MaxValue && KeepEncodedBytesInMemory)
             throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
+        ulong length = _valueLength.Value;
+        if (s is StreamSpan sp && (ulong)(sp.Length - sp.Position) < length)
+            throw new InvalidDataException($"Decoded tag content length ({length}) is larger than total available bytes in stream");
         using var ss = new StreamSpan(s, _valueLength.Value);
         return ValueFromStream(ss);
     }

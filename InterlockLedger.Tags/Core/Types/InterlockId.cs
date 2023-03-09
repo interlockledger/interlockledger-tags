@@ -67,7 +67,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public ITextual<InterlockId> Textual => this;
     public string AsBase64 => Value.Data.Safe().ToSafeBase64();
     private static readonly string _invalidTextualRepresentation = "?";
-        
+
     public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public static InterlockId Build(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
     public bool Equals(InterlockId? other) => base.Equals(other);

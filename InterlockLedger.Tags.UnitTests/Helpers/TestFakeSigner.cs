@@ -111,7 +111,6 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
     private readonly bool _generateEmptySignatures;
 
     private readonly RSAParameters _rsaParameters;
-
     private TestFakeSigner(bool generateEmptySignatures) {
         Name = "Fake Owner";
         Id = new OwnerId(TagHash.Empty);

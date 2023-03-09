@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 public interface IBaseKey : IDisposable
 {
-    string Description { get; }
+    string? Description { get; }
     BaseKeyId Id { get; }
     string Name { get; }
     IEnumerable<AppPermissions> Permissions { get; }

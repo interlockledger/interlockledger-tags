@@ -39,6 +39,7 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<TagHash>))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
+[SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>", Justification = "Implemented sealed in base class")]
 public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<TagHash>
 {
     private TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }

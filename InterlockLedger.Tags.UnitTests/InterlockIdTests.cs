@@ -140,10 +140,8 @@ InterlockIdPlus.Chain, HashAlgorithm.SHA256, new byte[] { 227, 176, 196, 66, 152
             int hashCode = id.GetHashCode();
             int expectedHashCode = idFromBytes.GetHashCode();
             Assert.That(hashCode, Is.EqualTo(expectedHashCode), "GetHashCode()");
-#pragma warning disable NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
             Assert.That(idFromBytes == id); //operators
             Assert.That(idFromBytes != id, Is.False); //operators
-#pragma warning restore NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
         });
     }
 

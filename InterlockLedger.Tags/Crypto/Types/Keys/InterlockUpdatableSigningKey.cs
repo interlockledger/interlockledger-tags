@@ -138,7 +138,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
     public class UpdatableParts : InterlockKey.Parts
     {
         public const ushort InterlockUpdatableSigningKeyVersion = 0x0001;
-        public byte[] Encrypted;
+        public byte[]? Encrypted;
         public DateTimeOffset LastSignatureTimeStamp;
         public ulong SignaturesWithCurrentKey;
 

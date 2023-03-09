@@ -92,19 +92,13 @@ public class DataFieldTests
     }
 
     [Test]
-    public void SerializeAndDeserializeWithEnumeration() {
-        TestWith(_dataFieldWithEnumeration);
-    }
+    public void SerializeAndDeserializeWithEnumeration() => TestWith(_dataFieldWithEnumeration);
 
     [Test]
-    public void SerializeAndDeserializeWithoutEnumeration() {
-        TestWith(_dataFieldWithoutEnumeration);
-    }
+    public void SerializeAndDeserializeWithoutEnumeration() => TestWith(_dataFieldWithoutEnumeration);
 
     [Test]
-    public void SerializeAndDeserializeWithFlagsEnumeration() {
-        TestWith(_dataFieldWithFlagsEnumeration);
-    }
+    public void SerializeAndDeserializeWithFlagsEnumeration() => TestWith(_dataFieldWithFlagsEnumeration);
 
     private static readonly DataField _dataFieldWithEnumeration =
         new() {

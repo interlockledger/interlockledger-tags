@@ -79,9 +79,9 @@ public static partial class StreamExtensions
 
     [Obsolete("Use DecodeTimestamp: needs field to be defined as ILTagTimestamp")]
     public static DateTimeOffset DecodeDateTimeOffset(this Stream s, bool doIt) => doIt ? s.DecodeDateTimeOffset() : DateTimeOffset.UnixEpoch;
-    public static Dictionary<string, string> DecodeDictionary(this Stream s) => s.Decode<ILTagStringDictionary>()!.Value;
+    public static Dictionary<string, string?> DecodeDictionary(this Stream s) => s.Decode<ILTagStringDictionary>()!.Value;
 
-    public static Dictionary<string, T> DecodeDictionary<T>(this Stream s) where T : ILTag {
+    public static Dictionary<string, T?> DecodeDictionary<T>(this Stream s) where T : ILTag {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.Dictionary
             ? new ILTagDictionary<T>(s).Value
@@ -94,14 +94,14 @@ public static partial class StreamExtensions
 
     public static int DecodeInt(this Stream s) => s.Decode<ILTagInt32>()?.Value ?? 0;
 
-    public static ILTag[] DecodeSequence(this Stream s) {
+    public static ILTag?[] DecodeSequence(this Stream s) {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.Sequence ? new ILTagSequence(s).Value : throw new InvalidDataException($"Not a {nameof(ILTagSequence)}");
     }
 
     public static string? DecodeString(this Stream s) => s.Decode<ILTagString>()?.Value;
 
-    public static Dictionary<string, string> DecodeStringDictionary(this Stream s) {
+    public static Dictionary<string, string?> DecodeStringDictionary(this Stream s) {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.StringDictionary
             ? new ILTagStringDictionary(s).Value

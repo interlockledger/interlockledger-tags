@@ -33,11 +33,11 @@
 namespace InterlockLedger.Tags;
 public static partial class StreamExtensions
 {
-    public static Stream EncodeAny<T>(this Stream s, T value) where T : ITaggable
+    public static Stream EncodeAny<T>(this Stream s, T? value) where T : ITaggable
         => s.EncodeTag(value?.AsILTag);
 
     public static Stream EncodeArray<T>(this Stream s, IEnumerable<T>? values) where T : class, ITaggableOf<T>
-        => s.EncodeTag(new ILTagArrayOfILTag<ILTagOf<T>>(values?.Select(v => v.AsTag).ToArray()));
+        => s.EncodeTag(new ILTagArrayOfILTag<ILTagOf<T>>(values.Safe().Select(v => v.AsTag).ToArray()));
 
     public static Stream EncodeBool(this Stream s, bool value)
         => s.EncodeTag(value ? ILTagBool.True : ILTagBool.False);
@@ -58,7 +58,7 @@ public static partial class StreamExtensions
     public static Stream EncodeDateTimeOffset(this Stream s, DateTimeOffset value)
         => s.EncodeILInt(value.AsMilliseconds());
 
-    public static Stream EncodeDictionary(this Stream s, Dictionary<string, string> dictionary)
+    public static Stream EncodeDictionary(this Stream s, Dictionary<string, string?> dictionary)
         => s.EncodeTag(new ILTagStringDictionary(dictionary));
 
     public static Stream EncodeILInt(this Stream s, ulong value)
@@ -82,7 +82,7 @@ public static partial class StreamExtensions
         => tag is null ? s.EncodeNull() : tag.SerializeIntoAsync(s).Result!;
 
     public static Stream EncodeTagArray<T>(this Stream s, IEnumerable<T>? values) where T : ILTag
-        => s.EncodeTag(new ILTagArrayOfILTag<T>(values?.ToArray()));
+        => s.EncodeTag(new ILTagArrayOfILTag<T>(values.Safe().ToArray()));
 
     public static Stream EncodeTimestamp(this Stream s, DateTimeOffset value)
         => s.EncodeTag(new ILTagTimestamp(value));

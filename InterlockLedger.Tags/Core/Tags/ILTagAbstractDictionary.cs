@@ -33,7 +33,7 @@
 namespace InterlockLedger.Tags;
 public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T?>> where T : class
 {
-    public T? this[string key] => Value?[key];
+    public T? this[string key] => Value[key];
 
     protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T?> value) : base(tagId, value) {
     }
@@ -56,8 +56,10 @@ public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<stri
 
     protected override Dictionary<string, T?> FromBytes(byte[] bytes)
         => FromBytesHelper(bytes, s => {
-            var length = (int)s.ILIntDecode();
             var result = new Dictionary<string, T?>();
+            if (bytes.Length == 0)
+                return result;
+            var length = (int)s.ILIntDecode();
             for (var i = 0; i < length; i++) {
                 result[s.DecodeString()!] = DecodeValue(s);
             }
@@ -66,7 +68,7 @@ public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<stri
 
     protected override byte[] ToBytes(Dictionary<string, T?> value)
         => TagHelpers.ToBytesHelper(s => {
-            if (value is not null) {
+            if (value is not null && value.Count > 0) {
                 s.ILIntEncode((ulong)value.Count);
                 foreach (var pair in value) {
                     s.EncodeString(pair.Key);

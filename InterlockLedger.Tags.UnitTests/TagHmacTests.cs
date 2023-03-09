@@ -53,7 +53,7 @@ public class TagHmacTests
     [TestCase("#HMAC-SHA3_256", HashAlgorithm.SHA3_256, new byte[] { })]
     [TestCase("#HMAC-SHA256", HashAlgorithm.SHA256, new byte[] { })]
     public void NewTagHmacFromString(string textual, HashAlgorithm algorithm, byte[] data) {
-        DoAsserts(algorithm, data, ITextual<TagHmac>.Parse(textual));   
+        DoAsserts(algorithm, data, ITextual<TagHmac>.Parse(textual));
 
         static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHmac tag) {
             Assert.AreEqual(ILTagId.Hmac, tag.TagId);

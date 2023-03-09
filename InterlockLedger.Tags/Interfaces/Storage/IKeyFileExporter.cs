@@ -33,5 +33,5 @@
 namespace InterlockLedger.Tags;
 public interface IKeyFileExporter
 {
-    ExportedKeyFile ExportKeyFile(string name);
+    ExportedKeyFile? ExportKeyFile(string name);
 }

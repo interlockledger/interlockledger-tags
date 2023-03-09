@@ -36,21 +36,21 @@ public class DataIndex : IEquatable<DataIndex>
 {
     public const string PrimaryIndexName = "~Primary~";
 
-    public IEnumerable<DataIndexElement> Elements { get; set; }
+    public IEnumerable<DataIndexElement> Elements { get; set; } = Enumerable.Empty<DataIndexElement>();
 
     [JsonIgnore]
     public string ElementsAsString {
-        get => Elements?.JoinedBy("|");
-        set => Elements = DataIndexElement.ParseList(value.Required());
+        get => Elements.JoinedBy("|");
+        init => Elements = DataIndexElement.ParseList(value.Required());
     }
 
     public bool IsUnique { get; set; }
 
-    public string Name { get; set; }
+    public string Name { get; set; } = "?";
 
-    public override bool Equals(object obj) => Equals(obj as DataIndex);
+    public override bool Equals(object? obj) => Equals(obj as DataIndex);
 
-    public bool Equals(DataIndex other) =>
+    public bool Equals(DataIndex? other) =>
         other is not null &&
         ElementsAsString == other.ElementsAsString &&
         IsUnique == other.IsUnique &&
@@ -58,7 +58,7 @@ public class DataIndex : IEquatable<DataIndex>
 
     public override int GetHashCode() => HashCode.Combine(ElementsAsString, IsUnique, Name);
 
-    public override string ToString() => ElementsAsString;
+    public override string ToString() => $"{Name}^{ElementsAsString}";
 }
 
 public class DataIndexElement
@@ -67,7 +67,9 @@ public class DataIndexElement
 
     public string FieldPath { get; set; } // in the form 'FieldName.ChildrenFieldName'
 
-    public string Function { get; set; }
+    public DataIndexElement(string fieldPath) => FieldPath = fieldPath;
+
+    public string? Function { get; set; }
 
     [JsonIgnore]
     public bool HasFunction => !string.IsNullOrWhiteSpace(Function);
@@ -91,8 +93,7 @@ public class DataIndexElement
         return elements;
     }
 
-    private static DataIndexElement FromParts(string[] parts) => new() {
-        FieldPath = parts[0],
+    private static DataIndexElement FromParts(string[] parts) => new(parts[0]) {
         DescendingOrder = parts.Length > 1 && parts[1] == "-",
         Function = parts.Length > 2 ? parts[2].TrimToNull() : null
     };
@@ -108,9 +109,9 @@ public class ILTagDataIndex : ILTagExplicit<DataIndex>
 
     protected override DataIndex FromBytes(byte[] bytes)
         => FromBytesHelper(bytes, s => new DataIndex {
-            Name = s.DecodeString(),
+            Name = s.DecodeString().WithDefault("?"),
             IsUnique = s.DecodeBool(),
-            ElementsAsString = s.DecodeString(),
+            ElementsAsString = s.DecodeString().Safe(),
         });
 
     protected override byte[] ToBytes(DataIndex value)

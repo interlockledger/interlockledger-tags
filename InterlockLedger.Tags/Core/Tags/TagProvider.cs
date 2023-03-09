@@ -48,7 +48,7 @@ public static class TagProvider
         return DeserializeFrom(ms);
     }
 
-    public static ILTag DeserializeFromJson(ulong tagId, object payload)
+    public static ILTag DeserializeFromJson(ulong tagId, object? payload)
         => payload is null
             ? ILTagNull.Instance
             : !_deserializers.ContainsKey(tagId)
@@ -59,7 +59,7 @@ public static class TagProvider
 
     public static ILTag NoJson(object json) => throw new InvalidOperationException($"Can't deserialize from json");
 
-    public static void RegisterDeserializer(ulong id, Func<Stream, ILTag> deserializer, Func<object, ILTag> jsonDeserializer = null) {
+    public static void RegisterDeserializer(ulong id, Func<Stream, ILTag> deserializer, Func<object, ILTag>? jsonDeserializer = null) {
         if (HasDeserializer(id))
             throw new ArgumentException($"Can't redefine deserializer for id: {id}", nameof(id));
         _deserializers[id] = (

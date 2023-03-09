@@ -30,23 +30,21 @@
 //
 // ******************************************************************************************************************************
 
-#nullable disable
-
 namespace InterlockLedger.Tags;
 
 public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
 {
-    public ILTagArrayOfILTag(IEnumerable<T> value) : this(ILTagId.ILTagArray, value?.ToArray()) { }
+    public ILTagArrayOfILTag(IEnumerable<T> value) : this(ILTagId.ILTagArray, value.ToArray()) { }
 
-    public override object AsJson => Value is null ? null : new JsonRepresentation(Value);
-    public T this[int i] => Value?[i];
+    public override object AsJson => new JsonRepresentation(Value);
+    public T this[int i] => Value[i];
 
-    public IEnumerable<TV> GetValues<TV>() => (Value ?? Enumerable.Empty<T>()).Select(t => t is ILTagOf<TV> tv ? tv.Value : default);
+    public IEnumerable<TV> GetValues<TV>() => Value.Select(t => t is ILTagOf<TV> tv ? tv.Value : default).SkipDefaults()!;
     protected override bool AreEquivalent(ILTagOf<T[]> other) => Value.EquivalentTo(other.Value);
     internal ILTagArrayOfILTag(Stream s) : base(ILTagId.ILTagArray, s) {
     }
 
-    internal ILTagArrayOfILTag(Stream s, Func<Stream, T> decoder) :
+    internal ILTagArrayOfILTag(Stream s, Func<Stream, T?> decoder) :
         base(ILTagId.ILTagArray, s, (it) => { ((ILTagArrayOfILTag<T>)it)._decoder = decoder; }) { }
 
     internal static ILTagArrayOfILTag<T> FromJson(object json) {
@@ -66,7 +64,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
                             throw new InvalidCastException($"Value in Array is a tag {tag.TagId} != {elementTagId}");
                         list.Add((T)tag);
                     } else {
-                        list.Add(TagProvider.DeserializeFromJson(elementTagId, item) as T);
+                        list.Add((T)TagProvider.DeserializeFromJson(elementTagId, item) as T);
                     }
                 }
                 return list.ToArray();
@@ -81,25 +79,32 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
     }
 
     protected override T[] ValueFromStream(StreamSpan s) {
-        if (s.Length > 0) {
-            var arrayLength = (int)s.ILIntDecode();
-            var array = new T[arrayLength];
-            for (var i = 0; i < arrayLength; i++) {
-                try {
-                    if (i > 9)
-                        Console.WriteLine(i);
-                    array[i] = _decoder(s);
-                } catch (Exception e) {
-                    Console.WriteLine($"Error decoding ILTagArrayOfILTag<{typeof(T).FullName}>, expecting {arrayLength} items but failed at item {i} with: {e}");
+        if (s.Length > s.Position) {
+            try {
+                var arrayLength = (int)s.ILIntDecode();
+                var list = new List<T>(arrayLength);
+                for (var i = 0; i < arrayLength; i++) {
+                    try {
+                        var item = _decoder(s);
+                        if (item is not null)
+                            list.Add(item);
+                        else
+                            break;
+                    } catch (Exception e) {
+                        Console.WriteLine($"Error decoding ILTagArrayOfILTag<{typeof(T).FullName}>, expecting {arrayLength} items but failed at item {i} with: {e}");
+                        break;
+                    }
                 }
+                return list.ToArray();
+            } catch (Exception e) {
+                Console.WriteLine($"Error decoding ILTagArrayOfILTag<{typeof(T).FullName}>, failed with: {e}");
             }
-            return array;
         }
-        return null;
+        return Array.Empty<T>();
     }
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
-        if (Value is not null) {
+        if (Value.Length > 0) {
             s.ILIntEncode((ulong)Value.Length);
             foreach (var tag in Value)
                 s.EncodeTag(tag);
@@ -108,9 +113,9 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
 
     }
 
-    private Func<Stream, T> _decoder = s => AllowNull(s.DecodeTag());
+    private Func<Stream, T?> _decoder = s => AllowNull(s.DecodeTag());
 
-    private static T AllowNull(ILTag tag) => (tag.Traits.IsNull || tag is not T) ? default : (T)tag;
+    private static T? AllowNull(ILTag tag) => (tag.Traits.IsNull || tag is not T) ? default : (T)tag;
 
     private class JsonRepresentation
     {
@@ -119,7 +124,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
             Elements = values.Select(e => e.AsJson).ToArray();
         }
 
-        public object[] Elements { get; set; }
+        public object?[] Elements { get; set; }
 
         public ulong ElementTagId { get; set; }
 

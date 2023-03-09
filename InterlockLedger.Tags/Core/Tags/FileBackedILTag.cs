@@ -35,7 +35,7 @@ using System.Diagnostics;
 namespace InterlockLedger.Tags;
 
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-public class FileBackedILTag<T> : ILTagOfExplicit<T>
+public class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
 {
     public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : this(tagId) {
         _fileInfo = fileInfo.Required();
