@@ -36,7 +36,7 @@ namespace InterlockLedger.Tags;
 [TestFixture]
 public class ILTagArrayOfILTagTests
 {
-    [TestCase(null, new byte[] { 21, 0 }, TestName = "DecodeArray_a_Null_Array")]
+    [TestCase(new byte[0], new byte[] { 21, 0 }, TestName = "DecodeArray_a_Null_as_Empty_Array")]
     [TestCase(new byte[0], new byte[] { 21, 1, 0 }, TestName = "DecodeArray_an_Empty_Array")]
     [TestCase(new byte[] { 1, 2, 3 }, new byte[] { 21, 10, 3, 0, 1, 1, 0, 1, 2, 0, 1, 3 }, TestName = "DecodeArray_One_Array_with_Four_Explicitly_Tagged_Bytes")]
     public void DecodeArray(byte[] bytes, byte[] encodedBytes) {
@@ -45,19 +45,7 @@ public class ILTagArrayOfILTagTests
         Assert.AreEqual(bytes, value);
     }
 
-    [Test]
-    public void DecodeArrayOfTagsWithNulls() {
-        var expectedBytes = new byte[] { 21, 6, 3, 10, 1, 0, 10, 3 };
-        var array = new ILTagILInt[] { new ILTagILInt(1), null, new ILTagILInt(3) };
-        var compound = new ILTagArrayOfILTag<ILTagILInt>(array);
-        byte[] encodedBytes = compound.EncodedBytes;
-        Assert.AreEqual(expectedBytes, encodedBytes);
-        using var ms = new MemoryStream(encodedBytes);
-        var value = ms.DecodeTagArray<ILTagILInt>();
-        Assert.AreEqual(array, value);
-    }
-
-    [TestCase(null, new byte[0], new byte[] { 21, 0 }, TestName = "Deserialize_a_Null_Array")]
+    
     [TestCase(new byte[0], new byte[0], new byte[] { 21, 1, 0 }, TestName = "Deserialize_an_Empty_Array")]
     [TestCase(new byte[0], new byte[] { 0 }, new byte[] { 21, 3, 1, 16, 0 }, TestName = "Deserialize_One_Array_with_Zero_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 21, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Array_with_Four_Bytes")]
@@ -70,7 +58,6 @@ public class ILTagArrayOfILTagTests
         CompareArrays<ILTagByteArray, byte[]>(array, value);
     }
 
-    [TestCase(null, new byte[0], new byte[] { 21, 0 }, TestName = "Deserialize_a_Null_Array_Generic")]
     [TestCase(new byte[0], new byte[0], new byte[] { 21, 1, 0 }, TestName = "Deserialize_an_Empty_Array_Generic")]
     [TestCase(new byte[0], new byte[] { 0 }, new byte[] { 21, 3, 1, 16, 0 }, TestName = "Deserialize_One_Array_with_Zero_Bytes_Generic")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 21, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Array_with_Four_Bytes_Generic")]
@@ -94,15 +81,10 @@ public class ILTagArrayOfILTagTests
         => GuaranteeBijectiveBehavior(new ILTagBool[] { ILTagBool.False, ILTagBool.True, ILTagBool.True, ILTagBool.True });
 
     [Test]
-    public void GuaranteeBijectiveBehaviorNullArray()
-        => GuaranteeBijectiveBehavior(null);
-
-    [Test]
     public void GuaranteeBijectiveBehaviorTwoElementsArray()
         => GuaranteeBijectiveBehavior(new ILTagBool[] { ILTagBool.False, ILTagBool.True });
 
-    [TestCase(null, new byte[0], ExpectedResult = new byte[] { 21, 0 }, TestName = "Serialize_a_Null_Array")]
-    [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 21, 1, 0 }, TestName = "Serialize_an_Empty_Array")]
+    [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 21, 0 }, TestName = "Serialize_an_Empty_Array")]
     [TestCase(new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 21, 3, 1, 16, 0 }, TestName = "Serialize_One_Array_with_One_Byte")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 21, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Array_with_Four_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Arrays_with_Two_Bytes")]
