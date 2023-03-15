@@ -54,12 +54,11 @@ public static partial class StreamExtensions
     public static Stream EncodeColor(this Stream s, InterlockColor value)
         => s.EncodeTag(new ILTagUInt32(value.RGBA));
 
-    [Obsolete("Use EncodeTimestamp: needs field to be defined as ILTagTimestamp")]
     public static Stream EncodeDateTimeOffset(this Stream s, DateTimeOffset value)
         => s.EncodeILInt(value.AsMilliseconds());
 
-    public static Stream EncodeDictionary(this Stream s, Dictionary<string, string?> dictionary)
-        => s.EncodeTag(new ILTagStringDictionary(dictionary));
+    public static Stream EncodeDictionary(this Stream s, Dictionary<string, string?>? dictionary)
+        => s.EncodeTag(new ILTagStringDictionary(dictionary ?? new Dictionary<string, string?>()));
 
     public static Stream EncodeILInt(this Stream s, ulong value)
         => s.EncodeTag(new ILTagILInt(value));

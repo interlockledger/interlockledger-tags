@@ -35,7 +35,7 @@ public static class IEnumerableOfExtensions
 {
     public static ILTagArrayOfILTag<TA> ToTagArray<T, TA>(this IEnumerable<T> list, Func<T, TA> convert) where TA : ILTag {
         convert.Required();
-        return new ILTagArrayOfILTag<TA>(list?.Select(st => convert(st)).ToArray());
+        return new ILTagArrayOfILTag<TA>(list.Select(st => convert(st)).ToArray());
     }
 
     public static ILTagArrayOfILTag<ILTagOf<T>> ToTagArrayFrom<T>(this IEnumerable<T> list, Func<T, ILTagOf<T>> convert)

@@ -60,39 +60,39 @@ public class AES256Engine : ISymmetricEngine
     }
 
     public (byte[] cipherData, byte[] key, byte[] iv) Encrypt(byte[] clearData,
-                                                              Action<MemoryStream, byte[], byte[]> writeHeader = null,
-                                                              byte[] key = null,
-                                                              byte[] iv = null) {
+                                                              byte[]? key = null,
+                                                              byte[]? iv = null,
+                                                              Action<MemoryStream, byte[], byte[]>? writeHeader = null) {
         clearData.Required();
-        return EncryptInner(writeHeader, key, iv, (cs) => cs.Write(clearData, 0, clearData.Length));
+        return EncryptInner(key, iv, (cs) => cs.Write(clearData, 0, clearData.Length), writeHeader);
     }
 
     public (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream,
-                                                              Action<MemoryStream, byte[], byte[]> writeHeader = null,
-                                                              byte[] key = null,
-                                                              byte[] iv = null) {
+                                                              byte[]? key = null,
+                                                              byte[]? iv = null,
+                                                              Action<MemoryStream, byte[], byte[]>? writeHeader = null) {
         clearDataStream.Required();
-        return EncryptInner(writeHeader, key, iv, (cs) => clearDataStream.CopyTo(cs));
+        return EncryptInner(key, iv, (cs) => clearDataStream.CopyTo(cs), writeHeader);
     }
 
-    private static SymmetricAlgorithm BuildAlgorithm(byte[] key, byte[] iv) {
+    private static SymmetricAlgorithm BuildAlgorithm(byte[]? key, byte[]? iv) {
         var AES = Aes.Create();
         AES.KeySize = 256;
         AES.BlockSize = 128;
         AES.Mode = CipherMode.CBC;
         AES.Padding = PaddingMode.Zeros;
-        if (iv == null || iv.Length != 16)
+        if (iv is null || iv.Length != 16)
             AES.GenerateIV();
         else
             AES.IV = iv;
-        if (key == null || key.Length != 32)
+        if (key is null || key.Length != 32)
             AES.GenerateKey();
         else
             AES.Key = key;
         return AES;
     }
 
-    private static (byte[] cipherData, byte[] key, byte[] iv) EncryptInner(Action<MemoryStream, byte[], byte[]> writeHeader, byte[] key, byte[] iv, Action<CryptoStream> writeTo) {
+    private static (byte[] cipherData, byte[] key, byte[] iv) EncryptInner(byte[]? key, byte[]? iv, Action<CryptoStream> writeTo, Action<MemoryStream, byte[], byte[]>? writeHeader) {
         using var algorithm = BuildAlgorithm(key, iv);
         using var ms = new MemoryStream();
         writeHeader?.Invoke(ms, algorithm.Key, algorithm.IV);

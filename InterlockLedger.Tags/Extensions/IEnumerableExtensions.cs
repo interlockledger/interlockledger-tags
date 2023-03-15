@@ -35,7 +35,9 @@ using IEnum = System.Collections.IEnumerable;
 namespace InterlockLedger.Tags;
 public static class IEnumerableExtensions
 {
-    public static IEnumerable<T?> AsList<T>(this IEnum items) where T : class => items.AsNavigableList().Select(o => o as T).ToArray();
+    public static IEnumerable<T> SafeSkipNulls<T>(this IEnumerable<T?>? values) where T : class => values.Safe().Skip((T? item) => item is null)!;
+
+    public static IEnumerable<T> AsList<T>(this IEnum items) where T : class => items.AsNavigableList().Select(o => o as T).SafeSkipNulls().ToArray();
 
     public static IEnumerable<object?> AsNavigableList(this IEnum items) => from object item in items select item?.AsNavigable();
 }

@@ -64,7 +64,7 @@ public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
 
         public static bool operator ==(Parts left, Parts right) => left.Equals(right);
 
-        public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
+        public override bool Equals(object? obj) => obj is Parts parts && Equals(parts);
 
         public bool Equals(Parts other) => EqualityComparer<byte[]>.Default.Equals(EncryptedIV, other.EncryptedIV) && EqualityComparer<byte[]>.Default.Equals(EncryptedKey, other.EncryptedKey) && EqualityComparer<TagHash>.Default.Equals(PublicKeyHash, other.PublicKeyHash) && ReaderId == other.ReaderId;
 

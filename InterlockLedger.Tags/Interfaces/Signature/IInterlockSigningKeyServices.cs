@@ -39,7 +39,7 @@ public interface IInterlockSigningKeyServices
 
     InterlockSigningKeyData CreateUsing(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
 
-    InterlockSigningKey Open(InterlockSigningKeyData key, string password);
+    InterlockSigningKey? Open(InterlockSigningKeyData key, string password);
 
     bool SupportsAlgorithm(Algorithm algorithm);
 }

@@ -58,7 +58,7 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
         CheckMissingPassword(password);
         if (password.Length < 6)
             throw new ArgumentException($"Password '{password}' is too weak!!!", nameof(password));
-        (byte[] cipherData, _, _) = Encrypt(value.OpenReadingStreamAsync().Result, (s, _key, _iv) => WriteHeader(password, s, _key, _iv), key, iv);
+        (byte[] cipherData, _, _) = Encrypt(value.OpenReadingStreamAsync().Result, key, iv, (s, _key, _iv) => WriteHeader(password, s, _key, _iv));
         _encrypted = new TagEncrypted(CipherAlgorithm.AES256, cipherData);
     }
 

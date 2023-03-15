@@ -40,7 +40,7 @@ public struct TagEncryptedParts : IEquatable<TagEncryptedParts>
 
     public static bool operator ==(TagEncryptedParts left, TagEncryptedParts right) => left.Equals(right);
 
-    public override bool Equals(object obj) => obj is TagEncryptedParts parts && Equals(parts);
+    public override bool Equals(object? obj) => obj is TagEncryptedParts parts && Equals(parts);
 
     public bool Equals(TagEncryptedParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(CipherData, other.CipherData);
 

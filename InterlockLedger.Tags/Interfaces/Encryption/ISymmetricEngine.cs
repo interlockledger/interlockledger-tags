@@ -38,8 +38,11 @@ public interface ISymmetricEngine
     byte[] Decrypt(byte[] cipherData, Func<MemoryStream, (byte[] key, byte[] iv)> readHeader);
 
     (byte[] cipherData, byte[] key, byte[] iv) Encrypt(byte[] clearData,
-                                                       Action<MemoryStream, byte[], byte[]> writeHeader = null,
-                                                       byte[] key = null,
-                                                       byte[] iv = null);
-    (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream, Action<MemoryStream, byte[], byte[]> writeHeader = null, byte[] key = null, byte[] iv = null);
+                                                       byte[]? key = null,
+                                                       byte[]? iv = null,
+                                                       Action<MemoryStream, byte[], byte[]>? writeHeader = null);
+    (byte[] cipherData, byte[] key, byte[] iv) Encrypt(Stream clearDataStream,
+                                                       byte[]? key = null,
+                                                       byte[]? iv = null,
+                                                       Action<MemoryStream, byte[], byte[]>? writeHeader = null);
 }

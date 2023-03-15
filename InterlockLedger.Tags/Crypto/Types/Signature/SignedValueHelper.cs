@@ -40,7 +40,7 @@ public static class SignedValueHelper
         var version = ms.DecodeUShort();
         var signedcontent = ms.DecodeTag();
         return signedcontent.ValueIs<ISignable>(out var signable)
-            ? signable.ResolveSigned(version, ms)
+            ? signable.Required().ResolveSigned(version, ms)
             : throw new InvalidDataException("Not a signable content");
     }
 }

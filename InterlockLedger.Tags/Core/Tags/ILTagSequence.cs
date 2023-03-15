@@ -34,18 +34,21 @@ using System.Collections;
 
 namespace InterlockLedger.Tags;
 
-public class ILTagSequence : ILTagArrayOfILTag<ILTag?>
+public class ILTagSequence : ILTagArrayOfILTag<ILTag>
 {
-    public ILTagSequence(params ILTag[]? value) : base(ILTagId.Sequence, value) {
+    public ILTagSequence(params ILTag[] value) : base(ILTagId.Sequence, value) {
     }
 
     public ILTagSequence(object opaqueValue) : this(Elicit(opaqueValue)) {
     }
 
-    public override object? AsJson => Value.Select(e => e is null ? null : new { e.TagId, Value = e.AsJson }).ToArray();
+    public override object AsJson => Value.Select(e => new SequenceItem(e.TagId, e.AsJson)).ToArray();
+
     public int Length => Value.Length;
     public new ILTag? this[int i] => Value[i];
     internal ILTagSequence(Stream s) : base(ILTagId.Sequence, s) {
     }
-    private static ILTag[]? Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : null;
+    private static ILTag[] Elicit(object opaqueValue) => opaqueValue is IEnumerable items ? items.AsList<ILTag>().ToArray() : Array.Empty<ILTag>();
 }
+
+internal record SequenceItem(ulong TagId, object? Value);

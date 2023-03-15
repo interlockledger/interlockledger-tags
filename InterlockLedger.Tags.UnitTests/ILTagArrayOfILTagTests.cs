@@ -84,7 +84,7 @@ public class ILTagArrayOfILTagTests
     public void GuaranteeBijectiveBehaviorTwoElementsArray()
         => GuaranteeBijectiveBehavior(new ILTagBool[] { ILTagBool.False, ILTagBool.True });
 
-    [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 21, 0 }, TestName = "Serialize_an_Empty_Array")]
+    [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 21, 1, 0 }, TestName = "Serialize_an_Empty_Array")]
     [TestCase(new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 21, 3, 1, 16, 0 }, TestName = "Serialize_One_Array_with_One_Byte")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 21, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Array_with_Four_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Arrays_with_Two_Bytes")]

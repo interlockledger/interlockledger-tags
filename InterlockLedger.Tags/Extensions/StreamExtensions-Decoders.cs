@@ -74,11 +74,8 @@ public static partial class StreamExtensions
         return tagValue is null ? InterlockColor.Transparent : InterlockColor.From(tagValue.Value);
     }
 
-    [Obsolete("Use DecodeTimestamp: needs field to be defined as ILTagTimestamp")]
-    public static DateTimeOffset DecodeDateTimeOffset(this Stream s) => s.DecodeILInt().AsDateTime();
-
-    [Obsolete("Use DecodeTimestamp: needs field to be defined as ILTagTimestamp")]
-    public static DateTimeOffset DecodeDateTimeOffset(this Stream s, bool doIt) => doIt ? s.DecodeDateTimeOffset() : DateTimeOffset.UnixEpoch;
+    public static DateTimeOffset DecodeOldDateTimeOffset(this Stream s) => s.DecodeILInt().AsDateTime();
+    public static DateTimeOffset DecodeOldDateTimeOffset(this Stream s, bool doIt) => doIt ? s.DecodeOldDateTimeOffset() : DateTimeOffset.UnixEpoch;
     public static Dictionary<string, string?> DecodeDictionary(this Stream s) => s.Decode<ILTagStringDictionary>()!.Value;
 
     public static Dictionary<string, T?> DecodeDictionary<T>(this Stream s) where T : ILTag {

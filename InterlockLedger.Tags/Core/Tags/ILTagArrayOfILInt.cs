@@ -61,8 +61,8 @@ public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
 
     protected override byte[] ToBytes(ulong[] value)
         => TagHelpers.ToBytesHelper(s => {
+            s.ILIntEncode((ulong)value.Length);
             if (value.Length > 0) {
-                s.ILIntEncode((ulong)value.Length);
                 foreach (var ilint in value)
                     s.ILIntEncode(ilint);
             }

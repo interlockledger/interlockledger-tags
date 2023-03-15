@@ -68,12 +68,13 @@ public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<stri
 
     protected override byte[] ToBytes(Dictionary<string, T?> value)
         => TagHelpers.ToBytesHelper(s => {
-            if (value is not null && value.Count > 0) {
+            if (value is not null) {
                 s.ILIntEncode((ulong)value.Count);
-                foreach (var pair in value) {
-                    s.EncodeString(pair.Key);
-                    EncodeValue(s, pair.Value);
-                }
+                if (value.Count > 0)
+                    foreach (var pair in value) {
+                        s.EncodeString(pair.Key);
+                        EncodeValue(s, pair.Value);
+                    }
             }
         });
 }

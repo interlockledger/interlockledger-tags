@@ -117,7 +117,7 @@ public class ILTagDictionaryTests
     }
 
     [TestCase(new string[0], null, new byte[0], ExpectedResult = new byte[] { 30, 0 }, TestName = "Serialize_a_Null_Dictionary")]
-    [TestCase(new string[0], new byte[0], new byte[0], ExpectedResult = new byte[] { 30, 0 }, TestName = "Serialize_an_Empty_Dictionary")]
+    [TestCase(new string[0], new byte[0], new byte[0], ExpectedResult = new byte[] { 30, 1, 0 }, TestName = "Serialize_an_Empty_Dictionary")]
     [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Serialize_One_Dictionary_with_One_Byte")]
     [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Dictionary_with_Four_Bytes")]
     [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Serialize_One_Dictionary_with_Two_Bytes")]

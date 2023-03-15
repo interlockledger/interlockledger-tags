@@ -35,13 +35,7 @@ namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
 public class BaseKeyId : InterlockId
-{
-    public static BaseKeyId? OptionalResolve(Stream s) {
-        s.Required();
-        return s.Position < s.Length ? Resolve(s) as BaseKeyId : null;
-    }
-
-    public static void RegisterKeyIdTypes() {
+{    public static void RegisterKeyIdTypes() {
         OwnerId.RegisterResolver();
         KeyId.RegisterResolver();
     }

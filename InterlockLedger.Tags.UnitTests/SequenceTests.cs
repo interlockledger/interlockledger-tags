@@ -91,7 +91,7 @@ public class SequenceTests
     public byte[] SerializeHeterogenousILTagSequence(string firstElement, ulong secondElement)
         => new ILTagSequence(new ILTagString(firstElement), new ILTagILInt(secondElement)).EncodedBytes;
 
-    [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 22, 0 }, TestName = "Serialize_an_Empty_Sequence")]
+    [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 22, 1, 0 }, TestName = "Serialize_an_Empty_Sequence")]
     [TestCase(new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 22, 3, 1, 16, 0 }, TestName = "Serialize_One_Sequence_with_One_Byte")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 22, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Sequence_with_Four_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 22, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Sequences_with_Two_Bytes")]

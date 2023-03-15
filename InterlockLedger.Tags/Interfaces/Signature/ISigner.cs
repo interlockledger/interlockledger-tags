@@ -34,12 +34,12 @@ namespace InterlockLedger.Tags;
 public interface ISigner : ISigningContext, IIdentifiedPublicKey
 {
     Algorithm Algorithm { get; }
-    InterlockKey AsInterlockKey { get; }
+    InterlockKey? AsInterlockKey { get; }
     KeyStrength Strength { get; }
 
     TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null, Algorithm algorithm = Algorithm.RSA);
 
-    IdentifiedSignature SignWithId(byte[] data) => new(Key.Sign(data), Id, PublicKey);
+    IdentifiedSignature SignWithId(byte[] data) => new(Key.Sign(data), Id.Required(), PublicKey);
 
     bool Supports(KeyPurpose purpose, ulong? appId = null);
 }

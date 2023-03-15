@@ -39,16 +39,16 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
         _keyParameters = ms.Decode<TagRSAParameters>();
     }
 
-    public override TagPubKey NextPublicKey => (_nextKeyParameters ?? _keyParameters.Required()).PublicKey;
+    public override TagPubKey? NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
 
     public override void DestroyKeys() => _destroyKeysAfterSigning = true;
 
     public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(_data.Strength);
 
-    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null)
+    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null)
         => Update(encrypt, RSAHelper.HashAndSign(data, _keyParameters.Required().Value.Parameters));
 
-    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null)
+    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null)
         => Update(encrypt, RSAHelper.HashAndSignBytes(data, _keyParameters.Required().Value.Parameters));
 
     private bool _destroyKeysAfterSigning;
@@ -56,18 +56,18 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
     private TagRSAParameters? _keyParameters;
     private TagRSAParameters? _nextKeyParameters;
 
-    private TagSignature Update(Func<byte[], byte[]> encrypt, byte[] signatureData) {
+    private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
         if (_destroyKeysAfterSigning) {
             _keyParameters = null;
             _nextKeyParameters = null;
             _data.Value.Encrypted = null;
             _data.Value.PublicKey = null!;
         } else {
-            var encryptionHandler = encrypt ?? throw new ArgumentNullException(nameof(encrypt));
+            var encryptionHandler = encrypt.Required();
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
                 _data.Value.Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
-                _data.Value.PublicKey = NextPublicKey;
+                _data.Value.PublicKey = _keyParameters.PublicKey;
                 _nextKeyParameters = null;
                 _data.SignaturesWithCurrentKey = 0;
             } else {

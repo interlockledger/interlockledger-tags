@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<InterlockKey>, IBaseKey
 {
-    public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions> permissions, KeyStrength? strength = null, string description = null)
+    public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions>? permissions, KeyStrength? strength = null, string? description = null)
         : this(new Parts(purposes,
             name,
             description,
@@ -56,7 +56,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
 
     [JsonIgnore]
     public override object AsJson => Value;
-    public string Description => Value.Description;
+    public string? Description => Value.Description;
     public BaseKeyId Id => Value.Id;
     public BaseKeyId Identity => Value.Identity;
     public string Name => Value.Name;
@@ -86,21 +86,23 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
     {
         public const ushort InterlockKeyVersion = 0x0004;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Parts() {
         }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        public Parts(KeyPurpose[] purposes, string name, string description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId, IEnumerable<AppPermissions> permissions) {
+        public Parts(KeyPurpose[] purposes, string name, string? description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId, IEnumerable<AppPermissions>? permissions) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
             Version = InterlockKeyVersion;
-            Name = name;
-            Purposes = purposes.Required();
+            Name = name.Required();
+            Purposes = purposes.Required().Distinct().ToArray();
             PublicKey = pubKey.Required();
             Description = description;
             Strength = strength;
-            if (Actionable && permissions.None())
+            Permissions = permissions.Safe().Distinct();
+            if (Actionable && Permissions.None())
                 Purposes = Purposes.Where(pu => pu != KeyPurpose.Action).ToArray(); // Remove Action Purpose
-            Permissions = permissions;
             Identity = new KeyId(TagHash.HashSha256Of(_hashable));
             Id = keyId ?? Identity;
         }
@@ -111,7 +113,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         public string? Description { get; init; }
         public BaseKeyId Id { get; init; }
         public BaseKeyId Identity { get; init; }
-        public string? Name { get; init; }
+        public string Name { get; init; }
         public IEnumerable<AppPermissions> Permissions { get; set; } = NoPermissions;
         public TagPubKey PublicKey { get; set; }
         public KeyPurpose[] Purposes { get; set; } = Array.Empty<KeyPurpose>();
@@ -144,7 +146,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
 
         internal ulong[] PurposesAsUlongs {
             get => AsUlongs(Purposes);
-            set => Purposes = value?.Select(u => (KeyPurpose)u).ToArray();
+            set => Purposes = value.Safe().Select(u => (KeyPurpose)u).Distinct().ToArray();
         }
 
         private ulong _firstAppId;
@@ -154,13 +156,13 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes())
             .Append(PurposesAsILInts.EncodedBytes);
 
-        private static ulong[] AsUlongs(KeyPurpose[] purposes) => purposes?.Select(p => (ulong)p).ToArray();
+        private static ulong[] AsUlongs(IEnumerable<KeyPurpose> purposes) => purposes.Select(p => (ulong)p).ToArray();
 
-        private string GetPermissions(string separator, Func<AppPermissions, string> formatter = null, string firstSep = null)
+        private string GetPermissions(string separator, Func<AppPermissions, string>? formatter = null, string? firstSep = null)
             => Actionable
                 ? Permissions.None()
                     ? "No actions"
-                    : $"{firstSep ?? separator}{Permissions.JoinedBy(separator, formatter)}"
+                    : $"{firstSep ?? separator}{Permissions.JoinedBy(separator, formatter!)}"
                 : string.Empty;
     }
 
@@ -186,16 +188,16 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
                 Version = version,                                // Field index 0 //
                 Name = s.DecodeString(),                          // Field index 1 //
                 PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
-                Id = s.Decode<BaseKeyId>(),                       // Field index 3 //
-                Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
+                Id = InterlockId.Resolve<BaseKeyId>(s),           // Field index 3 //
+                Identity = InterlockId.Resolve<BaseKeyId>(s),     // Field index 4 //
                 Description = s.DecodeString(),                   // Field index 5 //
-                PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
-                FirstAppId = version > 0 ? s.DecodeILInt() : 0,        // Field index 7  - since version 1 //
+                PublicKey = s.Decode<TagPubKey>().Required(),     // Field index 6 //
+                FirstAppId = version > 0 ? s.DecodeILInt() : 0,   // Field index 7  - since version 1 //
                 Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
                 FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
             };
             if (version > 3)
-                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
+                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value).Distinct().ToArray();
             return result;
         });
 

@@ -33,9 +33,9 @@
 namespace InterlockLedger.Tags;
 public interface IUpdatingSigner : ISigner
 {
-    BaseKeyId Identity { get; }
+    BaseKeyId? Identity { get; }
     DateTimeOffset LastSignatureTimeStamp { get; }
-    TagPubKey NextPublicKey { get; }
+    TagPubKey? NextPublicKey { get; }
     ulong SignaturesWithCurrentKey { get; }
 
     IUpdatingSigner DestroyKeys();

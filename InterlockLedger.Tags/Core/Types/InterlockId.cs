@@ -78,7 +78,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public static bool operator <=(InterlockId a, InterlockId b) => SafeCompare(a, b) <= 0;
     public static bool operator >(InterlockId a, InterlockId b) => SafeCompare(a, b) > 0;
     public static bool operator >=(InterlockId a, InterlockId b) => SafeCompare(a, b) >= 0;
-    public static InterlockId Resolve(Stream s) => new Parts(s).Resolve();
+    public static T Resolve<T>(Stream s) where T : InterlockId => (T)new Parts(s).Resolve();
 
     protected InterlockId(string textualRepresentation) : this(new Parts(textualRepresentation)) { }
     protected InterlockId(byte type, HashAlgorithm algorithm, byte[]? data) : this(new Parts(type, algorithm, data)) { }

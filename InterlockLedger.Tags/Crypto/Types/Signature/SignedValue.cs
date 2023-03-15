@@ -35,8 +35,10 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 {
     public const int CurrentVersion = 1;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
     }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public override object AsJson => new {
         TagId,
@@ -64,14 +66,16 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
                                         && sig.PublicKey == validPubKey
                                         && sig.Verify(SignedContent));
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
-        => Init(signedContent, s.DecodeArray<IdentifiedSignature>());
+        => Init(signedContent, s.DecodeArray<IdentifiedSignature>().OrEmpty());
 
     internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
         => Init(signedContent, signatures);
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     protected override IEnumerable<DataField> RemainingStateFields =>
-        new T().FieldModel?.WithName(nameof(SignedContent))
+        new T().FieldModel.WithName(nameof(SignedContent))
         .AppendedOf(new DataField(nameof(Signatures), ILTagId.ILTagArray) {
             ElementTagId = ILTagId.IdentifiedSignature,
             SubDataFields = new IdentifiedSignature().FieldModel.SubDataFields,
@@ -80,8 +84,8 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
     protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
 
     protected override void DecodeRemainingStateFrom(Stream s) {
-        SignedContent = s.DecodeAny<T>();
-        Signatures = s.DecodeArray<IdentifiedSignature>();
+        SignedContent = s.DecodeAny<T>().Required();
+        Signatures = s.DecodeArray<IdentifiedSignature>().Required();
     }
 
     protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
@@ -94,7 +98,5 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
         Signatures = signatures;
         if (Signatures.None())
             throw new InvalidDataException("At least one signature must be provided");
-        if (FailedSignatures.SafeAny())
-            throw new InvalidDataException("Some signatures don't match the payload");
     }
 }

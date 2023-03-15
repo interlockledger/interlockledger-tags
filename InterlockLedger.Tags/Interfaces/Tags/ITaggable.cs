@@ -34,7 +34,6 @@ namespace InterlockLedger.Tags;
 public interface ITaggable
 {
     ILTag AsILTag { get; }
-
     DataField FieldModel { get; }
     ulong TagId { get; }
 }

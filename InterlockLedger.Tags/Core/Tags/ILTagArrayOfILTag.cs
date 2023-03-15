@@ -36,7 +36,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
 {
     public ILTagArrayOfILTag(IEnumerable<T> value) : this(ILTagId.ILTagArray, value.ToArray()) { }
 
-    public override object AsJson => new JsonRepresentation(Value);
+    public override object? AsJson => new JsonRepresentation(Value);
     public T this[int i] => Value[i];
 
     public IEnumerable<TV> GetValues<TV>() => Value.Select(t => t is ILTagOf<TV> tv ? tv.Value : default).SkipDefaults()!;
@@ -104,8 +104,8 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
     }
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.ILIntEncode((ulong)Value.Length);
         if (Value.Length > 0) {
-            s.ILIntEncode((ulong)Value.Length);
             foreach (var tag in Value)
                 s.EncodeTag(tag);
         }

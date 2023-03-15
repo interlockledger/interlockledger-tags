@@ -71,8 +71,8 @@ public class InterlockIdTests
 
     [Test]
     public void ResolveFromStream() {
-        Assert.IsInstanceOf<OwnerId>(InterlockId.Resolve(ToStream(new byte[] { 43, 5, 1, 0, 0, 0, 0 })));
-        Assert.IsInstanceOf<KeyId>(InterlockId.Resolve(ToStream(new byte[] { 43, 5, 4, 0, 0, 0, 0 })));
+        Assert.IsInstanceOf<OwnerId>(InterlockId.Resolve<OwnerId>(ToStream(new byte[] { 43, 5, 1, 0, 0, 0, 0 })));
+        Assert.IsInstanceOf<KeyId>(InterlockId.Resolve<KeyId>(ToStream(new byte[] { 43, 5, 4, 0, 0, 0, 0 })));
     }
 
     [Test]
@@ -134,7 +134,7 @@ InterlockIdPlus.Chain, HashAlgorithm.SHA256, new byte[] { 227, 176, 196, 66, 152
             Assert.That(id.EncodedBytes, Is.EqualTo(bytes));
         });
         using var ms = new MemoryStream(bytes);
-        var idFromBytes = InterlockId.Resolve(ms);
+        var idFromBytes = InterlockId.Resolve<InterlockId>(ms);
         Assert.Multiple(() => {
             Assert.That(id, Is.EqualTo(idFromBytes));
             int hashCode = id.GetHashCode();

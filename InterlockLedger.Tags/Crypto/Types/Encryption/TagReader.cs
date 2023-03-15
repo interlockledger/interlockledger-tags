@@ -58,7 +58,7 @@ public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
 
         public static bool operator ==(Parts left, Parts right) => left.Equals(right);
 
-        public override bool Equals(object obj) => obj is Parts parts && Equals(parts);
+        public override bool Equals(object? obj) => obj is Parts parts && Equals(parts);
 
         public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && Name == other.Name;
 

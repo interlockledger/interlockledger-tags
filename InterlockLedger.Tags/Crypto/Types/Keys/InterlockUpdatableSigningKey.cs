@@ -40,7 +40,7 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     public BaseKeyId Identity => _data.Identity;
     public DateTimeOffset LastSignatureTimeStamp => _data.LastSignatureTimeStamp;
     public string Name => _data.Name;
-    public abstract TagPubKey NextPublicKey { get; }
+    public abstract TagPubKey? NextPublicKey { get; }
     public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
     public TagPubKey PublicKey => _data.PublicKey;
     public KeyPurpose[] Purposes => _data.Purposes;
@@ -63,9 +63,9 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
 
     public TagSignature Sign<T>(T data) where T : Signable<T>, new() => throw new InvalidOperationException("Can't sign without possibly updating the key");
 
-    public abstract TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]> encrypt = null) where T : Signable<T>, new();
+    public abstract TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();
 
-    public abstract TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]> encrypt = null);
+    public abstract TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null);
 
     public string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
 
@@ -172,7 +172,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
             Description = s.DecodeString().Safe(),            // Field index 5 //
             PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
             Encrypted = s.DecodeByteArray(),                  // Field index 7 //
-            LastSignatureTimeStamp = s.DecodeDateTimeOffset(),// Field index 8 //
+            LastSignatureTimeStamp = s.DecodeOldDateTimeOffset(),// Field index 8 //
             SignaturesWithCurrentKey = s.DecodeILInt(),       // Field index 9 //
             Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 10 //
         };

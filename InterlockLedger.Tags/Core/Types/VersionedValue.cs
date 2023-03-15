@@ -41,7 +41,7 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : Ver
     public ILTag AsILTag => AsPayload;
 
     [JsonIgnore]
-    public abstract object AsJson { get; }
+    public abstract object? AsJson { get; }
 
     [JsonIgnore]
     public Payload AsPayload => _payload ??= new Payload((T)this);
@@ -73,6 +73,11 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : Ver
     public abstract string TypeName { get; }
 
     public ushort Version { get; set; }
+
+    public T MustBeComplete() =>
+        Incomplete
+            ? throw new InvalidDataException($"Instance of {typeof(T)} is incompletely deserialized")
+            : (T)this;
 
     public void Changed() => _payload?.Changed();
 
