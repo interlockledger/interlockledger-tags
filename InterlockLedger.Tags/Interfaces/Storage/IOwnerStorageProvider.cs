@@ -36,11 +36,7 @@ public interface IOwnerStorageProvider
     IEnumerable<IOwnerData> Owners { get; }
     IEnumerable<Owner> ResolvedOwners { get; }
 
-    Owner Create(string name, string password, string description, string email, Algorithm algorithm, KeyStrength strength, bool silent = true);
-
-    Owner Resolve(string name, string password = null);
-
-    Owner ResolveOrDummy(string name);
-
-    Owner ResolveWithPassword(string name, ref string password);
+    Owner? Create(string name, string password, string? description, string? email, Algorithm algorithm, KeyStrength strength, bool silent = true);
+    Owner? Resolve(string name, string? password = null);
+    Owner? ResolveWithPassword(string name, ref string password);
 }

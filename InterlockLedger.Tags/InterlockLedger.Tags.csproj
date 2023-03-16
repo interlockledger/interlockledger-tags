@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>25.0.0</Version>
+        <Version>26.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>New ILTagTimestamp class and other breaking changes</PackageReleaseNotes>
+        <PackageReleaseNotes>More nullability love in IOwnerData/IOwnerStorageProvider</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>

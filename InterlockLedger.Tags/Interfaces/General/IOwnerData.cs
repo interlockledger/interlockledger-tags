@@ -34,8 +34,8 @@ namespace InterlockLedger.Tags;
 public interface IOwnerData
 {
     Algorithm Algorithm { get; }
-    string Description { get; }
-    string Email { get; }
+    string? Description { get; }
+    string? Email { get; }
     BaseKeyId Id { get; }
     string Name { get; }
     KeyStrength Strength { get; }
