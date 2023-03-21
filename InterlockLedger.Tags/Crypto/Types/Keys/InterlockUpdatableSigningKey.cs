@@ -164,16 +164,16 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
     protected override UpdatableParts ValueFromStream(StreamSpan s) {
         var version = s.DecodeUShort();
         return new UpdatableParts {
-            Version = version,                                // Field index 0 //
-            Name = s.DecodeString().Safe(),                   // Field index 1 //
-            PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
-            Id = s.Decode<KeyId>(),                           // Field index 3 //
-            Identity = s.Decode<BaseKeyId>(),                 // Field index 4 //
-            Description = s.DecodeString().Safe(),            // Field index 5 //
-            PublicKey = s.Decode<TagPubKey>(),                // Field index 6 //
-            Encrypted = s.DecodeByteArray(),                  // Field index 7 //
-            LastSignatureTimeStamp = s.DecodeOldDateTimeOffset(),// Field index 8 //
-            SignaturesWithCurrentKey = s.DecodeILInt(),       // Field index 9 //
+            Version = version,                                      // Field index 0 //
+            Name = s.DecodeString().Safe(),                         // Field index 1 //
+            PurposesAsUlongs = s.DecodeILIntArray(),                // Field index 2 //
+            Id = s.Decode<KeyId>().Required(),                      // Field index 3 //
+            Identity = s.Decode<BaseKeyId>().Required(),            // Field index 4 //
+            Description = s.DecodeString().Safe(),                  // Field index 5 //
+            PublicKey = s.Decode<TagPubKey>().Required(),           // Field index 6 //
+            Encrypted = s.DecodeByteArray(),                        // Field index 7 //
+            LastSignatureTimeStamp = s.DecodeOldDateTimeOffset(),   // Field index 8 //
+            SignaturesWithCurrentKey = s.DecodeILInt(),             // Field index 9 //
             Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 10 //
         };
     }

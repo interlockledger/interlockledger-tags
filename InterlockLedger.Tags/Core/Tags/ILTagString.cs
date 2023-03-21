@@ -39,9 +39,7 @@ public class ILTagString : ILTagOfExplicit<string>
 
     protected override bool AreEquivalent(ILTagOf<string> other) => Value.Equals(other.Value);
 
-    protected override string ValueFromStream(StreamSpan s) {
-        return s.Length == 0 ? string.Empty : Encoding.UTF8.GetString(s.ReadAllBytesAsync().Result);
-    }
+    protected override string ValueFromStream(StreamSpan s) => s.Length == 0 ? string.Empty : Encoding.UTF8.GetString(s.ReadAllBytesAsync().Result);
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.WriteBytes(Value.UTF8Bytes());

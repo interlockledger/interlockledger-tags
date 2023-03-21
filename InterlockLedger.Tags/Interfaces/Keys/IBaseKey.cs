@@ -39,6 +39,7 @@ public interface IBaseKey : IDisposable
     string Name { get; }
     IEnumerable<AppPermissions> Permissions { get; }
     TagPubKey PublicKey { get; }
+    Algorithm Algorithm => PublicKey.Algorithm;
     KeyPurpose[] Purposes { get; }
     KeyStrength Strength { get; }
 
