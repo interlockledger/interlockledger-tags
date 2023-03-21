@@ -99,8 +99,10 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     }
 }
 
-public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData
+public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData, IBaseKey
 {
+    private bool _disposedValue;
+
     public InterlockUpdatableSigningKeyData(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, DateTimeOffset creationTime, string description = null, BaseKeyId keyId = null)
         : this(new UpdatableParts(purposes, name, encrypted, pubKey, description, strength, keyId)) => LastSignatureTimeStamp = creationTime;
 
@@ -121,6 +123,8 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
     public ulong SignaturesWithCurrentKey { get => Value.SignaturesWithCurrentKey; internal set => Value.SignaturesWithCurrentKey = value; }
     public KeyStrength Strength => Value.Strength;
     public ushort Version => Value.Version;
+
+    public IEnumerable<AppPermissions> Permissions { get; }
 
     public static InterlockUpdatableSigningKeyData DecodeFromBytes(byte[] bytes) {
         using var stream = new MemoryStream(bytes);
@@ -154,12 +158,12 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         }
     }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     internal InterlockUpdatableSigningKeyData(Stream s) : base(ILTagId.InterlockUpdatableSigningKey, s) {
     }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
-
-#pragma warning disable CS0618 // Type or member is obsolete
 
     protected override UpdatableParts ValueFromStream(StreamSpan s) {
         var version = s.DecodeUShort();
@@ -192,7 +196,31 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         s.EncodeILInt((ulong)Value.Strength);                   // Field index 10 //
         return Task.FromResult(s);
     }
-#pragma warning restore CS0618 // Type or member is obsolete
 
     private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStreamAsync(s));
+
+    private void Dispose(bool disposing) {
+        if (!_disposedValue) {
+            if (disposing) {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposedValue = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~InterlockUpdatableSigningKeyData()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose() {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>26.1.0</Version>
+        <Version>26.2.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>Breaking Changes: Nullability love in IOwnerData/IOwnerStorageProvider</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>

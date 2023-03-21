@@ -103,8 +103,10 @@ public abstract class InterlockSigningKey : ISigningKey
     }
 }
 
-public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData
+public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, IInterlockKeySecretData, IBaseKey
 {
+    private bool _disposedValue;
+
     public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, string? description = null, BaseKeyId keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
         : this(new InterlockSigningKeyParts(purposes, permissions, name, encrypted, pubKey, description, strength, encryptedContentType, keyId)) { }
 
@@ -112,7 +114,7 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, 
     }
 
     public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
-    public string Description => Value.Description;
+    public string? Description => Value.Description;
     public byte[] Encrypted => Value.Encrypted;
     public EncryptedContentType EncryptedContentType => Value.EncryptedContentType;
     public BaseKeyId Id => Value.Id;
@@ -177,6 +179,31 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyParts>, 
             s.EncodeILInt((ulong)value.EncryptedContentType); // Field index 11 - since version 5
             s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
         });
+
+    protected virtual void Dispose(bool disposing) {
+        if (!_disposedValue) {
+            if (disposing) {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposedValue = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~InterlockSigningKeyData()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose() {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
 
 public class InterlockSigningKeyParts : InterlockKey.Parts
