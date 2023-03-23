@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
-//
-// Copyright (c) 2018-2021 InterlockLedger Network
+//  
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -62,9 +62,9 @@ public class TagPubRSAKey : TagPubKey
         if (bytes == null || bytes.Length == 0)
             return default;
         using var s = new MemoryStream(bytes);
-        return s.Decode<TagPublicRSAParameters>().Value;
+        return s.Decode<TagRSAPublicParameters>().Value;
     }
 
     private static byte[] EncodeParameters(RSAParameters parameters)
-        => new TagPublicRSAParameters(parameters).EncodedBytes;
+        => new TagRSAPublicParameters(parameters).EncodedBytes;
 }

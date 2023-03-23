@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
-//
-// Copyright (c) 2018-2021 InterlockLedger Network
+//  
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,12 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
-public class TagPublicRSAParameters : ILTagExplicit<RSAParameters>
+public class TagRSAPublicParameters : ILTagExplicit<RSAParameters>
 {
-    public TagPublicRSAParameters(RSAParameters parameters) : base(ILTagId.PublicRSAParameters, parameters) {
+    public TagRSAPublicParameters(RSAParameters parameters) : base(ILTagId.RSAParametersPublic, parameters) {
     }
 
-    internal TagPublicRSAParameters(Stream s) : base(ILTagId.PublicRSAParameters, s) {
+    internal TagRSAPublicParameters(Stream s) : base(ILTagId.RSAParametersPublic, s) {
     }
 
     protected override RSAParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new RSAParameters {

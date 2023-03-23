@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2021 InterlockLedger Network
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -91,12 +91,15 @@ public struct ILTagId
     public const ulong EncryptedText = 57;
 
     // RSA
-    public const ulong PublicRSAParameters = 40;
+    public const ulong RSAParametersPublic = 40;
     public const ulong RSAParameters = 41;
     // ECDSA
     public const ulong ECParameters = 58;
+    // EdDSA
+    public const ulong EdDSAParameters = 59;
+    public const ulong EdDSAPublicParameters = 60;
 
-    // ********** Free range 59-126 **************
+    // ********** Free range 61-126 **************
 
     // Metadata
     public const ulong DataField = 225;         //  DataField for Published Apps Records

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
-//
-// Copyright (c) 2018-2021 InterlockLedger Network
+//  
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,43 +32,26 @@
 
 namespace InterlockLedger.Tags;
 
-public class ECDsaInterlockSigningKey : InterlockSigningKey
+public class TagEdDSAParameters : ILTagExplicit<EdDSAParameters>, IKeyParameters
 {
-    public ECDsaInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
-        if (data.Required().EncryptedContentType != EncryptedContentType.EncryptedKey)
-            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
-        using var ms = new MemoryStream(decrypted);
-        _keyParameters = ms.DecodeAny<ECDsaParameters>();
+    public TagPubKey PublicKey => new TagPubEdDSAKey(Value);
+
+    public KeyStrength Strength => KeyStrength.Normal;
+
+    public TagEdDSAParameters(EdDSAParameters parameters)
+        : base(ILTagId.EdDSAParameters, parameters) {
     }
 
-    public override byte[] AsSessionState {
-        get {
-            using var ms = new MemoryStream();
-            ms.EncodeTag(_data);
-            ms.EncodeTag(_keyParameters.AsPayload);
-            return ms.ToArray();
-        }
+    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
+        using var s = new MemoryStream(encodedBytes);
+        return s.Decode<TagEdDSAParameters>().Required();
     }
 
-    public static new ECDsaInterlockSigningKey FromSessionState(byte[] bytes) {
-        using var ms = new MemoryStream(bytes);
-        var tag = ms.Decode<InterlockSigningKeyData>();
-        var parameters = ms.DecodeAny<ECDsaParameters>();
-        return new ECDsaInterlockSigningKey(tag, parameters);
+    internal TagEdDSAParameters(Stream s)
+        : base(ILTagId.EdDSAParameters, s) {
     }
 
-    public override byte[] Decrypt(byte[] bytes) => throw new InvalidOperationException("ECDsa does not permit encryption");
+    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
 
-    // ECDsaHelper.Decrypt(bytes, _keyParameters.Parameters);
-
-    public override TagSignature Sign(byte[] data)
-            => new(Algorithm.EcDSA, ECDsaHelper.HashAndSign(data, _keyParameters.Parameters, _keyParameters.HashAlgorithm.ToName()));
-
-    public override TagSignature Sign<T>(T data)
-        => new(Algorithm.EcDSA, ECDsaHelper.HashAndSignBytes(data, _keyParameters.Parameters, _keyParameters.HashAlgorithm.ToName()));
-
-    private readonly ECDsaParameters _keyParameters;
-
-    private ECDsaInterlockSigningKey(InterlockSigningKeyData tag, ECDsaParameters parameters) : base(tag)
-        => _keyParameters = parameters;
+    protected override byte[] ToBytes(EdDSAParameters Value) => Value.AsBytes;
 }

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
-//
-// Copyright (c) 2018-2021 InterlockLedger Network
+//  
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,15 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     public bool IsEmpty { get; private init; }
 
     public static TagPubKey Resolve(X509Certificate2 certificate) {
-        var RSA = certificate.GetRSAPublicKey();
-        var ECDsa = certificate.GetECDsaPublicKey();
-        return RSA is not null
-            ? new TagPubRSAKey(RSA.ExportParameters(false))
-            : ECDsa is not null
-                ? new TagPubECKey(ECDsa.ExportParameters(false))
-                : throw new NotSupportedException("Not yet supporting other kinds of certificates!");
+        var RSA = certificate.GetRSAPublicKey() ?? throw new NotSupportedException("Not yet supporting other kinds of certificates!");
+        return new TagPubRSAKey(RSA.ExportParameters(false));
     }
+    private static TagPubKey ResolveAs(Algorithm algorithm, byte[] data)
+        => algorithm switch {
+            Algorithm.RSA => new TagPubRSAKey(data),
+            Algorithm.EdDSA => new TagPubEdDSAKey(data),
+            _ => throw new NotSupportedException("Only support RSA/EdDSA for now!!!")
+        };
 
     public static TagPubKey InvalidBy(string cause)=>
          new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation};
@@ -104,11 +105,5 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     private string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
-    private static TagPubKey ResolveAs(Algorithm algorithm, byte[] data)
-        => algorithm switch {
-            Algorithm.RSA => new TagPubRSAKey(data),
-            Algorithm.EcDSA => TagPubECKey.From(data),
-            _ => throw new NotSupportedException("Only support RSA/EcDSA certificates for now!!!")
-        };
     private TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
 }

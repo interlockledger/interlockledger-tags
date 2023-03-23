@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
-//
-// Copyright (c) 2018-2021 InterlockLedger Network
+//  
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,35 +29,31 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
-#nullable enable
-
-using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
-public class TagPubECKey : TagPubKey
+
+public class TagPubEdDSAKey : TagPubKey
 {
-    public TagPubECKey(ECDsaParameters parameters) : base(Algorithm.EcDSA, parameters.EncodedPublicBytes) => _kp = parameters;
+    public readonly EdDSAParameters Parameters;
 
-    public override KeyStrength Strength => _kp.Strength;
+    public override KeyStrength Strength => KeyStrength.Normal;
 
-    public override byte[] Encrypt(byte[] bytes) => throw new InvalidOperationException("ECDsa does not permit encryption");
-    // ECDsaHelper.Encrypt(bytes, _kp.Parameters);
-
-    public override bool Verify<T>(T data, TagSignature signature)
-        => ECDsaHelper.Verify(data, signature, _kp.Parameters);
-
-    public override bool Verify(byte[] data, TagSignature signature)
-        => ECDsaHelper.Verify(data, signature, _kp.Parameters);
-
-    internal TagPubECKey(ECParameters parameters) : this(new ECDsaParameters(parameters)) {
+    public TagPubEdDSAKey(EdDSAParameters parameters)
+        : this(EncodeParameters(parameters)) {
     }
 
-    internal static TagPubECKey From(byte[] data) => new(data.Required());
+    public override byte[] Encrypt(byte[] bytes) => EdDSAHelper.Encrypt(bytes, Parameters);
 
-    protected TagPubECKey(byte[] data) : base(Algorithm.EcDSA, data) {
-        using var ms = new MemoryStream(data);
-        _kp = ms.DecodeAny<ECDsaParameters>();
+    public override bool Verify<T>(T data, TagSignature signature) => EdDSAHelper.Verify(data, signature, Parameters);
+
+    public override bool Verify(byte[] data, TagSignature signature) => EdDSAHelper.Verify(data, signature, Parameters);
+
+    internal TagPubEdDSAKey(byte[] data) : base(Algorithm.EdDSA, data) => Parameters = DecodeParameters(base.Data);
+
+    private static EdDSAParameters DecodeParameters(byte[] bytes) {
+        using var s = new MemoryStream(bytes.NonEmpty());
+        return s.Decode<TagEdDSAPublicParameters>()!.Value;
     }
 
-    private readonly ECDsaParameters _kp;
+    private static byte[] EncodeParameters(EdDSAParameters parameters) => new TagEdDSAPublicParameters(parameters).EncodedBytes;
 }

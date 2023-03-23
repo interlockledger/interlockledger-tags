@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
-//
-// Copyright (c) 2018-2021 InterlockLedger Network
+//  
+// Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ public static class TagProvider
         [ILTagId.PubKey] = (TagPubKey.Resolve, o => TagPubKey.Build((string)o)),
         [ILTagId.Signature] = (s => new TagSignature(s), NoJson),
         [ILTagId.Hash] = (s => new TagHash(s), o => TagHash.Build((string)o)),
-        [ILTagId.PublicRSAParameters] = (s => new TagPublicRSAParameters(s), NoJson),
+        [ILTagId.RSAParametersPublic] = (s => new TagRSAPublicParameters(s), NoJson),
         [ILTagId.RSAParameters] = (s => new TagRSAParameters(s), NoJson),
         [ILTagId.Encrypted] = (s => new TagEncrypted(s), NoJson),
         [ILTagId.InterlockId] = (InterlockId.DeserializeAndResolve, o => InterlockId.Build((string)o)),
@@ -122,7 +122,8 @@ public static class TagProvider
         [ILTagId.EncryptedBlob] = (s => new EncryptedBlob.Payload(ILTagId.EncryptedBlob, s), NoJson),
         [ILTagId.InterlockKeyAppPermission] = (s => new AppPermissions.Tag(s), NoJson),
         [ILTagId.EncryptedText] = (s => new EncryptedText.Payload(ILTagId.EncryptedText, s), NoJson),
-        [ILTagId.ECParameters] = (s => new ECDsaParameters.Payload(ILTagId.ECParameters, s), NoJson),
+        [ILTagId.EdDSAParameters] = (s => new TagEdDSAParameters(s), NoJson),
+        [ILTagId.EdDSAPublicParameters] = (s => new TagEdDSAPublicParameters(s), NoJson),
         [ILTagId.DataModel] = (s => new ILTagDataModel(s), NoJson),
         [ILTagId.DataField] = (s => new ILTagDataField(s), NoJson),
         [ILTagId.DataIndex] = (s => new ILTagDataIndex(s), NoJson),
