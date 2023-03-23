@@ -15,7 +15,7 @@
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
         <Version>26.3.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Add needed property in IKeyStorage</PackageReleaseNotes>
+        <PackageReleaseNotes>Add needed property in IKeyStorageProvider</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
