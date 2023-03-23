@@ -35,8 +35,10 @@ using System.Security.Cryptography.X509Certificates;
 namespace InterlockLedger.Tags;
 public interface IKeyStorageProvider : IKeyFileExporter
 {
+
     string AppKeysFolderPath { get; }
     IEnumerable<InterlockSigningKeyData> Keys { get; }
+    IEnumerable<Algorithm> SupportedAlgorithms { get; }
 
     InterlockSigningKeyData Create(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, Algorithm algorithm, KeyStrength strength, string name, string description, string password);
 

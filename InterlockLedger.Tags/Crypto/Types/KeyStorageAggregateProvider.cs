@@ -45,6 +45,8 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
     public string AppKeysFolderPath => _providers.Values.Select(ksp => ksp.AppKeysFolderPath).JoinedBy(":");
     public IEnumerable<InterlockSigningKeyData> Keys => _providers.Values.SelectMany(ksp => ksp.Keys);
 
+    public IEnumerable<Algorithm> SupportedAlgorithms => _providers.Values.SelectMany(ksp => ksp.SupportedAlgorithms).Distinct().Order().ToArray();
+
     public void AddProvider(IKeyStorageImplementationProvider provider) {
         provider.Required();
         _providers.Add(provider.Name, provider);
