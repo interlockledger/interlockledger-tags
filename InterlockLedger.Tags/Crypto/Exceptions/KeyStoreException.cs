@@ -30,23 +30,23 @@
 //
 // ******************************************************************************************************************************
 
-using System.Security.Cryptography.X509Certificates;
-
 namespace InterlockLedger.Tags;
-public interface IKeyStorageProvider : IKeyFileExporter
+
+/// <summary>
+/// This is the base exception for all errors in <see cref="SimpleKeyStore"/>.
+/// </summary>
+public class KeyStoreException : Exception
 {
+    public KeyStoreException() : base() {
+    }
 
-    string AppKeysFolderPath { get; }
-    IEnumerable<InterlockSigningKeyData> Keys { get; }
-    IEnumerable<Algorithm> SupportedAlgorithms { get; }
+    public KeyStoreException(string message) : base(message) {
+    }
 
-    InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password);
+    public KeyStoreException(System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+    }
 
-    X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength);
-
-    InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
-
-    InterlockSigningKey Open(InterlockSigningKeyData key, string password);
-
-    InterlockSigningKey? Resolve(string name, string password);
+    public KeyStoreException(string? message, Exception? innerException) : base(message, innerException) {
+    }
 }

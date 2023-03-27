@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using InterlockLedger.Tags.Crypto.Exceptions;
+
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
@@ -52,11 +54,11 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         _providers.Add(provider.Name, provider);
     }
 
-    public InterlockSigningKeyData Create(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, Algorithm algorithm, KeyStrength strength, string name, string description, string password)
-        => FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation, "and key creation").Create(purposes, permissions, algorithm, strength, name, description, password);
+    public InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password)
+        => FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation, "and key creation").Create(algorithm, purposes, permissions, strength, name, description, password);
 
-    public X509Certificate2 CreateCertificate(string name, string password, string file, Algorithm algorithm, KeyStrength strength)
-        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate creation").CreateCertificate(name, password, file, algorithm, strength);
+    public X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength)
+        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate creation").CreateCertificate(algorithm, name, password, file, strength);
 
     IKeyParameters IKeyPhasedCreationProvider.CreateKeyParameters(Algorithm algorithm, KeyStrength strength) => FindPhasedProvider(algorithm).CreateKeyParameters(algorithm, strength);
 
@@ -64,13 +66,15 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         => FindPhasedProvider(emergencyKeyParameters.PublicKey.Algorithm).CreateUsing(emergencyKeyParameters, strength, identity, name, description, password, permissions, purposes);
 
     public ExportedKeyFile? ExportKeyFile(string name) {
-        foreach (var provider in _providers.Values) if (provider.Keys.Any(k => k.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+        foreach (var provider in _providers.Values)
+            if (provider.Keys.Any(k => k.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
                 return provider.ExportKeyFile(name);
         return null;
     }
 
-    public InterlockSigningKeyData Import(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password)
-        => FindProviderFor(ksp => ksp.SupportsCertificateImport, "certificate import").Import(purposes, permissions, certificateBytes, password);
+    public InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password)
+        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate import")
+        .Import(algorithm, purposes, permissions, certificateBytes, password);
 
     public InterlockSigningKey Open(InterlockSigningKeyData key, string password)
         => key is null
@@ -89,8 +93,6 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         => (IKeyPhasedCreationProvider)FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation && ksp is IKeyPhasedCreationProvider, "and phased key creation");
 
     private IKeyStorageImplementationProvider FindProviderFor(Algorithm algorithm, Func<IKeyStorageImplementationProvider, bool> filter, string? messageComplement = null)
-        => FindProviderFor(ksp => ksp.SupportsAlgorithm(algorithm) && filter(ksp), $"the algorithm {algorithm} {messageComplement}");
-
-    private IKeyStorageImplementationProvider FindProviderFor(Func<IKeyStorageImplementationProvider, bool> filter, string? messageComplement = null)
-        => _providers.Values.FirstOrDefault(filter.Required()) ?? throw new InvalidOperationException($"No key storage provider found that supports {messageComplement}");
+        => _providers.Values.FirstOrDefault(ksp => ksp.SupportsAlgorithm(algorithm) && filter(ksp))
+        ?? throw new AlgorithmNotSupportedException($"No key storage provider found that supports the algorithm {algorithm} {messageComplement}");
 }

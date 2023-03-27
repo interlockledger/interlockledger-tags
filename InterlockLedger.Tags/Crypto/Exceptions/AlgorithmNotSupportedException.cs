@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
@@ -30,23 +30,24 @@
 //
 // ******************************************************************************************************************************
 
-using System.Security.Cryptography.X509Certificates;
+namespace InterlockLedger.Tags.Crypto.Exceptions;
 
-namespace InterlockLedger.Tags;
-public interface IKeyStorageProvider : IKeyFileExporter
+/// <summary>
+/// This Exception is used to report problems with the 
+/// <see cref="SimpleKeyStore"/> operation.
+/// </summary>
+public class AlgorithmNotSupportedException : KeyStoreException
 {
+    public AlgorithmNotSupportedException() : base() {
+    }
 
-    string AppKeysFolderPath { get; }
-    IEnumerable<InterlockSigningKeyData> Keys { get; }
-    IEnumerable<Algorithm> SupportedAlgorithms { get; }
+    public AlgorithmNotSupportedException(string message) : base(message) {
+    }
 
-    InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password);
+    public AlgorithmNotSupportedException(System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) : base(info, context) {
+    }
 
-    X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength);
-
-    InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
-
-    InterlockSigningKey Open(InterlockSigningKeyData key, string password);
-
-    InterlockSigningKey? Resolve(string name, string password);
+    public AlgorithmNotSupportedException(string? message, Exception? innerException) : base(message, innerException) {
+    }
 }
