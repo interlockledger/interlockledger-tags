@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using NUnit.Framework;
-
 namespace InterlockLedger.Tags;
 [TestFixture]
 public class ILTagArrayOfILTagTests
@@ -45,7 +43,7 @@ public class ILTagArrayOfILTagTests
         Assert.AreEqual(bytes, value);
     }
 
-    
+
     [TestCase(new byte[0], new byte[0], new byte[] { 21, 1, 0 }, TestName = "Deserialize_an_Empty_Array")]
     [TestCase(new byte[0], new byte[] { 0 }, new byte[] { 21, 3, 1, 16, 0 }, TestName = "Deserialize_One_Array_with_Zero_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 21, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Array_with_Four_Bytes")]

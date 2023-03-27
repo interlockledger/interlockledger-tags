@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Security.Cryptography;
-
 namespace InterlockLedger.Tags;
 
 public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHasher, IReader, IEncryptor

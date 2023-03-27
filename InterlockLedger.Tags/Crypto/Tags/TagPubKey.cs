@@ -58,8 +58,8 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
             _ => throw new NotSupportedException("Only support RSA/EdDSA for now!!!")
         };
 
-    public static TagPubKey InvalidBy(string cause)=>
-         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation};
+    public static TagPubKey InvalidBy(string cause) =>
+         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public static TagPubKey Build(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));

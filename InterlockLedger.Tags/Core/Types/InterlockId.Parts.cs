@@ -53,7 +53,7 @@ public partial class InterlockId
             hash.Add(Type);
             return hash.ToHashCode();
         }
-        private static readonly byte[] _noBytes  = Array.Empty<byte>();
+        private static readonly byte[] _noBytes = Array.Empty<byte>();
         public override bool Equals(object? obj) => Equals(obj as Parts);
         public bool Equals(Parts? other) => other is not null && Algorithm == other.Algorithm && Type == other.Type && Data.EqualTo(other.Data);
         internal static byte DefaultType;

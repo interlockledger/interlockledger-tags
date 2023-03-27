@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using NUnit.Framework;
-
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;

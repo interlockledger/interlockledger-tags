@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using NUnit.Framework;
-
 namespace InterlockLedger.Tags;
 [SetUpFixture]
 public class TestGlobalSetup : ITagRegistrar

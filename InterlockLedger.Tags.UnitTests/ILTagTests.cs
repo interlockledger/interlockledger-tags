@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using NUnit.Framework;
-
 namespace InterlockLedger.Tags;
 [TestFixture]
 public class ILTagTests
@@ -163,7 +161,7 @@ public class ILTagTests
     public byte[] SerializeILIntSigned(long value) => new ILTagILIntSigned(value).EncodedBytes;
 
     [TestCase(null, ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt_null")]
-    [TestCase(new ulong[0], ExpectedResult = new byte[] { 20,  1, 0 }, TestName = "SerializeILTagArrayOfILInt")]
+    [TestCase(new ulong[0], ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt")]
     [TestCase(new ulong[] { 2 }, ExpectedResult = new byte[] { 20, 2, 1, 2 }, TestName = "SerializeILTagArrayOfILInt_2")]
     [TestCase(new ulong[] { 1, 255, 3 }, ExpectedResult = new byte[] { 20, 5, 3, 1, 248, 7, 3 }, TestName = "SerializeILTagArrayOfILInt_1_255_3")]
     public byte[] SerializeILTagArrayOfILInt(ulong[] ilints) => new ILTagArrayOfILInt(ilints).EncodedBytes;

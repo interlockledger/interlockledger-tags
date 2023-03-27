@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
 public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<TagHmac>
 {
-    private TagHmac(): this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    private TagHmac() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
     public static TagHmac InvalidBy(string cause) =>
         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
@@ -54,7 +54,7 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public static Regex Mask { get; } = AnythingRegex();
     private static readonly string _invalidTextualRepresentation = "?";
     public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
-    public bool Equals(TagHmac? other) => other is not null &&  Algorithm == other.Algorithm && DataEquals(other.Data);
+    public bool Equals(TagHmac? other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
         using var hash = new HMACSHA256(key);
         return new TagHmac(HashAlgorithm.SHA256, hash.ComputeHash(content));

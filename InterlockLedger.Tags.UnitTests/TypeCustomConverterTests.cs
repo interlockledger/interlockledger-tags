@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using NUnit.Framework;
-
 using System.ComponentModel;
 using System.Globalization;
 

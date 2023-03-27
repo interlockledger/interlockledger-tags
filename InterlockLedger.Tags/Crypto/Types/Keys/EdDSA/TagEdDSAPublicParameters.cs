@@ -43,6 +43,6 @@ public class TagEdDSAPublicParameters : ILTagExplicit<EdDSAParameters>
     }
 
     protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-        
+
     protected override byte[] ToBytes(EdDSAParameters Value) => Value.AsPublicBytes;
 }
