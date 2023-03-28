@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
@@ -30,12 +30,24 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
-
+using System.Runtime.CompilerServices;
 
 namespace InterlockLedger.Tags;
 
 public static class ArrayOfExtensions
 {
+    [return: NotNull]
     public static T[] OrEmpty<T>(this T[]? values) => values ?? Array.Empty<T>();
+
+    [return: NotNull]
+    public static T[] MinLength<T>([NotNull] this T[] array, int length, [CallerArgumentExpression(nameof(array))] string? parameterName = null) =>
+     array is not null && array.Length >= length
+         ? array
+         : throw new ArgumentException($"Array parameter {parameterName} must have length >= {length}");
+
+    [return: NotNull]
+    public static T[] ExactLength<T>([NotNull] this T[] array, int length, [CallerArgumentExpression(nameof(array))] string? parameterName = null) =>
+     array is not null && array.Length == length
+         ? array
+         : throw new ArgumentException($"Array parameter {parameterName} must have length == {length}");
 }

@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 [TestFixture]
 public class ILTagTests
 {
@@ -44,9 +45,9 @@ public class ILTagTests
     [TestCase(new byte[] { 16, 0 }, ExpectedResult = new byte[0], TestName = "AsByteArray_Zero_Length_Empty_Array")]
     public byte[] AsByteArray(byte[] bytes) => new MemoryStream(bytes).DecodeByteArray();
 
-    [TestCase(new byte[] { 10, 0xF9, 0xFF, 0xFF }, ExpectedResult = 65783, TestName = "AsILInt_65783")]
-    [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = 503, TestName = "AsILInt_503")]
-    [TestCase(new byte[] { 10, 32 }, ExpectedResult = 32, TestName = "AsILInt_32")]
+    [TestCase(new byte[] { 10, 0xF9, 0xFF, 0xFF }, ExpectedResult = 65783ul, TestName = "AsILInt_65783")]
+    [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = 503ul, TestName = "AsILInt_503")]
+    [TestCase(new byte[] { 10, 32 }, ExpectedResult = 32ul, TestName = "AsILInt_32")]
     public ulong AsILInt(byte[] bytes) => ((ILTagILInt)TagProvider.DeserializeFrom(new MemoryStream(bytes))).Value;
 
     [TestCase(new byte[] { 14, 0xF9, 1, 0 }, ExpectedResult = 252, TestName = "AsILIntSigned_252")]
@@ -77,8 +78,8 @@ public class ILTagTests
     [TestCase(new byte[] { 4, 0, 0 }, ExpectedResult = (short)0, TestName = "AsShort_0")]
     public short AsShort(byte[] bytes) => ((ILTagInt16)TagProvider.DeserializeFrom(new MemoryStream(bytes))).Value;
 
-    [TestCase(new byte[] { 2, 0 }, ExpectedResult = (byte)0, TestName = "AsSignedByte_0")]
-    [TestCase(new byte[] { 2, 1 }, ExpectedResult = (byte)1, TestName = "AsSignedByte_1")]
+    [TestCase(new byte[] { 2, 0 }, ExpectedResult = (sbyte)0, TestName = "AsSignedByte_0")]
+    [TestCase(new byte[] { 2, 1 }, ExpectedResult = (sbyte)1, TestName = "AsSignedByte_1")]
     [TestCase(new byte[] { 2, 255 }, ExpectedResult = (sbyte)-1, TestName = "AsSignedByte_1")]
     public sbyte AsSignedByte(byte[] bytes) => ((ILTagInt8)TagProvider.DeserializeFrom(new MemoryStream(bytes))).Value;
 

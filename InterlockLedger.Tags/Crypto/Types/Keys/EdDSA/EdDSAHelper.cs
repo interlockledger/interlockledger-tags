@@ -30,6 +30,10 @@
 //
 // ******************************************************************************************************************************
 
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
@@ -39,7 +43,12 @@ public static class EdDSAHelper
 {
     private const int _maxRetries = 3;
 
-    public static TagEdDSAParameters CreateNewEdDSAParameters() => new(new EdDSAParameters(Array.Empty<byte>()));
+    public static TagEdDSAParameters CreateNewEdDSAParameters() {
+        var keyPair = _keyPairGenerator.GenerateKeyPair();
+        var privKey = (Ed25519PrivateKeyParameters)keyPair.Private;
+        var pubKey = (Ed25519PublicKeyParameters)keyPair.Public;
+        return new(new EdDSAParameters(pubKey, privKey));
+    }
 
     public static byte[] Decrypt(byte[] data, EdDSAParameters Key) {
         int num = _maxRetries;
@@ -150,5 +159,12 @@ public static class EdDSAHelper
         } catch (CryptographicException innerException) {
             throw new InterlockLedgerCryptographicException("Failed to verify data with current parameters and signature", innerException);
         }
+    }
+
+    private static readonly Ed25519KeyPairGenerator _keyPairGenerator = InitGenerator();
+    private static Ed25519KeyPairGenerator InitGenerator() {
+        var generator = new Ed25519KeyPairGenerator();
+        generator.Init(new Ed25519KeyGenerationParameters(new SecureRandom()));
+        return generator;
     }
 }
