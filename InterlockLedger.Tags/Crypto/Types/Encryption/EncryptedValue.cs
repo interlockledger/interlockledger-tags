@@ -36,7 +36,9 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
 {
     public const int CurrentVersion = 1;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public EncryptedValue(ulong tagId) => TagId = tagId;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public EncryptedValue(ulong tagId, CipherAlgorithm cipher, IEncryptor encryptor, T payloadInClearText, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this(tagId) {
         author.Required();

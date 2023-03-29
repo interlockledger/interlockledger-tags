@@ -34,5 +34,8 @@ namespace InterlockLedger.Tags;
 public interface ISigningContext
 {
     ISigningKey Key { get; }
-    ITimeStamper? TimeStamper { get; }
+    Algorithm Algorithm => Key.Algorithm;
+    TagPubKey PublicKey => Key.PublicKey;
+    KeyStrength Strength => Key.Strength;
+    ITimeStamper TimeStamper { get; }
 }

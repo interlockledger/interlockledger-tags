@@ -33,14 +33,9 @@
 namespace InterlockLedger.Tags;
 public interface ISigner : ISigningContext, IIdentifiedPublicKey
 {
-    Algorithm Algorithm => Key.Algorithm;
     InterlockKey? AsInterlockKey { get; }
-    KeyStrength Strength => Key.Strength;
     IReader? Reader { get; }
 
-    IdentifiedSignature SignWithId(byte[] data) => Key.SignWithId(data);
-    TagSignature Sign(byte[] data, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null) =>
-        purpose == KeyPurpose.Any || Key.Purposes.Contains(purpose)
-            ? Key.Sign(data)
-            : throw new InvalidOperationException($"This signer can't sign for the purpose '{purpose}' [{Key.ToShortString()}]");
+    IdentifiedSignature SignWithId(byte[] data);
+    TagSignature Sign(byte[] data, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null);
 }

@@ -30,14 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
-
-
 namespace InterlockLedger.Tags;
+
 public interface IIdentifiedPublicKey
 {
+    TagPubKey PublicKey { get; }
     BaseKeyId? Id { get; }
     string Identifier => (Id?.TextualRepresentation).WithDefault(Name!).WithDefault(PublicKey.Hash.TextualRepresentation);
     string? Name { get; }
-    TagPubKey PublicKey { get; }
 }
