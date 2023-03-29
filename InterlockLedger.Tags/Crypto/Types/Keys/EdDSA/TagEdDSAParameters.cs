@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 public class TagEdDSAParameters : ILTagExplicit<EdDSAParameters>, IKeyParameters
 {
-    public TagPubKey PublicKey => new TagPubEdDSAKey(Value);
+    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value);
 
     public KeyStrength Strength => KeyStrength.Normal;
 

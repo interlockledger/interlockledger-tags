@@ -35,8 +35,6 @@ public interface ISigningKey : IBaseKey
 {
     Algorithm SignAlgorithm { get; }
 
-    byte[] Decrypt(byte[] bytes);
-
     TagSignature Sign(byte[] data);
 
     TagSignature Sign<T>(T data) where T : Signable<T>, new();

@@ -51,10 +51,11 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
         var RSA = certificate.GetRSAPublicKey() ?? throw new NotSupportedException("Not yet supporting other kinds of certificates!");
         return new TagPubRSAKey(RSA.ExportParameters(false));
     }
+
     private static TagPubKey ResolveAs(Algorithm algorithm, byte[] data)
         => algorithm switch {
             Algorithm.RSA => new TagPubRSAKey(data),
-            Algorithm.EdDSA => new TagPubEdDSAKey(data),
+            Algorithm.EdDSA => new TagPublicEdDSAKey(data),
             _ => throw new NotSupportedException("Only support RSA/EdDSA for now!!!")
         };
 

@@ -32,36 +32,52 @@
 
 namespace InterlockLedger.Tags;
 
-public class EdDSAInterlockSigningKey : InterlockSigningKey
+public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 {
-    private readonly TagEdDSAParameters _keyParameters;
+    private bool _destroyKeysAfterSigning;
 
-    public override byte[] AsSessionState {
-        get {
-            using var ms = new MemoryStream();
-            _ = ms.EncodeTag(_data).EncodeTag(_keyParameters);
-            return ms.ToArray();
-        }
-    }
-    public static new EdDSAInterlockSigningKey FromSessionState(byte[] bytes) {
-        using var s = new MemoryStream(bytes);
-        return new EdDSAInterlockSigningKey(s.Decode<InterlockSigningKeyData>(), s.Decode<TagEdDSAParameters>());
-    }
+    private TagEdDSAParameters? _keyParameters;
 
+    private TagEdDSAParameters? _nextKeyParameters;
 
-    public EdDSAInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
-        if (data.Required().EncryptedContentType != 0)
-            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}");
+    public override TagPubKey? NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
+
+    public EdDSAInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper)
+        : base(tag, timeStamper) {
         using var s = new MemoryStream(decrypted);
         _keyParameters = s.Decode<TagEdDSAParameters>().Validate();
     }
 
-    public EdDSAInterlockSigningKey(InterlockSigningKeyData? tag, TagEdDSAParameters? parameters)
-        : base(tag.Required()) => _keyParameters = parameters.Validate();
+    public override void DestroyKeys() => _destroyKeysAfterSigning = true;
 
+    public override void GenerateNextKeys() => _nextKeyParameters = EdDSAHelper.CreateNewTagEdDSAParameters();
 
-    public override TagSignature Sign(byte[] data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSign(data, _keyParameters.Value));
+    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(data, _keyParameters.Required().Value));
 
-    public override TagSignature Sign<T>(T data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSignBytes(data, _keyParameters.Value));
+    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignBytes(data, _keyParameters.Required().Value));
 
+    private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
+        if (_destroyKeysAfterSigning) {
+            _keyParameters = null;
+            _nextKeyParameters = null;
+            _data.Value.Encrypted = null;
+            _data.Value.PublicKey = null!;
+        } else {
+            var func = encrypt.Required("encrypt");
+            if (_nextKeyParameters is not null) {
+                _keyParameters = _nextKeyParameters;
+                _data.Value.Encrypted = func(_keyParameters!.EncodedBytes);
+                _data.Value.PublicKey = _keyParameters!.PublicKey;
+                _nextKeyParameters = null;
+                //_data.SignaturesWithCurrentKey = 0uL;
+            } else {
+                //_data.SignaturesWithCurrentKey++;
+            }
+
+            //_data.LastSignatureTimeStamp = _timeStamper.Now;
+        }
+
+        _data.Changed();
+        return new TagSignature(Algorithm.EdDSA, signatureData);
+    }
 }

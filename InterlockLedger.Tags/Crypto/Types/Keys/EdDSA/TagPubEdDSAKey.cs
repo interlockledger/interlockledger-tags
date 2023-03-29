@@ -32,28 +32,17 @@
 
 namespace InterlockLedger.Tags;
 
-public class TagPubEdDSAKey : TagPubKey
+public class TagPublicEdDSAKey : TagPubKey
 {
-    public readonly EdDSAParameters Parameters;
+    private readonly EdDSAParameters _parameters;
 
     public override KeyStrength Strength => KeyStrength.Normal;
 
-    public TagPubEdDSAKey(EdDSAParameters parameters)
-        : this(EncodeParameters(parameters)) {
-    }
+    public TagPublicEdDSAKey(EdDSAParameters parameters) : this(parameters.Required().AsPublicBytes) { }
 
-    public override byte[] Encrypt(byte[] bytes) => EdDSAHelper.Encrypt(bytes, Parameters);
+    public override bool Verify<T>(T data, TagSignature signature) => EdDSAHelper.Verify(data, signature, _parameters);
 
-    public override bool Verify<T>(T data, TagSignature signature) => EdDSAHelper.Verify(data, signature, Parameters);
+    public override bool Verify(byte[] data, TagSignature signature) => EdDSAHelper.Verify(data, signature, _parameters);
 
-    public override bool Verify(byte[] data, TagSignature signature) => EdDSAHelper.Verify(data, signature, Parameters);
-
-    internal TagPubEdDSAKey(byte[] data) : base(Algorithm.EdDSA, data) => Parameters = DecodeParameters(base.Data);
-
-    private static EdDSAParameters DecodeParameters(byte[] bytes) {
-        using var s = new MemoryStream(bytes.NonEmpty());
-        return s.Decode<TagEdDSAPublicParameters>()!.Value;
-    }
-
-    private static byte[] EncodeParameters(EdDSAParameters parameters) => new TagEdDSAPublicParameters(parameters).EncodedBytes;
+    internal TagPublicEdDSAKey(byte[] data) : base(Algorithm.EdDSA, data) => _parameters = new(Data.NonEmpty());
 }

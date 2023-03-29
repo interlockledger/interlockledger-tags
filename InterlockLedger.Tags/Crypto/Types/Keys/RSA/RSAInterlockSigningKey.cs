@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public class RSAInterlockSigningKey : InterlockSigningKey
+public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
 {
     public RSAInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
         if (data.Required().EncryptedContentType != EncryptedContentType.EncryptedKey)
@@ -52,12 +52,12 @@ public class RSAInterlockSigningKey : InterlockSigningKey
 
     public static new RSAInterlockSigningKey FromSessionState(byte[] bytes) {
         using var ms = new MemoryStream(bytes);
-        var tag = ms.Decode<InterlockSigningKeyData>();
-        var parameters = ms.Decode<TagRSAParameters>();
+        var tag = ms.Decode<InterlockSigningKeyData>().Required();
+        var parameters = ms.Decode<TagRSAParameters>().Required();
         return new RSAInterlockSigningKey(tag, parameters);
     }
 
-    public override byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters.Value.Parameters);
+    public byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters.Value.Parameters);
 
     public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSign(data, _keyParameters.Value.Parameters));
 

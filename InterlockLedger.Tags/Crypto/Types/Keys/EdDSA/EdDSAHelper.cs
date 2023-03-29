@@ -32,97 +32,49 @@
 
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Security;
-
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
 
 public static class EdDSAHelper
 {
-    private const int _maxRetries = 3;
+    public static TagEdDSAParameters Validate(this TagEdDSAParameters? tagEdDSAParameters)
+        => tagEdDSAParameters.Required().Value.HasPrivatePart
+            ? tagEdDSAParameters
+            : throw new InvalidDataException("Key parameters don't have private key");
 
-    public static TagEdDSAParameters CreateNewEdDSAParameters() {
+    public static TagEdDSAParameters CreateNewTagEdDSAParameters() {
         var keyPair = _keyPairGenerator.GenerateKeyPair();
         var privKey = (Ed25519PrivateKeyParameters)keyPair.Private;
         var pubKey = (Ed25519PublicKeyParameters)keyPair.Public;
         return new(new EdDSAParameters(pubKey, privKey));
     }
 
-    public static byte[] Decrypt(byte[] data, EdDSAParameters Key) {
-        int num = _maxRetries;
-        while (true) {
-            try {
-                using var rSACryptoServiceProvider = new EdDSACryptoServiceProvider();
-                rSACryptoServiceProvider.ImportParameters(Key);
-                return rSACryptoServiceProvider.Decrypt(data);
-            } catch (CryptographicException innerException) {
-                if (num-- <= 0) {
-                    var defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(61, 1);
-                    defaultInterpolatedStringHandler.AppendLiteral("Failed to decrypt data with current parameters after ");
-                    defaultInterpolatedStringHandler.AppendFormatted(3);
-                    defaultInterpolatedStringHandler.AppendLiteral(" retries");
-                    throw new InterlockLedgerCryptographicException(defaultInterpolatedStringHandler.ToStringAndClear(), innerException);
-                }
-            }
-        }
-    }
+    //public static byte[] Decrypt(byte[] data, EdDSAParameters Key) => throw new NotImplementedException();
 
-    public static byte[] Encrypt(byte[] data, EdDSAParameters Key) {
-        int num = _maxRetries;
-        while (true) {
-            try {
-                using var rSACryptoServiceProvider = new EdDSACryptoServiceProvider();
-                rSACryptoServiceProvider.ImportParameters(Key);
-                return rSACryptoServiceProvider.Encrypt(data);
-            } catch (CryptographicException innerException) {
-                if (num-- <= 0) {
-                    var defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(61, 1);
-                    defaultInterpolatedStringHandler.AppendLiteral("Failed to encrypt data with current parameters after ");
-                    defaultInterpolatedStringHandler.AppendFormatted(3);
-                    defaultInterpolatedStringHandler.AppendLiteral(" retries");
-                    throw new InterlockLedgerCryptographicException(defaultInterpolatedStringHandler.ToStringAndClear(), innerException);
-                }
-            }
-        }
-    }
+    //public static byte[] Encrypt(byte[] data, EdDSAParameters Key) => throw new NotImplementedException();
 
     public static byte[] HashAndSign(byte[] data, EdDSAParameters parameters) {
-        int num = _maxRetries;
-        while (true) {
-            try {
-                using var rSACryptoServiceProvider = OpenProvider(parameters);
-                return rSACryptoServiceProvider.SignData(data, HashAlgorithmName.SHA256);
-            } catch (CryptographicException innerException) {
-                if (num-- <= 0) {
-                    var defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(58, 1);
-                    defaultInterpolatedStringHandler.AppendLiteral("Failed to sign data with current parameters after ");
-                    defaultInterpolatedStringHandler.AppendFormatted(3);
-                    defaultInterpolatedStringHandler.AppendLiteral(" retries");
-                    throw new InterlockLedgerCryptographicException(defaultInterpolatedStringHandler.ToStringAndClear(), innerException);
-                }
-            }
-        }
+        using var dataStream = new MemoryStream(data, writable: false);
+        return HashAndSignStream(dataStream, parameters);
     }
 
     public static byte[] HashAndSignBytes<T>(T dataToSign, EdDSAParameters parameters) where T : Signable<T>, new() {
-        int num = _maxRetries;
-        while (true) {
-            try {
-                using var rSACryptoServiceProvider = OpenProvider(parameters);
-                using var data = dataToSign.OpenReadingStreamAsync().Result;
-                return rSACryptoServiceProvider.SignData(data, HashAlgorithmName.SHA256);
-            } catch (CryptographicException innerException) {
-                if (num-- <= 0) {
-                    var defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(58, 1);
-                    defaultInterpolatedStringHandler.AppendLiteral("Failed to sign data with current parameters after ");
-                    defaultInterpolatedStringHandler.AppendFormatted(3);
-                    defaultInterpolatedStringHandler.AppendLiteral(" retries");
-                    throw new InterlockLedgerCryptographicException(defaultInterpolatedStringHandler.ToStringAndClear(), innerException);
-                }
-            }
-        }
+        using var dataStream = dataToSign.OpenReadingStreamAsync().Result;
+        return HashAndSignStream(dataStream, parameters);
+    }
+
+    public static byte[] HashAndSignStream(Stream dataStream, EdDSAParameters parameters) {
+        var signer = new Ed25519Signer();
+        signer.Init(forSigning: true, parameters.PrivateKeyParameters);
+        var buffer = new byte[0x4000];
+        do {
+            int len = dataStream.Read(buffer, 0, buffer.Length);
+            if (len == 0)
+                return signer.GenerateSignature();
+            signer.BlockUpdate(buffer, 0, len);
+        } while (true);
     }
 
     public static bool Verify<T>(T dataToVerify, TagSignature signature, EdDSAParameters parameters) where T : Signable<T>, new() {
@@ -135,30 +87,18 @@ public static class EdDSAHelper
         return VerifyStream(dataStream, signature, parameters);
     }
 
-    private static EdDSACryptoServiceProvider OpenProvider(EdDSAParameters parameters) {
-        var rSACryptoServiceProvider = new EdDSACryptoServiceProvider();
-        rSACryptoServiceProvider.ImportParameters(parameters);
-        return rSACryptoServiceProvider;
-    }
     private static bool VerifyStream(Stream dataStream, TagSignature signature, EdDSAParameters parameters) {
-        try {
-            if (signature.Required("signature").Algorithm != 0) {
-                var defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(54, 1);
-                defaultInterpolatedStringHandler.AppendLiteral("Signature uses different algorithm ");
-                defaultInterpolatedStringHandler.AppendFormatted(signature.Algorithm);
-                defaultInterpolatedStringHandler.AppendLiteral(" from this EdDSA key!");
-                throw new InvalidDataException(defaultInterpolatedStringHandler.ToStringAndClear());
-            }
-
-            if (!parameters.HasPrivatePart) {
-                throw new InvalidDataException("This EdDSA key is not properly configured to be able to verify a signature!");
-            }
-
-            using var rSACryptoServiceProvider = OpenProvider(parameters);
-            return rSACryptoServiceProvider.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256);
-        } catch (CryptographicException innerException) {
-            throw new InterlockLedgerCryptographicException("Failed to verify data with current parameters and signature", innerException);
-        }
+        if (signature.Required().Algorithm != Algorithm.EdDSA)
+            throw new InvalidDataException($"Signature uses different algorithm {signature.Algorithm} from this EdDSA key!");
+        var validator = new Ed25519Signer();
+        validator.Init(forSigning: false, parameters.PublicKeyParameters);
+        var buffer = new byte[0x4000];
+        do {
+            int len = dataStream.Read(buffer, 0, buffer.Length);
+            if (len == 0)
+                return validator.VerifySignature(signature.Data);
+            validator.BlockUpdate(buffer, 0, len);
+        } while (true);
     }
 
     private static readonly Ed25519KeyPairGenerator _keyPairGenerator = InitGenerator();

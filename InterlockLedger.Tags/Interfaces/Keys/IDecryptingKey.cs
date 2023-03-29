@@ -32,44 +32,8 @@
 
 namespace InterlockLedger.Tags;
 
-/// <summary>
-/// This is the interface of the key pair codecs. Instances of this
-/// interface must be thread safe and immutable.
-/// </summary>
-public interface IKeyPairCodec
+public interface IDecryptingKey
 {
-    public ushort Algorithm { get; }
+    byte[] Decrypt(byte[] bytes);
 
-    /// <summary>
-    /// Serializes the public key.
-    /// </summary>
-    /// <param name="publicKey">The public key to be serialized.</param>
-    /// <returns>The serialized key in bytes.</returns>
-    public byte[] SerializePublic(object publicKey);
-
-    /// <summary>
-    /// Serializes the private key.
-    /// </summary>
-    /// <param name="privateKey">The private key to be serialized.</param>
-    /// <returns>The serialized key in bytes. The contents of this array will
-    /// be properly destroyed by the caller.</returns>
-    public byte[] SerializePrivate(object privateKey);
-
-    /// <summary>
-    /// Deserializes the public key.
-    /// </summary>
-    /// <param name="serialized">The serialized public key.</param>
-    /// <returns>The deserialized public key.</returns>
-    /// <exception cref="KeyStoreException">If the key could not be deserialized.</exception>
-    public object DeserializePublic(byte[] serialized);
-
-    /// <summary>
-    /// Deserializes the private key.
-    /// </summary>
-    /// <param name="serialized">The serialized private key. This clone 
-    /// this value if required because the contents of this array will be
-    /// properly destroyed by the caller.</param>
-    /// <returns>The deserialized private key.</returns>
-    /// <exception cref="KeyStoreException">If the key could not be deserialized.</exception>
-    public object DeserializePrivate(byte[] serialized);
 }

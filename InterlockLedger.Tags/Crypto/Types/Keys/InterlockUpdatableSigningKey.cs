@@ -48,8 +48,6 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     public ulong SignaturesWithCurrentKey => _data.SignaturesWithCurrentKey;
     public KeyStrength Strength => _data.Strength;
 
-    public byte[] Decrypt(byte[] bytes) => throw new InvalidOperationException("Updatable keys can't decrypt");
-
     public abstract void DestroyKeys();
 
     public void Dispose() {

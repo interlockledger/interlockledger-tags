@@ -35,7 +35,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
 
-public sealed class RSACertificateSigningKey : InterlockSigningKey
+public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingKey
 {
     public RSACertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) :
         this(data, new X509Certificate2(certificateBytes.Required(),
@@ -64,12 +64,12 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey
 
     public static new RSACertificateSigningKey FromSessionState(byte[] bytes) {
         using var ms = new MemoryStream(bytes);
-        var tag = ms.Decode<InterlockSigningKeyData>();
-        var cert = new X509Certificate2(ms.DecodeByteArray(), tag.Name);
+        var tag = ms.Decode<InterlockSigningKeyData>().Required();
+        var cert = new X509Certificate2(ms.DecodeByteArray().Required(), tag.Name);
         return new RSACertificateSigningKey(tag, cert);
     }
 
-    public override byte[] Decrypt(byte[] bytes) =>
+    public byte[] Decrypt(byte[] bytes) =>
         DoWithPrivateKey(rsa => rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1));
 
     protected override void DisposeManagedResources() => _x509Certificate?.Dispose();

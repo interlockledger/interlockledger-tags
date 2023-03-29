@@ -40,15 +40,15 @@ public class EdDSAParameters
         int pubKeySize = Ed25519PublicKeyParameters.KeySize;
         AsBytes = bytes.MinLength(pubKeySize);
         AsPublicBytes = bytes[0..(pubKeySize - 1)];
-        _publicKeyParameters = new Ed25519PublicKeyParameters(bytes, 0);
-        _privateKeyParameters = bytes.Length > pubKeySize
+        PublicKeyParameters = new Ed25519PublicKeyParameters(bytes, 0);
+        PrivateKeyParameters = bytes.Length > pubKeySize
             ? new Ed25519PrivateKeyParameters(bytes.ExactLength(pubKeySize + Ed25519PrivateKeyParameters.KeySize), pubKeySize)
             : null;
     }
 
     public EdDSAParameters(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters privKey) {
-        _publicKeyParameters = pubKey.Required();
-        _privateKeyParameters = privKey.Required();
+        PublicKeyParameters = pubKey.Required();
+        PrivateKeyParameters = privKey.Required();
         var buf = new byte[Ed25519PublicKeyParameters.KeySize];
         pubKey.Encode(buf);
         AsPublicBytes = buf;
@@ -58,11 +58,15 @@ public class EdDSAParameters
     }
 
 #pragma warning disable IDE0052 // Remove unread private members
-    private readonly Ed25519PublicKeyParameters _publicKeyParameters;
-    private readonly Ed25519PrivateKeyParameters? _privateKeyParameters;
 #pragma warning restore IDE0052 // Remove unread private members
 
     public byte[] AsBytes { get; }
     public byte[] AsPublicBytes { get; }
-    public bool HasPrivatePart => _privateKeyParameters is not null;
+    public bool HasPrivatePart => PrivateKeyParameters is not null;
+
+    internal Ed25519PublicKeyParameters PublicKeyParameters { get; }
+
+    internal Ed25519PrivateKeyParameters? PrivateKeyParameters { get; }
+
+     
 }

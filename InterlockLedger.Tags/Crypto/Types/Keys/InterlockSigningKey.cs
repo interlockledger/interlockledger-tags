@@ -51,9 +51,6 @@ public abstract class InterlockSigningKey : ISigningKey
     public KeyStrength Strength => _data.Strength;
 
     public static InterlockSigningKey FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
-
-    public abstract byte[] Decrypt(byte[] bytes);
-
     public void Dispose() {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);

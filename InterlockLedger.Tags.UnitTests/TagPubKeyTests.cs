@@ -34,81 +34,85 @@ namespace InterlockLedger.Tags;
 [TestFixture]
 public class TagPubKeyTests
 {
-    [Test, Ignore("Unimplemented bits")]
+    private static readonly byte[] _bytesToSign = new byte[] { 1, 2, 3 };
+
+    [TestCase("PubKey!Fl9ud3p6acZqZRfx0GF8PjmBEpwXf_PQYqPHcM6cDUU#EdDSA", Algorithm.EdDSA, typeof(TagPublicEdDSAKey))]
+    public void ParsePubKey(string pubKey, Algorithm algorithm, Type type) {
+        var pubkey = TagPubKey.Build(pubKey);
+        Assert.That(pubkey, Is.Not.Null);
+        Assert.That(pubkey, Is.InstanceOf(type));
+        Assert.That(pubkey, Is.AssignableTo<TagPubKey>());
+        Assert.That(pubkey.Algorithm, Is.EqualTo(algorithm));
+    }
+
+    [Test]
     public void CreateEdDSAKeySerializeDeserializeSignAndVerify() {
-        var parameters = EdDSAHelper.CreateNewEdDSAParameters();
-        var key = new TagPubEdDSAKey(parameters.Value);
-        var bytes = key.EncodedBytes;
-        TestContext.WriteLine(bytes.AsLiteral());
-        using var ms = new MemoryStream(bytes);
+        var parameters = EdDSAHelper.CreateNewTagEdDSAParameters();
+        var pubkey = parameters.PublicKey;
+        var pubkeyencodedbytes = pubkey.EncodedBytes;
+        TestContext.WriteLine(pubkey.ToString());
+        TestContext.WriteLine(pubkeyencodedbytes.AsLiteral());
+        using var ms = new MemoryStream(pubkeyencodedbytes);
         var tag = ms.Decode<TagPubKey>();
-        Assert.NotNull(tag);
-        Assert.AreEqual(key, tag);
-        CollectionAssert.AreEqual(bytes, tag.EncodedBytes);
-        var signatureBytes = EdDSAHelper.HashAndSign(bytes, parameters.Value);
+        Assert.That(tag, Is.Not.Null);
+        Assert.That(tag, Is.EqualTo(pubkey));
+        CollectionAssert.AreEqual(pubkeyencodedbytes, tag.EncodedBytes);
+        var signatureBytes = EdDSAHelper.HashAndSign(_bytesToSign, parameters.Value);
         var signature = new TagSignature(Algorithm.EdDSA, signatureBytes);
-        Assert.IsTrue(key.Verify(bytes, signature), "Signature failed!");
+        Assert.That(pubkey.Verify(_bytesToSign, signature), "Signature failed!");
+        var keyData = new InterlockSigningKeyData(
+                        new KeyPurpose[] { KeyPurpose.Protocol },
+                        new AppPermissions[] { new AppPermissions(3) },
+                        name: "EdDSA Test Key",
+                        encrypted: _bytesToSign, // fake
+                        pubKey: pubkey,
+                        parameters.Strength
+                        );
+        var signingKey = new EdDSAInterlockSigningKey(keyData, parameters);
+        var newSignature = signingKey.Sign(_bytesToSign);
+        Assert.That(pubkey.Verify(_bytesToSign, signature), "New signature failed!");
     }
 
     [TestCase(
+        Algorithm.EdDSA,
         new byte[] {
-                37, 242,
-                    4, 0,
-                    58, 238,
-                        5, 1, 0,
-                        10, 0,
-                        10, 1,
-                        16, 24,
-                            30, 85, 30, 243, 193, 131, 193, 248, 41, 244, 83, 206,
-                            154, 79, 111, 148, 222, 162, 141, 172, 165, 74, 178, 177,
-                        16, 24,
-                            21, 52, 66, 9, 109, 160, 78, 48, 249, 74, 228, 82,
-                        200, 57, 244, 102, 239, 23, 51, 162, 217, 165, 252, 229, 0,
-                        17, 176,
-                            123, 13, 10, 32, 32, 34, 79, 105, 100, 34, 58, 32, 123, 13, 10, 32, 32, 32, 32, 34, 86, 97, 108, 117,
-                            101, 34, 58, 32, 110, 117, 108, 108, 44, 13, 10, 32, 32, 32, 32, 34, 70, 114, 105, 101, 110, 100, 108,
-                            121, 78, 97, 109, 101, 34, 58, 32, 34, 98, 114, 97, 105, 110, 112, 111, 111, 108, 80, 49, 57, 50, 114,
-                            49, 34, 13, 10, 32, 32, 125, 44, 13, 10, 32, 32, 34, 73, 115, 80, 114, 105, 109, 101, 34, 58, 32, 102,
-                            97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 67, 104, 97, 114, 97, 99, 116, 101, 114, 105, 115,
-                            116, 105, 99, 50, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 69, 120, 112,
-                            108, 105, 99, 105, 116, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 78, 97,
-                            109, 101, 100, 34, 58, 32, 116, 114, 117, 101, 13, 10, 125
-
+            37,
+              34,
+                5, 0,
+                190, 243, 109, 10, 8, 14, 248, 173, 115, 242, 96, 71, 191, 173, 251, 94,
+                    46, 245, 64, 18, 30, 248, 50, 172, 36, 29, 97, 226, 238, 19, 60, 61
         },
-        Algorithm.EcDSA,
         new byte[] {
-                58, 238,
-                    5, 1, 0,
-                    10, 0,
-                    10, 1,
-                    16, 24,
-                        30, 85, 30, 243, 193, 131, 193, 248, 41, 244, 83, 206,
-                        154, 79, 111, 148, 222, 162, 141, 172, 165, 74, 178, 177,
-                    16, 24,
-                        21, 52, 66, 9, 109, 160, 78, 48, 249, 74, 228, 82,
-                    200, 57, 244, 102, 239, 23, 51, 162, 217, 165, 252, 229, 0,
-                    17, 176,
-                        123, 13, 10, 32, 32, 34, 79, 105, 100, 34, 58, 32, 123, 13, 10, 32, 32, 32, 32, 34, 86, 97, 108, 117,
-                        101, 34, 58, 32, 110, 117, 108, 108, 44, 13, 10, 32, 32, 32, 32, 34, 70, 114, 105, 101, 110, 100, 108,
-                        121, 78, 97, 109, 101, 34, 58, 32, 34, 98, 114, 97, 105, 110, 112, 111, 111, 108, 80, 49, 57, 50, 114,
-                        49, 34, 13, 10, 32, 32, 125, 44, 13, 10, 32, 32, 34, 73, 115, 80, 114, 105, 109, 101, 34, 58, 32, 102,
-                        97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 67, 104, 97, 114, 97, 99, 116, 101, 114, 105, 115,
-                        116, 105, 99, 50, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 69, 120, 112,
-                        108, 105, 99, 105, 116, 34, 58, 32, 102, 97, 108, 115, 101, 44, 13, 10, 32, 32, 34, 73, 115, 78, 97,
-                        109, 101, 100, 34, 58, 32, 116, 114, 117, 101, 13, 10, 125
-         }), Ignore("Unimplemented bits")]
-    [TestCase(new byte[] { 37, 8, 0, 0, 40, 4, 16, 0, 16, 0 }, Algorithm.RSA, new byte[] { 40, 4, 16, 0, 16, 0 })]
-    public void NewTagPubKeyFromStream(byte[] bytes, Algorithm algorithm, byte[] data) {
+            190, 243, 109, 10, 8, 14, 248, 173, 115, 242, 96, 71, 191, 173, 251, 94,
+                46, 245, 64, 18, 30, 248, 50, 172, 36, 29, 97, 226, 238, 19, 60, 61
+        })
+    ]
+    [TestCase(Algorithm.RSA, new byte[] { 37, 8, 0, 0, 40, 4, 16, 0, 16, 0 }, new byte[] { 40, 4, 16, 0, 16, 0 })]
+    public void NewTagPubKeyFromStream(Algorithm algorithm, byte[] bytes, byte[] data) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TagPubKey>();
-        Assert.AreEqual(ILTagId.PubKey, tag.TagId);
-        Assert.AreEqual(algorithm, tag.Algorithm);
-        Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
+        Assert.That(tag, Is.Not.Null);
+        Assert.Multiple(() => {
+            Assert.That(tag.TagId, Is.EqualTo(ILTagId.PubKey));
+            Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+            Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+        });
     }
 
-    [TestCase(Algorithm.EcDSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 37, 4, 4, 0, 0, 0 })]
     [TestCase(Algorithm.RSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 37, 4, 0, 0, 0, 0 })]
-    [TestCase(Algorithm.ElGamal, new byte[] { }, ExpectedResult = new byte[] { 37, 2, 3, 0 })]
+    [TestCase(
+        Algorithm.EdDSA,
+        new byte[] {
+            190, 243, 109, 10, 8, 14, 248, 173, 115, 242, 96, 71, 191, 173, 251, 94,
+                46, 245, 64, 18, 30, 248, 50, 172, 36, 29, 97, 226, 238, 19, 60, 61
+        },
+        ExpectedResult = new byte[] {
+            37,
+              34,
+                5, 0,
+                190, 243, 109, 10, 8, 14, 248, 173, 115, 242, 96, 71, 191, 173, 251, 94,
+                    46, 245, 64, 18, 30, 248, 50, 172, 36, 29, 97, 226, 238, 19, 60, 61
+        })]
     public byte[] SerializeTagPubKey(Algorithm algorithm, byte[] data) => new TestTagPubKey(algorithm, data).EncodedBytes;
 }
 
