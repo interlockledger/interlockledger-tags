@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>30.0.0</Version>
+        <Version>30.0.1</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Breaks lots of API signatures/interfaces on cleanup/splitting</PackageReleaseNotes>
+        <PackageReleaseNotes>Fix EdDSAParameters serialization bug</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>

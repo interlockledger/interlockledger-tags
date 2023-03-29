@@ -39,7 +39,7 @@ public class EdDSAParameters
     public EdDSAParameters(byte[] bytes) {
         int pubKeySize = Ed25519PublicKeyParameters.KeySize;
         AsBytes = bytes.MinLength(pubKeySize);
-        AsPublicBytes = bytes[0..(pubKeySize - 1)];
+        AsPublicBytes = bytes[0..pubKeySize];
         PublicKeyParameters = new Ed25519PublicKeyParameters(bytes, 0);
         PrivateKeyParameters = bytes.Length > pubKeySize
             ? new Ed25519PrivateKeyParameters(bytes.ExactLength(pubKeySize + Ed25519PrivateKeyParameters.KeySize), pubKeySize)
