@@ -45,13 +45,9 @@ public abstract class Owner : ISigningKey, IPasswordProvider
     public OwnerId OwnerId => (OwnerId)Id;
     public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
     public KeyPurpose[] Purposes => keyPurposes;
-    public Algorithm SignAlgorithm { get; protected set; }
-    public KeyStrength Strength { get; protected set; }
-
-    public abstract byte[] Decrypt(byte[] bytes);
-
     public abstract void Dispose();
 
+    public ISigningKey Traits => this;
     public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes).Data);
 
     public abstract TagSignature Sign(byte[] data);
@@ -60,7 +56,7 @@ public abstract class Owner : ISigningKey, IPasswordProvider
 
     public string ToListing() => $"'{Name}' {Id}";
 
-    public string ToShortString() => $"Owner {Name} using {SignAlgorithm} with {Strength} strength ({Id})";
+    public string ToShortString() => $"Owner {Name} using {Traits.Algorithm} with {Traits.Strength} strength ({Id})";
 
     public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {PublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
 

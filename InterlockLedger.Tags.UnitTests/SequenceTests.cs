@@ -40,12 +40,12 @@ public class SequenceTests
     public void DeserializeHeterogenousILTagSequence(string firstElement, ulong secondElement, byte[] encodedBytes) {
         using var ms = new MemoryStream(encodedBytes);
         var tagValue = ms.DecodeTag();
-        Assert.IsInstanceOf<ILTagSequence>(tagValue);
+        Assert.That(tagValue, Is.InstanceOf<ILTagSequence>());
         var value = ((ILTagSequence)tagValue).Value;
 
-        Assert.AreEqual(2, value.Length);
-        Assert.AreEqual(firstElement, value[0].TextualRepresentation);
-        Assert.AreEqual(secondElement, (value[1] as ILTagILInt)?.Value);
+        Assert.That(value, Has.Length.EqualTo(2));
+        Assert.That(value[0].TextualRepresentation, Is.EqualTo(firstElement));
+        Assert.That((value[1] as ILTagILInt)?.Value, Is.EqualTo(secondElement));
     }
 
     [TestCase(new byte[0], new byte[0], new byte[] { 22, 1, 0 }, TestName = "Deserialize_an_Empty_Sequence")]
@@ -56,20 +56,20 @@ public class SequenceTests
     public void DeserializeILTagSequence(byte[] bytes, byte[] splits, byte[] encodedBytes) {
         using var ms = new MemoryStream(encodedBytes);
         var tagValue = ms.DecodeTag();
-        Assert.IsInstanceOf<ILTagSequence>(tagValue);
+        Assert.That(tagValue, Is.InstanceOf<ILTagSequence>());
         var value = ((ILTagSequence)tagValue).Value;
 
         var array = BuildArrayOfArrays(bytes, splits);
         if (array == null) {
-            Assert.IsTrue(value == null);
+            Assert.That(value, Is.EqualTo(null));
         } else {
-            Assert.AreEqual(array.Length, value.Length);
+            Assert.That(value, Has.Length.EqualTo(array.Length));
             for (var i = 0; i < array.Length; i++) {
                 var arrayValue = array[i].Value;
                 var valueValue = (value[i] as ILTagByteArray)?.Value;
                 if (arrayValue.Length == 0 && valueValue == null)
                     Assert.Pass();
-                Assert.AreEqual(arrayValue, valueValue);
+                Assert.That(valueValue, Is.EqualTo(arrayValue));
             }
         }
     }
@@ -82,7 +82,7 @@ public class SequenceTests
         TestContext.WriteLine(json);
         var parsedJson = JsonSerializer.Deserialize<List<object>>(json);
         var backSeq = TagProvider.DeserializeFromJson(ILTagId.Sequence, parsedJson);
-        Assert.IsTrue(seq.Equals(backSeq));
+        Assert.That(seq, Is.EqualTo(backSeq));
     }
 
     [TestCase("Test", 1024ul, ExpectedResult = new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Serialize_One_Sequence_with_a_string_and_one_ilint")]

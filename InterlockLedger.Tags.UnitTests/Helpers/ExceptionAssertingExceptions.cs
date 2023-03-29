@@ -35,6 +35,6 @@ namespace System;
 public static class ExceptionAssertingExtensions
 {
     public static void AssertMessageStartsWith(this Exception exception, string expectedMessageStart)
-        => Assert.IsTrue(exception.Message.StartsWith(expectedMessageStart, StringComparison.Ordinal),
+        => Assert.That(exception.Message.StartsWith(expectedMessageStart, StringComparison.Ordinal),
                          $"Exception message doesn't start with {expectedMessageStart}");
 }

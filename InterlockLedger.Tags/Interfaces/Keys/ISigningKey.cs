@@ -33,11 +33,12 @@
 namespace InterlockLedger.Tags;
 public interface ISigningKey : IBaseKey
 {
-    Algorithm SignAlgorithm { get; }
-
     TagSignature Sign(byte[] data);
 
     TagSignature Sign<T>(T data) where T : Signable<T>, new();
 
     IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), Id, PublicKey);
+
+    IdentifiedSignature SignWithId(byte[] data) => new(Sign(data), Id, PublicKey);
+
 }

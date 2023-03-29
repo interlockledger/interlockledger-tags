@@ -40,7 +40,7 @@ public class ILTagArrayOfILTagTests
     public void DecodeArray(byte[] bytes, byte[] encodedBytes) {
         using var ms = new MemoryStream(encodedBytes);
         var value = ms.DecodeArray<byte, TestTagOfOneByte>(s => new TestTagOfOneByte(s.DecodeTagId(), s));
-        Assert.AreEqual(bytes, value);
+        Assert.That(value, Is.EqualTo(bytes));
     }
 
 
@@ -64,7 +64,7 @@ public class ILTagArrayOfILTagTests
     public void DeserializeILTagILTagArrayGeneric(byte[] bytes, byte[] splits, byte[] encodedBytes) {
         using var ms = new MemoryStream(encodedBytes);
         var tagValue = ms.DecodeTag();
-        Assert.IsInstanceOf<ILTagArrayOfILTag<ILTag>>(tagValue);
+        Assert.That(tagValue, Is.InstanceOf<ILTagArrayOfILTag<ILTag>>());
         var value = ((ILTagArrayOfILTag<ILTag>)tagValue).Value;
         var array = BuildArrayOfArrays(bytes, splits);
         CompareArrays<ILTagByteArray, byte[]>(array, value);
@@ -109,13 +109,13 @@ public class ILTagArrayOfILTagTests
 
     private static void CompareArrays<T, TT>(T[] array, ILTag[] value) where T : ILTagOf<TT> {
         if (array == null)
-            Assert.IsNull(value);
+            Assert.That(value, Is.Null);
         else {
-            Assert.AreEqual(array.Length, value.Length);
+            Assert.That(value, Has.Length.EqualTo(array.Length));
             for (var i = 0; i < array.Length; i++) {
                 var arrayValue = array[i].Value;
                 var valueValue = ((T)value[i]).Value;
-                Assert.AreEqual(arrayValue, valueValue);
+                Assert.That(valueValue, Is.EqualTo(arrayValue));
             }
         }
     }
@@ -127,7 +127,7 @@ public class ILTagArrayOfILTagTests
         var value = ms.DecodeTagArray<ILTagBool>();
         CompareArrays<ILTagBool, bool>(array, value);
         var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes;
-        Assert.AreEqual(encodedBytes, newEncodedBytes);
+        Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
     private class TestTagOfOneByte : ILTagExplicit<byte>

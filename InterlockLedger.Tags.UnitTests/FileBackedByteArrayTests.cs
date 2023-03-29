@@ -57,15 +57,15 @@ public class FileBackedByteArrayTests
                 fos.Write(arrayBytes);
             }
             var fbba = new FileBackedByteArray(fi, bytesLength, (ulong)bytesLength);
-            Assert.IsNotNull(fbba);
-            Assert.AreEqual(bytesLength, fbba.Length);
-            Assert.AreEqual(bytesLength, fbba.Offset);
-            Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
-            Assert.IsNull(fbba.Value);
+            Assert.That(fbba, Is.Not.Null);
+            Assert.That(fbba.Length, Is.EqualTo(bytesLength));
+            Assert.That(fbba.Offset, Is.EqualTo(bytesLength));
+            Assert.That(fbba.TagId, Is.EqualTo(ILTagId.ByteArray));
+            Assert.That(fbba.Value, Is.Null);
             using var mso = SerializeInto(fbba, prefixedArrayBytes);
             mso.Position = 0;
             var tagArray = TagProvider.DeserializeFrom(mso);
-            Assert.IsInstanceOf<ILTagByteArray>(tagArray);
+            Assert.That(tagArray, Is.InstanceOf<ILTagByteArray>());
             CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
 
         } finally {
@@ -92,13 +92,13 @@ public class FileBackedByteArrayTests
             byte[] bytes = "This is just a test".UTF8Bytes();
             FileBackedByteArray fbba = null;
             using (var fs = fi.GetWritingStream(it => fbba = new FileBackedByteArray(it))) {
-                Assert.IsNull(fbba);
+                Assert.That(fbba, Is.Null);
                 fs.WriteBytes(bytes);
-                Assert.IsTrue(fi.Exists, "Temp file was not created");
+                Assert.That(fi.Exists, "Temp file was not created");
             }
-            Assert.IsNotNull(fbba);
-            Assert.AreEqual(bytes.Length, fbba.Length);
-            Assert.AreEqual(0L, fbba.Offset);
+            Assert.That(fbba, Is.Not.Null);
+            Assert.That(fbba.Length, Is.EqualTo(bytes.Length));
+            Assert.That(fbba.Offset, Is.EqualTo(0L));
             using (var s = fbba.ReadingStream) {
                 var readBytes = s.ReadAllBytesAsync().Result;
                 CollectionAssert.AreEqual(bytes, readBytes);
@@ -118,22 +118,22 @@ public class FileBackedByteArrayTests
             var prefixedArrayBytes = arrayBytes.Prepend((byte)bytesLength).Prepend((byte)ILTagId.ByteArray).ToArray();
             using var ms = new MemoryStream(arrayBytes);
             var fbba = await createFrom(fi, ms);
-            Assert.IsNotNull(fbba);
-            Assert.AreEqual(bytesLength, fbba.Length);
-            Assert.AreEqual(0, fbba.Offset);
-            Assert.AreEqual(ILTagId.ByteArray, fbba.TagId);
+            Assert.That(fbba, Is.Not.Null);
+            Assert.That(fbba.Length, Is.EqualTo(bytesLength));
+            Assert.That(fbba.Offset, Is.EqualTo(0));
+            Assert.That(fbba.TagId, Is.EqualTo(ILTagId.ByteArray));
             using var mso = SerializeInto(fbba, prefixedArrayBytes);
             mso.Position = 0;
             var tagArray = TagProvider.DeserializeFrom(mso);
-            Assert.IsInstanceOf<ILTagByteArray>(tagArray);
+            Assert.That(tagArray, Is.InstanceOf<ILTagByteArray>());
             CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
             var fbba2 = new FileBackedByteArray(fi);
             using (var fs = fbba2.OpenReadingStreamAsync().Result)
                 CollectionAssert.AreEqual(prefixedArrayBytes, fs.ReadAllBytesAsync().Result);
-            Assert.AreEqual(arrayBytes.Length, fbba2.Length);
+            Assert.That(fbba2.Length, Is.EqualTo(arrayBytes.Length));
             using var s = fbba2.ReadingStream;
             var bytes = s.ReadAllBytesAsync().Result;
-            Assert.IsNotNull(bytes);
+            Assert.That(bytes, Is.Not.Null);
             CollectionAssert.AreEqual(arrayBytes, bytes);
         } finally {
             fi.Delete();
@@ -144,7 +144,7 @@ public class FileBackedByteArrayTests
         var mso = new MemoryStream();
         _ = fbba.SerializeIntoAsync(mso).Result;
         var outputBytes = mso.ToArray();
-        Assert.IsNotNull(outputBytes);
+        Assert.That(outputBytes, Is.Not.Null);
         CollectionAssert.AreEqual(prefixedArrayBytes, outputBytes);
         return mso;
     }

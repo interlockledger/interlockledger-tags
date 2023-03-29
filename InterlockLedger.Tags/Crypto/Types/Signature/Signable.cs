@@ -44,7 +44,7 @@ public abstract class Signable<T> : VersionedValue<T>, ISignable where T : Signa
     public ILTag ResolveSigned(ushort version, Stream s) => new SignedValue<T>(version, (T)this, s).AsPayload;
 
     public SignedValue<T> SignWith(ISigningContext context)
-        => new((T)this, context.Required().Key.SignWithId((T)this).AsSingle());
+        => new((T)this, context.Required().Key.Required().SignWithId((T)this).AsSingle());
 
     protected Signable(ulong tagId, ushort version) : base(tagId, version) {
     }

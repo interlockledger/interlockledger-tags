@@ -58,7 +58,7 @@ public class ILTagDictionaryTests
     public void DeserializeILTagDictionaryOfILTagArrayGeneric(string[] keys, byte[] bytes, byte[] splits, byte[] encodedBytes) {
         using var ms = new MemoryStream(encodedBytes);
         var tagValue = ms.DecodeTag();
-        Assert.IsInstanceOf<ILTagDictionary<ILTag>>(tagValue);
+        Assert.That(tagValue, Is.InstanceOf<ILTagDictionary<ILTag>>());
         var value = ((ILTagDictionary<ILTag>)tagValue).Value;
         var dict = BuildDictionary(keys, bytes, splits);
         CompareSimilarDicts<ILTagByteArray, ILTag>(dict, value);
@@ -100,7 +100,7 @@ public class ILTagDictionaryTests
         TestContext.WriteLine(json);
         var parsedJson = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
         var backDict = TagProvider.DeserializeFromJson(ILTagId.Dictionary, parsedJson);
-        Assert.IsTrue(dict.Equals(backDict));
+        Assert.That(dict, Is.EqualTo(backDict));
     }
 
     [Test]
@@ -111,7 +111,7 @@ public class ILTagDictionaryTests
         TestContext.WriteLine(json);
         var parsedJson = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
         var backDict = TagProvider.DeserializeFromJson(ILTagId.StringDictionary, parsedJson);
-        Assert.IsTrue(dict.Equals(backDict));
+        Assert.That(dict, Is.EqualTo(backDict));
     }
 
     [TestCase(new string[0], null, new byte[0], ExpectedResult = new byte[] { 30, 0 }, TestName = "Serialize_a_Null_Dictionary")]
@@ -160,40 +160,40 @@ public class ILTagDictionaryTests
 
     private static void CompareDicts<T, TT>(Dictionary<string, T> dict, Dictionary<string, T> value) where T : ILTagOf<TT> {
         if (dict == null)
-            Assert.IsNull(value);
+            Assert.That(value, Is.Null);
         else {
-            Assert.AreEqual(dict.SafeCount(), value.SafeCount());
+            Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key].Value;
                 var valueValue = value[key].Value;
-                Assert.AreEqual(dictValue, valueValue);
+                Assert.That(valueValue, Is.EqualTo(dictValue));
             }
         }
     }
 
     private static void CompareSimilarDicts<T, TT>(Dictionary<string, T> dict, Dictionary<string, TT> value) where T : ILTag where TT : ILTag {
         if (dict == null)
-            Assert.IsNull(value);
+            Assert.That(value, Is.Null);
         else {
-            Assert.AreEqual(dict.SafeCount(), value.SafeCount());
+            Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key];
                 var valueValue = value[key];
-                Assert.AreEqual(dictValue.TagId, valueValue.TagId);
-                Assert.AreEqual(dictValue.EncodedBytes, valueValue.EncodedBytes);
+                Assert.That(valueValue.TagId, Is.EqualTo(dictValue.TagId));
+                Assert.That(valueValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes));
             }
         }
     }
 
     private static void CompareStringDicts(Dictionary<string, string> dict, Dictionary<string, string> value) {
         if (dict == null)
-            Assert.IsNull(value);
+            Assert.That(value, Is.Null);
         else {
-            Assert.AreEqual(dict.SafeCount(), value.SafeCount());
+            Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key];
                 var valueValue = value[key];
-                Assert.AreEqual(dictValue, valueValue);
+                Assert.That(valueValue, Is.EqualTo(dictValue));
             }
         }
     }
@@ -205,7 +205,7 @@ public class ILTagDictionaryTests
         var value = ms.DecodeDictionary<ILTagBool>();
         CompareDicts<ILTagBool, bool>(dict, value);
         var newEncodedBytes = new ILTagDictionary<ILTagBool>(value).EncodedBytes;
-        Assert.AreEqual(encodedBytes, newEncodedBytes);
+        Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
     private static void GuaranteeBijectiveBehaviorForString(Dictionary<string, string> dict) {
@@ -215,6 +215,6 @@ public class ILTagDictionaryTests
         var value = ms.DecodeStringDictionary();
         CompareStringDicts(dict, value);
         var newEncodedBytes = new ILTagStringDictionary(value).EncodedBytes;
-        Assert.AreEqual(encodedBytes, newEncodedBytes);
+        Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 }

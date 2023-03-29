@@ -65,9 +65,7 @@ public class TagPubKeyTests
                         new AppPermissions[] { new AppPermissions(3) },
                         name: "EdDSA Test Key",
                         encrypted: _bytesToSign, // fake
-                        pubKey: pubkey,
-                        parameters.Strength
-                        );
+                        pubKey: pubkey);
         var signingKey = new EdDSAInterlockSigningKey(keyData, parameters);
         var newSignature = signingKey.Sign(_bytesToSign);
         Assert.That(pubkey.Verify(_bytesToSign, signature), "New signature failed!");

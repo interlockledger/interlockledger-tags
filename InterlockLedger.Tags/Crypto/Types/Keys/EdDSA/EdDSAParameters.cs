@@ -57,9 +57,6 @@ public class EdDSAParameters
         AsBytes = buf.Concat(privBuf).ToArray();
     }
 
-#pragma warning disable IDE0052 // Remove unread private members
-#pragma warning restore IDE0052 // Remove unread private members
-
     public byte[] AsBytes { get; }
     public byte[] AsPublicBytes { get; }
     public bool HasPrivatePart => PrivateKeyParameters is not null;

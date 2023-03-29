@@ -41,7 +41,7 @@ public interface IBaseKey : IDisposable
     TagPubKey PublicKey { get; }
     Algorithm Algorithm => PublicKey.Algorithm;
     KeyPurpose[] Purposes { get; }
-    KeyStrength Strength { get; }
+    KeyStrength Strength => PublicKey.Strength;
 
     bool CanAct(ulong appId, ulong actionId) => Purposes.Contains(KeyPurpose.Action) && Permissions.SafeAny(p => p.CanAct(appId, actionId));
 

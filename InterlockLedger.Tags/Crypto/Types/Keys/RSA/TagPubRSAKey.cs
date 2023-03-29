@@ -62,7 +62,7 @@ public class TagPubRSAKey : TagPubKey
         if (bytes == null || bytes.Length == 0)
             return default;
         using var s = new MemoryStream(bytes);
-        return s.Decode<TagRSAPublicParameters>().Value;
+        return s.Decode<TagRSAPublicParameters>().Required().Value;
     }
 
     private static byte[] EncodeParameters(RSAParameters parameters)

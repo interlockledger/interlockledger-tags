@@ -40,10 +40,10 @@ public class TagHashTests
     public void NewTagHashFromStream(byte[] bytes, HashAlgorithm algorithm, byte[] data) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TagHash>();
-        Assert.AreEqual(ILTagId.Hash, tag.TagId);
-        Assert.AreEqual(algorithm, tag.Algorithm);
-        Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
-        Assert.AreEqual(data, tag.Data ?? Array.Empty<byte>());
+        Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hash));
+        Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+        Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+        Assert.That(tag.Data ?? Array.Empty<byte>(), Is.EqualTo(data));
     }
 
     [TestCase("AAA#SHA3_512", HashAlgorithm.SHA3_512, new byte[] { 0, 0 })]
@@ -54,10 +54,10 @@ public class TagHashTests
         DoAsserts(algorithm, data, ITextual<TagHash>.Parse(textual));
 
         static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHash tag) {
-            Assert.AreEqual(ILTagId.Hash, tag.TagId);
-            Assert.AreEqual(algorithm, tag.Algorithm);
-            Assert.AreEqual(data.Length, tag.Data?.Length ?? 0);
-            Assert.AreEqual(data, tag.Data);
+            Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hash));
+            Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+            Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+            Assert.That(tag.Data, Is.EqualTo(data));
         }
     }
 

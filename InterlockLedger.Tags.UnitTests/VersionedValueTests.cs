@@ -46,13 +46,13 @@ public class VersionedValueTests
         AssertThings(vvt, new VersionedValueForTests.Payload(27, new ReadOnlySequence<byte>(bytes[2..])));
 
         static void AssertThings(VersionedValueForTests vvt, VersionedValue<VersionedValueForTests>.Payload tag) {
-            Assert.AreEqual((ushort)1, tag.Version, "Version");
-            Assert.AreEqual((ulong)10, tag.ValueLength, "ValueLength");
+            Assert.That(tag.Version, Is.EqualTo((ushort)1), "Version");
+            Assert.That(tag.ValueLength, Is.EqualTo((ulong)10), "ValueLength");
             var data = tag.Value;
-            Assert.AreEqual((ushort)1, data.Version, "Version");
-            Assert.AreSame(tag, data.AsPayload, "AsPayload");
-            Assert.AreNotSame(vvt, data, "vvt_x_data");
-            Assert.AreEqual(vvt.UserMessage, data.UserMessage, "Not the right UserMessage");
+            Assert.That(data.Version, Is.EqualTo((ushort)1), "Version");
+            Assert.That(data.AsPayload, Is.SameAs(tag), "AsPayload");
+            Assert.That(data, Is.Not.SameAs(vvt), "vvt_x_data");
+            Assert.That(data.UserMessage, Is.EqualTo(vvt.UserMessage), "Not the right UserMessage");
         }
     }
 

@@ -33,6 +33,6 @@
 namespace InterlockLedger.Tags;
 public interface ISigningContext
 {
-    ISigningKey? Key { get; }
+    ISigningKey Key { get; }
     ITimeStamper? TimeStamper { get; }
 }

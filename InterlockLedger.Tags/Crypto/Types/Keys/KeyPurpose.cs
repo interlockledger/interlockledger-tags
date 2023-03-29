@@ -40,9 +40,10 @@ public enum KeyPurpose : ulong
     ClaimSigner = 3,
     Encryption = 4,
     Protocol = 5,
-    ChainOperation = 7,
-    ForceInterlock = 8
     // EmergencyClosing = 6, Now use specific action id
+    ChainOperation = 7,
+    ForceInterlock = 8,
+    Any = 9,
 }
 
 public static class KeyPurposeExtensions

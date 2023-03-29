@@ -38,9 +38,9 @@ public class TagHelpersTests
     public void ToBytesHelperTest() {
         var tag = new ILTagILInt(23);
         var bytes = TagHelpers.ToBytesHelper((s) => s.EncodeILInt(23));
-        Assert.IsNotNull(bytes);
+        Assert.That(bytes, Is.Not.Null);
         Assert.That(tag.EncodedBytes, Is.EquivalentTo(bytes));
         var e = Assert.Throws<ArgumentException>(() => TagHelpers.ToBytesHelper(null));
-        Assert.AreEqual("serialize", e.ParamName);
+        Assert.That(e.ParamName, Is.EqualTo("serialize"));
     }
 }

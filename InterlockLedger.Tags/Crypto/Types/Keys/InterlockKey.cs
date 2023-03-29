@@ -39,7 +39,6 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             name,
             description,
             pubKey.Required(),
-            strength ?? pubKey.Strength,
             keyId,
             permissions)) { }
 
@@ -49,7 +48,6 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             key.Name,
             key.Description,
             key.PublicKey,
-            key.Strength,
             key.Id,
             key.Permissions)) {
     }
@@ -78,9 +76,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
 
     public string ToShortString() => Value.ToShortString();
 
-    public override string ToString() => $@"InterlockKey
--- Version: {Version}
-{Value}";
+    public override string ToString() => Value.ToString();
 
     public class Parts
     {
@@ -91,7 +87,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        public Parts(KeyPurpose[] purposes, string name, string? description, TagPubKey pubKey, KeyStrength strength, BaseKeyId keyId, IEnumerable<AppPermissions>? permissions) {
+        public Parts(KeyPurpose[] purposes, string name, string? description, TagPubKey pubKey, BaseKeyId? keyId, IEnumerable<AppPermissions>? permissions) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
             Version = InterlockKeyVersion;
@@ -99,7 +95,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             Purposes = purposes.Required().Distinct().ToArray();
             PublicKey = pubKey.Required();
             Description = description;
-            Strength = strength;
+            Strength = pubKey.Strength;
             Permissions = permissions.Safe().Distinct();
             if (Actionable && Permissions.None())
                 Purposes = Purposes.Where(pu => pu != KeyPurpose.Action).ToArray(); // Remove Action Purpose
@@ -123,7 +119,8 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
 
         public override string ToString() =>
-        $@"-- Key '{Name}' - {Description}
+        $@"## {GetType().Name}#{Version}
+-- Key '{Name}' - {Description}
 ++ Id: {Id}
 ++ using {PublicKey.Algorithm} [{PublicKey.TextualRepresentation}]
 ++ with purposes: {_displayablePurposes}  {GetPermissions(Environment.NewLine + "++++ ", formatter: p => p.VerboseRepresentation).ToLowerInvariant()}
@@ -153,16 +150,15 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
 
         private string _displayablePurposes => Purposes.ToStringAsList();
 
-        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions(string.Empty).UTF8Bytes())
-            .Append(PurposesAsILInts.EncodedBytes);
+        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions().UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
 
         private static ulong[] AsUlongs(IEnumerable<KeyPurpose> purposes) => purposes.Select(p => (ulong)p).ToArray();
 
-        private string GetPermissions(string separator, Func<AppPermissions, string>? formatter = null, string? firstSep = null)
+        private string GetPermissions(string? separator = null, Func<AppPermissions, string>? formatter = null, string? firstSep = null)
             => Actionable
                 ? Permissions.None()
                     ? "No actions"
-                    : $"{firstSep ?? separator}{Permissions.JoinedBy(separator, formatter!)}"
+                    : $"{firstSep ?? separator}{Permissions.JoinedBy(separator.Safe(), formatter!)}"
                 : string.Empty;
     }
 

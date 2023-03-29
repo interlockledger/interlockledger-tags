@@ -39,14 +39,14 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
     }
 
     public AES256Encrypted(Stream s) {
-        _encrypted = s.Required().Decode<TagEncrypted>();
+        _encrypted = s.Required().Decode<TagEncrypted>().Required();
         if (_encrypted.Algorithm != CipherAlgorithm.AES256)
             throw new InvalidDataException($"Not AES 256 encrypted!!! {_encrypted.Algorithm}");
     }
 
     public byte[] EncodedBytes => _encrypted.EncodedBytes;
 
-    public T Decrypt(string password) {
+    public T? Decrypt(string password) {
         CheckMissingPassword(password);
         var decrypted = Decrypt(_encrypted.CipherData, (st) => ReadHeader(password, st));
         using var s = new MemoryStream(decrypted);
@@ -93,7 +93,7 @@ public class AESCipher : ISymmetricCipher
 {
     public byte[] Decrypt(byte[] ownerBytes, string composedPassword) {
         using var ms = new MemoryStream(ownerBytes.Required());
-        return new AES256Encrypted<ILTagByteArray>(ms).Decrypt(composedPassword).Value;
+        return new AES256Encrypted<ILTagByteArray>(ms).Required().Decrypt(composedPassword).Required().Value;
     }
 
     public byte[] Encrypt(byte[] ownerBytes, string composedPassword) =>

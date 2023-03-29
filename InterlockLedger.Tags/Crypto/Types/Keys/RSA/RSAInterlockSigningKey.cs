@@ -38,7 +38,7 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
         if (data.Required().EncryptedContentType != EncryptedContentType.EncryptedKey)
             throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
         using var ms = new MemoryStream(decrypted);
-        _keyParameters = ms.Decode<TagRSAParameters>();
+        _keyParameters = ms.Decode<TagRSAParameters>().Required();
     }
 
     public override byte[] AsSessionState {
@@ -65,5 +65,5 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
 
     private readonly TagRSAParameters _keyParameters;
 
-    private RSAInterlockSigningKey(InterlockSigningKeyData tag, TagRSAParameters parameters) : base(tag) => _keyParameters = parameters;
+    public RSAInterlockSigningKey(InterlockSigningKeyData tag, TagRSAParameters parameters) : base(tag) => _keyParameters = parameters;
 }

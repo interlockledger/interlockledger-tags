@@ -36,51 +36,53 @@ namespace InterlockLedger.Tags;
 public class DataModelTests
 {
     [Test]
-    public void BadCompatibilityElementTagIdChangedDataModel() => Assert.IsFalse(_bad_ElementTagIdChangedDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityElementTagIdChangedDataModel() => Assert.That(_bad_ElementTagIdChangedDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityFieldTagIdChangedDataModel() => Assert.IsFalse(_bad_FieldTagIdChangedDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityFieldTagIdChangedDataModel() => Assert.That(_bad_FieldTagIdChangedDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityIndexUniquenessDataModel() => Assert.IsFalse(_bad_IndexUniquenessDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityIndexUniquenessDataModel() => Assert.That(_bad_IndexUniquenessDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityLessIndexedDataModel() => Assert.IsFalse(_bad_LessIndexedDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityLessIndexedDataModel() => Assert.That(_bad_LessIndexedDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityOpaquedDataModel() => Assert.IsFalse(_bad_OpaquedDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityOpaquedDataModel() => Assert.That(_bad_OpaquedDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityRenamedDataModel() => Assert.IsFalse(_bad_RenamedDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityRenamedDataModel() => Assert.That(_bad_RenamedDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityRenamedFieldDataModel() => Assert.IsFalse(_bad_RenamedFieldDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityRenamedFieldDataModel() => Assert.That(_bad_RenamedFieldDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityRenamedIndexDataModel() => Assert.IsFalse(_bad_RenamedIndexDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityRenamedIndexDataModel() => Assert.That(_bad_RenamedIndexDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityRenumberedDataModel() => Assert.IsFalse(_bad_RenumberedDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityRenumberedDataModel() => Assert.That(_bad_RenumberedDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityShorterDataModel() => Assert.IsFalse(_bad_ShorterDataModel.IsCompatible(_baseDataModel));
+    public void BadCompatibilityShorterDataModel() => Assert.That(_bad_ShorterDataModel.IsCompatible(_baseDataModel), Is.False);
 
     [Test]
-    public void BadCompatibilityUnblobedAndIndexedDataModel() {
-        Assert.IsTrue(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_baseDataModel));
-        Assert.IsFalse(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_ok_UnblobedDataModel));
-    }
+    public void BadCompatibilityUnblobedAndIndexedDataModel() =>
+        Assert.Multiple(() => {
+            Assert.That(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_baseDataModel));
+            Assert.That(_bad_UnblobedAndIndexedMisversionedDataModel.IsCompatible(_ok_UnblobedDataModel), Is.False);
+        });
 
     [Test]
-    public void GoodCompatibilityUnblobedAndIndexedDataModel() {
-        Assert.IsTrue(_ok_UnblobedAndIndexedDataModel.IsCompatible(_baseDataModel));
-        Assert.IsTrue(_ok_UnblobedAndIndexedDataModel.IsCompatible(_ok_UnblobedDataModel));
-        Assert.IsTrue(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_baseDataModel));
-        Assert.IsTrue(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_ok_UnblobedDataModel));
-    }
+    public void GoodCompatibilityUnblobedAndIndexedDataModel() =>
+        Assert.Multiple(() => {
+            Assert.That(_ok_UnblobedAndIndexedDataModel.IsCompatible(_baseDataModel));
+            Assert.That(_ok_UnblobedAndIndexedDataModel.IsCompatible(_ok_UnblobedDataModel));
+            Assert.That(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_baseDataModel));
+            Assert.That(_ok_UnblobedWithEnumerationDataModel.IsCompatible(_ok_UnblobedDataModel));
+        });
 
     [Test]
-    public void GoodCompatibilityUnblobedDataModel() => Assert.IsTrue(_ok_UnblobedDataModel.IsCompatible(_baseDataModel));
+    public void GoodCompatibilityUnblobedDataModel() => Assert.That(_ok_UnblobedDataModel.IsCompatible(_baseDataModel));
 
     [Test]
     public void HasField() {
@@ -100,10 +102,10 @@ public class DataModelTests
         ShouldNotHave("Buyer..ID");
 
         static void ShouldHave(string fieldName)
-            => Assert.IsTrue(_ok_UnblobedDataModel.HasField(fieldName), $"Should have '{fieldName}' field");
+            => Assert.That(_ok_UnblobedDataModel.HasField(fieldName), $"Should have '{fieldName}' field");
 
         static void ShouldNotHave(string fieldName)
-            => Assert.IsFalse(_ok_UnblobedDataModel.HasField(fieldName), $"Should not have '{fieldName}' field");
+            => Assert.That(_ok_UnblobedDataModel.HasField(fieldName), Is.False, $"Should not have '{fieldName}' field");
     }
 
     private static readonly DataModel _bad_ElementTagIdChangedDataModel = new() {

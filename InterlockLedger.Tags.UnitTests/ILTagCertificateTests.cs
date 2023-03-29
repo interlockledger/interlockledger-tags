@@ -43,8 +43,8 @@ public class ILTagCertificateTests
         var encodedBytes = tag.EncodedBytes;
         using var ms = new MemoryStream(encodedBytes);
         var retag = ms.Decode<TagCertificate>();
-        Assert.AreEqual(x509, retag.Value);
-        Assert.AreEqual(x509.ToString(), retag.Value.ToString());
+        Assert.That(retag.Value, Is.EqualTo(x509));
+        Assert.That(retag.Value.ToString(), Is.EqualTo(x509.ToString()));
     }
 
     private const string _certificateInBase64 = "MIIENTCCAx2gAwIBAgIJAJs7yUDZRzUKMA0GCSqGSIb3DQEBCwUAMGAxLTArBgNVBAMMJEJpdGRlZmVuZGVyIFBlcnNvbmFsIENBLmF2ZnJlZTAwMDAwMDEMMAoGA1UECwwDSURTMRQwEgYDVQQKDAtCaXRkZWZlbmRlcjELMAkGA1UEBhMCVVMwHhcNMTkwODI4MTMyNjQ2WhcNMTkxMTI2MTMyNjQ2WjAiMSAwHgYDVQQDExdpbnRlcmxvY2tsZWRnZXIubmV0d29yazCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKvxaV/dLYivduXUwAizA86l1sdoEoJarGCWzkJgseiudcFeSSd+VfuCDY2jwvLRRWs0aDWjYUtzWZi0i17L5eA7aXJHqQRnWtlfiDNTbapcdFbe4uV2pQdkUzyPI5rGrIs6oYBTg+wXF6hdk9oblNsspxWwjkPOThg74m0m+IKUvIih8vlxQIkAKExnOYtYfRdqTjDH6aUxmxc2DMXCdD5sKiwhU2QRKqgJcCl8dFQqpGfpzUTk1YjKC2edLCy9vgyf9F5sqYpwPKf6UxQ7rV2PCQUeyNjuWCG/skdJ4tmZ92MUBW+1tJGj8bbooCosda8ThBoLzDE1A97tJtS8XrcCAwEAAaOCAS4wggEqMIIBJgYDVR0RBIIBHTCCARmCJGF1dG9kaXNjb3Zlci5pbnRlcmxvY2tsZWRnZXIubmV0d29ya4IeY3BhbmVsLmludGVybG9ja2xlZGdlci5uZXR3b3JrgitpbnRlcmxvY2tsZWRnZXItbmV0d29yay5pbnRlcmxvY2tyZWNvcmQuY29tghdpbnRlcmxvY2tsZWRnZXIubmV0d29ya4IcbWFpbC5pbnRlcmxvY2tsZWRnZXIubmV0d29ya4Ifd2ViZGlzay5pbnRlcmxvY2tsZWRnZXIubmV0d29ya4Ivd3d3LmludGVybG9ja2xlZGdlci1uZXR3b3JrLmludGVybG9ja3JlY29yZC5jb22CG3d3dy5pbnRlcmxvY2tsZWRnZXIubmV0d29yazANBgkqhkiG9w0BAQsFAAOCAQEAfY0XybYZCctyDAS/MxWNH/gNtdKPHlearMQgYbbIxj0QxYPbHvrpMQjqDD5AEJpcPt0cOmEcBw0rx0qzG6lBJKKVlL3XwUpjueP5Vh83CLLqMgvrnIMEddPpIMmahe11NMYtWhxjGLkucjhRCoo0JQYVfrWVMsrcYdyafO0ThSwLIXZfC4bm9e++lSoYlblBIvucO7rIbxsfId2RY0XcyCzc96HFqUHm8nZFAYVDc3HURj+2wFtsgPmRJou0/CwJcyWPo9T8E1amzUw0myDeaztdUwczlrUBJkLs7Gstcgrpb+mLRp/mhgP1r7QsiLL+aiEFBeuPCaFljhnc/zQx3A==";

@@ -37,29 +37,43 @@ public class DataIndexTests
     [Test]
     public void VerifyReversibilityOfElementsAsString() {
         var d = new DataIndex { ElementsAsString = "Field" };
-        Assert.AreEqual("Field", d.ElementsAsString);
-        Assert.AreEqual(1, d.Elements.SafeCount());
+        Assert.Multiple(() => {
+            Assert.That(d.ElementsAsString, Is.EqualTo("Field"));
+            Assert.That(d.Elements.SafeCount(), Is.EqualTo(1));
+        });
         var firstElement = d.Elements.First();
-        Assert.AreEqual("Field", firstElement.FieldPath);
-        Assert.AreEqual(false, firstElement.DescendingOrder);
-        Assert.IsNull(firstElement.Function);
+        Assert.Multiple(() => {
+            Assert.That(firstElement.FieldPath, Is.EqualTo("Field"));
+            Assert.That(firstElement.DescendingOrder, Is.EqualTo(false));
+            Assert.That(firstElement.Function, Is.Null);
+        });
         d = new DataIndex { ElementsAsString = "Field2:-" };
-        Assert.AreEqual("Field2:-", d.ElementsAsString);
-        Assert.AreEqual(1, d.Elements.SafeCount());
+        Assert.Multiple(() => {
+            Assert.That(d.ElementsAsString, Is.EqualTo("Field2:-"));
+            Assert.That(d.Elements.SafeCount(), Is.EqualTo(1));
+        });
         firstElement = d.Elements.First();
-        Assert.AreEqual("Field2", firstElement.FieldPath);
-        Assert.AreEqual(true, firstElement.DescendingOrder);
-        Assert.IsNull(firstElement.Function);
+        Assert.Multiple(() => {
+            Assert.That(firstElement.FieldPath, Is.EqualTo("Field2"));
+            Assert.That(firstElement.DescendingOrder, Is.EqualTo(true));
+            Assert.That(firstElement.Function, Is.Null);
+        });
         d = new DataIndex { ElementsAsString = "DateOfPurchase:+:Day|Buyer.Id" };
-        Assert.AreEqual("DateOfPurchase:+:Day|Buyer.Id", d.ElementsAsString);
-        Assert.AreEqual(2, d.Elements.SafeCount());
+        Assert.Multiple(() => {
+            Assert.That(d.ElementsAsString, Is.EqualTo("DateOfPurchase:+:Day|Buyer.Id"));
+            Assert.That(d.Elements.SafeCount(), Is.EqualTo(2));
+        });
         firstElement = d.Elements.First();
-        Assert.AreEqual("DateOfPurchase", firstElement.FieldPath);
-        Assert.AreEqual(false, firstElement.DescendingOrder);
-        Assert.AreEqual("Day", firstElement.Function);
+        Assert.Multiple(() => {
+            Assert.That(firstElement.FieldPath, Is.EqualTo("DateOfPurchase"));
+            Assert.That(firstElement.DescendingOrder, Is.EqualTo(false));
+            Assert.That(firstElement.Function, Is.EqualTo("Day"));
+        });
         var secondElement = d.Elements.Skip(1).First();
-        Assert.AreEqual("Buyer.Id", secondElement.FieldPath);
-        Assert.AreEqual(false, secondElement.DescendingOrder);
-        Assert.IsNull(secondElement.Function);
+        Assert.Multiple(() => {
+            Assert.That(secondElement.FieldPath, Is.EqualTo("Buyer.Id"));
+            Assert.That(secondElement.DescendingOrder, Is.EqualTo(false));
+            Assert.That(secondElement.Function, Is.Null);
+        });
     }
 }

@@ -41,52 +41,55 @@ public class DataFieldTests
 
         static void AssertCloneIsEqualTo(DataField source) {
             var clone = source.WithName(source.Name);
-            Assert.AreEqual(source, clone);
-            Assert.AreNotSame(source, clone);
-            Assert.AreNotEqual(source, clone.WithName("testing"));
+            Assert.That(clone, Is.EqualTo(source));
+            Assert.That(clone, Is.Not.SameAs(source));
+            Assert.That(clone.WithName("testing"), Is.Not.EqualTo(source));
         }
     }
 
     [Test]
     public void EnumerationFromString() {
         foreach (ulong value in _dataFieldWithEnumeration.EnumerationDefinition.Keys)
-            Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithEnumeration.EnumerationDefinition[value].Name));
-        Assert.AreEqual(10, FromStringAsNumber("?10"));
-        Assert.IsNull(FromStringAsNumber("?"));
+            Assert.That(FromStringAsNumber(_dataFieldWithEnumeration.EnumerationDefinition[value].Name), Is.EqualTo(value));
+        Assert.That(FromStringAsNumber("?10"), Is.EqualTo(10));
+        Assert.That(FromStringAsNumber("?"), Is.Null);
         var e = Assert.Throws<InvalidDataException>(() => FromStringAsNumber("Donr"));
-        Assert.AreEqual("Value 'Donr' is not valid for the enumeration for field [DeliveryStatus]", e.Message);
+        Assert.That(e.Message, Is.EqualTo("Value 'Donr' is not valid for the enumeration for field [DeliveryStatus]"));
         static ulong? FromStringAsNumber(string text) => EnumFromStringAsNumber(_dataFieldWithEnumeration, text);
     }
 
     [Test]
     public void EnumerationFromStringFlags() {
-        foreach (ulong value in _dataFieldWithFlagsEnumeration.EnumerationDefinition.Keys)
-            Assert.AreEqual(value, FromStringAsNumber(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name));
-        Assert.AreEqual(7ul, FromStringAsNumber(AllFlags()));
-        Assert.AreEqual(7ul, FromStringAsNumber(AllFlags(reversed: true)));
-        Assert.AreEqual(15ul, FromStringAsNumber(AllFlags() + "|?8"));
-        Assert.IsNull(FromStringAsNumber("?"));
+        Assert.Multiple(() => {
+            foreach (ulong value in _dataFieldWithFlagsEnumeration.EnumerationDefinition.Keys)
+            Assert.That(FromStringAsNumber(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name), Is.EqualTo(value));
+            Assert.That(FromStringAsNumber(AllFlags()), Is.EqualTo(7ul));
+            Assert.That(FromStringAsNumber(AllFlags(reversed: true)), Is.EqualTo(7ul));
+            Assert.That(FromStringAsNumber(AllFlags() + "|?8"), Is.EqualTo(15ul));
+            Assert.That(FromStringAsNumber("?"), Is.Null);
+        });
         var e = Assert.Throws<InvalidDataException>(() => FromStringAsNumber("CheckAll"));
-        Assert.AreEqual("Value 'CheckAll' is not valid for the enumeration for field [Policy]", e.Message);
+        Assert.That(e.Message, Is.EqualTo("Value 'CheckAll' is not valid for the enumeration for field [Policy]"));
+
         static ulong? FromStringAsNumber(string text) => EnumFromStringAsNumber(_dataFieldWithFlagsEnumeration, text);
     }
 
     [Test]
     public void EnumerationToString() {
         foreach (ulong value in _dataFieldWithEnumeration.EnumerationDefinition.Keys)
-            Assert.AreEqual(_dataFieldWithEnumeration.EnumerationDefinition[value].Name, _dataFieldWithEnumeration.EnumerationToString(value));
-        Assert.AreEqual("?10", _dataFieldWithEnumeration.EnumerationToString(10));
-        Assert.AreEqual("?", _dataFieldWithoutEnumeration.EnumerationToString(1));
+            Assert.That(_dataFieldWithEnumeration.EnumerationToString(value), Is.EqualTo(_dataFieldWithEnumeration.EnumerationDefinition[value].Name));
+        Assert.That(_dataFieldWithEnumeration.EnumerationToString(10), Is.EqualTo("?10"));
+        Assert.That(_dataFieldWithoutEnumeration.EnumerationToString(1), Is.EqualTo("?"));
     }
 
     [Test]
     public void EnumerationToStringFlags() {
         foreach (ulong value in _dataFieldWithFlagsEnumeration.EnumerationDefinition.Keys)
-            Assert.AreEqual(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name, _dataFieldWithFlagsEnumeration.EnumerationToString(value));
-        Assert.AreEqual(AllFlags(), _dataFieldWithFlagsEnumeration.EnumerationToString(7));
-        Assert.AreEqual("?8", _dataFieldWithFlagsEnumeration.EnumerationToString(8));
-        Assert.AreEqual(AllFlags() + "|?8", _dataFieldWithFlagsEnumeration.EnumerationToString(15));
-        Assert.AreEqual(AllFlags() + "|?40", _dataFieldWithFlagsEnumeration.EnumerationToString(47));
+            Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(value), Is.EqualTo(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name));
+        Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(7), Is.EqualTo(AllFlags()));
+        Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(8), Is.EqualTo("?8"));
+        Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(15), Is.EqualTo(AllFlags() + "|?8"));
+        Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(47), Is.EqualTo(AllFlags() + "|?40"));
     }
 
     [Test]
@@ -148,8 +151,8 @@ public class DataFieldTests
         var encodedBytes = new ILTagDataField(dataField).EncodedBytes;
         using var ms = new MemoryStream(encodedBytes);
         var tagValue = ms.DecodeTag();
-        Assert.IsInstanceOf<ILTagDataField>(tagValue);
+        Assert.That(tagValue, Is.InstanceOf<ILTagDataField>());
         var value = ((ILTagDataField)tagValue).Value;
-        Assert.AreEqual(dataField, value);
+        Assert.That(value, Is.EqualTo(dataField));
     }
 }

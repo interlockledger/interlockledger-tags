@@ -81,20 +81,20 @@ public class AES256EncryptedTests
 
     private static void AssertPasswordMissing(TestDelegate code) {
         var ae = Assert.Throws<ArgumentException>(code);
-        Assert.AreEqual("password", ae.ParamName);
+        Assert.That(ae.ParamName, Is.EqualTo("password"));
         ae.AssertMessageStartsWith(AES256Encrypted<ILTagBool>.MissingPasswordMessage);
     }
 
     private static void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
         var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));
         var clear = tag.Decrypt(password);
-        Assert.AreEqual(value, AsBool(clear));
+        Assert.That(AsBool(clear), Is.EqualTo(value));
     }
 
     private static byte[] SerializeAES256Encrypted(bool value, string password) {
         var result = new TestableAES256Encrypted(value ? ILTagBool.True : ILTagBool.False, password);
         var clear = result.Decrypt(password);
-        Assert.AreEqual(value, AsBool(clear));
+        Assert.That(AsBool(clear), Is.EqualTo(value));
         return result.EncodedBytes;
     }
 

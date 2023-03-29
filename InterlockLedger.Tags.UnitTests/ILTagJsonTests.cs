@@ -43,7 +43,7 @@ public class ILTagJsonTests
         TestTwiceWith(new AppPermissions(1, 100));
         TestTwiceWith(new AppPermissions(2, 100, 101));
         var ap = AppPermissions.Build("#3,1,2,3");
-        Assert.AreEqual("#3,1,2,3", ap.TextualRepresentation);
+        Assert.That(ap.TextualRepresentation, Is.EqualTo("#3,1,2,3"));
         TestTwiceWith(ap);
         TestTwiceWith(new AppPermissions(4, 100, 4, 101, 3));
         TestTwiceWith(AppPermissions.Empty);
@@ -55,8 +55,8 @@ public class ILTagJsonTests
     public bool BoolFrom(string json) {
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.Bool, payload);
-        Assert.IsInstanceOf<ILTagBool>(tag);
-        Assert.AreEqual(payload, tag.AsJson);
+        Assert.That(tag, Is.InstanceOf<ILTagBool>());
+        Assert.That(tag.AsJson, Is.EqualTo(payload));
         return ((ILTagBool)tag).Value;
     }
 
@@ -66,8 +66,8 @@ public class ILTagJsonTests
             var json = JsonSerializer.Serialize(datafield, _jsonOptions);
             TestContext.WriteLine(json);
             var payload = JsonSerializer.Deserialize<DataField>(json, _jsonOptions);
-            Assert.IsInstanceOf<DataField>(payload);
-            Assert.AreEqual(datafield, payload);
+            Assert.That(payload, Is.InstanceOf<DataField>());
+            Assert.That(payload, Is.EqualTo(datafield));
         }
         TestWith(new DataField {
             Name = "TestEnumeration0",
@@ -124,8 +124,8 @@ public class ILTagJsonTests
     public sbyte Int8From(string json) {
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.Int8, payload);
-        Assert.IsInstanceOf<ILTagInt8>(tag);
-        Assert.AreEqual(payload, tag.AsJson);
+        Assert.That(tag, Is.InstanceOf<ILTagInt8>());
+        Assert.That(tag.AsJson, Is.EqualTo(payload));
         return ((ILTagInt8)tag).Value;
     }
 
@@ -143,14 +143,14 @@ public class ILTagJsonTests
             var json = JsonSerializer.Serialize(color, _jsonOptions);
             TestContext.WriteLine(json);
             var payload = JsonSerializer.Deserialize<InterlockColor>(json, _jsonOptions);
-            Assert.IsInstanceOf<InterlockColor>(payload);
-            Assert.AreEqual(color, payload);
+            Assert.That(payload, Is.InstanceOf<InterlockColor>());
+            Assert.That(payload, Is.EqualTo(color));
             var wrapper = new ColorWrapper(color, color.Opposite);
             var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
             TestContext.WriteLine(biggerJson);
             var biggerPayload = JsonSerializer.Deserialize<ColorWrapper>(biggerJson, _jsonOptions);
-            Assert.IsInstanceOf<ColorWrapper>(biggerPayload);
-            Assert.AreEqual(wrapper, biggerPayload);
+            Assert.That(biggerPayload, Is.InstanceOf<ColorWrapper>());
+            Assert.That(biggerPayload, Is.EqualTo(wrapper));
         }
         TestWith(InterlockColor.Gainsboro);
         TestWith(InterlockColor.DeepPink.Opposite);
@@ -181,10 +181,10 @@ public class ILTagJsonTests
     public void NullFrom(string json) {
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.Null, payload);
-        Assert.IsInstanceOf<ILTagNull>(tag);
-        Assert.AreEqual(payload, tag.AsJson);
+        Assert.That(tag, Is.InstanceOf<ILTagNull>());
+        Assert.That(tag.AsJson, Is.EqualTo(payload));
         var tag2 = TagProvider.DeserializeFromJson(ILTagId.Version, payload);
-        Assert.IsInstanceOf<ILTagNull>(tag2);
+        Assert.That(tag2, Is.InstanceOf<ILTagNull>());
     }
 
     [TestCase("\"Some String\"", TestName = "TagStringFromSomeString")]
@@ -192,8 +192,8 @@ public class ILTagJsonTests
     public void StringFrom(string json) {
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.String, payload);
-        Assert.AreEqual(payload, tag.AsJson);
-        Assert.IsInstanceOf<ILTagString>(tag);
+        Assert.That(tag.AsJson, Is.EqualTo(payload));
+        Assert.That(tag, Is.InstanceOf<ILTagString>());
     }
 
     [Test]
@@ -216,8 +216,8 @@ public class ILTagJsonTests
     public byte UInt8From(string json) {
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.UInt8, payload);
-        Assert.IsInstanceOf<ILTagUInt8>(tag);
-        Assert.AreEqual(payload, tag.AsJson);
+        Assert.That(tag, Is.InstanceOf<ILTagUInt8>());
+        Assert.That(tag.AsJson, Is.EqualTo(payload));
         return ((ILTagUInt8)tag).Value;
     }
 
@@ -239,15 +239,15 @@ public class ILTagJsonTests
     private static void TestTwiceWith<T>(T value) {
         var json = JsonSerializer.Serialize(value, _jsonOptions);
         var payload = JsonSerializer.Deserialize<T>(json, _jsonOptions);
-        Assert.IsInstanceOf<T>(payload);
+        Assert.That(payload, Is.InstanceOf<T>());
         TestContext.WriteLine($"({NoLineBreaks(value)}) => {json} => {NoLineBreaks(payload)}");
-        Assert.AreEqual(value, payload);
+        Assert.That(payload, Is.EqualTo(value));
         var wrapper = new WrapperOf<T> { Item = value };
         var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
         TestContext.WriteLine(biggerJson);
         var biggerPayload = JsonSerializer.Deserialize<WrapperOf<T>>(biggerJson, _jsonOptions);
-        Assert.IsInstanceOf<WrapperOf<T>>(biggerPayload);
-        Assert.AreEqual(wrapper, biggerPayload);
+        Assert.That(biggerPayload, Is.InstanceOf<WrapperOf<T>>());
+        Assert.That(biggerPayload, Is.EqualTo(wrapper));
     }
 
     private static string NoLineBreaks<T>(T value) => value.ToString().Replace(Environment.NewLine, " ");

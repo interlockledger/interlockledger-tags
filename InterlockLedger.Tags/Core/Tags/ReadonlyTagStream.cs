@@ -36,7 +36,7 @@ public class ReadonlyTagStream : Stream
     public ReadonlyTagStream(ulong tagId, byte[] bytes) {
         _bytes = bytes ?? Array.Empty<byte>();
         _tagId = tagId.AsILInt();
-        _contentLength = ((ulong)bytes.Length).AsILInt();
+        _contentLength = ((ulong)_bytes.Length).AsILInt();
         _length = _tagId.Length + _contentLength.Length + _bytes.Length;
         _position = 0;
     }

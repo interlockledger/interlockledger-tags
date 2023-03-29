@@ -275,7 +275,7 @@ public class DataModelJsonTests
         TestContext.WriteLine(expectedBytes.WithCommas());
         TestContext.WriteLine("===== Actual");
         TestContext.WriteLine(encodedBytes.WithCommas());
-        Assert.AreEqual(expectedBytes, encodedBytes);
+        Assert.That(encodedBytes, Is.EqualTo(expectedBytes));
     }
 
     private static void ToFromBaseTest(ILTag data, Func<string, string> adjustExpected = null) {
@@ -289,17 +289,17 @@ public class DataModelJsonTests
         TestContext.WriteLine(expected);
         TestContext.WriteLine("===== Actual");
         TestContext.WriteLine(actual);
-        Assert.AreEqual(expected, actual);
+        Assert.That(actual, Is.EqualTo(expected));
         TestContext.WriteLine("===== Initial EncodedBytes");
         TestContext.WriteLine(encodedBytes.WithCommas());
         var backFrom = JsonTestTaggedData.Model.FromNavigable(modelJson);
-        Assert.IsInstanceOf<ILTag>(backFrom);
+        Assert.That(backFrom, Is.InstanceOf<ILTag>());
         byte[] backFromEncodedBytes = backFrom.EncodedBytes;
         TestContext.WriteLine("===== Back EncodedBytes");
         TestContext.WriteLine(backFromEncodedBytes.WithCommas());
-        Assert.AreEqual(encodedBytes, backFromEncodedBytes, "Bytes back from modelJson did not match");
+        Assert.That(backFromEncodedBytes, Is.EqualTo(encodedBytes), "Bytes back from modelJson did not match");
         var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object>>(actual));
-        Assert.IsInstanceOf<ILTag>(parsedFrom);
+        Assert.That(parsedFrom, Is.InstanceOf<ILTag>());
         byte[] parsedFromEncodedBytes = parsedFrom.EncodedBytes;
         TestContext.WriteLine("===== Parsed EncodedBytes");
         TestContext.WriteLine(parsedFromEncodedBytes.WithCommas());

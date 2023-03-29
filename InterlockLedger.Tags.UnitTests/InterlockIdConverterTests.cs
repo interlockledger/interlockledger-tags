@@ -40,8 +40,8 @@ public class InterlockIdConverterTests
     [Test]
     public void CanConvertFrom() {
         var converter = BuildConverter();
-        Assert.AreEqual(true, converter.CanConvertFrom(null, typeof(string)));
-        Assert.AreEqual(false, converter.CanConvertFrom(null, typeof(int)));
+        Assert.That(converter.CanConvertFrom(null, typeof(string)), Is.EqualTo(true));
+        Assert.That(converter.CanConvertFrom(null, typeof(int)), Is.EqualTo(false));
     }
 
     private static TypeCustomConverter<InterlockId> BuildConverter() => new();
@@ -49,32 +49,31 @@ public class InterlockIdConverterTests
     [Test]
     public void CanConvertTo() {
         var converter = BuildConverter();
-        Assert.AreEqual(true, converter.CanConvertTo(null, typeof(string)));
-        Assert.AreEqual(false, converter.CanConvertTo(null, typeof(int)));
+        Assert.That(converter.CanConvertTo(null, typeof(string)), Is.EqualTo(true));
+        Assert.That(converter.CanConvertTo(null, typeof(int)), Is.EqualTo(false));
     }
 
     [Test]
     public void ConvertFrom() {
         var converter = BuildConverter();
         var id = converter.ConvertFrom(null, CultureInfo.InvariantCulture, "Key!AAA#SHA3_512") as InterlockId;
-        Assert.IsNotNull(id);
-        Assert.AreEqual("Key!AAA#SHA3_512", id.ToString());
-        Assert.AreEqual(HashAlgorithm.SHA3_512, id.Algorithm);
-        Assert.AreEqual(new byte[] { 0, 0 }, id.Data);
-        Assert.AreEqual(4, id.Type);
+        Assert.That(id, Is.Not.Null);
+        Assert.That(id.ToString(), Is.EqualTo("Key!AAA#SHA3_512"));
+        Assert.That(id.Algorithm, Is.EqualTo(HashAlgorithm.SHA3_512));
+        Assert.That(id.Data, Is.EqualTo(new byte[] { 0, 0 }));
+        Assert.That(id.Type, Is.EqualTo(4));
     }
 
     [Test]
     public void ConvertTo() {
         var converter = BuildConverter();
-        Assert.AreEqual("Key!47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU",
-            converter.ConvertTo(null, CultureInfo.InvariantCulture, new KeyId(TagHash.Empty), typeof(string)));
+        Assert.That(converter.ConvertTo(null, CultureInfo.InvariantCulture, new KeyId(TagHash.Empty), typeof(string)), Is.EqualTo("Key!47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU"));
     }
 
     [Test]
     public void TypeDescriptor_GetConverter() {
         var converter = TypeDescriptor.GetConverter(typeof(InterlockId));
-        Assert.IsNotNull(converter);
-        Assert.IsInstanceOf<TypeCustomConverter<InterlockId>>(converter);
+        Assert.That(converter, Is.Not.Null);
+        Assert.That(converter, Is.InstanceOf<TypeCustomConverter<InterlockId>>());
     }
 }
