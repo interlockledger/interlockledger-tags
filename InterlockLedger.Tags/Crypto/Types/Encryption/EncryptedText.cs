@@ -59,7 +59,7 @@ public class EncryptedText : VersionedValue<EncryptedText>
 
     public ILTagString Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
-    public string DecryptText(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
+    public string DecryptText(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine).Value;
 
     public override EncryptedText FromJson(object json) => new(_encrypted.FromJson(json));
 

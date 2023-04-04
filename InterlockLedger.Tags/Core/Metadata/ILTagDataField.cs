@@ -78,7 +78,9 @@ public class ILTagDataField : ILTagExplicit<DataField>
 
     private static EnumerationDictionary DecodeEnumeration(Stream s) {
         var triplets = s.DecodeArray<Triplet, Triplet.Tag>(s => new Triplet.Tag(s));
-        return new EnumerationDictionary(triplets.Safe().Where(t => t is not null).ToDictionary(t => t!.Value, t => new EnumerationDetails(t.Name, t.Description)));
+        return new EnumerationDictionary(triplets.Safe()
+                                                 .Where(t => t is not null)
+                                                 .ToDictionary(t => t!.Value, t => new EnumerationDetails(t.Name, t.Description)));
     }
 
     private static void EncodeEnumeration(Stream s, EnumerationDictionary? enumeration)

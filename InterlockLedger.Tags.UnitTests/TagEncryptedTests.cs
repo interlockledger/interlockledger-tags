@@ -39,9 +39,12 @@ public class TagEncryptedTests
     public void NewTagEncryptedFromStream(byte[] bytes, CipherAlgorithm algorithm, byte[] data) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TagEncrypted>();
-        Assert.That(tag.TagId, Is.EqualTo(ILTagId.Encrypted));
-        Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
-        Assert.That(tag.CipherData?.Length ?? 0, Is.EqualTo(data.Length));
+        Assert.That(tag, Is.Not.Null);
+        Assert.Multiple(() => {
+            Assert.That(tag.TagId, Is.EqualTo(ILTagId.Encrypted));
+            Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+            Assert.That(tag.CipherData?.Length ?? 0, Is.EqualTo(data.Length));
+        });
     }
 
     [TestCase(CipherAlgorithm.AES256, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 42, 6, 0, 0, 16, 2, 0, 0 }, TestName = "SerializeTagEncrypted00")]

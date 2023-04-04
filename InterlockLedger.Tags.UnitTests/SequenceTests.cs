@@ -42,10 +42,11 @@ public class SequenceTests
         var tagValue = ms.DecodeTag();
         Assert.That(tagValue, Is.InstanceOf<ILTagSequence>());
         var value = ((ILTagSequence)tagValue).Value;
-
         Assert.That(value, Has.Length.EqualTo(2));
-        Assert.That(value[0].TextualRepresentation, Is.EqualTo(firstElement));
-        Assert.That((value[1] as ILTagILInt)?.Value, Is.EqualTo(secondElement));
+        Assert.Multiple(() => {
+            Assert.That(value[0].TextualRepresentation, Is.EqualTo(firstElement));
+            Assert.That((value[1] as ILTagILInt)?.Value, Is.EqualTo(secondElement));
+        });
     }
 
     [TestCase(new byte[0], new byte[0], new byte[] { 22, 1, 0 }, TestName = "Deserialize_an_Empty_Sequence")]

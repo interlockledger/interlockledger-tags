@@ -41,12 +41,12 @@ public static class Globals
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
         WriteIndented = true,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         IgnoreReadOnlyProperties = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
     };
 
     public static T FromJsonText<T>(string jsonText) where T : VersionedValue<T>, new()
-        => JsonSerializer.Deserialize<T>(jsonText, JsonOptions);
+        => JsonSerializer.Deserialize<T>(jsonText, JsonOptions).Required();
 }

@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
+public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag?
 {
     public ILTagArrayOfILTag(IEnumerable<T> value) : this(ILTagId.ILTagArray, value.ToArray()) { }
 
@@ -121,7 +121,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T[]> where T : ILTag
     {
         public JsonRepresentation(IEnumerable<T> values) {
             ElementTagId = values.FirstOrDefault()?.TagId ?? ILTagId.Null;
-            Elements = values.Select(e => e.AsJson).ToArray();
+            Elements = values.Select(e => e?.AsJson).ToArray();
         }
 
         public object?[] Elements { get; set; }

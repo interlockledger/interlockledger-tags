@@ -187,25 +187,31 @@ public class ILTagTests
 #pragma warning disable IDE0230 // Use UTF-8 string literal
         var tag = (ILTagILInt)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 10, 32 }));
 #pragma warning restore IDE0230 // Use UTF-8 string literal
-        Assert.That(tag.Value, Is.EqualTo(32));
-        Assert.That(tag.ValueIs<ulong>(out var v) && v == tag.Value, "Not an ulong value");
-        Assert.That(tag.ValueIs<ushort>(out var l) || l != default, Is.False, "An ushort value?");
+        Assert.Multiple(() => {
+            Assert.That(tag.Value, Is.EqualTo(32));
+            Assert.That(tag.ValueIs<ulong>(out var v) && v == tag.Value, "Not an ulong value");
+            Assert.That(tag.ValueIs<ushort>(out var l) || l != default, Is.False, "An ushort value?");
+        });
     }
 
     [Test]
     public void ULongsAsILintArrayVariations() {
         var tag = (ILTagArrayOfILInt)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 20, 5, 3, 1, 248, 7, 3 }));
         CollectionAssert.AreEqual(new ulong[] { 1, 255, 3 }, tag.Value);
-        Assert.That(tag.ValueIs<ulong[]>(out var v) && v.EqualTo(tag.Value), "Not an ulong[] value");
-        Assert.That(tag.ValueIs<ulong>(out var l) || l != default, Is.False, "An ushort value?");
-        Assert.That(tag.ValueIs<IEnumerable<ulong>>(out var list) && list.EqualTo(tag.Value), "Not an IEnumerable<ulong> value");
+        Assert.Multiple(() => {
+            Assert.That(tag.ValueIs<ulong[]>(out var v) && v.EqualTo(tag.Value), "Not an ulong[] value");
+            Assert.That(tag.ValueIs<ulong>(out var l) || l != default, Is.False, "An ushort value?");
+            Assert.That(tag.ValueIs<IEnumerable<ulong>>(out var list) && list.EqualTo(tag.Value), "Not an IEnumerable<ulong> value");
+        });
     }
 
     [Test]
     public void UShortVariations() {
         var tag = (ILTagUInt16)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 5, 1, 0 }));
-        Assert.That(tag.Value, Is.EqualTo((ushort)1));
-        Assert.That(tag.ValueIs<ushort>(out var v) && v == tag.Value, "Not an ushort value");
-        Assert.That(tag.ValueIs<ulong>(out var l) || l != default, Is.False, "An ulong value?");
+        Assert.Multiple(() => {
+            Assert.That(tag.Value, Is.EqualTo((ushort)1));
+            Assert.That(tag.ValueIs<ushort>(out var v) && v == tag.Value, "Not an ushort value");
+            Assert.That(tag.ValueIs<ulong>(out var l) || l != default, Is.False, "An ulong value?");
+        });
     }
 }

@@ -46,13 +46,17 @@ public class VersionedValueTests
         AssertThings(vvt, new VersionedValueForTests.Payload(27, new ReadOnlySequence<byte>(bytes[2..])));
 
         static void AssertThings(VersionedValueForTests vvt, VersionedValue<VersionedValueForTests>.Payload tag) {
-            Assert.That(tag.Version, Is.EqualTo((ushort)1), "Version");
-            Assert.That(tag.ValueLength, Is.EqualTo((ulong)10), "ValueLength");
+            Assert.Multiple(() => {
+                Assert.That(tag.Version, Is.EqualTo((ushort)1), "Version");
+                Assert.That(tag.ValueLength, Is.EqualTo((ulong)10), "ValueLength");
+            });
             var data = tag.Value;
-            Assert.That(data.Version, Is.EqualTo((ushort)1), "Version");
-            Assert.That(data.AsPayload, Is.SameAs(tag), "AsPayload");
-            Assert.That(data, Is.Not.SameAs(vvt), "vvt_x_data");
-            Assert.That(data.UserMessage, Is.EqualTo(vvt.UserMessage), "Not the right UserMessage");
+            Assert.Multiple(() => {
+                Assert.That(data.Version, Is.EqualTo((ushort)1), "Version");
+                Assert.That(data.AsPayload, Is.SameAs(tag), "AsPayload");
+                Assert.That(data, Is.Not.SameAs(vvt), "vvt_x_data");
+                Assert.That(data.UserMessage, Is.EqualTo(vvt.UserMessage), "Not the right UserMessage");
+            });
         }
     }
 
@@ -67,7 +71,7 @@ public class VersionedValueTests
         public override string TypeName => nameof(VersionedValueForTests);
         public string UserMessage { get; private set; }
 
-        public override VersionedValueForTests FromJson(object json) => throw new System.NotImplementedException();
+        public override VersionedValueForTests FromJson(object json) => throw new NotImplementedException();
 
         protected override IEnumerable<DataField> RemainingStateFields { get; }
         protected override string TypeDescription { get; }

@@ -81,7 +81,7 @@ public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
 
     public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
         using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagRSAParameters>();
+        return s.Decode<TagRSAParameters>().Required();
     }
 
     internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) {

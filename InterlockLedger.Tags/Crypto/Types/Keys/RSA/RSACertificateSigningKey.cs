@@ -84,7 +84,7 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingK
         if (!_x509Certificate.HasPrivateKey)
             throw new InvalidOperationException("The private key is missing- Can't sign");
         using var rsa = _x509Certificate.GetRSAPrivateKey();
-        return action(rsa);
+        return action(rsa.Required());
     }
 
     private byte[] HashAndSign(byte[] dataToSign) =>

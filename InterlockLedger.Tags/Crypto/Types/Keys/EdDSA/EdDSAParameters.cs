@@ -65,5 +65,5 @@ public class EdDSAParameters
 
     internal Ed25519PrivateKeyParameters? PrivateKeyParameters { get; }
 
-     
+
 }

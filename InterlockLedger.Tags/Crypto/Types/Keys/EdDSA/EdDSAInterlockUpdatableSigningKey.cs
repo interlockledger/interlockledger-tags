@@ -60,7 +60,7 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
         if (_destroyKeysAfterSigning) {
             _keyParameters = null;
             _nextKeyParameters = null;
-            _data.Value.Encrypted = null;
+            _data.Value.Encrypted = null!;
             _data.Value.PublicKey = null!;
         } else {
             var func = encrypt.Required("encrypt");

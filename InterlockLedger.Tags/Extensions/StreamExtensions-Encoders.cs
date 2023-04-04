@@ -72,7 +72,7 @@ public static partial class StreamExtensions
     public static Stream EncodeNull(this Stream s) => ILTagNull.Instance.SerializeIntoAsync(s).Result!;
 
     public static Stream EncodeSequence(this Stream s, IEnumerable<ILTag>? values)
-        => s.EncodeTag(new ILTagSequence(values?.ToArray()));
+        => s.EncodeTag(new ILTagSequence(values.Safe().ToArray()));
 
     public static Stream EncodeString(this Stream s, string? value)
         => s.EncodeTag(new ILTagString(value));

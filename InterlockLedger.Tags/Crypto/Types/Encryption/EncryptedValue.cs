@@ -65,13 +65,13 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
     public ushort Version { get; set; }
 
     public void DecodeRemainingStateFrom(Stream s) {
-        CipherText = s.DecodeByteArray();
+        CipherText = s.DecodeByteArray().Required();
         ReadingKeys = s.DecodeTagArray<TagReadingKey>();
     }
 
     public T Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
-        byte[] clearText = DecryptRaw(reader, findEngine);
-        return clearText is null ? null : TagProvider.DeserializeFrom(clearText) as T;
+        byte[] clearText = DecryptRaw(reader, findEngine).Required();
+        return (TagProvider.DeserializeFrom(clearText) as T).Required();
     }
 
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
@@ -80,10 +80,10 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
         foreach (var readingKey in ReadingKeys.Safe()) {
             if (readingKey.PublicKeyHash.Equals(reader.PublicKeyHash) && readingKey.ReaderId == reader.Id) {
                 (byte[] key, byte[] iv) = reader.OpenKeyAndIV(readingKey.EncryptedKey, readingKey.EncryptedIV);
-                return findEngine(Cipher)?.Decrypt(CipherText, key, iv);
+                return findEngine(Cipher).Decrypt(CipherText, key, iv);
             }
         }
-        return null;
+        throw new InvalidOperationException($"Reader {reader.Id} does not match any reading key to be able to decrypt this content");
     }
 
     public void EncodeRemainingStateTo(Stream s) => s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);

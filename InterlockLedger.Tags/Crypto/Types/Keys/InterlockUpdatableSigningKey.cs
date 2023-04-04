@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
 {
-    public string Description => _data.Description;
+    public string? Description => _data.Description;
     public byte[] EncodedBytes => _data.EncodedBytes;
     public BaseKeyId Id => _data.Id;
     public BaseKeyId Identity => _data.Identity;
@@ -101,14 +101,21 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
 {
     private bool _disposedValue;
 
-    public InterlockUpdatableSigningKeyData(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, KeyStrength strength, DateTimeOffset creationTime, string description = null, BaseKeyId keyId = null)
+    public InterlockUpdatableSigningKeyData(KeyPurpose[] purposes,
+                                            string name,
+                                            byte[] encrypted,
+                                            TagPubKey pubKey,
+                                            KeyStrength strength,
+                                            DateTimeOffset creationTime,
+                                            string? description = null,
+                                            BaseKeyId? keyId = null)
         : this(new UpdatableParts(purposes, name, encrypted, pubKey, description, strength, keyId)) => LastSignatureTimeStamp = creationTime;
 
     public InterlockUpdatableSigningKeyData(UpdatableParts parts) : base(ILTagId.InterlockUpdatableSigningKey, parts) {
     }
 
     public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
-    public string Description => Value.Description;
+    public string? Description => Value.Description;
 
     byte[] IInterlockKeySecretData.Encrypted => Value.Encrypted;
     EncryptedContentType IInterlockKeySecretData.EncryptedContentType => EncryptedContentType.EncryptedKey;
@@ -122,11 +129,11 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
     public KeyStrength Strength => Value.Strength;
     public ushort Version => Value.Version;
 
-    public IEnumerable<AppPermissions> Permissions { get; }
+    public IEnumerable<AppPermissions> Permissions { get; } = Enumerable.Empty<AppPermissions>();
 
     public static InterlockUpdatableSigningKeyData DecodeFromBytes(byte[] bytes) {
         using var stream = new MemoryStream(bytes);
-        return stream.Decode<InterlockUpdatableSigningKeyData>();
+        return stream.Decode<InterlockUpdatableSigningKeyData>().Required();
     }
 
     public void InvalidateBytes() => Changed();
@@ -140,26 +147,22 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
     public class UpdatableParts : InterlockKey.Parts
     {
         public const ushort InterlockUpdatableSigningKeyVersion = 0x0001;
-        public byte[]? Encrypted;
+        public byte[] Encrypted;
         public DateTimeOffset LastSignatureTimeStamp;
         public ulong SignaturesWithCurrentKey;
 
-        public UpdatableParts() {
-        }
+        public UpdatableParts() => Encrypted = Array.Empty<byte>();
 
-        public UpdatableParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string description, KeyStrength strength, BaseKeyId keyId)
+        public UpdatableParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string? description, KeyStrength strength, BaseKeyId? keyId)
             : base(purposes, name, description, pubKey, keyId, null) {
             Version = InterlockUpdatableSigningKeyVersion;
-            Encrypted = encrypted;
+            Encrypted = encrypted.Required();
             LastSignatureTimeStamp = DateTimeOffsetExtensions.TimeZero;
             SignaturesWithCurrentKey = 0;
         }
     }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    internal InterlockUpdatableSigningKeyData(Stream s) : base(ILTagId.InterlockUpdatableSigningKey, s) {
-    }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    internal InterlockUpdatableSigningKeyData(Stream s) : base(ILTagId.InterlockUpdatableSigningKey, s) { }
 
     protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
 
@@ -173,7 +176,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
             Identity = s.Decode<BaseKeyId>().Required(),            // Field index 4 //
             Description = s.DecodeString().Safe(),                  // Field index 5 //
             PublicKey = s.Decode<TagPubKey>().Required(),           // Field index 6 //
-            Encrypted = s.DecodeByteArray(),                        // Field index 7 //
+            Encrypted = s.DecodeByteArray().Required(),             // Field index 7 //
             LastSignatureTimeStamp = s.DecodeOldDateTimeOffset(),   // Field index 8 //
             SignaturesWithCurrentKey = s.DecodeILInt(),             // Field index 9 //
             Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 10 //

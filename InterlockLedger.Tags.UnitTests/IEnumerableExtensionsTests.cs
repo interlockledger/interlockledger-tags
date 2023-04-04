@@ -35,24 +35,28 @@ namespace InterlockLedger.Tags;
 public class IEnumerableExtensionsTests
 {
     [Test]
-    public void EqualTo() {
-        Assert.That(((IEnumerable<object>)null).EqualTo(null), "Null should be equal to Null");
-        Assert.That(((IEnumerable<object>)null).EqualTo(Enumerable.Empty<object>()), Is.False, "Null should NOT be equal to and Empty Enumeration");
-        Assert.That(Enumerable.Empty<object>().EqualTo(Enumerable.Empty<object>()), "Empty Enumeration should be equal to Empty Enumeration");
-        Assert.That(new int[] { 1 }.EqualTo(new int[] { 1 }), "Single Member Enumeration should be equal to equivalent Single Member Enumeration");
-        Assert.That(new int[] { 1, 2, 3 }.EqualTo(new int[] { 1 }), Is.False, "Multiple Member Enumeration should NOT be equal to Single Member Enumeration");
-        Assert.That(new int[] { 1, 2, 3 }.EqualTo(new int[] { 1, 2, 3 }), "Multiple Member Enumeration should be equal to equivalent Multiple Member Enumeration");
-        Assert.That(new int[] { 1, 2, 3 }.EqualTo(new int[] { 3, 2, 1 }), Is.False, "Multiple Member Enumeration should NOT be equal to reordered Multiple Member Enumeration");
-    }
+    public void EqualTo() =>
+        Assert.Multiple(() => {
+            Assert.That(((IEnumerable<object>)null).EqualTo(null), "Null should be equal to Null");
+            Assert.That(((IEnumerable<object>)null).EqualTo(Enumerable.Empty<object>()), Is.False, "Null should NOT be equal to and Empty Enumeration");
+            Assert.That(Enumerable.Empty<object>().EqualTo(Enumerable.Empty<object>()), "Empty Enumeration should be equal to Empty Enumeration");
+            Assert.That(new int[] { 1 }.EqualTo(new int[] { 1 }), "Single Member Enumeration should be equal to equivalent Single Member Enumeration");
+            Assert.That(new int[] { 1, 2, 3 }.EqualTo(new int[] { 1 }), Is.False, "Multiple Member Enumeration should NOT be equal to Single Member Enumeration");
+            Assert.That(new int[] { 1, 2, 3 }.EqualTo(new int[] { 1, 2, 3 }), "Multiple Member Enumeration should be equal to equivalent Multiple Member Enumeration");
+            Assert.That(new int[] { 1, 2, 3 }.EqualTo(new int[] { 3, 2, 1 }), Is.False, "Multiple Member Enumeration should NOT be equal to reordered Multiple Member Enumeration");
+        });
 
     [Test]
     public void IfAnyDo() {
         void IfAnyDoTest(IEnumerable<object> values, bool expected, string message) {
             var doneSomething = false;
             var newvalues = values.IfAnyDo(() => doneSomething = true);
-            Assert.That(values.EqualTo(newvalues), "output is not the same as input");
-            Assert.That(doneSomething, Is.EqualTo(expected), message);
+            Assert.Multiple(() => {
+                Assert.That(values.EqualTo(newvalues), "output is not the same as input");
+                Assert.That(doneSomething, Is.EqualTo(expected), message);
+            });
         }
+
         IfAnyDoTest(null, false, "Shouldn't have done anything for null enumerable");
         IfAnyDoTest(Array.Empty<object>(), false, "Shouldn't have done anything for empty enumerable");
         IfAnyDoTest(new object[] { "something" }, true, "Should have done something for non empty enumerable");
@@ -99,22 +103,31 @@ public class IEnumerableExtensionsTests
         static void WithDefaultTestWithEmptyInputAndNoDefault(IEnumerable<string> values, string message) => Assert.That(_emptyList.EqualTo(values.WithDefault()), message);
 
         static void WithDefaultTestWithEmptyInputAndNullDefault(IEnumerable<string> values, string message) {
-            Assert.That(_emptyList.EqualTo(values.WithDefault((IEnumerable<string>)null)), message);
-            Assert.That(_emptyList.EqualTo(values.WithDefault(() => null)), message);
+            Assert.Multiple(() => {
+                Assert.That(_emptyList.EqualTo(values.WithDefault((IEnumerable<string>)null)), message);
+                Assert.That(_emptyList.EqualTo(values.WithDefault(() => null)), message);
+            });
         }
+
         void WithDefaultTestWithNonEmptyInput(IEnumerable<string> values, string message) {
             Assert.That(values, Is.Not.Null);
             Assert.That(values, Is.Not.Empty);
-            Assert.That(values.EqualTo(values.WithDefault()), message);
-            Assert.That(values.EqualTo(values.WithDefault("anything")), message);
-            Assert.That(values.EqualTo(values.WithDefault((IEnumerable<string>)new string[] { "alternative thing" })), message);
-            Assert.That(values.EqualTo(values.WithDefault(() => new string[] { "newly generated thing" })), message);
+            Assert.Multiple(() => {
+                Assert.That(values.EqualTo(values.WithDefault()), message);
+                Assert.That(values.EqualTo(values.WithDefault("anything")), message);
+                Assert.That(values.EqualTo(values.WithDefault((IEnumerable<string>)new string[] { "alternative thing" })), message);
+                Assert.That(values.EqualTo(values.WithDefault(() => new string[] { "newly generated thing" })), message);
+            });
         }
+
         void WithDefaultTestWithEmptyInputAndSomeDefault(IEnumerable<string> values, string message, params string[] expected) {
-            Assert.That(expected.EqualTo(values.WithDefault(expected)), message);
-            Assert.That(expected.EqualTo(values.WithDefault((IEnumerable<string>)expected)), message);
-            Assert.That(expected.EqualTo(values.WithDefault(() => expected)), message);
+            Assert.Multiple(() => {
+                Assert.That(expected.EqualTo(values.WithDefault(expected)), message);
+                Assert.That(expected.EqualTo(values.WithDefault((IEnumerable<string>)expected)), message);
+                Assert.That(expected.EqualTo(values.WithDefault(() => expected)), message);
+            });
         }
+
         WithDefaultTestWithNonEmptyInput(new string[] { "something" }, "Should have returned the same non empty enumerable");
         WithDefaultTestWithEmptyInputAndSomeDefault(null, "Should have returned empty enumerable for null enumerable");
         WithDefaultTestWithEmptyInputAndSomeDefault(null, "Should have returned dual member default enumerable enumerable for null enumerable", "anything", "something else");

@@ -62,40 +62,45 @@ public class InterlockIdTests
     public void Setup() => InterlockIdPlus.Register();
 
     [Test]
-    public void IsEmpty() {
-        Assert.That(InterlockId.Build("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty, Is.EqualTo(true));
-        Assert.That(InterlockId.Build("#SHA3_256").IsEmpty, Is.EqualTo(false));
-    }
+    public void IsEmpty() =>
+        Assert.Multiple(() => {
+            Assert.That(InterlockId.Build("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty, Is.EqualTo(true));
+            Assert.That(InterlockId.Build("#SHA3_256").IsEmpty, Is.EqualTo(false));
+        });
 
     [Test]
-    public void ResolveFromStream() {
-        Assert.That(InterlockId.Resolve<OwnerId>(ToStream(new byte[] { 43, 5, 1, 0, 0, 0, 0 })), Is.InstanceOf<OwnerId>());
-        Assert.That(InterlockId.Resolve<KeyId>(ToStream(new byte[] { 43, 5, 4, 0, 0, 0, 0 })), Is.InstanceOf<KeyId>());
-    }
+    public void ResolveFromStream() =>
+        Assert.Multiple(() => {
+            Assert.That(InterlockId.Resolve<OwnerId>(ToStream(new byte[] { 43, 5, 1, 0, 0, 0, 0 })), Is.InstanceOf<OwnerId>());
+            Assert.That(InterlockId.Resolve<KeyId>(ToStream(new byte[] { 43, 5, 4, 0, 0, 0, 0 })), Is.InstanceOf<KeyId>());
+        });
 
     [Test]
     public void CompareFromTextualRepresentation() {
         var a = InterlockId.Build("Key!AAA#SHA1");
         var b = InterlockId.Build("Owner!AAA#SHA1");
         var c = (KeyId)a;
+        Assert.Multiple(() => {
 #pragma warning disable NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
-        Assert.That(a > b);
-        Assert.That(a >= b);
-        Assert.That(a != b);
-        Assert.That(b < a);
-        Assert.That(b <= a);
+            Assert.That(a > b);
+            Assert.That(a >= b);
+            Assert.That(a != b);
+            Assert.That(b < a);
+            Assert.That(b <= a);
 #pragma warning restore NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
-        Assert.That(a, Is.EqualTo(c));
-        Assert.That(b, Is.Not.EqualTo(a));
-        Assert.That(b.GetHashCode(), Is.Not.EqualTo(a.GetHashCode()));
-        Assert.That(c.GetHashCode(), Is.EqualTo(a.GetHashCode()));
+            Assert.That(a, Is.EqualTo(c));
+            Assert.That(b, Is.Not.EqualTo(a));
+            Assert.That(b.GetHashCode(), Is.Not.EqualTo(a.GetHashCode()));
+            Assert.That(c.GetHashCode(), Is.EqualTo(a.GetHashCode()));
+        });
     }
 
     [Test]
-    public void ResolveFromTextualRepresentation() {
-        Assert.That(InterlockId.Build("Owner!AAA#SHA1"), Is.InstanceOf<OwnerId>());
-        Assert.That(InterlockId.Build("Key!AAA#SHA1"), Is.InstanceOf<KeyId>());
-    }
+    public void ResolveFromTextualRepresentation() =>
+        Assert.Multiple(() => {
+            Assert.That(InterlockId.Build("Owner!AAA#SHA1"), Is.InstanceOf<OwnerId>());
+            Assert.That(InterlockId.Build("Key!AAA#SHA1"), Is.InstanceOf<KeyId>());
+        });
 
     [TestCase(HashAlgorithm.SHA512, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 4, 2, 0 }, TestName = "SerializeKeyIdFromParts#SHA512")]
     public byte[] SerializeKeyIdFromParts(HashAlgorithm algorithm, byte[] data)

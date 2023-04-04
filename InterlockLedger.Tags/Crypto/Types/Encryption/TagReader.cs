@@ -38,7 +38,7 @@ public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
 
     public TagReader(IIdentifiedPublicKey ipk) : this(ipk.Required().Identifier, ipk.PublicKey) { }
 
-    BaseKeyId IIdentifiedPublicKey.Id { get; }
+    BaseKeyId? IIdentifiedPublicKey.Id { get; }
     public string Name => Value.Name;
     public TagPubKey PublicKey => Value.PublicKey;
 
@@ -71,7 +71,7 @@ public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
     }
 
     protected override Parts FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagPubKey>()));
+        => FromBytesHelper(bytes, s => new Parts(s.DecodeString().Required(), s.Decode<TagPubKey>().Required()));
 
     protected override byte[] ToBytes(Parts value)
         => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.Name).EncodeTag(Value.PublicKey));

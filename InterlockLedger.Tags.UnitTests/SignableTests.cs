@@ -38,12 +38,14 @@ public class SignableTests
     public void NewSignableFromStream(ulong ilint, byte[] bytes) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TestSignable.Payload>();
-        Assert.That(tag.TagId, Is.EqualTo(TestSignable.FieldTagId));
-        Assert.That(tag.Value.SomeILInt, Is.EqualTo(ilint));
-        Assert.That(tag.ValueIs<ISignable>(out _));
-        Assert.That(tag.Value.FieldModel, Is.EqualTo(new TestSignable().FieldModel));
-        Assert.That(tag.Value.FieldModel.SubDataFields.SafeCount(), Is.EqualTo(2));
-        Assert.That(tag.Value.FieldModel.SubDataFields.Last().Name, Is.EqualTo(nameof(TestSignable.SomeILInt)));
+        Assert.Multiple(() => {
+            Assert.That(tag.TagId, Is.EqualTo(TestSignable.FieldTagId));
+            Assert.That(tag.Value.SomeILInt, Is.EqualTo(ilint));
+            Assert.That(tag.ValueIs<ISignable>(out _));
+            Assert.That(tag.Value.FieldModel, Is.EqualTo(new TestSignable().FieldModel));
+            Assert.That(tag.Value.FieldModel.SubDataFields.SafeCount(), Is.EqualTo(2));
+            Assert.That(tag.Value.FieldModel.SubDataFields.Last().Name, Is.EqualTo(nameof(TestSignable.SomeILInt)));
+        });
     }
 
     [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]

@@ -40,10 +40,13 @@ public class TagHmacTests
     public void NewTagHmacFromStream(byte[] bytes, HashAlgorithm algorithm, byte[] data) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TagHmac>();
-        Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hmac));
-        Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
-        Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
-        Assert.That(tag.Data ?? Array.Empty<byte>(), Is.EqualTo(data));
+        Assert.That(tag, Is.Not.Null);
+        Assert.Multiple(() => {
+            Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hmac));
+            Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+            Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+            Assert.That(tag.Data ?? Array.Empty<byte>(), Is.EqualTo(data));
+        });
     }
 
     [TestCase("AAA#HMAC-SHA3_512", HashAlgorithm.SHA3_512, new byte[] { 0, 0 })]
@@ -54,10 +57,12 @@ public class TagHmacTests
         DoAsserts(algorithm, data, ITextual<TagHmac>.Parse(textual));
 
         static void DoAsserts(HashAlgorithm algorithm, byte[] data, TagHmac tag) {
-            Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hmac));
-            Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
-            Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
-            Assert.That(tag.Data, Is.EqualTo(data));
+            Assert.Multiple(() => {
+                Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hmac));
+                Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+                Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+                Assert.That(tag.Data, Is.EqualTo(data));
+            });
         }
     }
 

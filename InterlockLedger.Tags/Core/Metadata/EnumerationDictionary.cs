@@ -39,5 +39,5 @@ public class EnumerationDictionary : Dictionary<ulong, EnumerationDetails>
     public EnumerationDictionary(IDictionary<ulong, EnumerationDetails> dictionary) : base(dictionary) {
     }
 
-    public EnumerationItems AsEnumerationItems => Count == 0 ? null : new EnumerationItems(this);
+    public EnumerationItems? AsEnumerationItems => Count == 0 ? null : new EnumerationItems(this);
 }

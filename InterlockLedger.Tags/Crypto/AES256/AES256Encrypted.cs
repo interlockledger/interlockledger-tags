@@ -47,15 +47,15 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
     public byte[] EncodedBytes => _encrypted.EncodedBytes;
 
     public T? Decrypt(string password) {
-        CheckMissingPassword(password);
+        password.Required();
         var decrypted = Decrypt(_encrypted.CipherData, (st) => ReadHeader(password, st));
         using var s = new MemoryStream(decrypted);
         return TagProvider.DeserializeFrom(s) as T;
     }
 
-    protected AES256Encrypted(T value, string password, byte[] key, byte[] iv) {
+    protected AES256Encrypted(T value, string password, byte[]? key, byte[]? iv) {
         value.Required();
-        CheckMissingPassword(password);
+        password.Required();
         if (password.Length < 6)
             throw new ArgumentException($"Password '{password}' is too weak!!!", nameof(password));
         (byte[] cipherData, _, _) = Encrypt(value.OpenReadingStreamAsync().Result, key, iv, (s, _key, _iv) => WriteHeader(password, s, _key, _iv));
@@ -63,11 +63,6 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
     }
 
     private readonly TagEncrypted _encrypted;
-
-    private static void CheckMissingPassword(string password) {
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException(MissingPasswordMessage, nameof(password));
-    }
 
     private static byte[] KeyFumble(byte[] key, string password) {
         for (var i = 0; i < key.Length; i++) key[i] ^= (byte)password[i % password.Length];

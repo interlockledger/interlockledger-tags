@@ -31,20 +31,10 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
 [TestFixture]
 public class FileBackedByteArrayTests
 {
-    [Test]
-    public void BadSequenceShouldThrow() {
-        var fbba = new FileBackedByteArrayWithPublicMethods();
-        using var source = new MemoryStream("Nothing".UTF8Bytes());
-        Assert.ThrowsAsync<InvalidOperationException>(async () => {
-            await fbba.PublicCopyFromAsync(source, 0);
-        });
-        Assert.Throws<InvalidOperationException>(() => _ = fbba.FileInfo);
-        Assert.Throws<InvalidOperationException>(() => _ = fbba.ReadingStream);
-    }
-
     [Test]
     public void FromPartialFileToStream() {
         var fi = "unit".TempFileInfo();
@@ -58,16 +48,17 @@ public class FileBackedByteArrayTests
             }
             var fbba = new FileBackedByteArray(fi, bytesLength, (ulong)bytesLength);
             Assert.That(fbba, Is.Not.Null);
-            Assert.That(fbba.Length, Is.EqualTo(bytesLength));
-            Assert.That(fbba.Offset, Is.EqualTo(bytesLength));
-            Assert.That(fbba.TagId, Is.EqualTo(ILTagId.ByteArray));
-            Assert.That(fbba.Value, Is.Null);
+            Assert.Multiple(() => {
+                Assert.That(fbba.Length, Is.EqualTo(bytesLength));
+                Assert.That(fbba.Offset, Is.EqualTo(bytesLength));
+                Assert.That(fbba.TagId, Is.EqualTo(ILTagId.ByteArray));
+                Assert.That(fbba.Value, Is.Null);
+            });
             using var mso = SerializeInto(fbba, prefixedArrayBytes);
             mso.Position = 0;
             var tagArray = TagProvider.DeserializeFrom(mso);
             Assert.That(tagArray, Is.InstanceOf<ILTagByteArray>());
             CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
-
         } finally {
             fi.Delete();
         }
@@ -119,9 +110,11 @@ public class FileBackedByteArrayTests
             using var ms = new MemoryStream(arrayBytes);
             var fbba = await createFrom(fi, ms);
             Assert.That(fbba, Is.Not.Null);
-            Assert.That(fbba.Length, Is.EqualTo(bytesLength));
-            Assert.That(fbba.Offset, Is.EqualTo(0));
-            Assert.That(fbba.TagId, Is.EqualTo(ILTagId.ByteArray));
+            Assert.Multiple(() => {
+                Assert.That(fbba.Length, Is.EqualTo(bytesLength));
+                Assert.That(fbba.Offset, Is.EqualTo(0));
+                Assert.That(fbba.TagId, Is.EqualTo(ILTagId.ByteArray));
+            });
             using var mso = SerializeInto(fbba, prefixedArrayBytes);
             mso.Position = 0;
             var tagArray = TagProvider.DeserializeFrom(mso);
@@ -151,9 +144,6 @@ public class FileBackedByteArrayTests
 
     private class FileBackedByteArrayWithPublicMethods : FileBackedByteArray
     {
-        public FileBackedByteArrayWithPublicMethods() : base() {
-        }
-
         public FileBackedByteArrayWithPublicMethods(FileInfo fileInfo) : base(fileInfo) {
         }
 

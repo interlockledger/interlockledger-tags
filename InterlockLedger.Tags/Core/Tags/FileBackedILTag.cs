@@ -35,16 +35,17 @@ using System.Diagnostics;
 namespace InterlockLedger.Tags;
 
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-public class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
+public abstract class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
 {
-    public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : this(tagId) {
+    public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : base(tagId, default!) {
         _fileInfo = fileInfo.Required();
         CopyFromAsync(source).Wait();
     }
 
-    public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset, ulong length) : this(tagId) {
-        if (fileInfo is null || !fileInfo.Exists)
-            throw new ArgumentNullException(nameof(fileInfo));
+    public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset, ulong length) : base(tagId, default!) {
+        _fileInfo = fileInfo.Required();
+        if (!fileInfo.Exists)
+            throw new InvalidOperationException($"File {fileInfo.FullName} does not exist");
         _fileInfo = fileInfo;
         Initialize(offset, length, fileInfo.Length);
     }
@@ -63,20 +64,8 @@ public class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
 
     public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult<Stream>(new TagStream(TagId, _contentStream));
 
-    public override bool ValueIs<TV>(out TV value) {
-        value = default;
-        return false;
-    }
 
-    protected FileBackedILTag(ulong tagId, FileInfo fileInfo) : this(tagId) {
-        _fileInfo = fileInfo.Required();
-        if (fileInfo.Exists)
-            Initialize(0, 0, fileInfo.Length);
-    }
-
-    protected FileBackedILTag(ulong tagId) : base(tagId, default) {
-        Length = 0;
-        Offset = 0;
+    protected FileBackedILTag(ulong tagId, FileInfo fileInfo) : this(tagId, fileInfo, offset: 0, length: 0) {
     }
 
     protected override bool KeepEncodedBytesInMemory => false;
@@ -98,8 +87,6 @@ public class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
         FileInfo.Refresh();
         Initialize(0, 0, FileInfo.Length);
     }
-
-    protected override T ValueFromStream(StreamSpan s) => default;
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
         using var fileStream = FileInfo.OpenRead();

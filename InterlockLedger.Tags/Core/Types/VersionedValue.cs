@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
-
 using System.Buffers;
 
 namespace InterlockLedger.Tags;
@@ -108,7 +106,7 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : Ver
             : base(alreadyDeserializedTagId, new ReadOnlySequenceStream(bytes), it => SetLength(it, (ulong)bytes.Length))
             => Initialize();
 
-        public override object AsJson => Value.AsJson;
+        public override object? AsJson => Value.AsJson;
 
         protected override bool KeepEncodedBytesInMemory => Value.KeepEncodedBytesInMemory;
 

@@ -36,7 +36,7 @@ public class EnumerationDetails : IEquatable<EnumerationDetails>
     public EnumerationDetails() {
     }
 
-    public EnumerationDetails(string name, string description) {
+    public EnumerationDetails(string name, string? description) {
         Name = name.Required();
         Description = description;
     }

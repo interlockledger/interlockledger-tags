@@ -55,6 +55,7 @@ public class TagSignature : ILTagExplicit<TagSignatureParts>
     public Algorithm Algorithm => Value.Algorithm;
 
     public byte[] Data => Value.Data;
+    public override object? AsJson => new { TagId, Algorithm, Data };
 
     internal TagSignature(Stream s) : base(ILTagId.Signature, s) {
     }

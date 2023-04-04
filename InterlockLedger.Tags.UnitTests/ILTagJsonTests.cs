@@ -192,8 +192,10 @@ public class ILTagJsonTests
     public void StringFrom(string json) {
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.String, payload);
-        Assert.That(tag.AsJson, Is.EqualTo(payload));
-        Assert.That(tag, Is.InstanceOf<ILTagString>());
+        Assert.Multiple(() => {
+            Assert.That(tag.AsJson, Is.EqualTo(payload));
+            Assert.That(tag, Is.InstanceOf<ILTagString>());
+        });
     }
 
     [Test]

@@ -68,7 +68,7 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
     }
 
     public TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null)
-        => _generateEmptySignatures ? new(Algorithm.RSA,  Array.Empty<byte>()) : Key.Sign(data);
+        => _generateEmptySignatures ? new(Algorithm.RSA, Array.Empty<byte>()) : Key.Sign(data);
 
     public override TagSignature Sign(byte[] data) => Sign(data, KeyPurpose.Any);
 

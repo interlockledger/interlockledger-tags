@@ -36,9 +36,13 @@ public class FileBackedByteArray : FileBackedILTag<object>
 {
     public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
 
-    public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo.Required()) { }
-
-    public FileBackedByteArray() : base(ILTagId.ByteArray) { }
+    public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo) { }
 
     public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
+
+    protected override object ValueFromStream(StreamSpan s) => default!;
+    public override bool ValueIs<TV>(out TV value) {
+        value = default!;
+        return false;
+    }
 }

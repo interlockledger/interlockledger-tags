@@ -182,7 +182,7 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             var version = s.DecodeUShort();
             var result = new Parts {
                 Version = version,                                // Field index 0 //
-                Name = s.DecodeString(),                          // Field index 1 //
+                Name = s.DecodeString().Required(),                          // Field index 1 //
                 PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
                 Id = InterlockId.Resolve<BaseKeyId>(s),           // Field index 3 //
                 Identity = InterlockId.Resolve<BaseKeyId>(s),     // Field index 4 //

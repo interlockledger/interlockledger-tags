@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
 
 using System.Security.Claims;
 
@@ -44,7 +43,7 @@ public class SenderIdentity : IEquatable<SenderIdentity?>, IIdentifiedPublicKey
         _reader = new Lazy<TagReader>(() => new TagReader(Id.TextualRepresentation, PublicKey));
     }
 
-    public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender(), claims.PublicKey(), claims.Name()) { }
+    public SenderIdentity(IEnumerable<Claim> claims) : this(claims.Sender()!, claims.PublicKey()!, claims.Name()) { }
 
     public TagReader AsReader => _reader.Value;
     public BaseKeyId Id { get; }

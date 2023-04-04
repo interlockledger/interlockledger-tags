@@ -39,15 +39,19 @@ public class InterlockColorConverterTests
     [Test]
     public void CanConvertFrom() {
         var converter = new TypeCustomConverter<InterlockColor>();
-        Assert.That(converter.CanConvertFrom(null, typeof(string)), Is.EqualTo(true));
-        Assert.That(converter.CanConvertFrom(null, typeof(int)), Is.EqualTo(false));
+        Assert.Multiple(() => {
+            Assert.That(converter.CanConvertFrom(null, typeof(string)), Is.EqualTo(true));
+            Assert.That(converter.CanConvertFrom(null, typeof(int)), Is.EqualTo(false));
+        });
     }
 
     [Test]
     public void CanConvertTo() {
         var converter = new TypeCustomConverter<InterlockColor>();
-        Assert.That(converter.CanConvertTo(null, typeof(string)), Is.EqualTo(true));
-        Assert.That(converter.CanConvertTo(null, typeof(int)), Is.EqualTo(false));
+        Assert.Multiple(() => {
+            Assert.That(converter.CanConvertTo(null, typeof(string)), Is.EqualTo(true));
+            Assert.That(converter.CanConvertTo(null, typeof(int)), Is.EqualTo(false));
+        });
     }
 
     [Test]
@@ -75,14 +79,16 @@ public class InterlockColorConverterTests
         ConvertFromStringAndAssert(converter, "#010203FF", InterlockColor.From(0x010203FF));
         ConvertFromStringAndAssert(converter, "#01020300", InterlockColor.From(0x01020300));
         ConvertFromStringAndAssert(converter, "#01020380", InterlockColor.From(0x01020380));
-        Assert.That("Nothing".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#1".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#12".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#123".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#1234".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#12345".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#1234567".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
-        Assert.That("#123AZT".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+        Assert.Multiple(() => {
+            Assert.That("Nothing".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#1".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#12".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#123".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#1234".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#12345".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#1234567".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+            Assert.That("#123AZT".ParseAs<InterlockColor>(), Is.EqualTo(InterlockColor.Transparent));
+        });
     }
 
     [Test]
@@ -101,10 +107,11 @@ public class InterlockColorConverterTests
         Assert.That(converter, Is.InstanceOf<TypeCustomConverter<InterlockColor>>());
     }
 
-    private static void ConvertFromStringAndAssert(TypeCustomConverter<InterlockColor> converter, string colorValue, InterlockColor expectedColor) {
-        Assert.That((InterlockColor)converter.ConvertFrom(null, CultureInfo.InvariantCulture, colorValue), Is.EqualTo(expectedColor));
-        Assert.That(colorValue.ParseAs<InterlockColor>(), Is.EqualTo(expectedColor));
-    }
+    private static void ConvertFromStringAndAssert(TypeCustomConverter<InterlockColor> converter, string colorValue, InterlockColor expectedColor) =>
+        Assert.Multiple(() => {
+            Assert.That((InterlockColor)converter.ConvertFrom(null, CultureInfo.InvariantCulture, colorValue), Is.EqualTo(expectedColor));
+            Assert.That(colorValue.ParseAs<InterlockColor>(), Is.EqualTo(expectedColor));
+        });
 
     private static void ConvertToStringAndAssert(TypeCustomConverter<InterlockColor> converter, InterlockColor color)
         => Assert.That(converter.ConvertTo(null, CultureInfo.InvariantCulture, color, typeof(string)), Is.EqualTo(color.Name));

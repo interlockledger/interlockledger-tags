@@ -46,7 +46,7 @@ internal class TestSignable : Signable<TestSignable>
     public ulong SomeILInt { get; private set; }
     public override string TypeName => nameof(TestSignable);
 
-    public override TestSignable FromJson(object json) => throw new System.NotImplementedException();
+    public override TestSignable FromJson(object json) => throw new NotImplementedException();
 
     protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {
         Name = nameof(SomeILInt),

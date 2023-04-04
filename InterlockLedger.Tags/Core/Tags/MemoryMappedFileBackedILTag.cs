@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags;
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
 public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
 {
-    public MemoryMappedFileBackedILTag(ulong tagId, MemoryMappedViewStream mmvs, long offset, ulong length) : base(tagId, default) {
+    public MemoryMappedFileBackedILTag(ulong tagId, MemoryMappedViewStream mmvs, long offset, ulong length) : base(tagId, default!) {
         _mmvs = mmvs.Required();
         Initialize(offset, length, mmvs.Length);
     }
@@ -55,13 +55,13 @@ public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T> where T : notnu
     public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult(ReadingStream);
 
     public override bool ValueIs<TV>(out TV value) {
-        value = default;
+        value = default!;
         return false;
     }
 
     protected string TagTypeName => $"{GetType().Name}#{TagId}";
 
-    protected override T ValueFromStream(StreamSpan s) => default;
+    protected override T ValueFromStream(StreamSpan s) => default!;
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
         using var streamSlice = new StreamSpan(_mmvs, Offset, Length);

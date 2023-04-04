@@ -40,8 +40,10 @@ public class InterlockIdConverterTests
     [Test]
     public void CanConvertFrom() {
         var converter = BuildConverter();
-        Assert.That(converter.CanConvertFrom(null, typeof(string)), Is.EqualTo(true));
-        Assert.That(converter.CanConvertFrom(null, typeof(int)), Is.EqualTo(false));
+        Assert.Multiple(() => {
+            Assert.That(converter.CanConvertFrom(null, typeof(string)), Is.EqualTo(true));
+            Assert.That(converter.CanConvertFrom(null, typeof(int)), Is.EqualTo(false));
+        });
     }
 
     private static TypeCustomConverter<InterlockId> BuildConverter() => new();
@@ -49,8 +51,10 @@ public class InterlockIdConverterTests
     [Test]
     public void CanConvertTo() {
         var converter = BuildConverter();
-        Assert.That(converter.CanConvertTo(null, typeof(string)), Is.EqualTo(true));
-        Assert.That(converter.CanConvertTo(null, typeof(int)), Is.EqualTo(false));
+        Assert.Multiple(() => {
+            Assert.That(converter.CanConvertTo(null, typeof(string)), Is.EqualTo(true));
+            Assert.That(converter.CanConvertTo(null, typeof(int)), Is.EqualTo(false));
+        });
     }
 
     [Test]
@@ -58,10 +62,12 @@ public class InterlockIdConverterTests
         var converter = BuildConverter();
         var id = converter.ConvertFrom(null, CultureInfo.InvariantCulture, "Key!AAA#SHA3_512") as InterlockId;
         Assert.That(id, Is.Not.Null);
-        Assert.That(id.ToString(), Is.EqualTo("Key!AAA#SHA3_512"));
-        Assert.That(id.Algorithm, Is.EqualTo(HashAlgorithm.SHA3_512));
-        Assert.That(id.Data, Is.EqualTo(new byte[] { 0, 0 }));
-        Assert.That(id.Type, Is.EqualTo(4));
+        Assert.Multiple(() => {
+            Assert.That(id.ToString(), Is.EqualTo("Key!AAA#SHA3_512"));
+            Assert.That(id.Algorithm, Is.EqualTo(HashAlgorithm.SHA3_512));
+            Assert.That(id.Data, Is.EqualTo(new byte[] { 0, 0 }));
+            Assert.That(id.Type, Is.EqualTo(4));
+        });
     }
 
     [Test]

@@ -54,12 +54,11 @@ public class EncryptedBlob : VersionedValue<EncryptedBlob>
     public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
     public override string TypeName => nameof(EncryptedBlob);
 
-    public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value)
-        => new(value.Required());
+    public static EncryptedBlob Embed(EncryptedValue<ILTagByteArray> value) => new(value.Required());
 
     public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
-    public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
+    public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine).Value;
 
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
 

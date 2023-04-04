@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
 
 namespace InterlockLedger.Tags;
 public abstract class ILTagOfExplicit<T> : ILTagOf<T> where T : notnull

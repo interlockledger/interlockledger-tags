@@ -40,17 +40,20 @@ public class TagRSAParametersTests
     public void NewTagRSAParametersFromStream(byte[] bytes) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TagRSAParameters>();
+        Assert.That(tag, Is.Not.Null);
         Assert.That(tag.TagId, Is.EqualTo(ILTagId.RSAParameters));
         var value = tag.Value.Parameters;
-        Assert.That(value.D, Is.EqualTo(new byte[] { 1 }));
-        Assert.That(value.DP, Is.EqualTo(new byte[] { 2 }));
-        Assert.That(value.DQ, Is.EqualTo(new byte[] { 3 }));
-        Assert.That(value.InverseQ, Is.EqualTo(new byte[] { 4 }));
-        Assert.That(value.Exponent, Is.EqualTo(new byte[] { 5 }));
-        Assert.That(value.Modulus, Is.EqualTo(new byte[] { 6 }));
-        Assert.That(value.P, Is.EqualTo(new byte[] { 7 }));
-        Assert.That(value.Q, Is.EqualTo(new byte[] { 8 }));
-        Assert.That(tag.Value.Strength, Is.EqualTo(KeyStrength.Normal));
+        Assert.Multiple(() => {
+            Assert.That(value.D, Is.EqualTo(new byte[] { 1 }));
+            Assert.That(value.DP, Is.EqualTo(new byte[] { 2 }));
+            Assert.That(value.DQ, Is.EqualTo(new byte[] { 3 }));
+            Assert.That(value.InverseQ, Is.EqualTo(new byte[] { 4 }));
+            Assert.That(value.Exponent, Is.EqualTo(new byte[] { 5 }));
+            Assert.That(value.Modulus, Is.EqualTo(new byte[] { 6 }));
+            Assert.That(value.P, Is.EqualTo(new byte[] { 7 }));
+            Assert.That(value.Q, Is.EqualTo(new byte[] { 8 }));
+            Assert.That(tag.Value.Strength, Is.EqualTo(KeyStrength.Normal));
+        });
     }
 
     [TestCase(ExpectedResult = new byte[] { 41, 26, 16, 1, 6, 16, 1, 5, 16, 1, 7, 16, 1, 8, 16, 1, 2, 16, 1, 3, 16, 1, 4, 16, 1, 1, 10, 0 })]

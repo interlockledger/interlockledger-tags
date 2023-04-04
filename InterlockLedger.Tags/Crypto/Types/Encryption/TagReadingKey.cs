@@ -77,7 +77,10 @@ public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
     }
 
     protected override Parts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new Parts(s.DecodeString(), s.Decode<TagHash>(), s.DecodeByteArray(), s.DecodeByteArray()));
+        FromBytesHelper(bytes, s => new Parts(s.DecodeString().Required(),
+                                              s.Decode<TagHash>().Required(),
+                                              s.DecodeByteArray().Required(),
+                                              s.DecodeByteArray().Required()));
 
     protected override byte[] ToBytes(Parts value)
         => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.ReaderId)

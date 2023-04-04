@@ -44,7 +44,7 @@ public static class KeyRSAExtensions
     //  HyperStrong = 5,    // RSA 7172
     //  UltraStrong = 6     // RSA 8192
 
-    public static KeyStrength KeyStrengthGuess(this RSA key) => Guess(key.Required().KeySize);
+    public static KeyStrength KeyStrengthGuess(this RSA? key) => Guess(key.Required().KeySize);
 
     public static int RSAKeySize(this KeyStrength strength) => 2048 + (1024 * (int)strength);
 

@@ -40,9 +40,12 @@ public class TagSignatureTests
     public void NewTagSignatureFromStream(byte[] bytes, Algorithm algorithm, byte[] data) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<TagSignature>();
-        Assert.That(tag.TagId, Is.EqualTo(ILTagId.Signature));
-        Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
-        Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+        Assert.That(tag, Is.Not.Null);
+        Assert.Multiple(() => {
+            Assert.That(tag.TagId, Is.EqualTo(ILTagId.Signature));
+            Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
+            Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
+        });
     }
 
     [TestCase(Algorithm.EcDSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 38, 4, 4, 0, 0, 0 })]

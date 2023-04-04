@@ -39,8 +39,10 @@ public class IEnumerableOfExtensionsTests
         var data = new string[] { "1", "2", "3", "5", "7", "11" };
         var tagArray = data.ToTagArrayFrom(v => new ILTagString(v));
         Assert.That(tagArray, Is.Not.Null);
-        Assert.That(tagArray.Value, Has.Length.EqualTo(data.Length));
-        Assert.That(tagArray.GetValues<string>(), Is.EquivalentTo(data));
+        Assert.Multiple(() => {
+            Assert.That(tagArray.Value, Has.Length.EqualTo(data.Length));
+            Assert.That(tagArray.GetValues<string>(), Is.EquivalentTo(data));
+        });
         var e = Assert.Throws<ArgumentException>(() => data.ToTagArrayFrom(null));
         Assert.That(e.ParamName, Is.EqualTo("convert"));
     }
@@ -50,8 +52,10 @@ public class IEnumerableOfExtensionsTests
         var data = new ulong[] { 1, 2, 3, 5, 7, 11 };
         var tagArray = data.ToTagArray(v => new ILTagILInt(v));
         Assert.That(tagArray, Is.Not.Null);
-        Assert.That(tagArray.Value, Has.Length.EqualTo(data.Length));
-        Assert.That(tagArray.GetValues<ulong>(), Is.EquivalentTo(data));
+        Assert.Multiple(() => {
+            Assert.That(tagArray.Value, Has.Length.EqualTo(data.Length));
+            Assert.That(tagArray.GetValues<ulong>(), Is.EquivalentTo(data));
+        });
         var e = Assert.Throws<ArgumentException>(() => data.ToTagArray<ulong, ILTagILInt>(null));
         Assert.That(e.ParamName, Is.EqualTo("convert"));
     }

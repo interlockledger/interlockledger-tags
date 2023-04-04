@@ -63,7 +63,7 @@ public class TagEncrypted : ILTagExplicit<TagEncryptedParts>
     protected override TagEncryptedParts FromBytes(byte[] bytes) =>
         FromBytesHelper(bytes, s => new TagEncryptedParts {
             Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
-            CipherData = s.DecodeByteArray(),
+            CipherData = s.DecodeByteArray().Required(),
         });
 
     protected override byte[] ToBytes(TagEncryptedParts value)

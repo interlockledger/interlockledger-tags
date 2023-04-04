@@ -61,7 +61,7 @@ public class ILTagDictionaryTests
         Assert.That(tagValue, Is.InstanceOf<ILTagDictionary<ILTag>>());
         var value = ((ILTagDictionary<ILTag>)tagValue).Value;
         var dict = BuildDictionary(keys, bytes, splits);
-        CompareSimilarDicts<ILTagByteArray, ILTag>(dict, value);
+        CompareSimilarDicts(dict, value);
     }
 
     [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Deserialize_One_String_Dictionary_with_two_strings")]
@@ -179,8 +179,10 @@ public class ILTagDictionaryTests
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key];
                 var valueValue = value[key];
-                Assert.That(valueValue.TagId, Is.EqualTo(dictValue.TagId));
-                Assert.That(valueValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes));
+                Assert.Multiple(() => {
+                    Assert.That(valueValue.TagId, Is.EqualTo(dictValue.TagId));
+                    Assert.That(valueValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes));
+                });
             }
         }
     }

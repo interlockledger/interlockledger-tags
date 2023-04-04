@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-#nullable enable
 
 
 namespace InterlockLedger.Tags;
@@ -55,6 +54,6 @@ public partial class EnumerationItems
 
         private const char _fieldSeparator = '|';
 
-        private static string? Normalize(string text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, "?");
+        private static string? Normalize(string? text) => text?.Replace(_fieldSeparator, '_').Replace(_detailSeparator, "?");
     }
 }

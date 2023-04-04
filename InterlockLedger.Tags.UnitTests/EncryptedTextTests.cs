@@ -88,8 +88,10 @@ public class EncryptedTextTests
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<EncryptedText.Payload>();
         Assert.That(tag, Is.Not.Null);
-        Assert.That(tag.TagId, Is.EqualTo(ILTagId.EncryptedText));
-        Assert.That(tag.Value.Cipher, Is.EqualTo(algorithm));
+        Assert.Multiple(() => {
+            Assert.That(tag.TagId, Is.EqualTo(ILTagId.EncryptedText));
+            Assert.That(tag.Value.Cipher, Is.EqualTo(algorithm));
+        });
         var clearBlob = tag.Value.DecryptText(TestFakeSigner.FixedKeysInstance.Reader, _ => new AES256Engine());
         Assert.That(clearBlob, Is.Not.Null);
         Assert.That(clearBlob, Has.Length.EqualTo(clearText.Length));
@@ -134,32 +136,40 @@ public class EncryptedTextTests
     public void ValidateFieldDefinition() {
         var fd = EncryptedText.FieldDefinition;
         Assert.That(fd, Is.Not.Null);
-        Assert.That(fd.Name, Is.EqualTo(nameof(EncryptedText)));
-        Assert.That(fd.TagId, Is.EqualTo(ILTagId.EncryptedText));
-        Assert.That(fd.HasSubFields, "Must have subfields");
-        Assert.That(fd.IsEnumeration, Is.False, "Should not be an enumeration");
-        Assert.That(fd.SubDataFields.SafeCount(), Is.EqualTo(3));
+        Assert.Multiple(() => {
+            Assert.That(fd.Name, Is.EqualTo(nameof(EncryptedText)));
+            Assert.That(fd.TagId, Is.EqualTo(ILTagId.EncryptedText));
+            Assert.That(fd.HasSubFields, "Must have subfields");
+            Assert.That(fd.IsEnumeration, Is.False, "Should not be an enumeration");
+            Assert.That(fd.SubDataFields.SafeCount(), Is.EqualTo(3));
+        });
         var fieldVersion = fd.SubDataFields.First();
-        Assert.That(fieldVersion.Name, Is.EqualTo(nameof(EncryptedText.Version)));
-        Assert.That(fieldVersion.TagId, Is.EqualTo(ILTagId.UInt16));
-        Assert.That(fieldVersion.Version, Is.EqualTo((ushort)1));
-        Assert.That(fieldVersion.IsVersion);
-        Assert.That(fieldVersion.IsDeprecated, Is.False);
-        Assert.That(fieldVersion.IsOpaque, Is.False);
+        Assert.Multiple(() => {
+            Assert.That(fieldVersion.Name, Is.EqualTo(nameof(EncryptedText.Version)));
+            Assert.That(fieldVersion.TagId, Is.EqualTo(ILTagId.UInt16));
+            Assert.That(fieldVersion.Version, Is.EqualTo((ushort)1));
+            Assert.That(fieldVersion.IsVersion);
+            Assert.That(fieldVersion.IsDeprecated, Is.False);
+            Assert.That(fieldVersion.IsOpaque, Is.False);
+        });
         var fieldCipherText = fd.SubDataFields.Skip(1).First();
-        Assert.That(fieldCipherText.Name, Is.EqualTo(nameof(EncryptedText.CipherText)));
-        Assert.That(fieldCipherText.TagId, Is.EqualTo(ILTagId.ByteArray));
-        Assert.That(fieldCipherText.Version, Is.EqualTo((ushort)1));
-        Assert.That(fieldCipherText.IsVersion, Is.False);
-        Assert.That(fieldCipherText.IsDeprecated, Is.False);
-        Assert.That(fieldCipherText.IsOpaque);
+        Assert.Multiple(() => {
+            Assert.That(fieldCipherText.Name, Is.EqualTo(nameof(EncryptedText.CipherText)));
+            Assert.That(fieldCipherText.TagId, Is.EqualTo(ILTagId.ByteArray));
+            Assert.That(fieldCipherText.Version, Is.EqualTo((ushort)1));
+            Assert.That(fieldCipherText.IsVersion, Is.False);
+            Assert.That(fieldCipherText.IsDeprecated, Is.False);
+            Assert.That(fieldCipherText.IsOpaque);
+        });
         var fieldKeys = fd.SubDataFields.Skip(2).First();
-        Assert.That(fieldKeys.Name, Is.EqualTo(nameof(EncryptedText.ReadingKeys)));
-        Assert.That(fieldKeys.TagId, Is.EqualTo(ILTagId.ILTagArray));
-        Assert.That(fieldKeys.Version, Is.EqualTo((ushort)1));
-        Assert.That(fieldKeys.IsVersion, Is.False);
-        Assert.That(fieldKeys.IsDeprecated, Is.False);
-        Assert.That(fieldKeys.IsOpaque, Is.False);
-        Assert.That(fieldKeys.ElementTagId, Is.EqualTo(ILTagId.ReadingKey));
+        Assert.Multiple(() => {
+            Assert.That(fieldKeys.Name, Is.EqualTo(nameof(EncryptedText.ReadingKeys)));
+            Assert.That(fieldKeys.TagId, Is.EqualTo(ILTagId.ILTagArray));
+            Assert.That(fieldKeys.Version, Is.EqualTo((ushort)1));
+            Assert.That(fieldKeys.IsVersion, Is.False);
+            Assert.That(fieldKeys.IsDeprecated, Is.False);
+            Assert.That(fieldKeys.IsOpaque, Is.False);
+            Assert.That(fieldKeys.ElementTagId, Is.EqualTo(ILTagId.ReadingKey));
+        });
     }
 }
