@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>31.0.0</Version>
+        <Version>31.0.1</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Fix all compilation warnings, specially of nullability</PackageReleaseNotes>
+        <PackageReleaseNotes>Fix FileBackedILTag initialization</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>

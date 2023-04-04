@@ -38,7 +38,7 @@ public class AES256EncryptedTests
     [SuppressMessage("Usage", "CA1806:Do not ignore method results", Justification = "Delegate is for testing exception throwing")]
     public void ConstructorParameterValidation() {
         AssertRequiredException(() => new AES256Encrypted<ILTagBool>(null, "password"), "value");
-        AssertPasswordMissing(() => new AES256Encrypted<ILTagBool>(ILTagBool.False, null));
+        AssertRequiredException(() => new AES256Encrypted<ILTagBool>(ILTagBool.False, null), "password");
         AssertRequiredException(() => new AES256Encrypted<ILTagBool>(null), "s");
     }
 
@@ -48,7 +48,7 @@ public class AES256EncryptedTests
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
             72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }));
-        AssertPasswordMissing(() => tag.Decrypt(null));
+        AssertRequiredException(() => tag.Decrypt(null), "password");
     }
 
     [Test]
@@ -79,11 +79,7 @@ public class AES256EncryptedTests
 
     private static bool AsBool(ILTagBool tag) => tag?.Value ?? throw new InvalidDataException("Not an ILTagBool");
 
-    private static void AssertPasswordMissing(TestDelegate code) {
-        var ae = Assert.Throws<ArgumentException>(code);
-        Assert.That(ae.ParamName, Is.EqualTo("password"));
-        ae.AssertMessageStartsWith(AES256Encrypted<ILTagBool>.MissingPasswordMessage);
-    }
+ 
 
     private static void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
         var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));

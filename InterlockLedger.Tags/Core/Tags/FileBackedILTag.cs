@@ -42,12 +42,12 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
         CopyFromAsync(source).Wait();
     }
 
-    public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset, ulong length) : base(tagId, default!) {
+    public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset = 0, ulong length = 0) : base(tagId, default!) {
         _fileInfo = fileInfo.Required();
-        if (!fileInfo.Exists)
+        if (fileInfo.Exists)
+            Initialize(offset, length, fileInfo.Length);
+        else if (length > 0)
             throw new InvalidOperationException($"File {fileInfo.FullName} does not exist");
-        _fileInfo = fileInfo;
-        Initialize(offset, length, fileInfo.Length);
     }
 
     public override object? AsJson => null;
@@ -63,10 +63,6 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
             : _contentStream;
 
     public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult<Stream>(new TagStream(TagId, _contentStream));
-
-
-    protected FileBackedILTag(ulong tagId, FileInfo fileInfo) : this(tagId, fileInfo, offset: 0, length: 0) {
-    }
 
     protected override bool KeepEncodedBytesInMemory => false;
 
