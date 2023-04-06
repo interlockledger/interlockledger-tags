@@ -33,7 +33,6 @@
 namespace InterlockLedger.Tags;
 public interface IVersionedEmbeddedValue<T> where T : IVersionedEmbeddedValue<T>
 {
-    object AsJson { get; }
     IEnumerable<DataField> RemainingStateFields { get; }
     ulong TagId { get; }
     string TypeDescription { get; }

@@ -56,7 +56,6 @@ public class ILTagJsonTests
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.Bool, payload);
         Assert.That(tag, Is.InstanceOf<ILTagBool>());
-        Assert.That(tag.AsJson, Is.EqualTo(payload));
         return ((ILTagBool)tag).Value;
     }
 
@@ -125,7 +124,6 @@ public class ILTagJsonTests
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.Int8, payload);
         Assert.That(tag, Is.InstanceOf<ILTagInt8>());
-        Assert.That(tag.AsJson, Is.EqualTo(payload));
         return ((ILTagInt8)tag).Value;
     }
 
@@ -182,7 +180,6 @@ public class ILTagJsonTests
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.Null, payload);
         Assert.That(tag, Is.InstanceOf<ILTagNull>());
-        Assert.That(tag.AsJson, Is.EqualTo(payload));
         var tag2 = TagProvider.DeserializeFromJson(ILTagId.Version, payload);
         Assert.That(tag2, Is.InstanceOf<ILTagNull>());
     }
@@ -193,7 +190,6 @@ public class ILTagJsonTests
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.String, payload);
         Assert.Multiple(() => {
-            Assert.That(tag.AsJson, Is.EqualTo(payload));
             Assert.That(tag, Is.InstanceOf<ILTagString>());
         });
     }
@@ -219,7 +215,6 @@ public class ILTagJsonTests
         var payload = json.DeserializeJson();
         var tag = TagProvider.DeserializeFromJson(ILTagId.UInt8, payload);
         Assert.That(tag, Is.InstanceOf<ILTagUInt8>());
-        Assert.That(tag.AsJson, Is.EqualTo(payload));
         return ((ILTagUInt8)tag).Value;
     }
 

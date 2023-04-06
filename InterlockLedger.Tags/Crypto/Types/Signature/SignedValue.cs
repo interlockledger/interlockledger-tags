@@ -40,17 +40,13 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public override object AsJson => new {
-        TagId,
-        ContentTagId,
-        SignedContent = SignedContent.AsILTag.AsJson,
-        Signatures = Signatures.AsJsonArray()
-    };
-
+    [JsonIgnore]
     public ulong ContentTagId => SignedContent.TagId;
 
+    [JsonIgnore]
     public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent);
 
+    [JsonIgnore]
     public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
     public IEnumerable<IdentifiedSignature> Signatures { get; private set; }
 

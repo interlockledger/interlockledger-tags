@@ -33,11 +33,11 @@
 namespace InterlockLedger.Tags;
 public class ILTagString : ILTagOfExplicit<string>
 {
-    public ILTagString(string? value) : base(ILTagId.String, value.Safe()) => TextualRepresentation = Value;
+    public ILTagString(string? value) : base(ILTagId.String, value.Safe()) => TextualRepresentation = Value!;
 
-    internal ILTagString(Stream s) : base(ILTagId.String, s) => TextualRepresentation = Value;
+    internal ILTagString(Stream s) : base(ILTagId.String, s) => TextualRepresentation = Value!;
 
-    protected override bool AreEquivalent(ILTagOf<string> other) => Value.Equals(other.Value);
+    protected override bool AreEquivalent(ILTagOf<string?> other) => Value.Safe().Equals(other.Value);
 
     protected override string ValueFromStream(StreamSpan s) => s.Length == 0 ? string.Empty : Encoding.UTF8.GetString(s.ReadAllBytesAsync().Result);
 

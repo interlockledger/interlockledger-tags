@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using Org.BouncyCastle.Bcpg;
+
 namespace InterlockLedger.Tags;
 
 
@@ -67,7 +69,7 @@ public class EncryptedBlobTests
                             114, 178, 124, 104, 173, 16, 159, 223, 130, 226, 194, 214, 182, 216, 184, 52, 66, 113, 158, 71, 59, 110, 165, 28, 237, 27, 0, 62, 84,
                             135, 152, 128, 201, 247, 155, 122, 0, 53, 213, 169, 231, 5, 214, 0, 213, 203, 214, 42, 228, 179, 35, 84, 234, 2, 162, 108, 201, 203,
                             195, 193, 94, 223, 10, 71, 211, 182, 246, 201, 72, 215, 230, 121, 46, 78, 84, 252, 130, 76, 76, 62, 122, 73, 101, 56, 189, 66, 85
-            }, CipherAlgorithm.AES256, new byte[] { }, TestName = "NewEncryptedBlobFromStream Better Padding")]
+            }, CipherAlgorithm.AES256, new byte[0], TestName = "NewEncryptedBlobFromStream Better Padding")]
     [TestCase(new byte[] {
             55, 249, 1, 131,
                 5, 1, 0,
@@ -133,7 +135,7 @@ public class EncryptedBlobTests
                             153, 29, 242, 20, 176, 87, 83, 70, 104, 40, 137, 230, 245, 144, 215, 192, 139, 33, 127, 249, 255, 141, 225, 106, 51, 41, 119, 212, 202, 150,
                             134, 211, 110, 36, 124, 101, 19, 246, 18, 196, 175, 113, 136, 226, 141, 27, 139, 123, 127, 226, 98, 125, 36, 40, 118, 210, 6, 146, 235, 150, 46,
                             152, 218, 113, 174, 82
-        }, CipherAlgorithm.AES256, new byte[] { }, TestName = "NewEncryptedBlobFromStream")]
+        }, CipherAlgorithm.AES256, new byte[0], TestName = "NewEncryptedBlobFromStream")]
     public void NewEncryptedBlobFromStream(byte[] bytes, CipherAlgorithm algorithm, byte[] data) {
         using var ms = new MemoryStream(bytes);
         var tag = ms.Decode<EncryptedBlob.Payload>();
@@ -143,8 +145,12 @@ public class EncryptedBlobTests
             Assert.That(tag.Value.Cipher, Is.EqualTo(algorithm));
         });
         var clearBlob = tag.Value.DecryptBlob(TestFakeSigner.FixedKeysInstance.Reader, _ => new AES256Engine());
-        Assert.That(clearBlob, Is.Not.Null);
-        Assert.That(clearBlob, Has.Length.EqualTo(data.Length));
+        if (data is null) {
+            Assert.That(clearBlob, Is.Null);
+        } else {
+            Assert.That(clearBlob, Is.Not.Null);
+            Assert.That(clearBlob, Has.Length.EqualTo(data.Length));
+        }
     }
 
     [TestCase(CipherAlgorithm.AES256, new byte[] { 0, 0 }, ExpectedResult = new byte[] {

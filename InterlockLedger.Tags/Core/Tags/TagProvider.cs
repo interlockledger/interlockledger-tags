@@ -97,7 +97,7 @@ public static class TagProvider
         [ILTagId.BigInteger] = (s => new ILTagBigInteger(s), NoJson),
         [ILTagId.BigDecimal] = (s => new ILTagBigDecimal(s), NoJson),
         [ILTagId.ILIntArray] = (s => new ILTagArrayOfILInt(s), ILTagArrayOfILInt.FromJson),
-        [ILTagId.ILTagArray] = (s => new ILTagArrayOfILTag<ILTag>(s), ILTagArrayOfILTag<ILTag>.FromJson),
+        [ILTagId.ILTagArray] = (s => new ILTagArrayOfILTag<ILTag>(s), NoJson),
         [ILTagId.Sequence] = (s => new ILTagSequence(s), o => new ILTagSequence(o)),
         [ILTagId.Version] = (s => new ILTagVersion(s), ILTagVersion.FromJson),
         [ILTagId.Range] = (s => new ILTagRange(s), o => ILTagRange.Build((string)o)),

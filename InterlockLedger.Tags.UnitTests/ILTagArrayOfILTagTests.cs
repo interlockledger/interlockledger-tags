@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 [TestFixture]
 public class ILTagArrayOfILTagTests
 {
-    [TestCase(new byte[0], new byte[] { 21, 0 }, TestName = "DecodeArray_a_Null_as_Empty_Array")]
+    [TestCase((byte[])null, new byte[] { 21, 0 }, TestName = "DecodeArray_a_Null_as_Null")]
     [TestCase(new byte[0], new byte[] { 21, 1, 0 }, TestName = "DecodeArray_an_Empty_Array")]
     [TestCase(new byte[] { 1, 2, 3 }, new byte[] { 21, 10, 3, 0, 1, 1, 0, 1, 2, 0, 1, 3 }, TestName = "DecodeArray_One_Array_with_Four_Explicitly_Tagged_Bytes")]
     public void DecodeArray(byte[] bytes, byte[] encodedBytes) {
@@ -82,13 +82,17 @@ public class ILTagArrayOfILTagTests
     public void GuaranteeBijectiveBehaviorTwoElementsArray()
         => GuaranteeBijectiveBehavior(new ILTagBool[] { ILTagBool.False, ILTagBool.True });
 
+    [TestCase((byte[])null, new byte[0], ExpectedResult = new byte[] { 21, 0 }, TestName = "Serialize_a_Null_Array")]
     [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 21, 1, 0 }, TestName = "Serialize_an_Empty_Array")]
     [TestCase(new byte[0], new byte[] { 0 }, ExpectedResult = new byte[] { 21, 3, 1, 16, 0 }, TestName = "Serialize_One_Array_with_One_Byte")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, ExpectedResult = new byte[] { 21, 7, 1, 16, 4, 1, 2, 3, 2 }, TestName = "Serialize_One_Array_with_Four_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Arrays_with_Two_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize_Two_Arrays_with_One_and_Three_Bytes")]
-    public byte[] SerializeILTagILTagArray(byte[] bytes, byte[] splits)
-        => new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).EncodedBytes;
+    public byte[] SerializeILTagILTagArray(byte[] bytes, byte[] splits) {
+        byte[] encodedBytes = new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).EncodedBytes;
+        TestContext.WriteLine(encodedBytes.AsLiteral());
+        return encodedBytes;
+    }
 
     private static ILTagByteArray[] BuildArrayOfArrays(byte[] bytes, byte[] splits) {
         if (bytes == null)

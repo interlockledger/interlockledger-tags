@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
@@ -39,7 +38,6 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
 {
     public ILTagRange() : this(LimitedRange.Empty) { }
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) => TextualRepresentation = Value.TextualRepresentation;
-    public override object AsJson => this;
     public static ILTagRange Empty { get; } = new ILTagRange();
     public static Regex Mask => LimitedRange.Mask;
     public bool IsEmpty => Value.IsEmpty;

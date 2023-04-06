@@ -78,12 +78,27 @@ public class SequenceTests
     [Test]
     public void JsonSerialization() {
         var seq = new ILTagSequence(new ILTagString("JsonTest"), new ILTagILInt(13), ILTagBool.False);
-        var jsonModel = seq.AsJson;
-        var json = JsonSerializer.Serialize(jsonModel, ILTagDictionaryTests.JsonOptions);
-        TestContext.WriteLine(json);
-        var parsedJson = JsonSerializer.Deserialize<List<object>>(json);
-        var backSeq = TagProvider.DeserializeFromJson(ILTagId.Sequence, parsedJson);
-        Assert.That(seq, Is.EqualTo(backSeq));
+        var jsonSeq = JsonSerializer.Serialize(seq, ILTagDictionaryTests.JsonOptions);
+        TestContext.WriteLine(jsonSeq);
+        Assert.That(jsonSeq.RegexReplace("\r\n","\n"), Is.EqualTo(/*lang=json,strict*/ """
+            {
+              "Content": [
+                {
+                  "TagId": 17,
+                  "Content": "JsonTest"
+                },
+                {
+                  "TagId": 10,
+                  "Content": 13
+                },
+                {
+                  "TagId": 1,
+                  "Content": false
+                }
+              ],
+              "TagId": 22
+            }
+            """));
     }
 
     [TestCase("Test", 1024ul, ExpectedResult = new byte[] { 22, 11, 2, 17, 4, 84, 101, 115, 116, 10, 249, 3, 8 }, TestName = "Serialize_One_Sequence_with_a_string_and_one_ilint")]

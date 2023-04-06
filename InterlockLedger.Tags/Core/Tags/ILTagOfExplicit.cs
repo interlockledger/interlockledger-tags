@@ -32,7 +32,8 @@
 
 
 namespace InterlockLedger.Tags;
-public abstract class ILTagOfExplicit<T> : ILTagOf<T> where T : notnull
+
+public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
 {
     public const int MaxEncodedValueLength = int.MaxValue / 16;
 
@@ -49,32 +50,41 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T> where T : notnull
     protected static void SetLength(ITag it, ulong length) => ((ILTagOfExplicit<T>)it)._valueLength = length;
 
     protected virtual ulong CalcValueLength() {
+        if (Value is null)
+            return 0;
         using var stream = new MemoryStream();
         ValueToStreamAsync(stream);
         stream.Flush();
         return (ulong)stream.ToArray().Length;
     }
 
-    protected sealed override T DeserializeInner(Stream s) {
-        if ((_valueLength ??= s.ILIntDecode()) > int.MaxValue && KeepEncodedBytesInMemory)
+    protected sealed override T? DeserializeInner(Stream s) {
+        ulong length = _valueLength ??= s.ILIntDecode();
+        if (length > int.MaxValue && KeepEncodedBytesInMemory)
             throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
-        ulong length = _valueLength.Value;
+        if (length == 0)
+            return ZeroLengthDefault;
         if (s is StreamSpan sp && (ulong)(sp.Length - sp.Position) < length)
             throw new InvalidDataException($"Decoded tag content length ({length}) is larger than total available bytes in stream");
-        using var ss = new StreamSpan(s, _valueLength.Value);
+        using var ss = new StreamSpan(s, length);
         return ValueFromStream(ss);
+    }
+
+    [JsonIgnore]
+    protected virtual T? ZeroLengthDefault => default;
+    protected async override Task<Stream> SerializeInnerAsync(Stream s) {
+        if (Value is not null) {
+            s.ILIntEncode(ValueLength);
+            if (ValueLength > 0)
+                await ValueToStreamAsync(s);
+        } else
+            s.ILIntEncode(0ul);
+        return s;
     }
 
     protected sealed override void OnChanged() {
         base.OnChanged();
         _valueLength = null;
-    }
-
-    protected sealed async override Task<Stream> SerializeInnerAsync(Stream s) {
-        s.ILIntEncode(ValueLength);
-        if (ValueLength > 0)
-            await ValueToStreamAsync(s);
-        return s;
     }
 
     private ulong? _valueLength;

@@ -36,7 +36,7 @@ public sealed class ILTagNull : ILTag
 {
     public static readonly ILTagNull Instance = new();
 
-    public override object? AsJson => null;
+    public override object? Content => null;
 
     protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
 

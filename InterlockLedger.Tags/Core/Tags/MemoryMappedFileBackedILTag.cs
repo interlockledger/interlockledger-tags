@@ -42,11 +42,10 @@ public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T> where T : notnu
         Initialize(offset, length, mmvs.Length);
     }
 
-    public override object AsJson => null!;
-
     public ulong Length { get; private set; }
     public long Offset { get; private set; }
 
+    [JsonIgnore]
     public Stream ReadingStream =>
         Length == 0
             ? throw new InvalidOperationException("Should not try to deserialize a zero-length tag")

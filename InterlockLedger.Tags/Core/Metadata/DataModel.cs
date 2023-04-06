@@ -276,9 +276,10 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
                     json[field.Name] = ToJson(bytes, field.TagId, field.SubDataFields, ref offset);
                 } else {
                     var value = DecodePartial(field.TagId, bytes, ref offset);
-                    json[field.Name] = field.IsEnumeration && !value.Traits.IsNull ? field.EnumerationToString(value) : value.AsJson;
+                    json[field.Name] = field.IsEnumeration && !value.Traits.IsNull ? field.EnumerationToString(value) : value;
                     if (isVersioned && firstField && field.IsVersion)
-                        version = (ushort)value.AsJson!;
+                        version = value is ILTagUInt16 uInt16 ? uInt16.Value : (ushort)0;
+                           
                 }
                 firstField = false;
             }

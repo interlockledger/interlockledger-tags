@@ -35,12 +35,11 @@ namespace InterlockLedger.Tags;
 public abstract class ILTag : ITag
 {
     [JsonIgnore]
-    public abstract object? AsJson { get; }
-
-    [JsonIgnore]
     public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
 
     public ulong TagId { get; set; }
+
+    public abstract object? Content { get;}
 
     [JsonIgnore]
     public ITag Traits => this;
@@ -48,35 +47,30 @@ public abstract class ILTag : ITag
     [JsonIgnore]
     public string TextualRepresentation { get; protected set; }
 
-    public void Changed() {
+    internal void Changed() {
         _encodedBytes = null;
         OnChanged();
     }
-
-    protected virtual void OnChanged() { }
 
     public virtual async Task<Stream> OpenReadingStreamAsync() {
         if (KeepEncodedBytesInMemory)
             return new MemoryStream(EncodedBytes, writable: false);
         var s = await BuildTempStreamAsync();
-        s.ILIntEncode(TagId);
-        await SerializeInnerAsync(s);
-        s.Flush();
+        await SerializeIntoAsync(s);
         s.Position = 0;
         return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
     }
 
-    public async Task<Stream?> SerializeIntoAsync(Stream? s) {
-        if (s is not null) {
-            s.ILIntEncode(TagId);
-            await SerializeInnerAsync(s);
-            s.Flush();
-        }
+    public async Task<Stream> SerializeIntoAsync(Stream s) {
+        s.ILIntEncode(TagId);
+        await SerializeInnerAsync(s);
+        s.Flush();
         return s;
     }
 
     public override string ToString() => TagPrefix + TextualRepresentation;
 
+    [JsonIgnore]
     public string TagPrefix => GetType().Name + $"[Tag#{TagId}]: ";
 
     public virtual bool ValueIs<TV>(out TV? value) {
@@ -89,18 +83,20 @@ public abstract class ILTag : ITag
         TextualRepresentation = textualRepresentation;
     }
 
+    [JsonIgnore]
     protected virtual bool KeepEncodedBytesInMemory => true;
 
     protected virtual Task<Stream> BuildTempStreamAsync() => Task.FromResult<Stream>(new MemoryStream());
 
     protected abstract Task SerializeInnerAsync(Stream s);
 
+    protected virtual void OnChanged() { }
+
     private byte[]? _encodedBytes;
 
     private byte[] ToBytes() {
         using var stream = new MemoryStream();
-        stream.ILIntEncode(TagId);
-        SerializeInnerAsync(stream);
+        SerializeIntoAsync(stream).Wait();
         stream.Flush();
         return stream.ToArray();
     }

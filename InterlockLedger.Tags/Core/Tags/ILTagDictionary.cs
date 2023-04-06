@@ -42,8 +42,6 @@ public class ILTagDictionary<T> : ILTagAbstractDictionary<T> where T : ILTag
     public ILTagDictionary(Dictionary<string, T?> value) : base(ILTagId.Dictionary, value) {
     }
 
-    public override object AsJson => Value.ToDictionary(p => p.Key, pp => new { pp.Value?.TagId, Value = pp.Value?.AsJson });
-
     internal ILTagDictionary(Stream s) : base(ILTagId.Dictionary, s) {
     }
     protected override T? DecodeValue(Stream s) => s.Decode<T>();

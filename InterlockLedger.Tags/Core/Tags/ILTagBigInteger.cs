@@ -34,8 +34,7 @@ namespace InterlockLedger.Tags;
 public class ILTagBigInteger : ILTag
 {
     public ILTagBigInteger(Stream s) : base(ILTagId.BigInteger, string.Empty) => throw new NotImplementedException();
-
-    public override object AsJson => throw new NotSupportedException();
+    public override object? Content { get; }
 
     protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
 }

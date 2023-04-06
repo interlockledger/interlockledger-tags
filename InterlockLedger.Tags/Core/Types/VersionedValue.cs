@@ -33,19 +33,16 @@
 using System.Buffers;
 
 namespace InterlockLedger.Tags;
-public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : VersionedValue<T>, new()
+public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : notnull, VersionedValue<T>,  new()
 {
     [JsonIgnore]
     public ILTag AsILTag => AsPayload;
 
     [JsonIgnore]
-    public abstract object? AsJson { get; }
-
-    [JsonIgnore]
     public Payload AsPayload => _payload ??= new Payload((T)this);
 
     [JsonIgnore]
-    public ILTagOf<T> AsTag => AsPayload;
+    public ILTagOf<T> AsTag => AsPayload!;
 
     [JsonIgnore]
     public DataField FieldModel => _fieldModel.Value;
@@ -65,9 +62,9 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : Ver
     [JsonIgnore]
     public DataModel PayloadDataModel => _payloadDataModel.Value;
 
+    [JsonIgnore]
     public ulong TagId { get; }
 
-    [JsonIgnore]
     public abstract string TypeName { get; }
 
     public ushort Version { get; set; }
@@ -106,25 +103,23 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : Ver
             : base(alreadyDeserializedTagId, new ReadOnlySequenceStream(bytes), it => SetLength(it, (ulong)bytes.Length))
             => Initialize();
 
-        public override object? AsJson => Value.AsJson;
-
-        protected override bool KeepEncodedBytesInMemory => Value.KeepEncodedBytesInMemory;
+        protected override bool KeepEncodedBytesInMemory => Value!.KeepEncodedBytesInMemory;
 
         public string TypeName => typeof(T).Name;
 
-        public ushort Version => Value.Version;
+        public ushort Version => Value!.Version;
 
         public override string ToString() => Value?.ToString() ?? "?";
 
         internal Payload(T value) : base(value.Required().TagId, value) {
         }
 
-        protected override ulong CalcValueLength() => Value.CalcValueLength();
+        protected override ulong CalcValueLength() => Value!.CalcValueLength();
 
         protected override T ValueFromStream(StreamSpan s) => new T().FromStream(s);
 
         protected override Task<Stream> ValueToStreamAsync(Stream s) {
-            Value.ToStream(s);
+            Value!.ToStream(s);
             return Task.FromResult(s);
         }
 

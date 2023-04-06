@@ -86,14 +86,14 @@ public class ILTagTests
     [TestCase(new byte[] { 17, 6, 0x41, 0xC3, 0xA7, 0xC3, 0xA3, 0x6F }, ExpectedResult = "Ação", TestName = "AsString_Ação")]
     [TestCase(new byte[] { 17, 2, 65, 66 }, ExpectedResult = "AB", TestName = "AsString_AB")]
     [TestCase(new byte[] { 17, 1, 65 }, ExpectedResult = "A", TestName = "AsString_A")]
-    [TestCase(new byte[] { 17, 0 }, ExpectedResult = "", TestName = "AsString_")]
+    [TestCase(new byte[] { 17, 0 }, ExpectedResult = (string)null, TestName = "AsString_null")]
     public string AsString(byte[] bytes) => TagProvider.DeserializeFrom(new MemoryStream(bytes)).TextualRepresentation;
 
     [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = "00000000000001F7", TestName = "AsStringMixedTags_ILint:1F7")]
     [TestCase(new byte[] { 17, 6, 0x41, 0xC3, 0xA7, 0xC3, 0xA3, 0x6F }, ExpectedResult = "Ação", TestName = "AsStringMixedTags_Ação")]
     [TestCase(new byte[] { 17, 2, 65, 66 }, ExpectedResult = "AB", TestName = "AsStringMixedTags_AB")]
     [TestCase(new byte[] { 17, 1, 65 }, ExpectedResult = "A", TestName = "AsStringMixedTags_A")]
-    [TestCase(new byte[] { 17, 0 }, ExpectedResult = "", TestName = "AsStringMixedTags_")]
+    [TestCase(new byte[] { 17, 0 }, ExpectedResult = (string)null, TestName = "AsStringMixedTags_null")]
     public string AsStringMixedTags(byte[] bytes) => TagProvider.DeserializeFrom(new MemoryStream(bytes)).TextualRepresentation;
 
     [TestCase(new byte[] { 7, 255, 255, 255, 255 }, ExpectedResult = 0xFFFFFFFF, TestName = "AsUInt_0xFFFFFFFF")]
@@ -111,7 +111,7 @@ public class ILTagTests
     [TestCase(new byte[] { 9, 1, 0, 0, 0, 0, 0, 0, 0 }, ExpectedResult = (ulong)1, TestName = "AsULong_1")]
     public ulong AsULong(byte[] bytes) => ((ILTagUInt64)TagProvider.DeserializeFrom(new MemoryStream(bytes))).Value;
 
-    [TestCase(new byte[] { 20, 0 }, ExpectedResult = new ulong[0], TestName = "AsULongArray_null")]
+    [TestCase(new byte[] { 20, 0 }, ExpectedResult = (ulong[])null, TestName = "AsULongArray_null")]
     [TestCase(new byte[] { 20, 1, 0 }, ExpectedResult = new ulong[0], TestName = "AsULongArray_empty")]
     [TestCase(new byte[] { 20, 2, 1, 2 }, ExpectedResult = new ulong[] { 2 }, TestName = "AsULongArray_2")]
     [TestCase(new byte[] { 20, 5, 3, 1, 248, 7, 3 }, ExpectedResult = new ulong[] { 1, 255, 3 }, TestName = "AsULongArray_1_255_3")]
@@ -161,13 +161,12 @@ public class ILTagTests
     [TestCase(252, ExpectedResult = new byte[] { 14, 0xF9, 1, 0 })]
     public byte[] SerializeILIntSigned(long value) => new ILTagILIntSigned(value).EncodedBytes;
 
-    [TestCase(null, ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt_null")]
+    [TestCase(null, ExpectedResult = new byte[] { 20, 0 }, TestName = "SerializeILTagArrayOfILInt_null")]
     [TestCase(new ulong[0], ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt")]
     [TestCase(new ulong[] { 2 }, ExpectedResult = new byte[] { 20, 2, 1, 2 }, TestName = "SerializeILTagArrayOfILInt_2")]
     [TestCase(new ulong[] { 1, 255, 3 }, ExpectedResult = new byte[] { 20, 5, 3, 1, 248, 7, 3 }, TestName = "SerializeILTagArrayOfILInt_1_255_3")]
     public byte[] SerializeILTagArrayOfILInt(ulong[] ilints) => new ILTagArrayOfILInt(ilints).EncodedBytes;
 
-    [TestCase(null, ExpectedResult = new byte[] { 16, 0 }, TestName = "SerializeILTagByteArray_null")]
     [TestCase(new byte[0], ExpectedResult = new byte[] { 16, 0 }, TestName = "SerializeILTagByteArray")]
     [TestCase(new byte[] { 2 }, ExpectedResult = new byte[] { 16, 1, 2 }, TestName = "SerializeILTagByteArray_2")]
     [TestCase(new byte[] { 1, 2, 3 }, ExpectedResult = new byte[] { 16, 3, 1, 2, 3 }, TestName = "SerializeILTagByteArray_1_2_3")]

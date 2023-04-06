@@ -36,7 +36,7 @@ public class ILTagByteArray : ILTagOfExplicit<byte[]>
     public ILTagByteArray(object opaqueValue) : this(Elicit(opaqueValue)) {
     }
 
-    public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value) {
+    public ILTagByteArray(byte[] value) : base(ILTagId.ByteArray, value.Required()) {
     }
 
     public ILTagByteArray(Span<byte> value) : this(value.ToArray()) {
@@ -45,10 +45,13 @@ public class ILTagByteArray : ILTagOfExplicit<byte[]>
     internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
     }
 
+    protected override byte[]? ZeroLengthDefault => Array.Empty<byte>();
     protected override byte[] ValueFromStream(StreamSpan s) => s.ReadAllBytesAsync().Result;
 
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
-        s.WriteBytes(Value);
+        if (Value is not null && Value.Length > 0) {
+            s.WriteBytes(Value);
+        }
         return Task.FromResult(s);
     }
 

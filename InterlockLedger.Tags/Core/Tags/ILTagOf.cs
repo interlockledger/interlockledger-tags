@@ -30,29 +30,28 @@
 //
 // ******************************************************************************************************************************
 
-
 namespace InterlockLedger.Tags;
 
 public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 {
     [JsonIgnore]
-    public override object? AsJson => Value;
-
     public T Value { get; set; }
-
-    public override bool ValueIs<TV>(out TV value) {
+    public override object? Content => Value;
+    public override bool ValueIs<TV>(out TV? value) where TV : default {
         if (Value is TV tvalue) {
             value = tvalue;
             return true;
         }
-        value = default!;
+        value = default;
         return false;
     }
-    protected ILTagOf(ulong tagId, T value) : base(tagId, string.Empty) => Value = value;
+    protected ILTagOf(ulong tagId, T value) : base(tagId, value is ITextual textual ? textual.TextualRepresentation : string.Empty) => Value = value;
 
     protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId, string.Empty) {
         setup?.Invoke(this);
         Value = DeserializeInner(s);
+        if (Value is ITextual textual)
+            TextualRepresentation = textual.TextualRepresentation;
     }
 
     protected abstract T DeserializeInner(Stream s);
@@ -68,6 +67,7 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
     public bool Equals(T? otherValue) =>
         (Value is null && otherValue is null) ||
         (Value is not null && otherValue is not null && Value.Equals(otherValue));
+
     protected virtual bool AreEquivalent(ILTagOf<T> other) => Equals(other.Value);
 
     public static bool operator ==(ILTagOf<T> left, ILTagOf<T> right) =>

@@ -87,9 +87,7 @@ public static partial class StreamExtensions
         }
     }
 
-    public static bool HasBytes(this Stream s) => !(s is null) && s.CanSeek && s.Position < s.Length;
-
-    public static byte[] ReadBytes(this Stream s, int length) {
+     public static byte[] ReadBytes(this Stream s, int length) {
         if (s is null || length <= 0)
             return Array.Empty<byte>();
         var bytes = new byte[length];

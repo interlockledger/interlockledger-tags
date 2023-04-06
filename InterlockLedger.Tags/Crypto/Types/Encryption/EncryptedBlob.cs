@@ -41,15 +41,10 @@ public class EncryptedBlob : VersionedValue<EncryptedBlob>
     public EncryptedBlob(CipherAlgorithm cipher, byte[] blobInClearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
         => _encrypted = new EncryptedValue<ILTagByteArray>(ILTagId.EncryptedBlob, cipher, encryptor, new ILTagByteArray(blobInClearText), author, readers);
 
-    public override object AsJson {
-        get {
-            _encrypted.Version = Version;
-            return _encrypted.AsJson;
-        }
-    }
-
     public CipherAlgorithm Cipher => _encrypted.Cipher;
     public byte[] CipherText => _encrypted.CipherText;
+
+    [JsonIgnore]
     public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
     public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
     public override string TypeName => nameof(EncryptedBlob);
@@ -58,7 +53,7 @@ public class EncryptedBlob : VersionedValue<EncryptedBlob>
 
     public ILTagByteArray Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.Decrypt(reader, findEngine);
 
-    public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine).Value;
+    public byte[] DecryptBlob(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine)?.Value;
 
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
 

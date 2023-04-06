@@ -281,7 +281,7 @@ public class DataModelJsonTests
     private static void ToFromBaseTest(ILTag data, Func<string, string> adjustExpected = null) {
         var encodedBytes = data.EncodedBytes;
         var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
-        var expected = JsonSerializer.Serialize(data.AsJson, _options);
+        var expected = JsonSerializer.Serialize(data, _options);
         if (adjustExpected is not null)
             expected = adjustExpected(expected);
         var actual = JsonSerializer.Serialize(modelJson, _options);
@@ -467,9 +467,7 @@ public class DataModelJsonTests
             public Reference(Stream s) : base(DataTagId, s) {
             }
 
-            public override object AsJson => new { Id, Name };
             public ulong Id => Value.Id;
-
             public string Name => Value.Name;
 
             public class Data
@@ -501,10 +499,10 @@ public class DataModelJsonTests
 
         private object AsJsonV4() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value };
 
-        private object AsJsonV5() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges.AsJson };
+        private object AsJsonV5() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges };
 
-        private object AsJsonV6() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges.AsJson, Bytes };
+        private object AsJsonV6() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges, Bytes };
 
-        private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges.AsJson, Bytes, Enumeration = Model.DataFields.Last().EnumerationToString((ulong)Enumeration) };
+        private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges, Bytes, Enumeration = Model.DataFields.Last().EnumerationToString((ulong)Enumeration) };
     }
 }

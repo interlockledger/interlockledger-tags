@@ -41,15 +41,9 @@ public class EncryptedText : VersionedValue<EncryptedText>
     public EncryptedText(CipherAlgorithm cipher, string clearText, IEncryptor encryptor, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this()
         => _encrypted = new EncryptedValue<ILTagString>(ILTagId.EncryptedText, cipher, encryptor, new ILTagString(clearText), author, readers);
 
-    public override object AsJson {
-        get {
-            _encrypted.Version = Version;
-            return _encrypted.AsJson;
-        }
-    }
-
     public CipherAlgorithm Cipher => _encrypted.Cipher;
     public byte[] CipherText => _encrypted.CipherText;
+    [JsonIgnore]
     public override string Formatted => $"Encrypted using {Cipher} with {CipherText.Length} bytes";
     public IEnumerable<TagReadingKey> ReadingKeys => _encrypted.ReadingKeys;
     public override string TypeName => nameof(EncryptedText);

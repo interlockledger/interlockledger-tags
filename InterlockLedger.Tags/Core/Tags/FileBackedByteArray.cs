@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public class FileBackedByteArray : FileBackedILTag<object>
+public class FileBackedByteArray : FileBackedILTag<object?>
 {
     public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
 
@@ -40,9 +40,5 @@ public class FileBackedByteArray : FileBackedILTag<object>
 
     public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
 
-    protected override object ValueFromStream(StreamSpan s) => default!;
-    public override bool ValueIs<TV>(out TV value) {
-        value = default!;
-        return false;
-    }
+    protected override object? ValueFromStream(StreamSpan s) => null;
 }

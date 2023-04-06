@@ -35,7 +35,7 @@ using System.Diagnostics;
 namespace InterlockLedger.Tags;
 
 [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-public abstract class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
+public abstract class FileBackedILTag<T> : ILTagOfExplicit<T>
 {
     public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : base(tagId, default!) {
         _fileInfo = fileInfo.Required();
@@ -49,8 +49,6 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
         else if (length > 0)
             throw new InvalidOperationException($"File {fileInfo.FullName} does not exist");
     }
-
-    public override object? AsJson => null;
 
     public FileInfo FileInfo => _fileInfo ?? throw new InvalidOperationException($"This instance of {TagTypeName} has not been set with a backing file");
 
@@ -89,6 +87,13 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T> where T : notnull
         using var streamSlice = new StreamSpan(fileStream, Offset, Length);
         streamSlice.CopyTo(s, _bufferLength);
         return Task.FromResult(s);
+    }
+
+    protected sealed async override Task<Stream> SerializeInnerAsync(Stream s) {
+        s.ILIntEncode(ValueLength);
+        if (ValueLength > 0)
+            await ValueToStreamAsync(s);
+        return s;
     }
 
     private const int _bufferLength = 16 * 1024;

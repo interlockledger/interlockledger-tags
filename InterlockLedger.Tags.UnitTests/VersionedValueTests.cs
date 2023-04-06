@@ -66,7 +66,6 @@ public class VersionedValueTests
 
         public VersionedValueForTests(string userMessage) : base(27, 1) => UserMessage = userMessage;
 
-        public override object AsJson { get; }
         public override string Formatted => UserMessage;
         public override string TypeName => nameof(VersionedValueForTests);
         public string UserMessage { get; private set; }

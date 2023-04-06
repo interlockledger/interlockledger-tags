@@ -39,7 +39,6 @@ public class Payload<T> : ILTagExplicit<T>, IVersion, INamed where T : IRecordDa
     public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
     }
 
-    public override object AsJson => Value.AsJson;
     public string TypeName => typeof(T).Name;
     public ushort Version => Value.Version;
 

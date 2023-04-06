@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<InterlockKey>, IBaseKey
+public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<InterlockKey>, IBaseKey
 {
     public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions>? permissions, KeyStrength? strength = null, string? description = null)
         : this(new Parts(purposes,
@@ -52,17 +52,15 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             key.Permissions)) {
     }
 
-    [JsonIgnore]
-    public override object AsJson => Value;
-    public string? Description => Value.Description;
-    public BaseKeyId Id => Value.Id;
-    public BaseKeyId Identity => Value.Identity;
-    public string Name => Value.Name;
-    public IEnumerable<AppPermissions> Permissions => Value.Permissions;
-    public TagPubKey PublicKey => Value.PublicKey;
-    public KeyPurpose[] Purposes => Value.Purposes;
-    public KeyStrength Strength => Value.Strength;
-    public ushort Version => Value.Version;
+    public string? Description => Value!.Description;
+    public BaseKeyId Id => Value!.Id;
+    public BaseKeyId Identity => Value!.Identity;
+    public string Name => Value!.Name;
+    public IEnumerable<AppPermissions> Permissions => Value!.Permissions;
+    public TagPubKey PublicKey => Value!.PublicKey;
+    public KeyPurpose[] Purposes => Value!.Purposes;
+    public KeyStrength Strength => Value!.Strength;
+    public ushort Version => Value!.Version;
 
     public void Dispose() {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -74,9 +72,9 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
 
     public bool Matches(BaseKeyId senderId, TagPubKey publicKey) => Id == senderId && PublicKey.Equals(publicKey);
 
-    public string ToShortString() => Value.ToShortString();
+    public string ToShortString() => Value!.ToShortString();
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Value!.ToString();
 
     public class Parts
     {
@@ -177,28 +175,26 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
         }
     }
 
-    protected override Parts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => {
-            var version = s.DecodeUShort();
-            var result = new Parts {
-                Version = version,                                // Field index 0 //
-                Name = s.DecodeString().Required(),                          // Field index 1 //
-                PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
-                Id = InterlockId.Resolve<BaseKeyId>(s),           // Field index 3 //
-                Identity = InterlockId.Resolve<BaseKeyId>(s),     // Field index 4 //
-                Description = s.DecodeString(),                   // Field index 5 //
-                PublicKey = s.Decode<TagPubKey>().Required(),     // Field index 6 //
-                FirstAppId = version > 0 ? s.DecodeILInt() : 0,   // Field index 7  - since version 1 //
-                Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
-                FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
-            };
-            if (version > 3)
-                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value).Distinct().ToArray();
-            return result;
-        });
-
-    protected override byte[] ToBytes(Parts value)
-        => TagHelpers.ToBytesHelper(s => {
+    protected override Parts? ValueFromStream(StreamSpan s) {
+        var version = s.DecodeUShort();
+        var result = new Parts {
+            Version = version,                                // Field index 0 //
+            Name = s.DecodeString().Required(),               // Field index 1 //
+            PurposesAsUlongs = s.DecodeILIntArray(),          // Field index 2 //
+            Id = InterlockId.Resolve<BaseKeyId>(s),           // Field index 3 //
+            Identity = InterlockId.Resolve<BaseKeyId>(s),     // Field index 4 //
+            Description = s.DecodeString(),                   // Field index 5 //
+            PublicKey = s.Decode<TagPubKey>().Required(),     // Field index 6 //
+            FirstAppId = version > 0 ? s.DecodeILInt() : 0,   // Field index 7  - since version 1 //
+            Strength = version > 1 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 8 - since version 2 //
+            FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
+        };
+        if (version > 3)
+            result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value).Distinct().ToArray();
+        return result;
+    }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        if (Value is not null) {
             s.EncodeUShort(Value.Version);              // Field index 0 //
             s.EncodeString(Value.Name);                 // Field index 1 //
             s.EncodeILIntArray(Value.PurposesAsUlongs); // Field index 2 //
@@ -207,20 +203,15 @@ public class InterlockKey : ILTagExplicit<InterlockKey.Parts>, IEquatable<Interl
             s.EncodeString(Value.Description);          // Field index 5 //
             s.EncodeTag(Value.PublicKey);               // Field index 6 //
             s.EncodeILInt(Value.FirstAppId);            // Field index 7 //
-            s.EncodeILInt((ulong)value.Strength);       // Field index 8 //
+            s.EncodeILInt((ulong)Value.Strength);       // Field index 8 //
             s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
             s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
-        });
+        }
+        return Task.FromResult(s);
+    }
 
     private bool _disposedValue;
 
     private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {
     }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~InterlockKey()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
 }

@@ -31,26 +31,20 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
+public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]?>
 {
-    public ILTagArrayOfILInt(ulong[]? Value) : base(ILTagId.ILIntArray, Value ?? Array.Empty<ulong>()) {
+    public ILTagArrayOfILInt(ulong[]? value) : base(ILTagId.ILIntArray, value) {
     }
 
-    public ulong this[int i] => Value[i];
+    public ulong this[int i] => Value?[i] ?? 0ul;
 
     internal ILTagArrayOfILInt(Stream s) : base(ILTagId.ILIntArray, s) {
     }
     internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
-    protected override bool AreEquivalent(ILTagOf<ulong[]> other) => Value.EquivalentTo(other.Value);
-
-    protected override ulong[] FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s =>
-            s.Length switch {
-                > 0 => DecodeArray(s),
-                _ => Array.Empty<ulong>(),
-            });
-
-    private static ulong[] DecodeArray(Stream s) {
+    protected override bool AreEquivalent(ILTagOf<ulong[]?> other) => Value.EquivalentTo(other?.Value!);
+    protected override ulong[]? ValueFromStream(StreamSpan s) {
+        if (s.Length <= s.Position)
+            return null;
         var length = (int)s.ILIntDecode();
         var result = new ulong[length];
         for (var i = 0; i < length; i++) {
@@ -58,15 +52,17 @@ public class ILTagArrayOfILInt : ILTagExplicit<ulong[]>
         }
         return result;
     }
-
-    protected override byte[] ToBytes(ulong[] value)
-        => TagHelpers.ToBytesHelper(s => {
-            s.ILIntEncode((ulong)value.Length);
-            if (value.Length > 0) {
-                foreach (var ilint in value)
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        if (Value is not null) {
+            s.ILIntEncode((ulong)Value.Length);
+            if (Value.Length > 0) {
+                foreach (var ilint in Value)
                     s.ILIntEncode(ilint);
             }
-        });
+        } else
+            s.ILIntEncode(0ul);
+        return Task.FromResult(s);
+    }
 
     private static ulong[] Elicit(object? opaqueValue)
         => opaqueValue switch {

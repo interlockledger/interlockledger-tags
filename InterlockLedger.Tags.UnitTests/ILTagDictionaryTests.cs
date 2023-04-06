@@ -65,7 +65,6 @@ public class ILTagDictionaryTests
     }
 
     [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Deserialize_One_String_Dictionary_with_two_strings")]
-    [TestCase(new string[] { "D", "E" }, new string[] { "Demo", "" }, new byte[] { 31, 15, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 17, 0 }, TestName = "Deserialize_One_String_Dictionary_with_one_string_and_one_empty_string")]
     [TestCase(new string[] { "F", "G" }, new string[] { "Demo", null }, new byte[] { 31, 14, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 0 }, TestName = "Deserialize_One_String_Dictionary_with_one_string_and_a_null")]
     public void DeserializeILTagStringDictionary(string[] keys, string[] values, byte[] encodedBytes) {
         using var ms = new MemoryStream(encodedBytes);
@@ -80,7 +79,6 @@ public class ILTagDictionaryTests
 
     [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_two_strings")]
     [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_one_string_and_a_null")]
-    [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_one_non_empty_string_and_one_empty_string")]
     public void GuaranteeBijectiveBehaviorForStringTest(string[] keys, string[] values)
         => GuaranteeBijectiveBehaviorForString(BuildStringDictionary(keys, values));
 
@@ -95,23 +93,39 @@ public class ILTagDictionaryTests
     [Test]
     public void JsonSerializationDictionary() {
         var dict = new ILTagDictionary<ILTag>(("Key1", ILTagBool.False), ("Key2", new ILTagString("Value2")));
-        var jsonModel = dict.AsJson;
-        var json = JsonSerializer.Serialize(jsonModel, JsonOptions);
+        var json = JsonSerializer.Serialize(dict, JsonOptions);
         TestContext.WriteLine(json);
-        var parsedJson = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-        var backDict = TagProvider.DeserializeFromJson(ILTagId.Dictionary, parsedJson);
-        Assert.That(dict, Is.EqualTo(backDict));
+        Assert.That(json.RegexReplace("\r\n","\n"), Is.EqualTo("""
+            {
+              "Content": {
+                "Key1": {
+                  "TagId": 1,
+                  "Content": false
+                },
+                "Key2": {
+                  "TagId": 17,
+                  "Content": "Value2"
+                }
+              },
+              "TagId": 30
+            }
+            """));
     }
 
     [Test]
     public void JsonSerializationStringDictionary() {
         var dict = new ILTagStringDictionary(("Key1", "Value1"), ("Key2", "Value2"));
-        var jsonModel = dict.AsJson;
-        var json = JsonSerializer.Serialize(jsonModel, JsonOptions);
+        var json = JsonSerializer.Serialize(dict, JsonOptions);
         TestContext.WriteLine(json);
-        var parsedJson = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-        var backDict = TagProvider.DeserializeFromJson(ILTagId.StringDictionary, parsedJson);
-        Assert.That(dict, Is.EqualTo(backDict));
+        Assert.That(json.RegexReplace("\r\n", "\n"), Is.EqualTo("""
+            {
+              "Content": {
+                "Key1": "Value1",
+                "Key2": "Value2"
+              },
+              "TagId": 31
+            }
+            """));
     }
 
     [TestCase(new string[0], null, new byte[0], ExpectedResult = new byte[] { 30, 0 }, TestName = "Serialize_a_Null_Dictionary")]
@@ -179,10 +193,11 @@ public class ILTagDictionaryTests
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key];
                 var valueValue = value[key];
-                Assert.Multiple(() => {
-                    Assert.That(valueValue.TagId, Is.EqualTo(dictValue.TagId));
-                    Assert.That(valueValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes));
-                });
+                if (valueValue is not null)
+                    Assert.Multiple(() => {
+                        Assert.That(valueValue.TagId, Is.EqualTo(dictValue.TagId));
+                        Assert.That(valueValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes));
+                    });
             }
         }
     }

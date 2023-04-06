@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-
 namespace InterlockLedger.Tags;
 
 [SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>", Justification = "Implemented sealed in base class")]

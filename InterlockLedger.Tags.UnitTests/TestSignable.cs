@@ -41,7 +41,6 @@ internal class TestSignable : Signable<TestSignable>
 
     public TestSignable(ulong someILInt) : base(FieldTagId, CurrentVersion) => SomeILInt = someILInt;
 
-    public override object AsJson => new { TagId, Version, SomeILInt };
     public override string Formatted => throw new NotImplementedException();
     public ulong SomeILInt { get; private set; }
     public override string TypeName => nameof(TestSignable);

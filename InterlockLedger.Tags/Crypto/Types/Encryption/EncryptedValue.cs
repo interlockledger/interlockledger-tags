@@ -50,7 +50,6 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
         Cipher = cipher;
     }
 
-    public object AsJson => new { TagId, Version, Cipher, CipherText, ReadingKeys = ReadingKeys.AsJsonArray() };
     public CipherAlgorithm Cipher { get; private set; }
     public byte[] CipherText { get; private set; }
     public IEnumerable<TagReadingKey> ReadingKeys { get; private set; }

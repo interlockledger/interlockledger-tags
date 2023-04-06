@@ -46,14 +46,14 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
          new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public TagHash(HashAlgorithm algorithm, byte[] data) : this(new Parts { Algorithm = algorithm, Data = data }) { }
 
-    public HashAlgorithm Algorithm => Value.Algorithm;
-    public override object AsJson => TextualRepresentation;
-    public byte[] Data => Value.Data;
+    public HashAlgorithm Algorithm => Value!.Algorithm;
+    public byte[] Data => Value!.Data;
     public bool IsEmpty => Data.EqualTo(Empty.Data);
     public string? InvalidityCause { get; private init; }
     public ITextual<TagHash> Textual => this;
     public bool Equals(TagHash? other) => base.Equals(other);
-    protected override bool AreEquivalent(ILTagOf<Parts> other) => Algorithm == other.Value.Algorithm && DataEquals(other.Value.Data);
+    protected override bool AreEquivalent(ILTagOf<Parts?> other) =>
+        other.Value is not null && Algorithm == other.Value.Algorithm && DataEquals(other.Value.Data);
     public override string ToString() => Textual.FullRepresentation;
     public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
     public static Regex Mask { get; } = AnythingRegex();

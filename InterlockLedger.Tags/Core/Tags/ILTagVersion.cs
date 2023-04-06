@@ -38,7 +38,6 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
 {
 
     public ILTagVersion(Version version) : base(ILTagId.Version, version) => TextualRepresentation = version.Required().ToString();
-    public override object AsJson => TextualRepresentation;
     public bool IsEmpty { get; private init; }
     public static ILTagVersion Empty { get; } = new() { TextualRepresentation = string.Empty, IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
