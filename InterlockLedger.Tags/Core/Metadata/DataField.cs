@@ -134,7 +134,7 @@ public sealed partial class DataField : IEquatable<DataField>
             : AsNumericTag(TagId, Parse(value));
 
         ulong Parse(string value) {
-            return !EnumerationAsFlags ? FindKey(value) : SplitAndParse(value);
+            return !EnumerationAsFlags ? FindKey(value.Trim()) : SplitAndParse(value);
 
             ulong FindKey(string value) {
                 try {
@@ -148,12 +148,13 @@ public sealed partial class DataField : IEquatable<DataField>
 
             ulong SplitAndParse(string value) {
                 ulong numericValue = 0;
-                foreach (var partValue in value.Split('|', ','))
-                    numericValue |= FindKey(partValue);
+                foreach (var partValue in value.Split(_separators, StringSplitOptions.TrimEntries))
+                    numericValue |= FindKey(partValue.Trim());
                 return numericValue;
             }
         }
     }
+    private static readonly char[] _separators = new char[] { '|', ',' };
 
     public string EnumerationToString(ILTag value) => EnumerationToString(AsNumber(value));
 
@@ -176,7 +177,7 @@ public sealed partial class DataField : IEquatable<DataField>
                 }
             if (number > 0)
                 names.Add($"?{number}");
-            return names.JoinedBy("|");
+            return names.JoinedBy(", ");
         }
     }
 

@@ -94,8 +94,8 @@ public class DataFieldTests
                 Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(value), Is.EqualTo(_dataFieldWithFlagsEnumeration.EnumerationDefinition[value].Name));
             Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(7), Is.EqualTo(AllFlags()));
             Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(8), Is.EqualTo("?8"));
-            Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(15), Is.EqualTo(AllFlags() + "|?8"));
-            Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(47), Is.EqualTo(AllFlags() + "|?40"));
+            Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(15), Is.EqualTo(AllFlags() + ", ?8"));
+            Assert.That(_dataFieldWithFlagsEnumeration.EnumerationToString(47), Is.EqualTo(AllFlags() + ", ?40"));
         });
 
     [Test]
@@ -147,7 +147,7 @@ public class DataFieldTests
     private static string AllFlags(bool reversed = false) => _dataFieldWithFlagsEnumeration.EnumerationDefinition
         .OrderBy(kp => reversed ? Reverse(kp.Key) : kp.Key)
         .Select(i => i.Value.Name)
-        .JoinedBy("|");
+        .JoinedBy(", ");
 
     private static ulong? EnumFromStringAsNumber(DataField datafield, string text) => (datafield.EnumerationFromString(text) as ILTagILInt)?.Value;
 

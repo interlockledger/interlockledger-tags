@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -265,7 +267,8 @@ public class DataModelJsonTests
     private static readonly JsonSerializerOptions _options = new() {
         WriteIndented = true,
         PropertyNamingPolicy = null,
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
@@ -281,7 +284,7 @@ public class DataModelJsonTests
     private static void ToFromBaseTest(ILTag data, Func<string, string> adjustExpected = null) {
         var encodedBytes = data.EncodedBytes;
         var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
-        var expected = JsonSerializer.Serialize(data, _options);
+        var expected = JsonSerializer.Serialize(data.Content, _options);
         if (adjustExpected is not null)
             expected = adjustExpected(expected);
         var actual = JsonSerializer.Serialize(modelJson, _options);
@@ -353,11 +356,11 @@ public class DataModelJsonTests
                         SubDataFields = new DataField[] {
                             new DataField {
                                 TagId = ILTagId.ILInt,
-                                Name = nameof(Reference.Id)
+                                Name = nameof(Reference.Data.Id)
                             },
                             new DataField {
                                 TagId = ILTagId.String,
-                                Name = nameof(Reference.Name)
+                                Name = nameof(Reference.Data.Name)
                             },
                        }
                     },
@@ -385,24 +388,19 @@ public class DataModelJsonTests
                     }
                 }
         };
+        private readonly string? _hidden;
+        private readonly Reference? _fancy;
 
-        public byte[] Bytes;
-
-        public SomeEnumeration Enumeration;
-
-        public Reference Fancy;
-
-        public string Hidden;
-
-        public ulong Id;
-
-        public string Name;
-
-        public LimitedRange[] Ranges;
-
-        public Version SemanticVersion;
-
-        public ulong[] Values;
+        public ushort Version { get; }
+        public ulong Id { get; }
+        public string? Name { get; }
+        public string? Hidden => Version > 0 ? _hidden : null;
+        public Version? SemanticVersion { get; }
+        public ulong[]? Values { get; }
+        public Reference.Data? Fancy => _fancy?.Value;
+        public LimitedRange[]? Ranges { get; }
+        public byte[]? Bytes { get; }
+        public SomeEnumeration? Enumeration { get; }
 
         public JsonTestTaggedData() => AsPayload = new Payload<JsonTestTaggedData>(PayloadTagId, this);
 
@@ -410,14 +408,33 @@ public class DataModelJsonTests
             Version = version;
             Id = id;
             Name = name.Required();
-            Hidden = hidden.Required();
-            SemanticVersion = new Version(1, 0, 1, 33);
+            _hidden = hidden.Required();
+            SemanticVersion = version <= 1 ? null : new Version(1, 0, 1, 33);
+            Values = version <= 2 ? null : values;
+            _fancy = version <= 3 ? null : new Reference(id * 10, "Fancy " + name);
+            Ranges = version <= 4 ? null : new LimitedRange[] { new LimitedRange(10, 5), new LimitedRange(21, 13) };
+            Bytes = version <= 5 ? null : Values!.Select(u => (byte)u).ToArray();
+            Enumeration = version <= 6 ? null : some;
             AsPayload = new Payload<JsonTestTaggedData>(PayloadTagId, this);
-            Values = values;
-            Fancy = new Reference(id * 10, "Fancy " + name);
-            Ranges = new LimitedRange[] { new LimitedRange(10, 5), new LimitedRange(21, 13) };
-            Bytes = Values.Select(u => (byte)u).ToArray();
-            Enumeration = some;
+        }
+
+        public void ToStream(Stream s) {
+            s.EncodeUShort(Version);                 // Field index 0 //
+            s.EncodeILInt(Id);                       // Field index 1 //
+            s.EncodeString(Name);                    // Field index 2 //
+            s.EncodeString(_hidden);                 // Field index 3 //
+            if (Version > 1)
+                s.EncodeVersion(SemanticVersion!);    // Field index 4 - from version 2 //
+            if (Version > 2)
+                s.EncodeILIntArray(Values);
+            if (Version > 3)
+                _ = _fancy!.SerializeIntoAsync(s).Result;
+            if (Version > 4)
+                s.EncodeTagArray(Ranges!.Select(r => new ILTagRange(r)));
+            if (Version > 5)
+                s.EncodeByteArray(Bytes);
+            if (Version > 6)
+                s.EncodeByte((byte)Enumeration!);
         }
 
         [JsonIgnore]
@@ -436,28 +453,8 @@ public class DataModelJsonTests
         [JsonIgnore]
         public Payload<JsonTestTaggedData> AsPayload { get; }
 
-        public ushort Version { get; }
 
         public JsonTestTaggedData FromStream(Stream s) => throw new NotImplementedException();
-
-        public void ToStream(Stream s) {
-            s.EncodeUShort(Version);                 // Field index 0 //
-            s.EncodeILInt(Id);                       // Field index 1 //
-            s.EncodeString(Name);                    // Field index 2 //
-            s.EncodeString(Hidden);                  // Field index 3 //
-            if (Version > 1)
-                s.EncodeVersion(SemanticVersion);    // Field index 4 - from version 2 //
-            if (Version > 2)
-                s.EncodeILIntArray(Values);
-            if (Version > 3)
-                _ = Fancy.SerializeIntoAsync(s).Result;
-            if (Version > 4)
-                s.EncodeTagArray(Ranges.Select(r => new ILTagRange(r)));
-            if (Version > 5)
-                s.EncodeByteArray(Bytes);
-            if (Version > 6)
-                s.EncodeByte((byte)Enumeration);
-        }
 
         public class Reference : ILTagExplicit<Reference.Data>
         {
@@ -466,28 +463,24 @@ public class DataModelJsonTests
 
             public Reference(Stream s) : base(DataTagId, s) {
             }
-
-            public ulong Id => Value.Id;
-            public string Name => Value.Name;
-
             public class Data
             {
                 public Data(ulong id, string name) {
                     Id = id;
-                    Name = name;
+                    Name = name.Required();
                 }
 
                 public ulong Id { get; set; }
                 public string Name { get; set; }
             }
 
-            protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()));
+            protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()!));
 
             protected override byte[] ToBytes(Data value)
-                => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value.Id).EncodeString(Value.Name));
+                => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value!.Id).EncodeString(Value.Name));
         }
 
-        private ILTagArrayOfILTag<ILTagRange> _taggedRanges => new(Ranges.Select(r => new ILTagRange(r)));
+        private ILTagArrayOfILTag<ILTagRange>? _taggedRanges => Ranges is not null ? new(Ranges.Select(r => new ILTagRange(r))) : null;
 
         private object AsJsonV0() => new { Version, Id, Name };
 
@@ -497,12 +490,12 @@ public class DataModelJsonTests
 
         private object AsJsonV3() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values };
 
-        private object AsJsonV4() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value };
+        private object AsJsonV4() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy };
 
-        private object AsJsonV5() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges };
+        private object AsJsonV5() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy, Ranges = _taggedRanges };
 
-        private object AsJsonV6() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges, Bytes };
+        private object AsJsonV6() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy, Ranges = _taggedRanges, Bytes };
 
-        private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy = Fancy.Value, Ranges = _taggedRanges, Bytes, Enumeration = Model.DataFields.Last().EnumerationToString((ulong)Enumeration) };
+        private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy, Ranges = _taggedRanges, Bytes, Enumeration };
     }
 }
