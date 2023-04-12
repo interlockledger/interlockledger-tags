@@ -47,9 +47,7 @@ public class ILTagStringDictionary : ILTagAbstractDictionary<string>
 
     protected override string? DecodeValue(Stream s) => s.Decode<ILTagString>()?.Value;
 
-    protected override void EncodeValue(Stream s, string? value) {
-        if (value is null) s.EncodeNull(); else s.EncodeString(value);
-    }
+    protected override void EncodeValue(Stream s, string? value) => s.EncodeString(value);
 
     private static Dictionary<string, string?> Elicit(object opaqueValue)
         => (opaqueValue as Dictionary<string, string?>) ?? new Dictionary<string, string?>();

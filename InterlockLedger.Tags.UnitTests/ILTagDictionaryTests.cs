@@ -138,7 +138,7 @@ public class ILTagDictionaryTests
         => new ILTagDictionary<ILTagByteArray>(BuildDictionary(keys, bytes, splits)).EncodedBytes;
 
     [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, ExpectedResult = new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Serialize_One_String_Dictionary_with_two_strings")]
-    [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, ExpectedResult = new byte[] { 31, 14, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_string_and_a_null")]
+    [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 17, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_string_and_a_null")]
     [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 17, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_non_empty_string_and_one_empty_string")]
     public byte[] SerializeILTagStringDictionary(string[] keys, string[] values)
         => new ILTagStringDictionary(BuildStringDictionary(keys, values)).EncodedBytes;
