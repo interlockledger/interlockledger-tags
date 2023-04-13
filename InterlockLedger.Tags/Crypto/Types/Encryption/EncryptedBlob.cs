@@ -57,8 +57,6 @@ public class EncryptedBlob : VersionedValue<EncryptedBlob>
 
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => _encrypted.DecryptRaw(reader, findEngine);
 
-    public override EncryptedBlob FromJson(object json) => new(_encrypted.FromJson(json));
-
     protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
     protected override string TypeDescription => "An array of bytes encrypted for some readers";
 

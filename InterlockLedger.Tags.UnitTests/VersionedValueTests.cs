@@ -70,8 +70,6 @@ public class VersionedValueTests
         public override string TypeName => nameof(VersionedValueForTests);
         public string UserMessage { get; private set; }
 
-        public override VersionedValueForTests FromJson(object json) => throw new NotImplementedException();
-
         protected override IEnumerable<DataField> RemainingStateFields { get; }
         protected override string TypeDescription { get; }
 

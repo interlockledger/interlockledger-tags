@@ -55,8 +55,6 @@ public class EncryptedText : VersionedValue<EncryptedText>
 
     public string DecryptText(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) => Decrypt(reader, findEngine).Value;
 
-    public override EncryptedText FromJson(object json) => new(_encrypted.FromJson(json));
-
     protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
 
     protected override string TypeDescription => "A text encrypted for some readers";

@@ -87,10 +87,6 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
 
     public void EncodeRemainingStateTo(Stream s) => s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);
 
-    public EncryptedValue<T> FromJson(object o) => new(TagId) {
-        Cipher = CipherAlgorithm.AES256, // TODO deserialize from o
-    };
-
     private static TagReadingKey BuildReadingKey(byte[] symmetricKey, byte[] IV, string id, TagPubKey publicKey)
         => new(id, publicKey.Hash, publicKey.Encrypt(symmetricKey), publicKey.Encrypt(IV));
 

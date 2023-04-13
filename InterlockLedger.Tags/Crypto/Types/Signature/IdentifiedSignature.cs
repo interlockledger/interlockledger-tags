@@ -54,8 +54,6 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     public BaseKeyId SignerId { get; set; }
     public override string TypeName => nameof(IdentifiedSignature);
 
-    public override IdentifiedSignature FromJson(object json) => throw new NotSupportedException();
-
     public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
 
     protected override IEnumerable<DataField> RemainingStateFields => _remainingDataFields;

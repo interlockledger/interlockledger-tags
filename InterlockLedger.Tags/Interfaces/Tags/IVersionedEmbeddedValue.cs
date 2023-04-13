@@ -41,6 +41,4 @@ public interface IVersionedEmbeddedValue<T> where T : IVersionedEmbeddedValue<T>
     void DecodeRemainingStateFrom(Stream s);
 
     void EncodeRemainingStateTo(Stream s);
-
-    T FromJson(object o);
 }

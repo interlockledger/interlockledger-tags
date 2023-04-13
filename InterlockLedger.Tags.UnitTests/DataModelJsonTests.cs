@@ -281,7 +281,7 @@ public class DataModelJsonTests
         Assert.That(encodedBytes, Is.EqualTo(expectedBytes));
     }
 
-    private static void ToFromBaseTest(ILTag data, Func<string, string> adjustExpected = null) {
+    private static void ToFromBaseTest(ILTag data, Func<string, string>? adjustExpected = null) {
         var encodedBytes = data.EncodedBytes;
         var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
         var expected = JsonSerializer.Serialize(data.Content, _options);
@@ -301,7 +301,7 @@ public class DataModelJsonTests
         TestContext.WriteLine("===== Back EncodedBytes");
         TestContext.WriteLine(backFromEncodedBytes.WithCommas());
         Assert.That(backFromEncodedBytes, Is.EqualTo(encodedBytes), "Bytes back from modelJson did not match");
-        var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object>>(actual));
+        var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object?>>(actual));
         Assert.That(parsedFrom, Is.InstanceOf<ILTag>());
         byte[] parsedFromEncodedBytes = parsedFrom.EncodedBytes;
         TestContext.WriteLine("===== Parsed EncodedBytes");

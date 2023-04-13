@@ -54,8 +54,6 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 
     public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
 
-    public override SignedValue<T> FromJson(object json) => throw new NotSupportedException();
-
     public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey)
         => SignedContent is not null
         && Signatures.Safe().Any(sig => sig.SignerId == validSigner

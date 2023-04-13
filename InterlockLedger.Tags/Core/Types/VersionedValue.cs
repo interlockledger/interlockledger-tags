@@ -76,8 +76,6 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
 
     public void Changed() => _payload?.Changed();
 
-    public abstract T FromJson(object json);
-
     public T FromUnknown(ILTagUnknown unknown) {
         if (unknown.Required().TagId != TagId)
             throw new InvalidCastException($"Wrong tagId! Expecting {TagId} but came {unknown.TagId}");
@@ -91,7 +89,7 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
 
     public bool RegisterAsField(ITagRegistrar registrar)
         => registrar.Required()
-            .RegisterILTag(TagId, s => new Payload(TagId, s), o => new T().FromJson(o).AsPayload);
+            .RegisterILTag(TagId, s => new Payload(TagId, s), TagProvider.NoJson);
 
     public sealed class Payload : ILTagOfExplicit<T>, IVersion, INamed
     {
