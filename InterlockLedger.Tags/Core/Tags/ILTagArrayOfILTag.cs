@@ -34,6 +34,7 @@ namespace InterlockLedger.Tags;
 
 public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]?> where T : ILTag
 {
+    public ILTagArrayOfILTag(T?[]? value) : this(ILTagId.ILTagArray, value) { }
     public ILTagArrayOfILTag(IEnumerable<T?> value) : this(ILTagId.ILTagArray, value?.ToArray()) { }
     public T? this[int i] => Value?[i];
     [JsonIgnore]
