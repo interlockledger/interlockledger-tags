@@ -36,7 +36,7 @@ public class ILTagStringDictionary : ILTagAbstractDictionary<string>
     public ILTagStringDictionary(params (string key, string? value)[] pairs) : this(pairs.ToDictionary(p => p.key, pp => pp.value)) {
     }
 
-    public ILTagStringDictionary(Dictionary<string, string?> value) : base(ILTagId.StringDictionary, value) {
+    public ILTagStringDictionary(Dictionary<string, string?>? value) : base(ILTagId.StringDictionary, value) {
     }
 
     public ILTagStringDictionary(object opaqueValue) : this(Elicit(opaqueValue)) {

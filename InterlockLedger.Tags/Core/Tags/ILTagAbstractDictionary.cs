@@ -31,20 +31,28 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<string, T?>> where T : class
+public abstract class ILTagAbstractDictionary<T> : ILTagOfExplicit<Dictionary<string, T?>?> where T : class
 {
-    public T? this[string key] => Value[key];
+    public T? this[string key] => Value?[key];
 
     protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T?> value) : base(tagId, value) {
     }
 
     protected ILTagAbstractDictionary(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
     }
-    protected override bool AreEquivalent(ILTagOf<Dictionary<string, T?>> other) {
-        foreach (var kp in Value) {
-            var otherValue = other.Value[kp.Key];
-            var value = kp.Value;
-            if ((value is not null && !value.Equals(otherValue)) || (value is null && otherValue is not null))
+    protected override bool AreEquivalent(ILTagOf<Dictionary<string, T?>?> other) {
+        if (other is null)
+            return false;
+        var dict = Value;
+        if (dict is null)
+            return other.Value.None();
+        var otherDict = other.Value.Required();
+        foreach (var pair in dict) {
+            if (otherDict.TryGetValue(pair.Key, out var otherValue)) {
+                var value = pair.Value;
+                if ((value is not null && !value.Equals(otherValue)) || (value is null && otherValue is not null))
+                    return false;
+            } else
                 return false;
         }
         return true;
@@ -54,27 +62,25 @@ public abstract class ILTagAbstractDictionary<T> : ILTagExplicit<Dictionary<stri
 
     protected abstract void EncodeValue(Stream s, T? value);
 
-    protected override Dictionary<string, T?> FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes, s => {
-            var result = new Dictionary<string, T?>();
-            if (bytes.Length == 0)
-                return result;
-            var length = (int)s.ILIntDecode();
-            for (var i = 0; i < length; i++) {
-                result[s.DecodeString()!] = DecodeValue(s);
-            }
-            return result;
-        });
-
-    protected override byte[] ToBytes(Dictionary<string, T?> value)
-        => TagHelpers.ToBytesHelper(s => {
-            if (value is not null) {
-                s.ILIntEncode((ulong)value.Count);
-                if (value.Count > 0)
-                    foreach (var pair in value) {
-                        s.EncodeString(pair.Key);
-                        EncodeValue(s, pair.Value);
-                    }
-            }
-        });
+    protected override Dictionary<string, T?>? ValueFromStream(StreamSpan s) {
+        if (s.Length == 0)
+            return null;
+        var result = new Dictionary<string, T?>();
+        var length = (int)s.ILIntDecode();
+        for (var i = 0; i < length; i++) {
+            result[s.DecodeString()!] = DecodeValue(s);
+        }
+        return result;
+    }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        if (Value is not null) {
+            s.ILIntEncode((ulong)Value.Count);
+            if (Value.Count > 0)
+                foreach (var pair in Value) {
+                    s.EncodeString(pair.Key);
+                    EncodeValue(s, pair.Value);
+                }
+        }
+        return Task.FromResult(s);
+    }
 }

@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
 using System.Text.Json;
 
 namespace InterlockLedger.Tags;
@@ -38,6 +40,7 @@ public class ILTagDictionaryTests
 {
     public static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
+    [TestCase(null, null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize_a_Null_Dictionary")]
     [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize_an_Empty_Dictionary")]
     [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize_One_Dictionary_with_Zero_Bytes")]
     [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Dictionary_with_Four_Bytes")]
@@ -50,6 +53,7 @@ public class ILTagDictionaryTests
         CompareDicts<ILTagByteArray, byte[]>(dict, value);
     }
 
+    [TestCase(new string[0], null, new byte[0], new byte[] { 30, 0 }, TestName = "Deserialize_a_Null_Dictionary_Generic")]
     [TestCase(new string[0], new byte[0], new byte[0], new byte[] { 30, 1, 0 }, TestName = "Deserialize_an_Empty_Dictionary_Generic")]
     [TestCase(new string[] { "@" }, new byte[0], new byte[] { 0 }, new byte[] { 30, 6, 1, 17, 1, 64, 16, 0 }, TestName = "Deserialize_One_Dictionary_with_Zero_Bytes_Generic")]
     [TestCase(new string[] { "A" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 4 }, new byte[] { 30, 10, 1, 17, 1, 65, 16, 4, 1, 2, 3, 2 }, TestName = "Deserialize_One_Dictionary_with_Four_Bytes_Generic")]
@@ -74,6 +78,9 @@ public class ILTagDictionaryTests
     }
 
     [Test]
+    public void GuaranteeBijectiveBehaviorNullArray()
+        => GuaranteeBijectiveBehavior(null);
+    [Test]
     public void GuaranteeBijectiveBehaviorEmptyArray()
         => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool>());
 
@@ -95,7 +102,7 @@ public class ILTagDictionaryTests
         var dict = new ILTagDictionary<ILTag>(("Key1", ILTagBool.False), ("Key2", new ILTagString("Value2")));
         var json = JsonSerializer.Serialize(dict, JsonOptions);
         TestContext.WriteLine(json);
-        Assert.That(json.RegexReplace("\r\n","\n"), Is.EqualTo("""
+        Assert.That(json.RegexReplace("\r\n", "\n"), Is.EqualTo("""
             {
               "Content": {
                 "Key1": {
@@ -143,11 +150,11 @@ public class ILTagDictionaryTests
     public byte[] SerializeILTagStringDictionary(string[] keys, string[] values)
         => new ILTagStringDictionary(BuildStringDictionary(keys, values)).EncodedBytes;
 
-    private static Dictionary<string, ILTagByteArray> BuildDictionary(string[] keys, byte[] bytes, byte[] splits) {
-        if (bytes == null)
+    private static Dictionary<string, ILTagByteArray?>? BuildDictionary(string[] keys, byte[] bytes, byte[] splits) {
+        if (keys is null || bytes is null)
             return null;
-        var dict = new Dictionary<string, ILTagByteArray>();
-        if ((splits?.Length ?? 0) > 0) {
+        var dict = new Dictionary<string, ILTagByteArray?>();
+        if (splits.Length > 0) {
             if (splits.Length != keys.Length)
                 throw new InvalidDataException("Non matching keys and splits arrays");
             var lastSplit = 0;
@@ -164,16 +171,18 @@ public class ILTagDictionaryTests
         return dict;
     }
 
-    private static Dictionary<string, string> BuildStringDictionary(string[] keys, string[] values) {
-        var dict = new Dictionary<string, string>();
+    private static Dictionary<string, string?>? BuildStringDictionary(string[] keys, string[] values) {
+        if (keys is null || values is null)
+            return null;
+        var dict = new Dictionary<string, string?>();
         for (int i = 0; i < keys.Length; i++) {
             dict.Add(keys[i], values[i]);
         }
         return dict;
     }
 
-    private static void CompareDicts<T, TT>(Dictionary<string, T> dict, Dictionary<string, T> value) where T : ILTagOf<TT> {
-        if (dict == null)
+    private static void CompareDicts<T, TT>(Dictionary<string, T>? dict, Dictionary<string, T>? value) where T : ILTagOf<TT> {
+        if (dict is null)
             Assert.That(value, Is.Null);
         else {
             Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
@@ -185,37 +194,39 @@ public class ILTagDictionaryTests
         }
     }
 
-    private static void CompareSimilarDicts<T, TT>(Dictionary<string, T> dict, Dictionary<string, TT> value) where T : ILTag where TT : ILTag {
-        if (dict == null)
-            Assert.That(value, Is.Null);
+    private static void CompareSimilarDicts<T, TT>(Dictionary<string, T?>? dict, Dictionary<string, TT?>? otherDict) where T : ILTag where TT : ILTag {
+        if (dict is null)
+            Assert.That(otherDict, Is.Null);
         else {
-            Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
+            Assert.That(otherDict.SafeCount(), Is.EqualTo(dict.SafeCount()));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key];
-                var valueValue = value[key];
-                if (valueValue is not null)
+                var otherDictValue = otherDict?[key];
+                if (dictValue is null)
+                    Assert.That(otherDictValue, Is.Null, nameof(otherDictValue));
+                else if (otherDictValue is not null)
                     Assert.Multiple(() => {
-                        Assert.That(valueValue.TagId, Is.EqualTo(dictValue.TagId));
-                        Assert.That(valueValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes));
+                        Assert.That(otherDictValue.TagId, Is.EqualTo(dictValue.TagId), nameof(otherDictValue.TagId));
+                        Assert.That(otherDictValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes), nameof(otherDictValue.EncodedBytes));
                     });
             }
         }
     }
 
-    private static void CompareStringDicts(Dictionary<string, string> dict, Dictionary<string, string> value) {
+    private static void CompareStringDicts(Dictionary<string, string?>? dict, Dictionary<string, string?>? value) {
         if (dict == null)
             Assert.That(value, Is.Null);
         else {
             Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key];
-                var valueValue = value[key];
+                var valueValue = value?[key];
                 Assert.That(valueValue, Is.EqualTo(dictValue));
             }
         }
     }
 
-    private static void GuaranteeBijectiveBehavior(Dictionary<string, ILTagBool> dict) {
+    private static void GuaranteeBijectiveBehavior(Dictionary<string, ILTagBool?>? dict) {
         var ilarray = new ILTagDictionary<ILTagBool>(dict);
         var encodedBytes = ilarray.EncodedBytes;
         using var ms = new MemoryStream(encodedBytes);
