@@ -181,15 +181,17 @@ public class ILTagDictionaryTests
         return dict;
     }
 
-    private static void CompareDicts<T, TT>(Dictionary<string, T>? dict, Dictionary<string, T>? value) where T : ILTagOf<TT> {
+    private static void CompareDicts<T, TT>(Dictionary<string, T>? dict, Dictionary<string, T>? otherDict)
+        where T : ILTagOf<TT?>{
         if (dict is null)
-            Assert.That(value, Is.Null);
+            Assert.That(otherDict, Is.Null);
         else {
-            Assert.That(value.SafeCount(), Is.EqualTo(dict.SafeCount()));
+            Assert.That(otherDict, Is.Not.Null);
+            Assert.That(otherDict.Count, Is.EqualTo(dict.Count));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key].Value;
-                var valueValue = value[key].Value;
-                Assert.That(valueValue, Is.EqualTo(dictValue));
+                var otherDictValue = otherDict[key].Value;
+                Assert.That(otherDictValue, Is.EqualTo(dictValue), nameof(otherDictValue));
             }
         }
     }

@@ -35,7 +35,7 @@ public abstract class ILTagAbstractDictionary<T> : ILTagOfExplicit<Dictionary<st
 {
     public T? this[string key] => Value?[key];
 
-    protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T?> value) : base(tagId, value) {
+    protected ILTagAbstractDictionary(ulong tagId, Dictionary<string, T?>? value) : base(tagId, value) {
     }
 
     protected ILTagAbstractDictionary(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {

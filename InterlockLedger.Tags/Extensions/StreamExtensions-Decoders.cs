@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using System.Linq;
+
 namespace InterlockLedger.Tags;
 public static partial class StreamExtensions
 {
@@ -50,17 +52,26 @@ public static partial class StreamExtensions
                 : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
     }
 
-    public static T[]? DecodeArray<T>(this Stream s) where T : ITaggableOf<T> =>
-        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s));
+    public static T?[]? DecodeArray<T>(this Stream s) where T : ITaggableOf<T> =>
+        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T?>>(s));
 
-    public static T[]? DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder) where T : notnull where TT : ILTagOfExplicit<T> =>
-        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s, decoder));
+    public static T?[]? DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder)
+        where TT : ILTagOfExplicit<T?> =>
+        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T?>>(s, decoder));
 
-    private static T[]? DecodeArrayInternal<T>(Stream s, Func<Stream, ILTagArrayOfILTag<ILTagOfExplicit<T>>> decodeTagArray) where T : notnull {
+    private static T?[]? DecodeArrayInternal<T>(Stream s, Func<Stream, ILTagArrayOfILTag<ILTagOfExplicit<T?>>> decodeTagArray)        {
         var tagId = s.DecodeTagId();
-        return tagId != ILTagId.ILTagArray
-            ? throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagOfExplicit<T>>).Name}")
-            : (decodeTagArray(s).Value?.SkipDefaults().Select(element => element.Value).SkipDefaults().ToArray());
+        if (tagId != ILTagId.ILTagArray)
+            throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagOfExplicit<T>>).Name}");
+        else {
+            var arrayOfTags = decodeTagArray(s).Value;
+            return arrayOfTags is null
+                ? null
+                : arrayOfTags.Length == 0
+                    ? Array.Empty<T>()
+                    : arrayOfTags.Select(element => element is null ? default : element.Value)
+                                 .ToArray();
+        }
     }
 
     public static bool DecodeBool(this Stream s) => s.Decode<ILTagBool>()?.Value ?? false;
@@ -76,9 +87,7 @@ public static partial class StreamExtensions
 
     public static DateTimeOffset DecodeOldDateTimeOffset(this Stream s) => s.DecodeILInt().AsDateTime();
     public static DateTimeOffset DecodeOldDateTimeOffset(this Stream s, bool doIt) => doIt ? s.DecodeOldDateTimeOffset() : DateTimeOffset.UnixEpoch;
-    public static Dictionary<string, string?> DecodeDictionary(this Stream s) => s.Decode<ILTagStringDictionary>()!.Value;
-
-    public static Dictionary<string, T?> DecodeDictionary<T>(this Stream s) where T : ILTag {
+    public static Dictionary<string, T?>? DecodeDictionary<T>(this Stream s) where T : ILTag {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.Dictionary
             ? new ILTagDictionary<T>(s).Value
@@ -91,14 +100,14 @@ public static partial class StreamExtensions
 
     public static int DecodeInt(this Stream s) => s.Decode<ILTagInt32>()?.Value ?? 0;
 
-    public static ILTag?[] DecodeSequence(this Stream s) {
+    public static ILTag?[]? DecodeSequence(this Stream s) {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.Sequence ? new ILTagSequence(s).Value : throw new InvalidDataException($"Not a {nameof(ILTagSequence)}");
     }
 
     public static string? DecodeString(this Stream s) => s.Decode<ILTagString>()?.Value;
 
-    public static Dictionary<string, string?> DecodeStringDictionary(this Stream s) {
+    public static Dictionary<string, string?>? DecodeStringDictionary(this Stream s) {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.StringDictionary
             ? new ILTagStringDictionary(s).Value
@@ -108,7 +117,7 @@ public static partial class StreamExtensions
     public static ILTag DecodeTag(this Stream s)
         => TagProvider.DeserializeFrom(s);
 
-    public static T[] DecodeTagArray<T>(this Stream s) where T : ILTag {
+    public static T?[]? DecodeTagArray<T>(this Stream s) where T : ILTag {
         var tagId = s.DecodeTagId();
         return tagId == ILTagId.ILTagArray
             ? new ILTagArrayOfILTag<T>(s).Value

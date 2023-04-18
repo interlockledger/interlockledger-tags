@@ -39,7 +39,7 @@ public class ILTagDictionary<T> : ILTagAbstractDictionary<T> where T : ILTag
     public ILTagDictionary(object opaqueValue) : this(Elicit(opaqueValue)) {
     }
 
-    public ILTagDictionary(Dictionary<string, T?> value) : base(ILTagId.Dictionary, value) {
+    public ILTagDictionary(Dictionary<string, T?>? value) : base(ILTagId.Dictionary, value) {
     }
 
     internal ILTagDictionary(Stream s) : base(ILTagId.Dictionary, s) {
