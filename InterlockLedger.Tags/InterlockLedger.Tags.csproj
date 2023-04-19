@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>36.1.0</Version>
+        <Version>36.2.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes></PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>

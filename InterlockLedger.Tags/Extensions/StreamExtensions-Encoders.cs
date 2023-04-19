@@ -58,7 +58,7 @@ public static partial class StreamExtensions
         => s.EncodeILInt(value.AsMilliseconds());
 
     public static Stream EncodeDictionary(this Stream s, Dictionary<string, string?>? dictionary)
-        => s.EncodeTag(new ILTagStringDictionary(dictionary ?? new Dictionary<string, string?>()));
+        => s.EncodeTag(new ILTagStringDictionary(dictionary));
 
     public static Stream EncodeILInt(this Stream s, ulong value)
         => s.EncodeTag(new ILTagILInt(value));
