@@ -74,7 +74,7 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
             ? throw new InvalidDataException($"Instance of {typeof(T)} is incompletely deserialized")
             : (T)this;
 
-    public void Changed() => _payload?.Changed();
+    public void Changed() => _payload = null;
 
     public T FromUnknown(ILTagUnknown unknown) {
         if (unknown.Required().TagId != TagId)

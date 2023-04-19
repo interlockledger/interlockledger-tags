@@ -82,7 +82,7 @@ public class ILTagDictionaryTests
         => GuaranteeBijectiveBehavior(null);
     [Test]
     public void GuaranteeBijectiveBehaviorEmptyArray()
-        => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool>());
+        => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool?>());
 
     [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_two_strings")]
     [TestCase(new string[] { "D", "E" }, new string[] { "Demo", null }, TestName = "Guarantee_Bijective_Behavior_for_One_String_Dictionary_with_one_string_and_a_null")]
@@ -91,11 +91,11 @@ public class ILTagDictionaryTests
 
     [Test]
     public void GuaranteeBijectiveBehaviorFourElementsArray()
-        => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool> { ["C"] = ILTagBool.False, ["D"] = ILTagBool.True, ["E"] = ILTagBool.True, ["F"] = ILTagBool.True });
+        => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool?> { ["C"] = ILTagBool.False, ["D"] = ILTagBool.True, ["E"] = ILTagBool.True, ["F"] = ILTagBool.True });
 
     [Test]
     public void GuaranteeBijectiveBehaviorTwoElementsArray()
-        => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool> { ["A"] = ILTagBool.False, ["B"] = ILTagBool.True });
+        => GuaranteeBijectiveBehavior(new Dictionary<string, ILTagBool?> { ["A"] = ILTagBool.False, ["B"] = ILTagBool.True });
 
     [Test]
     public void JsonSerializationDictionary() {
@@ -238,7 +238,7 @@ public class ILTagDictionaryTests
         Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
-    private static void GuaranteeBijectiveBehaviorForString(Dictionary<string, string> dict) {
+    private static void GuaranteeBijectiveBehaviorForString(Dictionary<string, string?> dict) {
         var ilarray = new ILTagStringDictionary(dict);
         var encodedBytes = ilarray.EncodedBytes;
         using var ms = new MemoryStream(encodedBytes);
