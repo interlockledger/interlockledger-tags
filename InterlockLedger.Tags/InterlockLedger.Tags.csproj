@@ -54,7 +54,7 @@
         <Copy DestinationFolder="$(INTERLOCK_LOCAL_NUGETS_FOLDER)" SourceFiles="@(NugetPackages)" ContinueOnError="true" SkipUnchangedFiles="false" />
     </Target>
 
-    <Target Name="NugetOrg" Condition="'$(Configuration)'=='Release'" DependsOnTargets="Pack">
+    <Target Name="NugetOrg" Condition="'$(Configuration)'=='Release'" DependsOnTargets="Pack;TagSources">
         <PropertyGroup>
             <NugetPackage>$(PackageOutputAbsolutePath)$(PackageId).$(Version).nupkg</NugetPackage>
         </PropertyGroup>
