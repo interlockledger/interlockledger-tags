@@ -53,7 +53,7 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     public static ILTagVersion InvalidBy(string cause) =>
         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
     public bool Equals(ILTagVersion? other) => base.Equals(other);
-    protected override bool AreEquivalent(ILTagOf<Version>? other) => TextualRepresentation == other.TextualRepresentation;
+    protected override bool AreEquivalent(ILTagOf<Version?> other) => TextualRepresentation == other.TextualRepresentation;
     public static ILTagVersion FromJson(object o) => o is Version version ? new(version) : Build((string)o);
     public ITextual<ILTagVersion> Textual => this;
 

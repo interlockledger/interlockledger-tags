@@ -53,7 +53,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
         if (Value is null)
             return 0;
         using var stream = new MemoryStream();
-        ValueToStreamAsync(stream);
+        ValueToStreamAsync(stream).Wait();
         stream.Flush();
         return (ulong)stream.ToArray().Length;
     }

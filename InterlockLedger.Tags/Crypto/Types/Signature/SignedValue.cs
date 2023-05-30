@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using System.Linq;
+
 namespace InterlockLedger.Tags;
 public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<T>, new()
 {
@@ -62,7 +64,7 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     internal SignedValue(ushort version, T signedContent, Stream s) : base(ILTagId.SignedValue, version)
-        => Init(signedContent, s.DecodeArray<IdentifiedSignature>().OrEmpty());
+        => Init(signedContent, s.DecodeArray<IdentifiedSignature>().OrEmpty()!);
 
     internal SignedValue(T signedContent, IEnumerable<IdentifiedSignature> signatures) : this()
         => Init(signedContent, signatures);
@@ -79,7 +81,7 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 
     protected override void DecodeRemainingStateFrom(Stream s) {
         SignedContent = s.DecodeAny<T>().Required();
-        Signatures = s.DecodeArray<IdentifiedSignature>().Required();
+        Signatures = s.DecodeArray<IdentifiedSignature>().RequireNonNulls().NonEmpty();
     }
 
     protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);

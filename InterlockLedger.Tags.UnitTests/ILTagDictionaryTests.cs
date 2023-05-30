@@ -187,7 +187,7 @@ public class ILTagDictionaryTests
             Assert.That(otherDict, Is.Null);
         else {
             Assert.That(otherDict, Is.Not.Null);
-            Assert.That(otherDict.Count, Is.EqualTo(dict.Count));
+            Assert.That(otherDict, Has.Count.EqualTo(dict.Count));
             foreach (var key in dict.Keys) {
                 var dictValue = dict[key].Value;
                 var otherDictValue = otherDict[key].Value;

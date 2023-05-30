@@ -65,7 +65,7 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
 
     public void DecodeRemainingStateFrom(Stream s) {
         CipherText = s.DecodeByteArray().Required();
-        ReadingKeys = s.DecodeTagArray<TagReadingKey>();
+        ReadingKeys = s.DecodeTagArray<TagReadingKey>().RequireNonNulls().NonEmpty();
     }
 
     public T Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {

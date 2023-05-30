@@ -7,13 +7,13 @@
         <Authors>Rafael Teixeira</Authors>
         <Company>InterlockLedger Network</Company>
         <Copyright>Copyright (c) 2018-2023 InterlockLedger Network</Copyright>
-        <Description>Some better public interfaces for keys</Description>
+        <Description>Some nullability fixes and fix bug while calculating explicit tag length while serializing (async method not waited)</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>36.2.0</Version>
+        <Version>36.4.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes></PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -64,7 +64,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="12.2.1" />
+        <PackageReference Include="InterlockLedger.Commons" Version="12.4.0" />
         <PackageReference Include="InterlockLedger.Tags.ILInt" Version="12.0.0" />
         <PackageReference Include="System.Memory" Version="4.5.5" />
         <PackageReference Include="BouncyCastle.Cryptography" Version="2.1.1" />
