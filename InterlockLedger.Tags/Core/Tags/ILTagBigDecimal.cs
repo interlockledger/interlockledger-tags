@@ -33,9 +33,10 @@
 namespace InterlockLedger.Tags;
 public class ILTagBigDecimal : ILTag
 {
-    public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal, string.Empty) => throw new NotImplementedException();
+    public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal) => throw new NotImplementedException();
 
     public override object? Content { get; }
+    public override string TextualRepresentation { get; }
 
     protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
 }

@@ -40,11 +40,11 @@ public struct TagEncryptedParts : IEquatable<TagEncryptedParts>
 
     public static bool operator ==(TagEncryptedParts left, TagEncryptedParts right) => left.Equals(right);
 
-    public override bool Equals(object? obj) => obj is TagEncryptedParts parts && Equals(parts);
+    public override readonly bool Equals(object? obj) => obj is TagEncryptedParts parts && Equals(parts);
 
-    public bool Equals(TagEncryptedParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(CipherData, other.CipherData);
+    public readonly bool Equals(TagEncryptedParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(CipherData, other.CipherData);
 
-    public override int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
+    public override readonly int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
 }
 
 public class TagEncrypted : ILTagExplicit<TagEncryptedParts>

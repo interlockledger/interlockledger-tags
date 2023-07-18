@@ -36,10 +36,10 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
 public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IComparable<ILTagVersion>
 {
-
-    public ILTagVersion(Version version) : base(ILTagId.Version, version) => TextualRepresentation = version.Required().ToString();
+    protected override string? BuildTextualRepresentation() => InvalidityCause ?? Value?.ToString();
+    public ILTagVersion(Version version) : base(ILTagId.Version, version) { }
     public bool IsEmpty { get; private init; }
-    public static ILTagVersion Empty { get; } = new() { TextualRepresentation = string.Empty, IsEmpty = true };
+    public static ILTagVersion Empty { get; } = new() { IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
     public string? InvalidityCause { get; private init; }
     public static ILTagVersion Build(string textualRepresentation) {
@@ -50,15 +50,13 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
             return InvalidBy(ex.Message);
         }
     }
-    public static ILTagVersion InvalidBy(string cause) =>
-        new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+    public static ILTagVersion InvalidBy(string cause) => new() { InvalidityCause = cause };
     public bool Equals(ILTagVersion? other) => base.Equals(other);
     protected override bool AreEquivalent(ILTagOf<Version?> other) => TextualRepresentation == other.TextualRepresentation;
     public static ILTagVersion FromJson(object o) => o is Version version ? new(version) : Build((string)o);
     public ITextual<ILTagVersion> Textual => this;
 
-    private static readonly string _invalidTextualRepresentation = "?";
-    public int CompareTo(ILTagVersion? other) => Value.CompareTo(other?.Value);
+    public int CompareTo(ILTagVersion? other) => Value?.CompareTo(other?.Value) ?? -1;
 
     public static bool operator <(ILTagVersion left, ILTagVersion right) =>
         left is null ? right is not null : left.CompareTo(right) < 0;
@@ -69,7 +67,7 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
     public static bool operator >=(ILTagVersion left, ILTagVersion right) =>
         left is null ? right is null : left.CompareTo(right) >= 0;
 
-    internal ILTagVersion(Stream s) : base(ILTagId.Version, s) => TextualRepresentation = Value.ToString();
+    internal ILTagVersion(Stream s) : base(ILTagId.Version, s) { }
     protected override Version FromBytes(byte[] bytes) {
         return FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
         static Version Build(int major, int minor, int build, int revision)

@@ -47,21 +47,21 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<App
         TextualRepresentation = BuildTextualRepresentation();
     }
 
-    public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
-    public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
+    public readonly bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
+    public readonly IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
 
-    public Tag AsTag => new(this);
+    public readonly Tag AsTag => new(this);
 
-    public string VerboseRepresentation {
+    public readonly string VerboseRepresentation {
         get {
             var plural = ActionIds.SafeCount() == 1 ? "" : "s";
             return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
         }
     }
-    public bool IsEmpty => AppId == 0 && ActionIds.None();
+    public readonly bool IsEmpty => AppId == 0 && ActionIds.None();
     public string? InvalidityCause { get; private init; }
     public string TextualRepresentation { get; private init; }
-    private string BuildTextualRepresentation() => Textual.IsInvalid
+    private readonly string BuildTextualRepresentation() => Textual.IsInvalid
             ? $"#?{InvalidityCause}"
             : $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
 
@@ -76,12 +76,12 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<App
         var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
         return new AppPermissions(parts.First(), parts.Skip(1));
     }
-    public bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
+    public readonly bool Equals(AppPermissions other) => other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
 
-    public override bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
-    public ITextual<AppPermissions> Textual => this;
-    public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
-    public override string ToString() => Textual.FullRepresentation;
+    public override readonly bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
+    public readonly ITextual<AppPermissions> Textual => this;
+    public override readonly int GetHashCode() => HashCode.Combine(AppId, ActionIds);
+    public override readonly string ToString() => Textual.FullRepresentation;
     public static bool operator ==(AppPermissions left, AppPermissions right) =>
          left.Equals(right);
     public static bool operator !=(AppPermissions left, AppPermissions right) =>
@@ -94,11 +94,11 @@ public partial struct AppPermissions : ITextual<AppPermissions>, IComparable<App
         left.CompareTo(right) > 0;
     public static bool operator >=(AppPermissions left, AppPermissions right) =>
         left.CompareTo(right) >= 0;
-    private bool _noActions => ActionIds.None();
+    private readonly bool _noActions => ActionIds.None();
 
 
     [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
     private static partial Regex PermissionsListRegex();
-    public int CompareTo(AppPermissions other) => Equals(other) ? 0 : AppId.CompareTo(other.AppId);
+    public readonly int CompareTo(AppPermissions other) => Equals(other) ? 0 : AppId.CompareTo(other.AppId);
 
 }

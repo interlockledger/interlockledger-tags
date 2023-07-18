@@ -36,6 +36,10 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 {
     [JsonIgnore]
     public T Value { get; set; }
+    [JsonIgnore]
+    public sealed override string TextualRepresentation => (_textualRepresentation ??= BuildTextualRepresentation()) ?? string.Empty;
+    protected virtual string? BuildTextualRepresentation() => (Value is ITextual textual) ? textual.TextualRepresentation : null;
+    private string? _textualRepresentation;
     public override object? Content => Value;
     public override bool ValueIs<TV>(out TV? value) where TV : default {
         if (Value is TV tvalue) {
@@ -45,13 +49,11 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
         value = default;
         return false;
     }
-    protected ILTagOf(ulong tagId, T value) : base(tagId, value is ITextual textual ? textual.TextualRepresentation : string.Empty) => Value = value;
+    protected ILTagOf(ulong tagId, T value) : base(tagId) => Value = value;
 
-    protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId, string.Empty) {
+    protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
         setup?.Invoke(this);
         Value = DeserializeInner(s);
-        if (Value is ITextual textual)
-            TextualRepresentation = textual.TextualRepresentation;
     }
 
     protected abstract T DeserializeInner(Stream s);
@@ -62,8 +64,7 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 
     public sealed override int GetHashCode() => HashCode.Combine(TagId, Value);
     public sealed override bool Equals(object? obj) => Equals(obj as ILTagOf<T>);
-    public bool Equals(ILTagOf<T>? other) =>
-        other is not null && TagId == other.TagId && AreEquivalent(other);
+    public bool Equals(ILTagOf<T>? other) => other is not null && TagId == other.TagId && AreEquivalent(other);
     public bool Equals(T? otherValue) =>
         (Value is null && otherValue is null) ||
         (Value is not null && otherValue is not null && Value.Equals(otherValue));

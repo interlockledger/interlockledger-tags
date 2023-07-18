@@ -196,10 +196,10 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     }
 
     public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
-    public string AsCSS => Name is null || Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
-    public InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
-    public uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
-    public bool IsEmpty => false;
+    public readonly string AsCSS => Name is null || Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
+    public readonly InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
+    public readonly uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
+    public readonly bool IsEmpty => false;
     public static InterlockColor InvalidBy(string cause) =>
         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
 
@@ -209,11 +209,11 @@ public partial struct InterlockColor : ITextual<InterlockColor>
         var colorCode = FromColorCode(value);
         return _knownColorsByName!.TryGetValue(value, out var color) ? color : From(colorCode);
     }
-    public bool Equals(InterlockColor other) => RGBA == other.RGBA;
+    public readonly bool Equals(InterlockColor other) => RGBA == other.RGBA;
     public static InterlockColor Empty { get; } = Black;
     public static Regex Mask { get; } = AnythingRegex();
     public string? InvalidityCause {
-        get => _invalidityCause;
+        readonly get => _invalidityCause;
         private init {
             _invalidityCause = value;
             uint ic = Transparent.RGBA;
@@ -233,15 +233,15 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     }
 
 
-    public override bool Equals(object? obj) => obj is InterlockColor other && Textual.Equals(other);
-    public ITextual<InterlockColor> Textual => this;
+    public override readonly bool Equals(object? obj) => obj is InterlockColor other && Textual.Equals(other);
+    public readonly ITextual<InterlockColor> Textual => this;
     public string TextualRepresentation { get; private init; }
     private static readonly string _invalidTextualRepresentation = string.Empty;
 
-    public override int GetHashCode() => (int)RGBA;
-    public override string ToString() => Textual.FullRepresentation;
+    public override readonly int GetHashCode() => (int)RGBA;
+    public override readonly string ToString() => Textual.FullRepresentation;
 
-    public InterlockColor WithA(byte newA) => newA == A ? this : new InterlockColor(R, G, B, a: newA);
+    public readonly InterlockColor WithA(byte newA) => newA == A ? this : new InterlockColor(R, G, B, a: newA);
 
     private static Dictionary<uint, InterlockColor>? _knownColors;
 

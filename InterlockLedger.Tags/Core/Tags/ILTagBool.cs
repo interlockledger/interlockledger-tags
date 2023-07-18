@@ -46,7 +46,7 @@ public sealed class ILTagBool : ILTagOfImplicit<bool>
         s.WriteByte((byte)(Value ? 1 : 0));
         return Task.FromResult(s);
     }
+    private ILTagBool(bool value) : base(ILTagId.Bool, value) { }
 
-    private ILTagBool(bool value) : base(ILTagId.Bool, value) =>
-        TextualRepresentation = Value.ToString(CultureInfo.InvariantCulture);
+    protected override string? BuildTextualRepresentation() => Value.ToString(CultureInfo.InvariantCulture);
 }

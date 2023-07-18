@@ -59,7 +59,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
         };
 
     public static TagPubKey InvalidBy(string cause) =>
-         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+         new() { InvalidityCause = cause };
     public static TagPubKey Build(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
@@ -73,7 +73,6 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 
     public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
     public static Regex Mask { get; } = AnythingRegex();
-    private static readonly string _invalidTextualRepresentation = "?";
     public string? InvalidityCause { get; private init; }
     public ITextual<TagPubKey> Textual => this;
 
@@ -95,8 +94,7 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
         return ResolveAs(pubKey.Algorithm, pubKey.Data);
     }
 
-    protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) =>
-        TextualRepresentation = BuildTextualRepresentation();
+    protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) { }
 
     protected override TagKeyParts FromBytes(byte[] bytes)
         => FromBytesHelper(bytes,
@@ -104,6 +102,6 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
     protected override byte[] ToBytes(TagKeyParts value)
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
-    private string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
+    protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
     private TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
 }

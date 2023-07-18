@@ -62,9 +62,8 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public ITextual<InterlockId> Textual => this;
     [JsonIgnore] 
     public string AsBase64 => Value!.Data.Safe().ToSafeBase64();
-    private static readonly string _invalidTextualRepresentation = "?";
 
-    public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+    public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause };
     public static InterlockId Build(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
     public bool Equals(InterlockId? other) => base.Equals(other);
     public sealed override string ToString() => TextualRepresentation;
@@ -78,7 +77,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     protected InterlockId(string textualRepresentation) : this(new Parts(textualRepresentation)) { }
     protected InterlockId(byte type, HashAlgorithm algorithm, byte[]? data) : this(new Parts(type, algorithm, data)) { }
-    protected InterlockId(Parts parts) : base(ILTagId.InterlockId, parts) => TextualRepresentation = Value!.ToShortString();
+    protected InterlockId(Parts parts) : base(ILTagId.InterlockId, parts) { }
     protected static void RegisterResolver(byte type, string typeName, Func<Parts, InterlockId> resolver) =>
         Parts.RegisterResolver(type, typeName.Required(), resolver.Required());
     protected void CheckType(byte type) {

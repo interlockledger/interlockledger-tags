@@ -33,8 +33,9 @@
 namespace InterlockLedger.Tags;
 public class ILTagBinary32 : ILTag
 {
-    public ILTagBinary32(Stream s) : base(ILTagId.Binary32, string.Empty) => throw new NotImplementedException();
+    public ILTagBinary32(Stream s) : base(ILTagId.Binary32) => throw new NotImplementedException();
     public override object? Content { get; }
+    public override string TextualRepresentation { get; }
 
     protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
 }

@@ -40,11 +40,11 @@ public struct TagSignatureParts : IEquatable<TagSignatureParts>
 
     public static bool operator ==(TagSignatureParts left, TagSignatureParts right) => left.Equals(right);
 
-    public override bool Equals(object? obj) => obj is TagSignatureParts parts && Equals(parts);
+    public override readonly bool Equals(object? obj) => obj is TagSignatureParts parts && Equals(parts);
 
-    public bool Equals(TagSignatureParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
+    public readonly bool Equals(TagSignatureParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
 
-    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
+    public override readonly int GetHashCode() => HashCode.Combine(Algorithm, Data);
 }
 
 public class TagSignature : ILTagExplicit<TagSignatureParts>

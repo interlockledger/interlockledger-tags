@@ -45,7 +45,7 @@ public abstract class ILTag : ITag
     public ITag Traits => this;
 
     [JsonIgnore]
-    public string TextualRepresentation { get; protected set; }
+    public abstract string TextualRepresentation { get;}
 
     internal void Changed() {
         _encodedBytes = null;
@@ -68,20 +68,14 @@ public abstract class ILTag : ITag
         return s;
     }
 
-    public override string ToString() => TagPrefix + TextualRepresentation;
-
-    [JsonIgnore]
-    public string TagPrefix => GetType().Name + $"[Tag#{TagId}]: ";
+    public override string ToString() => TextualRepresentation;
 
     public virtual bool ValueIs<TV>(out TV? value) {
         value = default;
         return false;
     }
 
-    protected ILTag(ulong tagId, string textualRepresentation) {
-        TagId = tagId;
-        TextualRepresentation = textualRepresentation;
-    }
+    protected ILTag(ulong tagId) => TagId = tagId;
 
     [JsonIgnore]
     protected virtual bool KeepEncodedBytesInMemory => true;

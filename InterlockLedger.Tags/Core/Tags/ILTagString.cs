@@ -33,9 +33,9 @@
 namespace InterlockLedger.Tags;
 public class ILTagString : ILTagOfExplicit<string>
 {
-    public ILTagString(string? value) : base(ILTagId.String, value.Safe()) => TextualRepresentation = Value!;
+    public ILTagString(string? value) : base(ILTagId.String, value.Safe()) { }
 
-    internal ILTagString(Stream s) : base(ILTagId.String, s) => TextualRepresentation = Value!;
+    internal ILTagString(Stream s) : base(ILTagId.String, s) { }
 
     protected override bool AreEquivalent(ILTagOf<string?> other) => Value.Safe().Equals(other.Value);
 
@@ -45,4 +45,5 @@ public class ILTagString : ILTagOfExplicit<string>
         s.WriteBytes(Value.UTF8Bytes());
         return Task.FromResult(s);
     }
+    protected override string? BuildTextualRepresentation() => Value;
 }

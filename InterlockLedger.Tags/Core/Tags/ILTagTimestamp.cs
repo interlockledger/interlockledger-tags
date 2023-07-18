@@ -34,10 +34,7 @@ namespace InterlockLedger.Tags;
 
 public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>
 {
-    internal ILTagTimestamp(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Timestamp, s) {
-        Traits.ValidateTagId(alreadyDeserializedTagId);
-        TextualRepresentation = Value.ToString("u");
-    }
+    internal ILTagTimestamp(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Timestamp, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
     protected override DateTimeOffset ValueFromStream(StreamSpan s) =>
         DateTimeOffset.FromUnixTimeMilliseconds(s.ILIntDecode().AsSignedILInt());
@@ -46,6 +43,6 @@ public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>
         s.ILIntEncode(Value.ToUnixTimeMilliseconds().AsUnsignedILInt());
         return Task.FromResult(s);
     }
-    public ILTagTimestamp(DateTimeOffset value) : base(ILTagId.Timestamp, value)
-        => TextualRepresentation = Value.ToString("u");
+    public ILTagTimestamp(DateTimeOffset value) : base(ILTagId.Timestamp, value) { }
+    protected override string? BuildTextualRepresentation() => Value.ToString("u");
 }

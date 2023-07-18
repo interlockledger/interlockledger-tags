@@ -40,7 +40,7 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
 {
     private TagHmac() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
     public static TagHmac InvalidBy(string cause) =>
-        new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+        new() { InvalidityCause = cause };
     public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value.Algorithm;
@@ -51,8 +51,7 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
     public static Regex Mask { get; } = AnythingRegex();
-    private static readonly string _invalidTextualRepresentation = "?";
-    public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
+   public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
     public bool Equals(TagHmac? other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
         using var hash = new HMACSHA256(key);
@@ -60,8 +59,8 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     }
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();
-    private TagHmac(TagHash.Parts parts) : base(ILTagId.Hmac, parts) => TextualRepresentation = BuildTextualRepresentation();
-    internal TagHmac(Stream s) : base(ILTagId.Hmac, s) => TextualRepresentation = BuildTextualRepresentation();
+    private TagHmac(TagHash.Parts parts) : base(ILTagId.Hmac, parts) { }
+    internal TagHmac(Stream s) : base(ILTagId.Hmac, s) { }
     protected override TagHash.Parts FromBytes(byte[] bytes) =>
         FromBytesHelper(bytes, s => new TagHash.Parts {
             Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
@@ -77,5 +76,5 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
         return new TagHash.Parts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
     private bool DataEquals(byte[]? otherData) => (Data.None() && otherData.None()) || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
-    private string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
+    protected override string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
 }

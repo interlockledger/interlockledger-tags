@@ -33,12 +33,9 @@
 namespace InterlockLedger.Tags;
 public class ILTagILInt : ILTagOfImplicit<ulong>
 {
-    public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) => TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
+    public ILTagILInt(ulong value) : base(ILTagId.ILInt, value) { }
 
-    internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) {
-        Traits.ValidateTagId(alreadyDeserializedTagId);
-        TextualRepresentation = Value.ToString("X16", CultureInfo.InvariantCulture);
-    }
+    internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
     protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
 
@@ -46,4 +43,5 @@ public class ILTagILInt : ILTagOfImplicit<ulong>
         s.ILIntEncode(Value);
         return Task.FromResult(s);
     }
+    protected override string? BuildTextualRepresentation() => Value.ToString("X16", CultureInfo.InvariantCulture);
 }

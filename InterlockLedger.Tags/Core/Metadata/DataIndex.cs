@@ -116,7 +116,7 @@ public class ILTagDataIndex : ILTagExplicit<DataIndex>
 
     protected override byte[] ToBytes(DataIndex value)
          => TagHelpers.ToBytesHelper(s => {
-             s.EncodeString(Value.Name);
+             s.EncodeString(Value.Required().Name);
              s.EncodeBool(Value.IsUnique);
              s.EncodeString(Value.ElementsAsString);
          });

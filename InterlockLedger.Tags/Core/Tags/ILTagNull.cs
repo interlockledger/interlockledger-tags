@@ -35,10 +35,8 @@ namespace InterlockLedger.Tags;
 public sealed class ILTagNull : ILTag
 {
     public static readonly ILTagNull Instance = new();
-
     public override object? Content => null;
-
     protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
-
-    private ILTagNull() : base(ILTagId.Null, "null") { }
+    public override string TextualRepresentation => "null";
+    private ILTagNull() : base(ILTagId.Null) { }
 }

@@ -43,7 +43,7 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
 {
     private TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
     public static TagHash InvalidBy(string cause) =>
-         new() { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
+         new() { InvalidityCause = cause };
     public TagHash(HashAlgorithm algorithm, byte[] data) : this(new Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value!.Algorithm;
@@ -57,12 +57,10 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public override string ToString() => Textual.FullRepresentation;
     public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
     public static Regex Mask { get; } = AnythingRegex();
-    private static readonly string _invalidTextualRepresentation = "?";
-
     public static TagHash Build(string textualRepresentation) => new(Split(textualRepresentation.Safe().Trim()));
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
-    internal TagHash(Stream s) : base(ILTagId.Hash, s) => TextualRepresentation = BuildTextualRepresentation();
+    internal TagHash(Stream s) : base(ILTagId.Hash, s) { }
     internal static TagHash HashFrom(X509Certificate2 certificate) => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
     protected override Parts FromBytes(byte[] bytes) =>
         FromBytesHelper(bytes, s => new Parts {
@@ -71,7 +69,7 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
         });
     protected override byte[] ToBytes(Parts value)
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Data.OrEmpty()));
-    private TagHash(Parts parts) : base(ILTagId.Hash, parts) => TextualRepresentation = BuildTextualRepresentation();
+    private TagHash(Parts parts) : base(ILTagId.Hash, parts) { }
     private static byte[] HashSha256(byte[] data) {
         using var hasher = SHA256.Create();
         hasher.Initialize();
@@ -83,7 +81,7 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
         return new Parts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }
     private bool DataEquals(byte[]? otherData) => Data.None() && otherData.None() || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
-    private string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
+    protected override string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
 
     [GeneratedRegex(".+")]
     private static partial Regex AnythingRegex();

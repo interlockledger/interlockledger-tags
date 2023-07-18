@@ -114,7 +114,6 @@ public class ILTagJsonTests
         TestTwiceWith(new ILTagVersion(new Version(1, 2, 3, 4)));
         TestTwiceWith(new ILTagVersion(new Version(3, 0)));
         TestTwiceWith(new ILTagVersion(new Version()));
-        TestTwiceWith(ILTagVersion.InvalidBy("Test"));
     }
 
     [TestCase("0", TestName = "Int8FromJson0", ExpectedResult = (sbyte)0)]

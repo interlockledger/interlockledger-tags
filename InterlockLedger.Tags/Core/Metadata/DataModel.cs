@@ -340,8 +340,8 @@ public class ILTagDataModel : ILTagExplicit<DataModel>
             s.DecodeILInt(); // drop deprecated field
             return new DataModel {
                 PayloadTagId = payloadTagId,
-                DataFields = s.DecodeTagArray<ILTagDataField>().Safe().Select(t => t.Value),
-                Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Value),
+                DataFields = s.DecodeTagArray<ILTagDataField>().Safe().Select(t => t.Required().Value.Required()),
+                Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Required().Value.Required()),
                 PayloadName = s.DecodeString(),
                 Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
                 Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null
@@ -350,7 +350,7 @@ public class ILTagDataModel : ILTagExplicit<DataModel>
 
     protected override byte[] ToBytes(DataModel value)
         => TagHelpers.ToBytesHelper(s => {
-            s.EncodeILInt(Value.PayloadTagId);
+            s.EncodeILInt(Value.Required().PayloadTagId);
             s.EncodeILInt(0); // deprecated field
             s.EncodeTagArray(Value.DataFields.Select(df => new ILTagDataField(df)));
             s.EncodeTagArray(Value.Indexes.Select(index => new ILTagDataIndex(index)));

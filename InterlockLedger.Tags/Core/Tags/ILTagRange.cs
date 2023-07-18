@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags;
 public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
 {
     public ILTagRange() : this(LimitedRange.Empty) { }
-    public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) => TextualRepresentation = Value.TextualRepresentation;
+    public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
 
     public static ILTagRange FromJson(object json) {
         var range = json is JsonElement je && je.ValueKind == JsonValueKind.String
@@ -56,7 +56,7 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public string? InvalidityCause => Value.InvalidityCause;
     public ITextual<ILTagRange> Textual => this;
     public static ILTagRange Build(string textualRepresentation) => new(LimitedRange.Build(textualRepresentation));
-    internal ILTagRange(Stream s) : base(ILTagId.Range, s) => TextualRepresentation = Value.TextualRepresentation;
+    internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
     protected override LimitedRange FromBytes(byte[] bytes) =>
         FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
     protected override byte[] ToBytes(LimitedRange value) =>
