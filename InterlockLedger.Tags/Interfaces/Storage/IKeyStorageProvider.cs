@@ -46,7 +46,7 @@ public interface IKeyStorageProvider : IKeyFileExporter
 
     InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
 
-    InterlockSigningKey Open(InterlockSigningKeyData key, string password);
+    InterlockSigningKey? Open(InterlockSigningKeyData key, string password, Action<string> errorWriteLine);
 
     InterlockSigningKey? Resolve(string name, string password);
 }

@@ -76,10 +76,10 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate import")
         .Import(algorithm, purposes, permissions, certificateBytes, password);
 
-    public InterlockSigningKey Open(InterlockSigningKeyData key, string password)
+    public InterlockSigningKey? Open(InterlockSigningKeyData key, string password, Action<string> errorWriteLine)
         => key is null
-            ? throw new ArgumentNullException(nameof(key))
-            : FindProviderFor(key.PublicKey.Algorithm, _ => true).Open(key, password);
+            ? null
+            : FindProviderFor(key.PublicKey.Algorithm, _ => true).Open(key, password, errorWriteLine);
 
     public InterlockSigningKey? Resolve(string name, string password) {
         foreach (var provider in _providers.Values) if (provider.Keys.Any(k => k.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
