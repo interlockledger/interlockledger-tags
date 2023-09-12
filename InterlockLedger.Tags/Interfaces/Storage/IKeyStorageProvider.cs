@@ -48,5 +48,5 @@ public interface IKeyStorageProvider : IKeyFileExporter
 
     InterlockSigningKey? Open(InterlockSigningKeyData key, string password, Action<string> errorWriteLine);
 
-    InterlockSigningKey? Resolve(string name, string password);
+    InterlockSigningKey? Resolve(string name, string password, Action<string> errorWriteLine);
 }

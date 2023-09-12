@@ -81,9 +81,9 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
             ? null
             : FindProviderFor(key.PublicKey.Algorithm, _ => true).Open(key, password, errorWriteLine);
 
-    public InterlockSigningKey? Resolve(string name, string password) {
+    public InterlockSigningKey? Resolve(string name, string password, Action<string> errorWriteLine) {
         foreach (var provider in _providers.Values) if (provider.Keys.Any(k => k.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
-                return provider.Resolve(name, password);
+                return provider.Resolve(name, password, errorWriteLine);
         return null;
     }
 

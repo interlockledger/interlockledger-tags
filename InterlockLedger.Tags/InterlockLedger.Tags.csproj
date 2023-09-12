@@ -7,13 +7,13 @@
         <Authors>Rafael Teixeira</Authors>
         <Company>InterlockLedger Network</Company>
         <Copyright>Copyright (c) 2018-2023 InterlockLedger Network</Copyright>
-        <Description>Some nullability fixes and fix bug while calculating explicit tag length while serializing (async method not waited)</Description>
+        <Description>More CLI-friendly handling of key storage trying to open/resolve a key</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>38.0.0</Version>
+        <Version>39.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes></PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
