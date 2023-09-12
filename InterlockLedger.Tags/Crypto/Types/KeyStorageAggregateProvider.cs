@@ -54,11 +54,11 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         _providers.Add(provider.Name, provider);
     }
 
-    public InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password)
-        => FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation, "and key creation").Create(algorithm, purposes, permissions, strength, name, description, password);
+    public InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password, bool overwrite)
+        => FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation, "and key creation").Create(algorithm, purposes, permissions, strength, name, description, password, overwrite);
 
-    public X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength)
-        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate creation").CreateCertificate(algorithm, name, password, file, strength);
+    public X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength, bool overwrite)
+        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate creation").CreateCertificate(algorithm, name, password, file, strength, overwrite);
 
     IKeyParameters IKeyPhasedCreationProvider.CreateKeyParameters(Algorithm algorithm, KeyStrength strength) => FindPhasedProvider(algorithm).CreateKeyParameters(algorithm, strength);
 
@@ -72,9 +72,9 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         return null;
     }
 
-    public InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password)
+    public InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password, bool overwrite)
         => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate import")
-        .Import(algorithm, purposes, permissions, certificateBytes, password);
+            .Import(algorithm, purposes, permissions, certificateBytes, password, overwrite);
 
     public InterlockSigningKey? Open(InterlockSigningKeyData key, string password, Action<string> errorWriteLine)
         => key is null

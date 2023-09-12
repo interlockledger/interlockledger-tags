@@ -40,11 +40,11 @@ public interface IKeyStorageProvider : IKeyFileExporter
     IEnumerable<InterlockSigningKeyData> Keys { get; }
     IEnumerable<Algorithm> SupportedAlgorithms { get; }
 
-    InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password);
+    InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password, bool overwrite);
 
-    X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength);
+    X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength, bool overwrite);
 
-    InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password);
+    InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password, bool overwrite);
 
     InterlockSigningKey? Open(InterlockSigningKeyData key, string password, Action<string> errorWriteLine);
 
