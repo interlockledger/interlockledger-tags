@@ -80,7 +80,7 @@ public class SequenceTests
         var seq = new ILTagSequence(new ILTagString("JsonTest"), new ILTagILInt(13), ILTagBool.False);
         var jsonSeq = JsonSerializer.Serialize(seq, ILTagDictionaryTests.JsonOptions);
         TestContext.WriteLine(jsonSeq);
-        Assert.That(jsonSeq.RegexReplace("\r\n","\n"), Is.EqualTo(/*lang=json,strict*/ """
+        Assert.That(jsonSeq.RegexReplace("\r\n", "\n"), Is.EqualTo(/*lang=json,strict*/ """
             {
               "Content": [
                 {

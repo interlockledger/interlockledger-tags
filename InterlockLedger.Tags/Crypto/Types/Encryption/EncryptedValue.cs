@@ -68,8 +68,9 @@ public class EncryptedValue<T>(ulong tagId) : IVersionedEmbeddedValue<EncryptedV
     }
 
     public T Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
-        byte[] clearText = DecryptRaw(reader, findEngine).Required();
-        return (TagProvider.DeserializeFrom(clearText) as T).Required();
+        // TODO: try to replace MemoryStream and byte arrays
+        using var ms = new MemoryStream(DecryptRaw(reader, findEngine).Required());
+        return (TagProvider.DeserializeFrom(ms) as T).Required();
     }
 
     public byte[] DecryptRaw(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {

@@ -62,12 +62,6 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
     public KeyStrength Strength => Value!.Strength;
     public ushort Version => Value!.Version;
 
-    public void Dispose() {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
     public bool Equals(InterlockKey? other) => other is not null && Id == other.Id;
 
     public bool Matches(BaseKeyId senderId, TagPubKey publicKey) => Id == senderId && PublicKey.Equals(publicKey);
@@ -128,12 +122,12 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         internal static AppPermissions[] NoPermissions = [];
 
         internal IEnumerable<ulong> FirstActions {
-            get => Permissions.FirstOrDefault().ActionIds ?? Array.Empty<ulong>();
+            get => Permissions?.FirstOrDefault()?.ActionIds ?? Array.Empty<ulong>();
             set => Permissions = new AppPermissions(_firstAppId, value).ToEnumerable();
         }
 
         internal ulong FirstAppId {
-            get => Permissions.FirstOrDefault().AppId;
+            get => Permissions?.FirstOrDefault()?.AppId ?? 0ul;
             set => _firstAppId = value;
         }
 
@@ -163,19 +157,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
     internal InterlockKey(Stream s) : base(ILTagId.InterlockKey, s) {
     }
 
-    protected virtual void Dispose(bool disposing) {
-        if (!_disposedValue) {
-            if (disposing) {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposedValue = true;
-        }
-    }
-
-    protected override Parts? ValueFromStream(StreamSpan s) {
+    protected override Parts? ValueFromStream(Stream s) {
         var version = s.DecodeUShort();
         var result = new Parts {
             Version = version,                                // Field index 0 //
@@ -190,10 +172,10 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
             FirstActions = version > 2 ? s.DecodeILIntArray() : Enumerable.Empty<ulong>(), // Field index 9 - since version 3 //
         };
         if (version > 3)
-            result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value).Distinct().ToArray();
+            result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().SelectSkippingNulls(t => t?.Value).Distinct().ToArray();
         return result;
     }
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         if (Value is not null) {
             s.EncodeUShort(Value.Version);              // Field index 0 //
             s.EncodeString(Value.Name);                 // Field index 1 //
@@ -207,10 +189,8 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
             s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
             s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
         }
-        return Task.FromResult(s);
+        return s;
     }
-
-    private bool _disposedValue;
 
     private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {
     }

@@ -82,11 +82,11 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T>
         Initialize(0, 0, FileInfo.Length);
     }
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         using var fileStream = FileInfo.OpenRead();
         using var streamSlice = new StreamSpan(fileStream, Offset, Length);
         streamSlice.CopyTo(s, _bufferLength);
-        return Task.FromResult(s);
+        return s;
     }
 
     protected sealed async override Task<Stream> SerializeInnerAsync(Stream s) {

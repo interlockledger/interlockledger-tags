@@ -36,12 +36,9 @@ namespace InterlockLedger.Tags;
 public static class StringExtensions
 {
     public static object? DeserializeJson(this string json) =>
-        string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<object>(json, _jsonOptions).AsNavigable();
+        string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<object>(json, System.StringExtensions.DefaultJsonOptions).AsNavigable();
 
-    public static T? FromJson<T>(this string json) =>
-        string.IsNullOrWhiteSpace(json) ? default : JsonSerializer.Deserialize<T>(json, _jsonOptions);
 
     public static TagHash HashOf(this string s) => TagHash.HashSha256Of(s.UTF8Bytes());
 
-    internal static readonly JsonSerializerOptions _jsonOptions = new() { AllowTrailingCommas = true, WriteIndented = true };
 }

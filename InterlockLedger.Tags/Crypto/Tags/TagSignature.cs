@@ -30,43 +30,41 @@
 //
 // ******************************************************************************************************************************
 
+using Org.BouncyCastle.Utilities;
+
 namespace InterlockLedger.Tags;
-public struct TagSignatureParts : IEquatable<TagSignatureParts>
+public class TagSignatureParts : IEquatable<TagSignatureParts>
 {
     public Algorithm Algorithm;
-    public byte[] Data;
+    public byte[] Data = Array.Empty<byte>();
 
     public static bool operator !=(TagSignatureParts left, TagSignatureParts right) => !(left == right);
 
     public static bool operator ==(TagSignatureParts left, TagSignatureParts right) => left.Equals(right);
 
-    public override readonly bool Equals(object? obj) => obj is TagSignatureParts parts && Equals(parts);
+    public override bool Equals(object? obj) => obj is TagSignatureParts parts && Equals(parts);
 
-    public readonly bool Equals(TagSignatureParts other) => Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
+    public bool Equals(TagSignatureParts? other) => other is not null && Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
 
-    public override readonly int GetHashCode() => HashCode.Combine(Algorithm, Data);
+    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
 }
 
-public class TagSignature : ILTagExplicit<TagSignatureParts>
+public class TagSignature : ILTagOfExplicit<TagSignatureParts>
 {
     public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts { Algorithm = algorithm, Data = data }) {
     }
 
     [JsonIgnore]
-    public Algorithm Algorithm => Value.Algorithm;
+    public Algorithm Algorithm => Value!.Algorithm;
 
     [JsonIgnore]
-    public byte[] Data => Value.Data;
+    public byte[] Data => Value!.Data;
 
-    internal TagSignature(Stream s) : base(ILTagId.Signature, s) {
-    }
+    internal TagSignature(Stream s) : base(ILTagId.Signature, s) => Value.Required();
 
-    protected override TagSignatureParts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new TagSignatureParts {
-            Algorithm = (Algorithm)s.BigEndianReadUShort(),
-            Data = s.ReadBytes(bytes.Length - sizeof(ushort))
-        });
-
-    protected override byte[] ToBytes(TagSignatureParts value)
-        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
+    protected override TagSignatureParts? ValueFromStream(Stream s) => new() {
+        Algorithm = (Algorithm)s.BigEndianReadUShort(),
+        Data = s.ReadAllBytesAsync().Result
+    };
+    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
 }

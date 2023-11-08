@@ -55,12 +55,12 @@ public partial class InterlockId
         public override bool Equals(object? obj) => Equals(obj as Parts);
         public bool Equals(Parts? other) => other is not null && Algorithm == other.Algorithm && Type == other.Type && Data.EqualTo(other.Data);
         internal static byte DefaultType;
+        public static Parts FromStream(Stream s) => new() {
+            Type = s.ReadSingleByte(),
+            Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
+            Data = s.ReadAllBytesAsync().Result
+        };
 
-        internal Parts(Stream s) {
-            if (s.ILIntDecode() != ILTagId.InterlockId)
-                throw new InvalidDataException($"This is not an {nameof(InterlockId)}");
-            FromStream(s, (int)s.ILIntDecode());
-        }
 
         internal Parts(byte type, TagHash hash) : this(type, hash.Required().Algorithm, hash.Data.Required()) { }
 
@@ -88,9 +88,6 @@ public partial class InterlockId
                 Type = ToType(parts[0]);
             }
         }
-
-        internal Parts(Stream s, int length) => FromStream(s, length);
-
         internal static IEnumerable<string> AllTypes => _knownTypes.OrderBy(p => p.Key).Select(p => $"#{p.Key} - {p.Value.typeName} {(p.Key == DefaultType ? "[default] (if prefix is ommited)" : string.Empty)}");
 
         internal static HashAlgorithm DefaultAlgorithm => _defaultAlgorithm;
@@ -107,7 +104,7 @@ public partial class InterlockId
 
         internal string ToShortString() => $"{_conditionalTypePrefix}{_dataInfix}{_conditionalAlgorithmSuffix}";
 
-        internal void ToStream(Stream s) => s.WriteSingleByte(Type).BigEndianWriteUShort((ushort)Algorithm).WriteBytes(Data.OrEmpty());
+        internal Stream ToStream(Stream s) => s.WriteSingleByte(Type).BigEndianWriteUShort((ushort)Algorithm).WriteBytes(Data.OrEmpty());
 
         private const HashAlgorithm _defaultAlgorithm = HashAlgorithm.SHA256;
         private const char _prefixSeparator = '!';
@@ -132,11 +129,6 @@ public partial class InterlockId
         private static bool Matches(string typeName, string prefix) => typeName.Equals(prefix.Trim(), StringComparison.OrdinalIgnoreCase);
         private static string ToTypeName(byte type) => _knownTypes.TryGetValue(type, out var value) ? value.typeName : "?";
 
-        private void FromStream(Stream s, int length) {
-            Type = s.ReadSingleByte();
-            Algorithm = (HashAlgorithm)s.BigEndianReadUShort();
-            Data = s.ReadBytes(length - sizeof(ushort) - 1);
-        }
 
     }
 }

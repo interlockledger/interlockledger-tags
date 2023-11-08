@@ -40,7 +40,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
     [JsonIgnore]
     public ulong ValueLength => _valueLength ??= CalcValueLength();
 
-    protected ILTagOfExplicit(ulong tagId, T value) : base(tagId, value) {
+    protected ILTagOfExplicit(ulong tagId, T? value) : base(tagId, value) {
     }
 
     protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null)
@@ -58,7 +58,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
         return (ulong)stream.ToArray().Length;
     }
 
-    protected sealed override T? DeserializeInner(Stream s) {
+    private protected sealed async override Task<T?> DeserializeInnerAsync(Stream s) {
         ulong length = _valueLength ??= s.ILIntDecode();
         if (length > int.MaxValue && KeepEncodedBytesInMemory)
             throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
@@ -66,8 +66,22 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
             return ZeroLengthDefault;
         if (s is StreamSpan sp && (ulong)(sp.Length - sp.Position) < length)
             throw new InvalidDataException($"Decoded tag content length ({length}) is larger than total available bytes in stream");
+        if (length > 128 * 1024ul) {
+            _cache = await CachedTagPart.ExtractTagPartAsync(s, TagId, length);
+            return await _cache.PerformReadingOfStreamAsync(ValueFromStreamAsync, justBody: true);
+        }
         using var ss = new StreamSpan(s, length);
         return ValueFromStream(ss);
+    }
+    public override async Task<Stream> OpenReadingStreamAsync() {
+        if (KeepEncodedBytesInMemory)
+            return new MemoryStream(EncodedBytes, writable: false);
+        if (_cache is not null)
+            return await _cache.OpenReadingStreamAsync();
+        var s = await BuildTempStreamAsync();
+        await SerializeIntoAsync(s);
+        s.Position = 0;
+        return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
     }
 
     [JsonIgnore]
@@ -88,4 +102,10 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
     }
 
     private ulong? _valueLength;
+    private CachedTagPart? _cache;
+
+    protected override void DisposeManagedResources() {
+        _cache?.Dispose();
+        _cache = null;
+    }
 }

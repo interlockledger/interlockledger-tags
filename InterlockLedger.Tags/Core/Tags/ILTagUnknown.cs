@@ -31,7 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagUnknown : ILTagExplicit<byte[]>
+public sealed class ILTagUnknown : ILTagOfExplicit<byte[]>
 {
     public ILTagUnknown(ulong tagId, Stream s) : base(tagId, s) {
     }
@@ -50,7 +50,11 @@ public class ILTagUnknown : ILTagExplicit<byte[]>
     [JsonIgnore]
     public IDataModel? Model { get; }
 
-    protected override byte[] FromBytes(byte[] bytes) => bytes;
-
-    protected override byte[] ToBytes(byte[] value) => value;
+    protected override async Task<byte[]?> ValueFromStreamAsync(Stream s) => await s.ReadAllBytesAsync();
+    protected override byte[]? ValueFromStream(Stream s) => throw new InvalidOperationException("Can only be read on the Async version of this method");
+    protected override Stream ValueToStream(Stream s) {
+        if (Value is not null)
+            s.WriteBytes(Value);
+        return s;
+    }
 }

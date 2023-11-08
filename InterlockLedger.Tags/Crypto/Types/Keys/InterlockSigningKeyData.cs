@@ -32,9 +32,8 @@
 
 namespace InterlockLedger.Tags;
 
-public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyData.Parts>, IInterlockKeySecretData, IBaseKey
+public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.Parts>, IInterlockKeySecretData, IBaseKey
 {
-    private bool _disposedValue;
     public class Parts : InterlockKey.Parts
     {
         public const ushort InterlockSigningKeyVersion = 0x0006;
@@ -67,11 +66,11 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyData.Par
                 EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
             };
             if (version > 5) // Field index 12 - since version 6 //
-                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Select(t => t.Value);
+                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Safe().Select(t => t!.Value);
             return result;
         }
 
-        public void ToStream(Stream s) {
+        public Stream ToStream(Stream s) {
             s.EncodeUShort(Version);              // Field index 0 //
             s.EncodeString(Name);                 // Field index 1 //
             s.EncodeILIntArray(PurposesAsUlongs); // Field index 2 //
@@ -85,6 +84,7 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyData.Par
             s.EncodeILIntArray(FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
             s.EncodeILInt((ulong)EncryptedContentType); // Field index 11 - since version 5
             s.EncodeTagArray(Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
+            return s;
         }
 
     }
@@ -120,33 +120,6 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyData.Par
 
     internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
     }
-
-    protected override Parts FromBytes(byte[] bytes) => FromBytesHelper(bytes, Parts.FromStream);
-
-    protected override byte[] ToBytes(Parts value) => TagHelpers.ToBytesHelper(value.ToStream);
-
-    protected virtual void Dispose(bool disposing) {
-        if (!_disposedValue) {
-            if (disposing) {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposedValue = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~InterlockSigningKeyData()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
-    public void Dispose() {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
+    protected override Parts? ValueFromStream(Stream s) => Parts.FromStream(s);
+    protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
 }

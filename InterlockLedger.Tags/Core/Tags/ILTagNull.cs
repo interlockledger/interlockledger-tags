@@ -39,4 +39,5 @@ public sealed class ILTagNull : ILTag
     protected override Task<Stream> SerializeInnerAsync(Stream s) => Task.FromResult(s);
     public override string TextualRepresentation => "null";
     private ILTagNull() : base(ILTagId.Null) { }
+    protected sealed override void DisposeManagedResources() { }
 }

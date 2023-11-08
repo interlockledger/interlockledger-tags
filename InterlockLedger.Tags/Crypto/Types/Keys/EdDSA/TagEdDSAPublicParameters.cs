@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAPublicParameters : ILTagExplicit<EdDSAParameters>
+public class TagEdDSAPublicParameters : ILTagInBytesExplicit<EdDSAParameters>
 {
     public TagEdDSAPublicParameters(EdDSAParameters parameters)
         : base(ILTagId.EdDSAPublicParameters, parameters) {

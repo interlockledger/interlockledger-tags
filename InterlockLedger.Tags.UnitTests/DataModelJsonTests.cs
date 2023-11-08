@@ -458,7 +458,7 @@ public class DataModelJsonTests
 
         public JsonTestTaggedData FromStream(Stream s) => throw new NotImplementedException();
 
-        public class Reference : ILTagExplicit<Reference.Data>
+        public class Reference : ILTagOfExplicit<Reference.Data>
         {
             public Reference(ulong id, string name) : base(DataTagId, new Data(id, name)) {
             }
@@ -471,10 +471,8 @@ public class DataModelJsonTests
                 public string Name { get; set; } = name.Required();
             }
 
-            protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()!));
-
-            protected override byte[] ToBytes(Data value)
-                => TagHelpers.ToBytesHelper(s => s.EncodeILInt(Value!.Id).EncodeString(Value.Name));
+            protected override Data? ValueFromStream(Stream s) => new(s.DecodeILInt(), s.DecodeString()!);
+            protected override Stream ValueToStream(Stream s) => s.EncodeILInt(Value!.Id).EncodeString(Value.Name);
         }
 
         private ILTagArrayOfILTag<ILTagRange>? _taggedRanges => Ranges is not null ? new(Ranges.Select(r => new ILTagRange(r))) : null;

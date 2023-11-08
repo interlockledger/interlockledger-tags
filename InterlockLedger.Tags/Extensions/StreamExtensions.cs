@@ -43,5 +43,5 @@ public static partial class StreamExtensions
 
     public static Stream EncodeInterlockId(this Stream s, InterlockId? value) => s.EncodeTag(value);
 
- 
+
 }

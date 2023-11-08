@@ -91,7 +91,7 @@ public class IEnumerableExtensionsTests
     [Test]
     public void SafeSkipNulls() {
         static void SkipNullsTest(IEnumerable<string> values, string message, params string[] expected)
-            => Assert.That(expected.EqualTo(values.SafeSkipNulls()), message);
+            => Assert.That(expected.EqualTo(values.SkipNulls()), message);
         SkipNullsTest(null, "Should have returned empty enumerable for null enumerable");
         SkipNullsTest(Array.Empty<string>(), "Should have returned empty enumerable for empty enumerable");
         SkipNullsTest(new string[] { "something" }, "Should have returned single member enumerable for single member enumerable", "something");

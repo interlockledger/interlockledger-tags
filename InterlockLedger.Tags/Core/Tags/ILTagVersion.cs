@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
 [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
-public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersion>, IComparable<ILTagVersion>
+public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVersion>, IComparable<ILTagVersion>
 {
     protected override string? BuildTextualRepresentation() => InvalidityCause ?? Value?.ToString();
     public ILTagVersion(Version version) : base(ILTagId.Version, version) { }
@@ -68,23 +68,23 @@ public partial class ILTagVersion : ILTagExplicit<Version>, ITextual<ILTagVersio
         left is null ? right is null : left.CompareTo(right) >= 0;
 
     internal ILTagVersion(Stream s) : base(ILTagId.Version, s) { }
-    protected override Version FromBytes(byte[] bytes) {
-        return FromBytesHelper(bytes, s => Build(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
-        static Version Build(int major, int minor, int build, int revision)
-            => revision >= 0
-                ? new Version(major, minor, build, revision)
-                : build >= 0
-                    ? new Version(major, minor, build)
-                    : new Version(major, minor);
-    }
-
-    protected override byte[] ToBytes(Version value) =>
-        TagHelpers.ToBytesHelper(s => s.BigEndianWriteInt(value.Major)
-                                       .BigEndianWriteInt(value.Minor)
-                                       .BigEndianWriteInt(value.Build)
-                                       .BigEndianWriteInt(value.Revision));
+    private static Version BuildVersion(int major, int minor, int build, int revision)
+        => revision >= 0
+            ? new Version(major, minor, build, revision)
+            : build >= 0
+                ? new Version(major, minor, build)
+                : new Version(major, minor);
 
     [GeneratedRegex("""^\d+(\.\d+){1,3}$""")]
     private static partial Regex Version_Regex();
+
+    protected override Version? ValueFromStream(Stream s) =>
+        BuildVersion(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt());
+    protected override Stream ValueToStream(Stream s) =>
+        s.BigEndianWriteInt(Value!.Major)
+         .BigEndianWriteInt(Value.Minor)
+         .BigEndianWriteInt(Value.Build)
+         .BigEndianWriteInt(Value.Revision);
+
     private ILTagVersion() : this(Version.Parse("0.0.0.0".AsSpan())) { }
 }

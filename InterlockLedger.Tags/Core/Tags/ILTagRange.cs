@@ -36,7 +36,7 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
 [JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
-public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
+public class ILTagRange : ILTagOfExplicit<LimitedRange>, ITextual<ILTagRange>
 {
     public ILTagRange() : this(LimitedRange.Empty) { }
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
@@ -57,10 +57,8 @@ public class ILTagRange : ILTagExplicit<LimitedRange>, ITextual<ILTagRange>
     public ITextual<ILTagRange> Textual => this;
     public static ILTagRange Build(string textualRepresentation) => new(LimitedRange.Build(textualRepresentation));
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
-    protected override LimitedRange FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new LimitedRange(s.ILIntDecode(), s.BigEndianReadUShort()));
-    protected override byte[] ToBytes(LimitedRange value) =>
-        TagHelpers.ToBytesHelper(s => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
     static ILTagRange ITextual<ILTagRange>.InvalidBy(string cause) => new(LimitedRange.InvalidBy(cause));
     public bool Equals(ILTagRange? other) => base.Equals(other);
+    protected override LimitedRange ValueFromStream(Stream s) => new(s.ILIntDecode(), s.BigEndianReadUShort());
+    protected override Stream ValueToStream(Stream s) => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count);
 }

@@ -33,7 +33,7 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
-public readonly struct KeyParameters(RSAParameters parameters, KeyStrength strength)
+public class KeyParameters(RSAParameters parameters, KeyStrength strength)
 {
     public readonly RSAParameters Parameters = parameters;
     public readonly KeyStrength Strength = strength;
@@ -65,24 +65,22 @@ public readonly struct KeyParameters(RSAParameters parameters, KeyStrength stren
     private static KeyStrength DecodeStrength(Stream s) => (KeyStrength)(s.HasBytes() ? s.DecodeILInt() : 0);
 }
 
-public class TagRSAParameters : ILTagExplicit<KeyParameters>, IKeyParameters
+public class TagRSAParameters : ILTagOfExplicit<KeyParameters>, IKeyParameters
 {
     public TagRSAParameters(RSAParameters parameters, KeyStrength strength) : base(ILTagId.RSAParameters, new KeyParameters(parameters, strength)) {
     }
 
-    public TagPubKey PublicKey => new TagPubRSAKey(Value.Parameters);
+    public TagPubKey PublicKey => new TagPubRSAKey(Value!.Parameters);
 
-    public KeyStrength Strength => Value.Strength;
+    public KeyStrength Strength => Value!.Strength;
 
     public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
         using var s = new MemoryStream(encodedBytes);
         return s.Decode<TagRSAParameters>().Required();
     }
 
-    internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) {
-    }
+    internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) => Value.Required();
 
-    protected override KeyParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new KeyParameters(s));
-
-    protected override byte[] ToBytes(KeyParameters value) => TagHelpers.ToBytesHelper(s => value.EncodeTo(s));
+    protected override KeyParameters? ValueFromStream(Stream s) => new(s);
+    protected override Stream ValueToStream(Stream s) => Value!.EncodeTo(s);
 }

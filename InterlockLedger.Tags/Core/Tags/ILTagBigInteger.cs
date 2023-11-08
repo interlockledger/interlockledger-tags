@@ -38,4 +38,5 @@ public class ILTagBigInteger : ILTag
     public override string TextualRepresentation { get; }
 
     protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
+    protected sealed override void DisposeManagedResources() { }
 }

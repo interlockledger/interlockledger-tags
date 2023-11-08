@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Linq;
-
 namespace InterlockLedger.Tags;
 public static partial class StreamExtensions
 {
@@ -52,14 +50,14 @@ public static partial class StreamExtensions
                 : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
     }
 
-    public static T?[]? DecodeArray<T>(this Stream s) where T : ITaggableOf<T> =>
-        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T?>>(s));
+    public static T?[]? DecodeArray<T>(this Stream s) where T : class, ITaggableOf<T> =>
+        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s));
 
     public static T?[]? DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder)
-        where TT : ILTagOfExplicit<T?> =>
-        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T?>>(s, decoder));
+        where TT : ILTagOfExplicit<T> =>
+        DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s, decoder));
 
-    private static T?[]? DecodeArrayInternal<T>(Stream s, Func<Stream, ILTagArrayOfILTag<ILTagOfExplicit<T?>>> decodeTagArray)        {
+    private static T?[]? DecodeArrayInternal<T>(Stream s, Func<Stream, ILTagArrayOfILTag<ILTagOfExplicit<T>>> decodeTagArray) {
         var tagId = s.DecodeTagId();
         if (tagId != ILTagId.ILTagArray)
             throw new InvalidDataException($"Not {typeof(ILTagArrayOfILTag<ILTagOfExplicit<T>>).Name}");

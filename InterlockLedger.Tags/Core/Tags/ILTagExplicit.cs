@@ -32,12 +32,12 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class ILTagExplicit<T> : ILTagOfExplicit<T> where T : notnull
+public abstract class ILTagInBytesExplicit<T> : ILTagOfExplicit<T> where T : class
 {
-    protected ILTagExplicit(ulong tagId, T value) : base(tagId, value) {
+    protected ILTagInBytesExplicit(ulong tagId, T value) : base(tagId, value) {
     }
 
-    protected ILTagExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null)
+    protected ILTagInBytesExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null)
             : base(alreadyDeserializedTagId, s, setup) {
     }
 
@@ -48,14 +48,11 @@ public abstract class ILTagExplicit<T> : ILTagOfExplicit<T> where T : notnull
         using var s = new MemoryStream(bytes, writable: false);
         return deserialize(s);
     }
-    protected sealed override T ValueFromStream(StreamSpan s) => FromBytes(s.ReadAllBytesAsync().Result);
+    protected sealed override T ValueFromStream(Stream s) => FromBytes(s.ReadAllBytesAsync().Result);
 
     protected abstract T FromBytes(byte[] bytes);
 
-    protected sealed override Task<Stream> ValueToStreamAsync(Stream s) {
-        s.WriteBytes(ToBytes(Value));
-        return Task.FromResult(s);
-    }
+    protected sealed override Stream ValueToStream(Stream s) => s.WriteBytes(ToBytes(Value));
 
     protected abstract byte[] ToBytes(T Value);
 

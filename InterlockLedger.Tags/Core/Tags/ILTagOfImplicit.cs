@@ -39,7 +39,9 @@ public abstract class ILTagOfImplicit<T> : ILTagOf<T>
     protected ILTagOfImplicit(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
     }
 
-    protected sealed override T DeserializeInner(Stream s) => ValueFromStream(new StreamSpan(s, (ulong)(s.Length - s.Position)));
+    private protected sealed override Task<T> DeserializeInnerAsync(Stream s) => ValueFromStreamAsync(s);
 
     protected sealed override Task<Stream> SerializeInnerAsync(Stream s) => ValueToStreamAsync(s);
+
+    protected sealed override void DisposeManagedResources() { }
 }

@@ -97,7 +97,7 @@ public class DataIndexElement(string fieldPath)
     };
 }
 
-public class ILTagDataIndex : ILTagExplicit<DataIndex>
+public class ILTagDataIndex : ILTagOfExplicit<DataIndex>
 {
     public ILTagDataIndex(DataIndex index) : base(ILTagId.DataIndex, index) {
     }
@@ -105,17 +105,15 @@ public class ILTagDataIndex : ILTagExplicit<DataIndex>
     public ILTagDataIndex(Stream s) : base(ILTagId.DataIndex, s) {
     }
 
-    protected override DataIndex FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes, s => new DataIndex {
-            Name = s.DecodeString().WithDefault("?"),
-            IsUnique = s.DecodeBool(),
-            ElementsAsString = s.DecodeString().Safe(),
-        });
-
-    protected override byte[] ToBytes(DataIndex value)
-         => TagHelpers.ToBytesHelper(s => {
-             s.EncodeString(Value.Required().Name);
-             s.EncodeBool(Value.IsUnique);
-             s.EncodeString(Value.ElementsAsString);
-         });
+    protected override DataIndex? ValueFromStream(Stream s) => new() {
+        Name = s.DecodeString().WithDefault("?"),
+        IsUnique = s.DecodeBool(),
+        ElementsAsString = s.DecodeString().Safe(),
+    };
+    protected override Stream ValueToStream(Stream s) {
+        s.EncodeString(Value.Required().Name);
+        s.EncodeBool(Value.IsUnique);
+        s.EncodeString(Value.ElementsAsString);
+        return s;
+    }
 }

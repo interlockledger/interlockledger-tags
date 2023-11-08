@@ -31,7 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]?>
+public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]>
 {
     public ILTagArrayOfILInt(ulong[]? value) : base(ILTagId.ILIntArray, value) {
     }
@@ -42,7 +42,7 @@ public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]?>
     }
     internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
     protected override bool AreEquivalent(ILTagOf<ulong[]?> other) => Value.EquivalentTo(other?.Value!);
-    protected override ulong[]? ValueFromStream(StreamSpan s) {
+    protected override ulong[]? ValueFromStream(Stream s) {
         if (s.Length <= s.Position)
             return null;
         var length = (int)s.ILIntDecode();
@@ -52,7 +52,7 @@ public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]?>
         }
         return result;
     }
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         if (Value is not null) {
             s.ILIntEncode((ulong)Value.Length);
             if (Value.Length > 0) {
@@ -61,7 +61,7 @@ public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]?>
             }
         } else
             s.ILIntEncode(0ul);
-        return Task.FromResult(s);
+        return s;
     }
 
     private static ulong[] Elicit(object? opaqueValue)

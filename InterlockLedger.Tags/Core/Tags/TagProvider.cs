@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Text.Json;
-
 namespace InterlockLedger.Tags;
 public static class TagProvider
 {
@@ -43,11 +41,6 @@ public static class TagProvider
                 : new ILTagUnknown(tagId, s);
         }
         return ILTagNull.Instance;
-    }
-
-    public static ILTag DeserializeFrom(byte[] bytes) {
-        using var ms = new MemoryStream(bytes);
-        return DeserializeFrom(ms);
     }
 
     public static ILTag DeserializeFromJson(ulong tagId, object? payload)

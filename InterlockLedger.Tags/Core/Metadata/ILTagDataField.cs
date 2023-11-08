@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using System.Globalization;
+
 namespace InterlockLedger.Tags;
 
 public class ILTagDataField : ILTagOfExplicit<DataField>
@@ -98,7 +100,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
             public Tag(Stream s) : base(s.DecodeTagId(), s) {
             }
 
-            protected override Triplet ValueFromStream(StreamSpan s) =>
+            protected override Triplet ValueFromStream(Stream s) =>
                 new(s.DecodeILInt(), s.DecodeString(), s.DecodeString());
             protected override Task<Stream> ValueToStreamAsync(Stream s) {
                 s.EncodeILInt(Value.Required().Value);

@@ -30,8 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System.Linq;
-
 namespace InterlockLedger.Tags;
 public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<T>, new()
 {

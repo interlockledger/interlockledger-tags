@@ -60,12 +60,12 @@ public class MemoryMappedFileBackedILTag<T> : ILTagOfExplicit<T> where T : notnu
 
     protected string TagTypeName => $"{GetType().Name}#{TagId}";
 
-    protected override T ValueFromStream(StreamSpan s) => default!;
+    protected override T ValueFromStream(Stream s) => default!;
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         using var streamSlice = new StreamSpan(_mmvs, Offset, Length);
         streamSlice.CopyTo(s, _bufferLength);
-        return Task.FromResult(s);
+        return s;
     }
 
     protected override ulong CalcValueLength() => Length;

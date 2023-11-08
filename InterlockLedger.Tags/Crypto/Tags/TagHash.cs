@@ -34,12 +34,14 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
+using Org.BouncyCastle.Utilities;
+
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<TagHash>))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
 [SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>", Justification = "Implemented sealed in base class")]
-public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<TagHash>
+public sealed partial class TagHash : ILTagOfExplicit<TagHash.Parts>, ITextual<TagHash>
 {
     private TagHash() : this(HashAlgorithm.Invalid, []) { }
     public static TagHash InvalidBy(string cause) =>
@@ -62,13 +64,12 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
     internal TagHash(Stream s) : base(ILTagId.Hash, s) { }
     internal static TagHash HashFrom(X509Certificate2 certificate) => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
-    protected override Parts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new Parts {
-            Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-            Data = s.ReadBytes(bytes.Length - sizeof(ushort))
-        });
-    protected override byte[] ToBytes(Parts value)
-        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Data.OrEmpty()));
+
+    protected override Parts ValueFromStream(Stream s) => new() {
+        Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
+        Data = s.ReadAllBytesAsync().Result
+    };
+    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty());
     private TagHash(Parts parts) : base(ILTagId.Hash, parts) { }
     private static byte[] HashSha256(byte[] data) {
         using var hasher = SHA256.Create();

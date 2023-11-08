@@ -33,10 +33,12 @@
 
 using System.Security.Cryptography;
 
+using Org.BouncyCastle.Utilities;
+
 namespace InterlockLedger.Tags;
 
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
-public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<TagHmac>
+public sealed partial class TagHmac : ILTagOfExplicit<TagHash.Parts>, ITextual<TagHmac>
 {
     private TagHmac() : this(HashAlgorithm.Invalid, []) { }
     public static TagHmac InvalidBy(string cause) =>
@@ -64,13 +66,6 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     private static partial Regex AnythingRegex();
     private TagHmac(TagHash.Parts parts) : base(ILTagId.Hmac, parts) { }
     internal TagHmac(Stream s) : base(ILTagId.Hmac, s) { }
-    protected override TagHash.Parts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new TagHash.Parts {
-            Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-            Data = s.ReadBytes(bytes.Length - sizeof(ushort))
-        });
-    protected override byte[] ToBytes(TagHash.Parts value)
-         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Data.OrEmpty()));
     private static TagHash.Parts Split(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentNullException(nameof(textualRepresentation));
@@ -80,4 +75,9 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     }
     private bool DataEquals(byte[]? otherData) => (Data.None() && otherData.None()) || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
     protected override string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
+    protected override TagHash.Parts? ValueFromStream(Stream s) => new() {
+        Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
+        Data = s.ReadAllBytesAsync().Result
+    };
+    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty());
 }

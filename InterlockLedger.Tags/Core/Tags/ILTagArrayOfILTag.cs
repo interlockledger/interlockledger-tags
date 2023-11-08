@@ -32,11 +32,12 @@
 
 namespace InterlockLedger.Tags;
 
-public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]?> where T : ILTag
+public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]> where T : ILTag
 {
     public ILTagArrayOfILTag(T?[]? value) : this(ILTagId.ILTagArray, value) { }
     public ILTagArrayOfILTag(IEnumerable<T?> value) : this(ILTagId.ILTagArray, value?.ToArray()) { }
     public T? this[int i] => Value?[i];
+
     [JsonIgnore]
     public int Length => Value?.Length ?? 0;
 
@@ -52,7 +53,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]?> where T : ILTag
     private protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s, null) {
     }
 
-    protected override T?[]? ValueFromStream(StreamSpan s) {
+    protected override T?[]? ValueFromStream(Stream s) {
         if (s.Length > s.Position) {
             try {
                 var arrayLength = (int)s.ILIntDecode();
@@ -77,7 +78,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]?> where T : ILTag
         return null;
     }
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         if (Value is not null) {
             s.ILIntEncode((ulong)Value.Length);
             if (Value.Length > 0) {
@@ -85,7 +86,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]?> where T : ILTag
                     s.EncodeTag(tag);
             }
         }
-        return Task.FromResult(s);
+        return s;
 
     }
 

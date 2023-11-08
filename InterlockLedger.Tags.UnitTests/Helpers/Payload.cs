@@ -31,7 +31,8 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class Payload<T> : ILTagExplicit<T>, IVersion, INamed where T : IRecordData<T>, new()
+
+public class Payload<T> : ILTagOfExplicit<T>, IVersion, INamed where T : IRecordData<T>, new()
 {
     public Payload(ulong tagId, T jsonTestTaggedData) : base(tagId, jsonTestTaggedData) {
     }
@@ -44,17 +45,17 @@ public class Payload<T> : ILTagExplicit<T>, IVersion, INamed where T : IRecordDa
 
     public override string ToString() => Value.ToString();
 
-    protected override T FromBytes(byte[] bytes)
-       => FromBytesHelper(bytes, s => TryBuildFrom(() => new T().FromStream(s)));
-
-    protected override byte[] ToBytes(T Value)
-        => TagHelpers.ToBytesHelper(s => Value.ToStream(s));
-
     private static TR TryBuildFrom<TR>(Func<TR> func) {
         try {
             return func();
         } catch (InvalidDataException e) {
             throw new InvalidDataException($"Not a properly encoded Payload of {typeof(T).Name}", e);
         }
+    }
+
+    protected override T ValueFromStream(Stream s) => TryBuildFrom(() => new T().FromStream(s));
+    protected override Stream ValueToStream(Stream s) {
+        Value.ToStream(s);
+        return s;
     }
 }

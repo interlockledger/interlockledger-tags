@@ -99,8 +99,6 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
 
 public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData, IBaseKey
 {
-    private bool _disposedValue;
-
     public InterlockUpdatableSigningKeyData(KeyPurpose[] purposes,
                                             string name,
                                             byte[] encrypted,
@@ -166,7 +164,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
 
     protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
 
-    protected override UpdatableParts ValueFromStream(StreamSpan s) {
+    protected override UpdatableParts ValueFromStream(Stream s) {
         var version = s.DecodeUShort();
         return new UpdatableParts {
             Version = version,                                      // Field index 0 //
@@ -183,8 +181,8 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         };
     }
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
-        s.EncodeUShort(Value.Version);                          // Field index 0 //
+    protected override Stream ValueToStream(Stream s) {
+        s.EncodeUShort(Value.Required().Version);               // Field index 0 //
         s.EncodeString(Value.Name);                             // Field index 1 //
         s.EncodeILIntArray(Value.PurposesAsUlongs);             // Field index 2 //
         s.EncodeInterlockId(Value.Id);                          // Field index 3 //
@@ -195,33 +193,8 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         s.EncodeDateTimeOffset(Value.LastSignatureTimeStamp);   // Field index 8 //
         s.EncodeILInt(Value.SignaturesWithCurrentKey);          // Field index 9 //
         s.EncodeILInt((ulong)Value.Strength);                   // Field index 10 //
-        return Task.FromResult(s);
+        return s;
     }
 
     private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStreamAsync(s));
-
-    private void Dispose(bool disposing) {
-        if (!_disposedValue) {
-            if (disposing) {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            _disposedValue = true;
-        }
-    }
-
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~InterlockUpdatableSigningKeyData()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
-
-    public void Dispose() {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
 }

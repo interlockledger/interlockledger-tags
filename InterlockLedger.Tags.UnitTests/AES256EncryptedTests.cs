@@ -80,7 +80,7 @@ public class AES256EncryptedTests
 
     private static bool AsBool(ILTagBool tag) => tag?.Value ?? throw new InvalidDataException("Not an ILTagBool");
 
- 
+
 
     private static void NewAES256EncryptedFromStream(byte[] bytes, bool value, string password) {
         var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(bytes));

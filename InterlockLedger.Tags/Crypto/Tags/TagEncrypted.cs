@@ -47,7 +47,7 @@ public struct TagEncryptedParts : IEquatable<TagEncryptedParts>
     public override readonly int GetHashCode() => HashCode.Combine(Algorithm, CipherData);
 }
 
-public class TagEncrypted : ILTagExplicit<TagEncryptedParts>
+public class TagEncrypted : ILTagOfExplicit<TagEncryptedParts>
 {
     public TagEncrypted(CipherAlgorithm algorithm, byte[] data) :
         base(ILTagId.Encrypted, new TagEncryptedParts { Algorithm = algorithm, CipherData = data }) {
@@ -59,13 +59,9 @@ public class TagEncrypted : ILTagExplicit<TagEncryptedParts>
 
     internal TagEncrypted(Stream s) : base(ILTagId.Encrypted, s) {
     }
-
-    protected override TagEncryptedParts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new TagEncryptedParts {
-            Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
-            CipherData = s.DecodeByteArray().Required(),
-        });
-
-    protected override byte[] ToBytes(TagEncryptedParts value)
-        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).EncodeByteArray(Value.CipherData));
+    protected override TagEncryptedParts ValueFromStream(Stream s) => new() {
+        Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
+        CipherData = s.DecodeByteArray().Required(),
+    };
+    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value.Algorithm).EncodeByteArray(Value.CipherData);
 }

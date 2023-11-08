@@ -38,10 +38,10 @@ public class ILTagUInt8 : ILTagOfImplicit<byte>
 
     internal ILTagUInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override byte ValueFromStream(StreamSpan s) => s.ReadSingleByte();
+    protected override byte ValueFromStream(Stream s) => s.ReadSingleByte();
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         s.WriteSingleByte(Value);
-        return Task.FromResult(s);
+        return s;
     }
 }

@@ -31,7 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
+public class TagReadingKey : ILTagOfExplicit<TagReadingKey.Parts>
 {
     public TagReadingKey(string id, TagHash publicKeyHash, byte[] encryptedKey, byte[] encryptedIV)
         : base(ILTagId.ReadingKey, new Parts(id, publicKeyHash, encryptedKey, encryptedIV)) {
@@ -76,15 +76,14 @@ public class TagReadingKey : ILTagExplicit<TagReadingKey.Parts>
     internal TagReadingKey(Stream s) : base(ILTagId.ReadingKey, s) {
     }
 
-    protected override Parts FromBytes(byte[] bytes) =>
-        FromBytesHelper(bytes, s => new Parts(s.DecodeString().Required(),
-                                              s.Decode<TagHash>().Required(),
-                                              s.DecodeByteArray().Required(),
-                                              s.DecodeByteArray().Required()));
-
-    protected override byte[] ToBytes(Parts value)
-        => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.ReaderId)
-                               .EncodeTag(Value.PublicKeyHash)
-                               .EncodeByteArray(Value.EncryptedKey)
-                               .EncodeByteArray(Value.EncryptedIV));
+    protected override Parts ValueFromStream(Stream s) =>
+        new(id: s.DecodeString().Required(),
+            publicKeyHash: s.Decode<TagHash>().Required(),
+            encryptedKey: s.DecodeByteArray().Required(),
+            encryptedIV: s.DecodeByteArray().Required());
+    protected override Stream ValueToStream(Stream s) =>
+        s.EncodeString(Value.ReaderId)
+         .EncodeTag(Value.PublicKeyHash)
+         .EncodeByteArray(Value.EncryptedKey)
+         .EncodeByteArray(Value.EncryptedIV);
 }

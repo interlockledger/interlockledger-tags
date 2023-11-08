@@ -134,10 +134,12 @@ public class ILTagArrayOfILTagTests
         Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
-    private class TestTagOfOneByte(ulong tagId, Stream s) : ILTagExplicit<byte>(tagId, s)
+    private class TestTagOfOneByte(ulong tagId, Stream s) : ILTagOfExplicit<byte>(tagId, s)
     {
-        protected override byte FromBytes(byte[] bytes) => bytes?.FirstOrDefault() ?? 0;
-
-        protected override byte[] ToBytes(byte Value) => new byte[] { Value };
+        protected override byte ValueFromStream(Stream s) => s.ReadSingleByte();
+        protected override Stream ValueToStream(Stream s) {
+            s.WriteByte(Value);
+            return s;
+        }
     }
 }

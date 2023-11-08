@@ -33,7 +33,7 @@
 using System.Buffers;
 
 namespace InterlockLedger.Tags;
-public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : notnull, VersionedValue<T>,  new()
+public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : notnull, VersionedValue<T>, new()
 {
     [JsonIgnore]
     public ILTag AsILTag => AsPayload;
@@ -114,11 +114,11 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
 
         protected override ulong CalcValueLength() => Value!.CalcValueLength();
 
-        protected override T ValueFromStream(StreamSpan s) => new T().FromStream(s);
+        protected override T ValueFromStream(Stream s) => new T().FromStream(s);
 
-        protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        protected override Stream ValueToStream(Stream s) {
             Value!.ToStream(s);
-            return Task.FromResult(s);
+            return s;
         }
 
         private void Initialize() {

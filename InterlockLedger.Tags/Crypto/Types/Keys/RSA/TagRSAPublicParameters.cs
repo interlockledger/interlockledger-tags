@@ -33,20 +33,18 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
-public class TagRSAPublicParameters : ILTagExplicit<RSAParameters>
+public class TagRSAPublicParameters : ILTagOfExplicit<RSAParameters>
 {
     public TagRSAPublicParameters(RSAParameters parameters) : base(ILTagId.RSAParametersPublic, parameters) {
     }
 
     internal TagRSAPublicParameters(Stream s) : base(ILTagId.RSAParametersPublic, s) {
     }
-
-    protected override RSAParameters FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new RSAParameters {
+    protected override RSAParameters ValueFromStream(Stream s) => new() {
         Modulus = s.DecodeByteArray(),
         Exponent = s.DecodeByteArray()
-    });
-
-    protected override byte[] ToBytes(RSAParameters value) => TagHelpers.ToBytesHelper(s =>
+    };
+    protected override Stream ValueToStream(Stream s) =>
         s.EncodeByteArray(Value.Modulus)
-         .EncodeByteArray(Value.Exponent));
+         .EncodeByteArray(Value.Exponent);
 }

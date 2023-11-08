@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
-public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
+public partial class InterlockId : ILTagOfExplicit<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
 {
 
     private InterlockId() : this(DefaultType, HashAlgorithm.Invalid, []) { }
@@ -60,7 +60,7 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public int CompareTo(InterlockId? other) => SafeCompare(this, other);
     [JsonIgnore]
     public ITextual<InterlockId> Textual => this;
-    [JsonIgnore] 
+    [JsonIgnore]
     public string AsBase64 => Value!.Data.Safe().ToSafeBase64();
 
     public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause };
@@ -73,20 +73,24 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
     public static bool operator <=(InterlockId a, InterlockId b) => SafeCompare(a, b) <= 0;
     public static bool operator >(InterlockId a, InterlockId b) => SafeCompare(a, b) > 0;
     public static bool operator >=(InterlockId a, InterlockId b) => SafeCompare(a, b) >= 0;
-    public static T Resolve<T>(Stream s) where T : InterlockId => (T)new Parts(s).Resolve();
+    public static T Resolve<T>(Stream s) where T : InterlockId =>
+        s.ILIntDecode() == ILTagId.InterlockId
+            ? (T)DeserializeAndResolve(s)
+            : throw new InvalidDataException("Not an InterlockId");
 
     protected InterlockId(string textualRepresentation) : this(new Parts(textualRepresentation)) { }
     protected InterlockId(byte type, HashAlgorithm algorithm, byte[]? data) : this(new Parts(type, algorithm, data)) { }
     protected InterlockId(Parts parts) : base(ILTagId.InterlockId, parts) { }
+
+    private InterlockId(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) { }
     protected static void RegisterResolver(byte type, string typeName, Func<Parts, InterlockId> resolver) =>
         Parts.RegisterResolver(type, typeName.Required(), resolver.Required());
     protected void CheckType(byte type) {
         if (Type != type)
             throw new InvalidDataException($"This is not a {GetType().Name}");
     }
-    protected override Parts FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Parts(s, bytes.Length));
-    protected override byte[] ToBytes(Parts value) => TagHelpers.ToBytesHelper(s => value.ToStream(s));
-    internal static ILTag DeserializeAndResolve(Stream s) => new Parts(s, (int)s.ILIntDecode()).Resolve();
+    internal static InterlockId DeserializeAndResolve(Stream s) =>
+        new InterlockId(ILTagId.InterlockId, s).Value!.Resolve();
     private static int SafeCompare(InterlockId? a, InterlockId? b) {
         if (a is null)
             return b is null ? 0 : -1;
@@ -108,4 +112,6 @@ public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();
+    protected override Parts? ValueFromStream(Stream s) => Parts.FromStream(s);
+    protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
 }

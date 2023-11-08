@@ -53,14 +53,15 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 
     protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
         setup?.Invoke(this);
-        Value = DeserializeInner(s);
+        Value = DeserializeInnerAsync(s).Result;
     }
+    private protected abstract Task<T> DeserializeInnerAsync(Stream s);
 
-    protected abstract T DeserializeInner(Stream s);
+    protected abstract T ValueFromStream(Stream s);
+    protected virtual Task<T> ValueFromStreamAsync(Stream s) => Task.FromResult(ValueFromStream(s));
 
-    protected abstract T ValueFromStream(StreamSpan s);
-
-    protected abstract Task<Stream> ValueToStreamAsync(Stream s);
+    protected abstract Stream ValueToStream(Stream s);
+    protected virtual Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(ValueToStream(s));
 
     public sealed override int GetHashCode() => HashCode.Combine(TagId, Value);
     public sealed override bool Equals(object? obj) => Equals(obj as ILTagOf<T>);

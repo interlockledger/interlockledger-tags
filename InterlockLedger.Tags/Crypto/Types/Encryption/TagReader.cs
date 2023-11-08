@@ -31,18 +31,20 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
+public class TagReader : ILTagOfExplicit<TagReader.Parts>, IIdentifiedPublicKey
 {
     public TagReader(string name, TagPubKey publicKey) :
-        base(ILTagId.Reader, new Parts(name.Required(), publicKey.Required())) { }
+        base(ILTagId.Reader, new Parts(name.Required(), publicKey.Required())) {
+    }
 
-    public TagReader(IIdentifiedPublicKey ipk) : this(ipk.Required().Identifier, ipk.PublicKey) { }
+    public TagReader(IIdentifiedPublicKey ipk) : this(ipk.Required().Identifier, ipk.PublicKey) => Id = ipk.Id;
 
-    BaseKeyId? IIdentifiedPublicKey.Id { get; }
-    public string Name => Value.Name;
-    public TagPubKey PublicKey => Value.PublicKey;
+    public string Name => Value!.Name;
+    public TagPubKey PublicKey => Value!.PublicKey;
 
-    public readonly struct Parts : IEquatable<Parts>
+    public BaseKeyId? Id { get; }
+
+    public class Parts : IEquatable<Parts>
     {
         public readonly string Name;
         public readonly TagPubKey PublicKey;
@@ -60,19 +62,15 @@ public class TagReader : ILTagExplicit<TagReader.Parts>, IIdentifiedPublicKey
 
         public override bool Equals(object? obj) => obj is Parts parts && Equals(parts);
 
-        public bool Equals(Parts other) => EqualityComparer<TagPubKey>.Default.Equals(PublicKey, other.PublicKey) && Name == other.Name;
+        public bool Equals(Parts? other) => other is not null && PublicKey.Equals(other.PublicKey) && Name == other.Name;
 
         public override int GetHashCode() => HashCode.Combine(PublicKey, Name);
 
         public override string ToString() => $"Reader '{Name}' with public key {PublicKey}";
     }
 
-    internal TagReader(Stream s) : base(ILTagId.Reader, s) {
-    }
+    internal TagReader(Stream s) : base(ILTagId.Reader, s) => Value.Required();
 
-    protected override Parts FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes, s => new Parts(s.DecodeString().Required(), s.Decode<TagPubKey>().Required()));
-
-    protected override byte[] ToBytes(Parts value)
-        => TagHelpers.ToBytesHelper(s => s.EncodeString(Value.Name).EncodeTag(Value.PublicKey));
+    protected override Parts ValueFromStream(Stream s) => new(s.DecodeString().Required(), s.Decode<TagPubKey>().Required());
+    protected override Stream ValueToStream(Stream s) => s.EncodeString(Value!.Name).EncodeTag(Value.PublicKey);
 }

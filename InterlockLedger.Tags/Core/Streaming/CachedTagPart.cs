@@ -39,12 +39,24 @@ public class CachedTagPart : AbstractDisposable
     public ulong TagId { get; private set; }
     public ulong Size { get; private set; }
     public long BodyPosition { get; private set; }
-    public Task PerformReadingOfStreamAsync(Func<Stream, Task> performAsync) =>
-        DoAsync(() => performAsync(_file.OpenRead()));
+    public Task<T?> PerformReadingOfStreamAsync<T>(Func<Stream, Task<T?>> performAsync, bool justBody) =>
+        UnsafeDoAsync(async () => {
+            using var stream = await OpenReadingStreamAsync();
+            if (justBody)
+                stream.Position = BodyPosition;
+            return await performAsync(stream);
+        });
     public Task CopyToAsync(Stream destination) =>
-        DoAsync(() => _file.OpenRead().CopyToAsync(destination));
+        DoAsync(async () => {
+            using var stream = await OpenReadingStreamAsync();
+            await stream.CopyToAsync(destination);
+        });
+
+    internal Task<Stream> OpenReadingStreamAsync() => Task.FromResult<Stream>(_file.OpenRead());
+
     internal static Task<CachedTagPart> ExtractTagPartAsync(Stream source, ulong tagId, ulong size) =>
         new CachedTagPart().DoExtractTagPartAsync(source, tagId, size);
+
     protected override void DisposeManagedResources() {
         if (_file.Exists)
             _file.Delete();
@@ -78,6 +90,7 @@ public class CachedTagPart : AbstractDisposable
         }
         return this;
     }
+
 
     private CachedTagPart() {
         _file = new FileInfo(Path.GetTempFileName());

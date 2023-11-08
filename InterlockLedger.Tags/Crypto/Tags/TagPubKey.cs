@@ -33,12 +33,14 @@
 
 using System.Security.Cryptography.X509Certificates;
 
+using Org.BouncyCastle.Utilities;
+
 namespace InterlockLedger.Tags;
 public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 
 [TypeConverter(typeof(TypeCustomConverter<TagPubKey>))]
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
-public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
+public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKey>
 {
     public Algorithm Algorithm => Value.Algorithm;
     public byte[] Data => Value.Data;
@@ -96,12 +98,13 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
 
     protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) { }
 
-    protected override TagKeyParts FromBytes(byte[] bytes)
-        => FromBytesHelper(bytes,
-            s => new TagKeyParts((Algorithm)s.BigEndianReadUShort(), s.ReadBytes(bytes.Length - sizeof(ushort))));
-    protected override byte[] ToBytes(TagKeyParts value)
-        => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
     private TagPubKey() : this(Algorithm.Invalid, []) { }
+    protected override TagKeyParts? ValueFromStream(Stream s) =>
+        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().Result);
+    protected override Stream ValueToStream(Stream s) =>
+        s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
+
+    private TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
 }
