@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
@@ -32,30 +32,10 @@
 
 namespace InterlockLedger.Tags;
 
-public class Payload<T> : ILTagOfExplicit<T>, IVersion, INamed where T : IRecordData<T>, new()
+public interface IPreloadableTagStorage
 {
-    public Payload(ulong tagId, T jsonTestTaggedData) : base(tagId, jsonTestTaggedData) {
-    }
+    Stream PayloadReadStream { get; }
 
-    public Payload(ulong alreadyDeserializedTagId, Stream s) : base(alreadyDeserializedTagId, s) {
-    }
-
-    public string TypeName => typeof(T).Name;
-    public ushort Version => Value.Version;
-
-    public override string ToString() => Value.ToString();
-
-    private static TR TryBuildFrom<TR>(Func<TR> func) {
-        try {
-            return func();
-        } catch (InvalidDataException e) {
-            throw new InvalidDataException($"Not a properly encoded Payload of {typeof(T).Name}", e);
-        }
-    }
-
-    protected override T ValueFromStream(StreamSpan s) => TryBuildFrom(() => new T().FromStream(s));
-    protected override Stream ValueToStream(Stream s) {
-        Value.ToStream(s);
-        return s;
-    }
+    Stream CopyTo(Stream s);
+    void Mark(StreamSpan s);
 }

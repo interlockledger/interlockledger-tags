@@ -40,7 +40,7 @@ public class TagRSAPublicParameters : ILTagOfExplicit<RSAParameters>
 
     internal TagRSAPublicParameters(Stream s) : base(ILTagId.RSAParametersPublic, s) {
     }
-    protected override RSAParameters ValueFromStream(Stream s) => new() {
+    protected override RSAParameters ValueFromStream(StreamSpan s) => new() {
         Modulus = s.DecodeByteArray(),
         Exponent = s.DecodeByteArray()
     };

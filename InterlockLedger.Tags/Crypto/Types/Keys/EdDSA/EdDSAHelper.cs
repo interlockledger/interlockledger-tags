@@ -40,7 +40,7 @@ namespace InterlockLedger.Tags;
 public static class EdDSAHelper
 {
     public static TagEdDSAParameters Validate(this TagEdDSAParameters? tagEdDSAParameters)
-        => tagEdDSAParameters.Required().Value.HasPrivatePart
+        => tagEdDSAParameters.Required().Value.Required().HasPrivatePart
             ? tagEdDSAParameters
             : throw new InvalidDataException("Key parameters don't have private key");
 

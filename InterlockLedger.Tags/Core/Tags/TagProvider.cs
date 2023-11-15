@@ -31,6 +31,8 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
+
+
 public static class TagProvider
 {
     public static ILTag DeserializeFrom(Stream s) {

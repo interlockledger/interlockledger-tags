@@ -62,7 +62,7 @@ public abstract class ILTagAbstractDictionary<T> : ILTagOfExplicit<Dictionary<st
 
     protected abstract void EncodeValue(Stream s, T? value);
 
-    protected override Dictionary<string, T?>? ValueFromStream(Stream s) {
+    protected override Dictionary<string, T?>? ValueFromStream(StreamSpan s) {
         if (s.Length == 0)
             return null;
         var result = new Dictionary<string, T?>();

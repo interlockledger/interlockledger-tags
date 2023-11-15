@@ -71,6 +71,6 @@ public class TagReader : ILTagOfExplicit<TagReader.Parts>, IIdentifiedPublicKey
 
     internal TagReader(Stream s) : base(ILTagId.Reader, s) => Value.Required();
 
-    protected override Parts ValueFromStream(Stream s) => new(s.DecodeString().Required(), s.Decode<TagPubKey>().Required());
+    protected override Parts ValueFromStream(StreamSpan s) => new(s.DecodeString().Required(), s.Decode<TagPubKey>().Required());
     protected override Stream ValueToStream(Stream s) => s.EncodeString(Value!.Name).EncodeTag(Value.PublicKey);
 }

@@ -38,7 +38,7 @@ public class ILTagInt32 : ILTagOfImplicit<int>
 
     internal ILTagInt32(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int32, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override int ValueFromStream(Stream s) => s.BigEndianReadInt();
+    protected override int ValueFromStream(StreamSpan s) => s.BigEndianReadInt();
 
     protected override Stream ValueToStream(Stream s) {
         s.BigEndianWriteInt(Value);

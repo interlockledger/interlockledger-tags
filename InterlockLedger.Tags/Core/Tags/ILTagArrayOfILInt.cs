@@ -42,7 +42,7 @@ public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]>
     }
     internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
     protected override bool AreEquivalent(ILTagOf<ulong[]?> other) => Value.EquivalentTo(other?.Value!);
-    protected override ulong[]? ValueFromStream(Stream s) {
+    protected override ulong[]? ValueFromStream(StreamSpan s) {
         if (s.Length <= s.Position)
             return null;
         var length = (int)s.ILIntDecode();

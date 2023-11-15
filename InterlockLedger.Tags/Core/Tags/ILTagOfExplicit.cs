@@ -71,13 +71,13 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
             return await _cache.PerformReadingOfStreamAsync(ValueFromStreamAsync, justBody: true);
         }
         using var ss = new StreamSpan(s, length);
-        return ValueFromStream(ss);
+        return await ValueFromStreamAsync(ss);
     }
     public override async Task<Stream> OpenReadingStreamAsync() {
-        if (KeepEncodedBytesInMemory)
-            return new MemoryStream(EncodedBytes, writable: false);
         if (_cache is not null)
             return await _cache.OpenReadingStreamAsync();
+        if (KeepEncodedBytesInMemory)
+            return new MemoryStream(EncodedBytes, writable: false);
         var s = await BuildTempStreamAsync();
         await SerializeIntoAsync(s);
         s.Position = 0;

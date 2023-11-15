@@ -65,7 +65,7 @@ public sealed partial class TagHash : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     internal TagHash(Stream s) : base(ILTagId.Hash, s) { }
     internal static TagHash HashFrom(X509Certificate2 certificate) => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
 
-    protected override Parts ValueFromStream(Stream s) => new() {
+    protected override Parts ValueFromStream(StreamSpan s) => new() {
         Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
         Data = s.ReadAllBytesAsync().Result
     };

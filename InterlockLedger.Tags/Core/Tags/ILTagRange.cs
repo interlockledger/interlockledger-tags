@@ -59,6 +59,6 @@ public class ILTagRange : ILTagOfExplicit<LimitedRange>, ITextual<ILTagRange>
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
     static ILTagRange ITextual<ILTagRange>.InvalidBy(string cause) => new(LimitedRange.InvalidBy(cause));
     public bool Equals(ILTagRange? other) => base.Equals(other);
-    protected override LimitedRange ValueFromStream(Stream s) => new(s.ILIntDecode(), s.BigEndianReadUShort());
+    protected override LimitedRange ValueFromStream(StreamSpan s) => new(s.ILIntDecode(), s.BigEndianReadUShort());
     protected override Stream ValueToStream(Stream s) => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count);
 }

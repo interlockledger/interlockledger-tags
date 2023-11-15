@@ -320,75 +320,75 @@ public class DataModelJsonTests
         public static readonly DataModel Model = new() {
             PayloadName = nameof(JsonTestTaggedData),
             PayloadTagId = PayloadTagId,
-            DataFields = new DataField[] {
-                    new() {
-                        TagId = ILTagId.UInt16,
-                        Name = nameof(Version),
-                        Version = 0
-                    },
-                    new() {
-                        TagId = ILTagId.ILInt,
-                        Name = nameof(Id),
-                        Version = 0
-                    },
-                    new() {
-                        TagId = ILTagId.String,
-                        Name = nameof(Name),
-                        Version = 0
-                    },
-                    new() {
-                        TagId = ILTagId.String,
-                        Name = nameof(Hidden),
-                        Version = 1
-                    },
-                    new() {
-                        TagId = ILTagId.Version,
-                        Name = nameof(SemanticVersion),
-                        Version = 2
-                    },
-                    new() {
-                        TagId = ILTagId.ILIntArray,
-                        Name = nameof(Values),
-                        Version = 3
-                    },
-                    new() {
-                        TagId = DataTagId,
-                        Name = nameof(Fancy),
-                        Version = 4,
-                        SubDataFields = new DataField[] {
-                            new() {
-                                TagId = ILTagId.ILInt,
-                                Name = nameof(Reference.Data.Id)
-                            },
-                            new() {
-                                TagId = ILTagId.String,
-                                Name = nameof(Reference.Data.Name)
-                            },
-                       }
-                    },
-                    new() {
-                        TagId = ILTagId.ILTagArray,
-                        Name = nameof(Ranges),
-                        Version = 5,
-                        ElementTagId = ILTagId.Range
-                    },
-                    new() {
-                        TagId = ILTagId.ByteArray,
-                        Name = nameof(Bytes),
-                        Version = 6
-                    },
-                    new() {
-                        TagId = ILTagId.UInt8,
-                        Name = nameof(Enumeration),
-                        Version = 7,
-                        EnumerationDefinition = new EnumerationDictionary {
-                            [(byte)SomeEnumeration.None] = new EnumerationDetails(nameof(SomeEnumeration.None), "Nothing"),
-                            [(byte)SomeEnumeration.Some] = new EnumerationDetails(nameof(SomeEnumeration.Some), "A small number"),
-                            [(byte)SomeEnumeration.Lots] = new EnumerationDetails(nameof(SomeEnumeration.Lots), "A large number"),
+            DataFields = [
+                new() {
+                    TagId = ILTagId.UInt16,
+                    Name = nameof(Version),
+                    Version = 0
+                },
+                new() {
+                    TagId = ILTagId.ILInt,
+                    Name = nameof(Id),
+                    Version = 0
+                },
+                new() {
+                    TagId = ILTagId.String,
+                    Name = nameof(Name),
+                    Version = 0
+                },
+                new() {
+                    TagId = ILTagId.String,
+                    Name = nameof(Hidden),
+                    Version = 1
+                },
+                new() {
+                    TagId = ILTagId.Version,
+                    Name = nameof(SemanticVersion),
+                    Version = 2
+                },
+                new() {
+                    TagId = ILTagId.ILIntArray,
+                    Name = nameof(Values),
+                    Version = 3
+                },
+                new() {
+                    TagId = DataTagId,
+                    Name = nameof(Fancy),
+                    Version = 4,
+                    SubDataFields = new DataField[] {
+                        new() {
+                            TagId = ILTagId.ILInt,
+                            Name = nameof(Reference.Data.Id)
                         },
-                        EnumerationAsFlags = true
+                        new() {
+                            TagId = ILTagId.String,
+                            Name = nameof(Reference.Data.Name)
+                        },
                     }
+                },
+                new() {
+                    TagId = ILTagId.ILTagArray,
+                    Name = nameof(Ranges),
+                    Version = 5,
+                    ElementTagId = ILTagId.Range
+                },
+                new() {
+                    TagId = ILTagId.ByteArray,
+                    Name = nameof(Bytes),
+                    Version = 6
+                },
+                new() {
+                    TagId = ILTagId.UInt8,
+                    Name = nameof(Enumeration),
+                    Version = 7,
+                    EnumerationDefinition = new EnumerationDictionary {
+                        [(byte)SomeEnumeration.None] = new EnumerationDetails(nameof(SomeEnumeration.None), "Nothing"),
+                        [(byte)SomeEnumeration.Some] = new EnumerationDetails(nameof(SomeEnumeration.Some), "A small number"),
+                        [(byte)SomeEnumeration.Lots] = new EnumerationDetails(nameof(SomeEnumeration.Lots), "A large number"),
+                    },
+                    EnumerationAsFlags = true
                 }
+                ]
         };
         private readonly string? _hidden;
         private readonly Reference? _fancy;
@@ -471,7 +471,7 @@ public class DataModelJsonTests
                 public string Name { get; set; } = name.Required();
             }
 
-            protected override Data? ValueFromStream(Stream s) => new(s.DecodeILInt(), s.DecodeString()!);
+            protected override Data? ValueFromStream(StreamSpan s) => new(s.DecodeILInt(), s.DecodeString()!);
             protected override Stream ValueToStream(Stream s) => s.EncodeILInt(Value!.Id).EncodeString(Value.Name);
         }
 

@@ -110,8 +110,7 @@ public partial class InterlockId
         private const char _prefixSeparator = '!';
         private const char _suffixSeparator = '#';
 
-        private static readonly Dictionary<byte, (string typeName, Func<Parts, InterlockId> resolver)> _knownTypes =
-            [];
+        private static readonly Dictionary<byte, (string typeName, Func<Parts, InterlockId> resolver)> _knownTypes = [];
 
         private string _algorithmSuffix => $"{_suffixSeparator}{Algorithm}";
         private string _conditionalAlgorithmSuffix => Algorithm == _defaultAlgorithm ? string.Empty : _algorithmSuffix;

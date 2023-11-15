@@ -36,7 +36,7 @@ namespace InterlockLedger.Tags;
 public class TagSignatureParts : IEquatable<TagSignatureParts>
 {
     public Algorithm Algorithm;
-    public byte[] Data = Array.Empty<byte>();
+    public byte[] Data = [];
 
     public static bool operator !=(TagSignatureParts left, TagSignatureParts right) => !(left == right);
 
@@ -62,7 +62,7 @@ public class TagSignature : ILTagOfExplicit<TagSignatureParts>
 
     internal TagSignature(Stream s) : base(ILTagId.Signature, s) => Value.Required();
 
-    protected override TagSignatureParts? ValueFromStream(Stream s) => new() {
+    protected override TagSignatureParts? ValueFromStream(StreamSpan s) => new() {
         Algorithm = (Algorithm)s.BigEndianReadUShort(),
         Data = s.ReadAllBytesAsync().Result
     };

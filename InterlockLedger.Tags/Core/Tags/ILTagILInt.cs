@@ -37,7 +37,7 @@ public class ILTagILInt : ILTagOfImplicit<ulong>
 
     internal ILTagILInt(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILInt, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override ulong ValueFromStream(Stream s) => s.ILIntDecode();
+    protected override ulong ValueFromStream(StreamSpan s) => s.ILIntDecode();
 
     protected override Stream ValueToStream(Stream s) {
         s.ILIntEncode(Value);

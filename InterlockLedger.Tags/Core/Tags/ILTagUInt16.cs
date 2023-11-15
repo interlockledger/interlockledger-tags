@@ -38,7 +38,7 @@ public class ILTagUInt16 : ILTagOfImplicit<ushort>
 
     internal ILTagUInt16(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt16, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override ushort ValueFromStream(Stream s) => s.BigEndianReadUShort();
+    protected override ushort ValueFromStream(StreamSpan s) => s.BigEndianReadUShort();
 
     protected override Stream ValueToStream(Stream s) {
         s.BigEndianWriteUShort(Value);

@@ -73,8 +73,8 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     }
 
     private static readonly DataField[] _remainingDataFields = [
-            new() { Name = nameof(Signature), TagId = ILTagId.Signature },
-            new() { Name = nameof(SignerId), TagId = ILTagId.InterlockId },
-            new() { Name = nameof(PublicKey), TagId = ILTagId.PubKey}
-        ];
+        new() { Name = nameof(Signature), TagId = ILTagId.Signature },
+        new() { Name = nameof(SignerId), TagId = ILTagId.InterlockId },
+        new() { Name = nameof(PublicKey), TagId = ILTagId.PubKey }
+    ];
 }

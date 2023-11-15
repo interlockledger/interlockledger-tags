@@ -136,7 +136,7 @@ public class ILTagArrayOfILTagTests
 
     private class TestTagOfOneByte(ulong tagId, Stream s) : ILTagOfExplicit<byte>(tagId, s)
     {
-        protected override byte ValueFromStream(Stream s) => s.ReadSingleByte();
+        protected override byte ValueFromStream(StreamSpan s) => s.ReadSingleByte();
         protected override Stream ValueToStream(Stream s) {
             s.WriteByte(Value);
             return s;

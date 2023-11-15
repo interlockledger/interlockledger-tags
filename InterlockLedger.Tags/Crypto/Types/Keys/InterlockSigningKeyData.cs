@@ -66,7 +66,7 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
                 EncryptedContentType = version > 4 ? (EncryptedContentType)s.DecodeILInt() : EncryptedContentType.EncryptedKey, // Field index 11 - since version 5
             };
             if (version > 5) // Field index 12 - since version 6 //
-                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Safe().Select(t => t!.Value);
+                result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().Safe().Select(t => t!.Value)!;
             return result;
         }
 
@@ -120,6 +120,6 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
 
     internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
     }
-    protected override Parts? ValueFromStream(Stream s) => Parts.FromStream(s);
+    protected override Parts? ValueFromStream(StreamSpan s) => Parts.FromStream(s);
     protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
 }

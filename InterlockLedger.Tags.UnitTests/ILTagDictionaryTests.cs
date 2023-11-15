@@ -181,13 +181,8 @@ public class ILTagDictionaryTests
         return dict;
     }
 
-<<<<<<< HEAD
     private static void CompareDicts<T, TT>(Dictionary<string, T?>? dict, Dictionary<string, T?>? otherDict)
         where T : ILTagOf<TT?>{
-=======
-    private static void CompareDicts<T, TT>(Dictionary<string, T>? dict, Dictionary<string, T>? otherDict)
-        where T : ILTagOf<TT?> {
->>>>>>> 56d298a (v41.0.0 - A lot less creation of byte arrays - sparsely tested)
         if (dict is null)
             Assert.That(otherDict, Is.Null);
         else {
