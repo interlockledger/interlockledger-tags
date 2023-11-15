@@ -41,7 +41,7 @@ public abstract class PreloadableTag<T, TV> : ILTagOfExplicit<TV> where T : Prel
         base(alreadyDeserializedTagId, s, r => { if (r is T tag) tag.PreloadStorage = preloadStorage; }) { }
     protected IPreloadableTagStorage? PreloadStorage { get; set; }
     public abstract T Preload(Stream s, IPreloadableTagStorage? storage);
-    public ulong ApplicationId { get; }
-    public ulong PayloadTagId { get; }
+    public abstract ulong ApplicationId { get; }
+    public abstract ulong PayloadTagId { get; }
 
 }
