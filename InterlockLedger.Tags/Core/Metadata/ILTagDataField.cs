@@ -60,7 +60,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
             IsDeprecated = (serVersion > 4) && s.DecodeBool(),
         };
     }
-    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+    protected override Stream ValueToStream(Stream s) {
         s.EncodeUShort(Value.Required().Version);
         s.EncodeILInt(Value.TagId);
         s.EncodeString(Value.Name);
@@ -74,7 +74,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
         EncodeEnumeration(s, Value.EnumerationDefinition);
         s.EncodeBool(Value.EnumerationAsFlags);
         s.EncodeBool(Value.IsDeprecated);
-        return Task.FromResult(s);
+        return s;
     }
 
     private static EnumerationDictionary DecodeEnumeration(Stream s) {
@@ -92,7 +92,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
 
         public Tag AsTag => new(this);
 
-        public class Tag : ILTagOfExplicit<Triplet?>
+        public class Tag : ILTagOfExplicit<Triplet>
         {
             public Tag(Triplet v) : base(0, v) {
             }
@@ -102,11 +102,11 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
 
             protected override Triplet ValueFromStream(StreamSpan s) =>
                 new(s.DecodeILInt(), s.DecodeString(), s.DecodeString());
-            protected override Task<Stream> ValueToStreamAsync(Stream s) {
+            protected override Stream ValueToStream(Stream s) {
                 s.EncodeILInt(Value.Required().Value);
                 s.EncodeString(Value.Name);
                 s.EncodeString(Value.Description);
-                return Task.FromResult(s);
+                return s;
             }
         }
     }
