@@ -87,7 +87,7 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
         return null;
     }
 
-    private readonly Dictionary<string, IKeyStorageImplementationProvider> _providers = new();
+    private readonly Dictionary<string, IKeyStorageImplementationProvider> _providers = [];
 
     private IKeyPhasedCreationProvider FindPhasedProvider(Algorithm algorithm)
         => (IKeyPhasedCreationProvider)FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation && ksp is IKeyPhasedCreationProvider, "and phased key creation");

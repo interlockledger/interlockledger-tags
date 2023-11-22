@@ -196,7 +196,7 @@ public partial struct InterlockColor : ITextual<InterlockColor>
     }
 
     public static InterlockColor Random => From((uint)(DateTimeOffset.Now.Ticks | 255u));
-    public readonly string AsCSS => Name is null || Name.StartsWith("#", StringComparison.Ordinal) && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
+    public readonly string AsCSS => Name is null || Name.StartsWith('#') && Name.Length > 7 ? $"rgba({R},{G},{B},{InvariantPercent(A)})" : Name;
     public readonly InterlockColor Opposite => From(new InterlockColor(Invert(R), Invert(G), Invert(B)).RGBA);
     public readonly uint RGBA => (uint)((R << 24) + (G << 16) + (B << 8) + A);
     public readonly bool IsEmpty => false;

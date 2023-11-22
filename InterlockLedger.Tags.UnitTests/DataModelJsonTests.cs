@@ -142,7 +142,7 @@ public class DataModelJsonTests
                 Name = "Fancy DataModelToJson"
             },
             Ranges = new {
-                Elements = new string[] { "[10-14]", "[21-33]" },
+                Elements = _rangesList,
                 ElementTagId = 23
             }
         },
@@ -174,7 +174,7 @@ public class DataModelJsonTests
                 Name = "Fancy DataModelToJson"
             },
             Ranges = new {
-                Elements = new string[] { "[10-14]", "[21-33]" },
+                Elements = _rangesList,
                 ElementTagId = 23
             },
             Bytes = "Bgw="
@@ -208,7 +208,7 @@ public class DataModelJsonTests
                 Name = "Fancy DataModelToJson"
             },
             Ranges = new {
-                Elements = new string[] { "[10-14]", "[21-33]" },
+                Elements = _rangesList,
                 ElementTagId = 23
             },
             Bytes = "Bgw=",
@@ -271,6 +271,8 @@ public class DataModelJsonTests
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
+    private static readonly string[] _rangesList = ["[10-14]", "[21-33]"];
+
     private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
         var tag = JsonTestTaggedData.Model.FromJson(json);
         byte[] encodedBytes = tag.EncodedBytes;
@@ -319,63 +321,63 @@ public class DataModelJsonTests
             PayloadName = nameof(JsonTestTaggedData),
             PayloadTagId = PayloadTagId,
             DataFields = new DataField[] {
-                    new DataField {
+                    new() {
                         TagId = ILTagId.UInt16,
                         Name = nameof(Version),
                         Version = 0
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.ILInt,
                         Name = nameof(Id),
                         Version = 0
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.String,
                         Name = nameof(Name),
                         Version = 0
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.String,
                         Name = nameof(Hidden),
                         Version = 1
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.Version,
                         Name = nameof(SemanticVersion),
                         Version = 2
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.ILIntArray,
                         Name = nameof(Values),
                         Version = 3
                     },
-                    new DataField {
+                    new() {
                         TagId = DataTagId,
                         Name = nameof(Fancy),
                         Version = 4,
                         SubDataFields = new DataField[] {
-                            new DataField {
+                            new() {
                                 TagId = ILTagId.ILInt,
                                 Name = nameof(Reference.Data.Id)
                             },
-                            new DataField {
+                            new() {
                                 TagId = ILTagId.String,
                                 Name = nameof(Reference.Data.Name)
                             },
                        }
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.ILTagArray,
                         Name = nameof(Ranges),
                         Version = 5,
                         ElementTagId = ILTagId.Range
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.ByteArray,
                         Name = nameof(Bytes),
                         Version = 6
                     },
-                    new DataField {
+                    new() {
                         TagId = ILTagId.UInt8,
                         Name = nameof(Enumeration),
                         Version = 7,
@@ -412,7 +414,7 @@ public class DataModelJsonTests
             SemanticVersion = version <= 1 ? null : new Version(1, 0, 1, 33);
             Values = version <= 2 ? null : values;
             _fancy = version <= 3 ? null : new Reference(id * 10, "Fancy " + name);
-            Ranges = version <= 4 ? null : new LimitedRange[] { new LimitedRange(10, 5), new LimitedRange(21, 13) };
+            Ranges = version <= 4 ? null : [new(10, 5), new(21, 13)];
             Bytes = version <= 5 ? null : Values!.Select(u => (byte)u).ToArray();
             Enumeration = version <= 6 ? null : some;
             AsPayload = new Payload<JsonTestTaggedData>(PayloadTagId, this);
@@ -463,15 +465,10 @@ public class DataModelJsonTests
 
             public Reference(Stream s) : base(DataTagId, s) {
             }
-            public class Data
+            public class Data(ulong id, string name)
             {
-                public Data(ulong id, string name) {
-                    Id = id;
-                    Name = name.Required();
-                }
-
-                public ulong Id { get; set; }
-                public string Name { get; set; }
+                public ulong Id { get; set; } = id;
+                public string Name { get; set; } = name.Required();
             }
 
             protected override Data FromBytes(byte[] bytes) => FromBytesHelper(bytes, s => new Data(s.DecodeILInt(), s.DecodeString()!));

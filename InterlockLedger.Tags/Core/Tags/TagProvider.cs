@@ -38,9 +38,9 @@ public static class TagProvider
     public static ILTag DeserializeFrom(Stream s) {
         if (s.HasBytes()) {
             var tagId = s.DecodeTagId();
-            return !_deserializers.ContainsKey(tagId)
-                ? new ILTagUnknown(tagId, s)
-                : _deserializers[tagId].fromStream(s);
+            return _deserializers.TryGetValue(tagId, out var value)
+                ? value.fromStream(s)
+                : new ILTagUnknown(tagId, s);
         }
         return ILTagNull.Instance;
     }
@@ -53,9 +53,9 @@ public static class TagProvider
     public static ILTag DeserializeFromJson(ulong tagId, object? payload)
         => payload is null
             ? ILTagNull.Instance
-            : !_deserializers.ContainsKey(tagId)
-                ? throw new ArgumentException($"Unknown tagId: {tagId}", nameof(tagId))
-                : _deserializers[tagId].fromJson(payload);
+            : _deserializers.TryGetValue(tagId, out var value)
+                ? value.fromJson(payload)
+                : throw new ArgumentException($"Unknown tagId: {tagId}", nameof(tagId));
 
     public static bool HasDeserializer(ulong id) => _deserializers.ContainsKey(id);
 

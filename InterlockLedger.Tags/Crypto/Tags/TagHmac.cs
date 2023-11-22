@@ -38,20 +38,23 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
 public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<TagHmac>
 {
-    private TagHmac() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    private TagHmac() : this(HashAlgorithm.Invalid, []) { }
     public static TagHmac InvalidBy(string cause) =>
         new() { InvalidityCause = cause };
     public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
 
-    public HashAlgorithm Algorithm => Value.Algorithm;
-    public byte[] Data => Value.Data;
+    public HashAlgorithm Algorithm => Value?.Algorithm ?? HashAlgorithm.Invalid;
+    public byte[] Data => Value?.Data ?? [];
     public bool IsEmpty => Data is not null && Data.None();
     public string? InvalidityCause { get; init; }
     public override string ToString() => Textual.FullRepresentation;
     public ITextual<TagHmac> Textual => this;
-    public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, Array.Empty<byte>());
+    public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, []);
     public static Regex Mask { get; } = AnythingRegex();
-   public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
+
+    private static readonly string[] _prefixSeparator = ["#HMAC-"];
+
+    public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
     public bool Equals(TagHmac? other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
         using var hash = new HMACSHA256(key);
@@ -71,7 +74,7 @@ public sealed partial class TagHmac : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     private static TagHash.Parts Split(string textualRepresentation) {
         if (string.IsNullOrWhiteSpace(textualRepresentation))
             throw new ArgumentNullException(nameof(textualRepresentation));
-        var parts = textualRepresentation.Split(new string[] { "#HMAC-" }, StringSplitOptions.None);
+        var parts = textualRepresentation.Split(_prefixSeparator, StringSplitOptions.None);
         var algorithm = parts.Length < 2 ? HashAlgorithm.SHA256 : (HashAlgorithm)Enum.Parse(typeof(HashAlgorithm), parts[1], ignoreCase: true);
         return new TagHash.Parts { Algorithm = algorithm, Data = parts[0].FromSafeBase64() };
     }

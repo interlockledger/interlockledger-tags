@@ -45,7 +45,7 @@ public class TagHashTests
             Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hash));
             Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
             Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
-            Assert.That(tag.Data ?? Array.Empty<byte>(), Is.EqualTo(data));
+            Assert.That(tag.Data ?? [], Is.EqualTo(data));
         });
     }
 

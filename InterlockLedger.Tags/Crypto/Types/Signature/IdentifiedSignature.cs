@@ -72,9 +72,9 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
         s.EncodeTag(PublicKey);
     }
 
-    private static readonly DataField[] _remainingDataFields = new DataField[] {
-            new DataField { Name = nameof(Signature), TagId = ILTagId.Signature },
-            new DataField { Name = nameof(SignerId), TagId = ILTagId.InterlockId },
-            new DataField { Name = nameof(PublicKey), TagId = ILTagId.PubKey}
-        };
+    private static readonly DataField[] _remainingDataFields = [
+            new() { Name = nameof(Signature), TagId = ILTagId.Signature },
+            new() { Name = nameof(SignerId), TagId = ILTagId.InterlockId },
+            new() { Name = nameof(PublicKey), TagId = ILTagId.PubKey}
+        ];
 }

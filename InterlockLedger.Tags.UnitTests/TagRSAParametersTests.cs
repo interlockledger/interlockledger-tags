@@ -59,13 +59,13 @@ public class TagRSAParametersTests
     [TestCase(ExpectedResult = new byte[] { 41, 26, 16, 1, 6, 16, 1, 5, 16, 1, 7, 16, 1, 8, 16, 1, 2, 16, 1, 3, 16, 1, 4, 16, 1, 1, 10, 0 })]
     public byte[] SerializeTagRSAParameters() =>
         new TagRSAParameters(new RSAParameters {
-            D = new byte[] { 1 },
-            DP = new byte[] { 2 },
-            DQ = new byte[] { 3 },
-            InverseQ = new byte[] { 4 },
-            Exponent = new byte[] { 5 },
-            Modulus = new byte[] { 6 },
-            P = new byte[] { 7 },
-            Q = new byte[] { 8 },
+            D = [1],
+            DP = [2],
+            DQ = [3],
+            InverseQ = [4],
+            Exponent = [5],
+            Modulus = [6],
+            P = [7],
+            Q = [8],
         }, KeyStrength.Normal).EncodedBytes;
 }

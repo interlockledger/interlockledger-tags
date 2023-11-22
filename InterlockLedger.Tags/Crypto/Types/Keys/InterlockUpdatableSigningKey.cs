@@ -151,7 +151,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         public DateTimeOffset LastSignatureTimeStamp;
         public ulong SignaturesWithCurrentKey;
 
-        public UpdatableParts() => Encrypted = Array.Empty<byte>();
+        public UpdatableParts() => Encrypted = [];
 
         public UpdatableParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string? description, KeyStrength strength, BaseKeyId? keyId)
             : base(purposes, name, description, pubKey, keyId, null) {

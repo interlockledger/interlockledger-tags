@@ -154,8 +154,8 @@ public class ILTagTests
 
     [TestCase(new byte[] { 0 }, ExpectedResult = true)]
     public bool IsNull(byte[] bytes) {
-        ITag tag = TagProvider.DeserializeFrom(new MemoryStream(bytes));
-        return tag.IsNull && !tag.ValueIs<object>(out _);
+        var tag = TagProvider.DeserializeFrom(new MemoryStream(bytes));
+        return ((ITag)tag).IsNull && !tag.ValueIs<object>(out _);
     }
 
     [TestCase(252, ExpectedResult = new byte[] { 14, 0xF9, 1, 0 })]
@@ -183,9 +183,7 @@ public class ILTagTests
 
     [Test]
     public void ULongAsILintVariations() {
-#pragma warning disable IDE0230 // Use UTF-8 string literal
-        var tag = (ILTagILInt)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 10, 32 }));
-#pragma warning restore IDE0230 // Use UTF-8 string literal
+        var tag = (ILTagILInt)TagProvider.DeserializeFrom(new MemoryStream([10, 32]));
         Assert.Multiple(() => {
             Assert.That(tag.Value, Is.EqualTo(32));
             Assert.That(tag.ValueIs<ulong>(out var v) && v == tag.Value, "Not an ulong value");
@@ -195,7 +193,7 @@ public class ILTagTests
 
     [Test]
     public void ULongsAsILintArrayVariations() {
-        var tag = (ILTagArrayOfILInt)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 20, 5, 3, 1, 248, 7, 3 }));
+        var tag = (ILTagArrayOfILInt)TagProvider.DeserializeFrom(new MemoryStream([20, 5, 3, 1, 248, 7, 3]));
         CollectionAssert.AreEqual(new ulong[] { 1, 255, 3 }, tag.Value);
         Assert.Multiple(() => {
             Assert.That(tag.ValueIs<ulong[]>(out var v) && v.EqualTo(tag.Value), "Not an ulong[] value");
@@ -206,7 +204,7 @@ public class ILTagTests
 
     [Test]
     public void UShortVariations() {
-        var tag = (ILTagUInt16)TagProvider.DeserializeFrom(new MemoryStream(new byte[] { 5, 1, 0 }));
+        var tag = (ILTagUInt16)TagProvider.DeserializeFrom(new MemoryStream([5, 1, 0]));
         Assert.Multiple(() => {
             Assert.That(tag.Value, Is.EqualTo((ushort)1));
             Assert.That(tag.ValueIs<ushort>(out var v) && v == tag.Value, "Not an ushort value");

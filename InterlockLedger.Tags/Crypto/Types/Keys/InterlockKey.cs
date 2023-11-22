@@ -110,7 +110,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         public string Name { get; init; }
         public IEnumerable<AppPermissions> Permissions { get; set; } = NoPermissions;
         public TagPubKey PublicKey { get; set; }
-        public KeyPurpose[] Purposes { get; set; } = Array.Empty<KeyPurpose>();
+        public KeyPurpose[] Purposes { get; set; } = [];
         public KeyStrength Strength { get; init; }
         public ushort Version { get; init; }
 
@@ -125,7 +125,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
 ++ from: {Identity}
 ++ with strength {Strength}";
 
-        internal static AppPermissions[] NoPermissions = Array.Empty<AppPermissions>();
+        internal static AppPermissions[] NoPermissions = [];
 
         internal IEnumerable<ulong> FirstActions {
             get => Permissions.FirstOrDefault().ActionIds ?? Array.Empty<ulong>();

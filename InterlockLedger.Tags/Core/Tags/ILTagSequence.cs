@@ -44,6 +44,6 @@ public class ILTagSequence : ILTagArrayOfILTag<ILTag>
     private static ILTag[] Elicit(object opaqueValue) =>
          opaqueValue is IEnumerable items
          ? items.AsList<ILTag>().ToArray()
-         : Array.Empty<ILTag>();
+         : [];
 }
 

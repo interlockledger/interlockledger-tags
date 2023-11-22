@@ -72,15 +72,15 @@ public class ILTagArrayOfILTagTests
 
     [Test]
     public void GuaranteeBijectiveBehaviorEmptyArray()
-        => GuaranteeBijectiveBehavior(Array.Empty<ILTagBool>());
+        => GuaranteeBijectiveBehavior([]);
 
     [Test]
     public void GuaranteeBijectiveBehaviorFourElementsArray()
-        => GuaranteeBijectiveBehavior(new ILTagBool[] { ILTagBool.False, ILTagBool.True, ILTagBool.True, ILTagBool.True });
+        => GuaranteeBijectiveBehavior([ILTagBool.False, ILTagBool.True, ILTagBool.True, ILTagBool.True]);
 
     [Test]
     public void GuaranteeBijectiveBehaviorTwoElementsArray()
-        => GuaranteeBijectiveBehavior(new ILTagBool[] { ILTagBool.False, ILTagBool.True });
+        => GuaranteeBijectiveBehavior([ILTagBool.False, ILTagBool.True]);
 
     [TestCase((byte[])null, new byte[0], ExpectedResult = new byte[] { 21, 0 }, TestName = "Serialize_a_Null_Array")]
     [TestCase(new byte[0], new byte[0], ExpectedResult = new byte[] { 21, 1, 0 }, TestName = "Serialize_an_Empty_Array")]
@@ -108,7 +108,7 @@ public class ILTagArrayOfILTagTests
                 lastSplit = split;
             }
         }
-        return list.ToArray();
+        return [.. list];
     }
 
     private static void CompareArrays<T, TT>(T[] array, ILTag[] value) where T : ILTagOf<TT> {
@@ -134,11 +134,8 @@ public class ILTagArrayOfILTagTests
         Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
-    private class TestTagOfOneByte : ILTagExplicit<byte>
+    private class TestTagOfOneByte(ulong tagId, Stream s) : ILTagExplicit<byte>(tagId, s)
     {
-        public TestTagOfOneByte(ulong tagId, Stream s) : base(tagId, s) {
-        }
-
         protected override byte FromBytes(byte[] bytes) => bytes?.FirstOrDefault() ?? 0;
 
         protected override byte[] ToBytes(byte Value) => new byte[] { Value };

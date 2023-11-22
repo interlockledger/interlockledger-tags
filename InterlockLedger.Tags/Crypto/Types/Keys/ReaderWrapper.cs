@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
@@ -32,16 +32,12 @@
 
 namespace InterlockLedger.Tags;
 
-public sealed class ReaderWrapper : IReader
+public sealed class ReaderWrapper(IDecryptingKey decryptingKey, string id, TagHash publicKeyHash) : IReader
 {
-    private readonly IDecryptingKey _decryptingKey;
-    public ReaderWrapper(IDecryptingKey decryptingKey, string id, TagHash publicKeyHash) {
-        _decryptingKey = decryptingKey.Required();
-        Id = id.Required();
-        PublicKeyHash = publicKeyHash.Required();
-    }
-    public string Id { get; }
-    public TagHash PublicKeyHash { get; }
+    private readonly IDecryptingKey _decryptingKey = decryptingKey.Required();
+
+    public string Id { get; } = id.Required();
+    public TagHash PublicKeyHash { get; } = publicKeyHash.Required();
     public (byte[] key, byte[] iv) OpenKeyAndIV(byte[] encryptedKey, byte[] encryptedIV) =>
         (_decryptingKey.Decrypt(encryptedKey), _decryptingKey.Decrypt(encryptedIV));
 }

@@ -54,7 +54,7 @@ public class EdDSAParameters
         AsPublicBytes = buf;
         var privBuf = new byte[Ed25519PrivateKeyParameters.KeySize];
         privKey.Encode(privBuf);
-        AsBytes = buf.Concat(privBuf).ToArray();
+        AsBytes = [.. buf, .. privBuf];
     }
 
     public byte[] AsBytes { get; }

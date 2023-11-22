@@ -33,15 +33,10 @@
 using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
-public readonly struct KeyParameters
+public readonly struct KeyParameters(RSAParameters parameters, KeyStrength strength)
 {
-    public readonly RSAParameters Parameters;
-    public readonly KeyStrength Strength;
-
-    public KeyParameters(RSAParameters parameters, KeyStrength strength) {
-        Parameters = parameters;
-        Strength = strength;
-    }
+    public readonly RSAParameters Parameters = parameters;
+    public readonly KeyStrength Strength = strength;
 
     internal KeyParameters(Stream s) : this(
         new RSAParameters {

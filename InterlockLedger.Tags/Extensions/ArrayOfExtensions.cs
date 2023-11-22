@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags;
 public static class ArrayOfExtensions
 {
     [return: NotNull]
-    public static T[] OrEmpty<T>(this T[]? values) => values ?? Array.Empty<T>();
+    public static T[] OrEmpty<T>(this T[]? values) => values ?? [];
 
     [return: NotNull]
     public static T[] MinLength<T>([NotNull] this T[] array, int length, [CallerArgumentExpression(nameof(array))] string? parameterName = null) =>

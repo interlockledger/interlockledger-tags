@@ -52,6 +52,6 @@ public class ILTagDictionary<T> : ILTagAbstractDictionary<T> where T : ILTag
         => opaqueValue switch {
             Dictionary<string, T?> dict => dict,
             Dictionary<string, object?> odict => odict.ToDictionary(p => p.Key, pp => (T?)pp.Value?.AsNavigable()),
-            _ => new Dictionary<string, T?>()
+            _ => []
         };
 }

@@ -31,8 +31,6 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class InterlockLedgerCryptographicException : InterlockLedgerException
+public class InterlockLedgerCryptographicException(string message, Exception innerException) : InterlockLedgerException(message, innerException)
 {
-    public InterlockLedgerCryptographicException(string message, Exception innerException) : base(message, innerException) {
-    }
 }

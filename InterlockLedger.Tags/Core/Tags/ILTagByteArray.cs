@@ -61,6 +61,6 @@ public class ILTagByteArray : ILTagOfExplicit<byte[]>
         => opaqueValue switch {
             byte[] value => value,
             string s => Convert.FromBase64String(s),
-            _ => Array.Empty<byte>()
+            _ => []
         };
 }

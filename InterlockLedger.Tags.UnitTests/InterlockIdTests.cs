@@ -71,8 +71,8 @@ public class InterlockIdTests
     [Test]
     public void ResolveFromStream() =>
         Assert.Multiple(() => {
-            Assert.That(InterlockId.Resolve<OwnerId>(ToStream(new byte[] { 43, 5, 1, 0, 0, 0, 0 })), Is.InstanceOf<OwnerId>());
-            Assert.That(InterlockId.Resolve<KeyId>(ToStream(new byte[] { 43, 5, 4, 0, 0, 0, 0 })), Is.InstanceOf<KeyId>());
+            Assert.That(InterlockId.Resolve<OwnerId>(ToStream([43, 5, 1, 0, 0, 0, 0])), Is.InstanceOf<OwnerId>());
+            Assert.That(InterlockId.Resolve<KeyId>(ToStream([43, 5, 4, 0, 0, 0, 0])), Is.InstanceOf<KeyId>());
         });
 
     [Test]

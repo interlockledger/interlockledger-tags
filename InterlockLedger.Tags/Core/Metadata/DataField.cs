@@ -154,7 +154,7 @@ public sealed partial class DataField : IEquatable<DataField>
             }
         }
     }
-    private static readonly char[] _separators = new char[] { '|', ',' };
+    private static readonly char[] _separators = ['|', ','];
 
     public string EnumerationToString(ILTag value) => EnumerationToString(AsNumber(value));
 

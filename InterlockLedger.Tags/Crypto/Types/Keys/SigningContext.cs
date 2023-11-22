@@ -31,13 +31,8 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class SigningContext : ISigningContext
+public class SigningContext(InterlockSigningKey key, ITimeStamper timeStamper) : ISigningContext
 {
-    public SigningContext(InterlockSigningKey key, ITimeStamper timeStamper) {
-        Key = key.Required();
-        TimeStamper = timeStamper.Required();
-    }
-
-    public ISigningKey Key { get; }
-    public ITimeStamper TimeStamper { get; }
+    public ISigningKey Key { get; } = key.Required();
+    public ITimeStamper TimeStamper { get; } = timeStamper.Required();
 }

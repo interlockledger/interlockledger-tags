@@ -31,7 +31,7 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-internal class TestSignable : Signable<TestSignable>
+internal class TestSignable(ulong someILInt) : Signable<TestSignable>(FieldTagId, CurrentVersion)
 {
     public const ushort CurrentVersion = 1;
     public const ulong FieldTagId = 1_000_000;
@@ -39,10 +39,8 @@ internal class TestSignable : Signable<TestSignable>
     public TestSignable() : this(0ul) {
     }
 
-    public TestSignable(ulong someILInt) : base(FieldTagId, CurrentVersion) => SomeILInt = someILInt;
-
     public override string Formatted => throw new NotImplementedException();
-    public ulong SomeILInt { get; private set; }
+    public ulong SomeILInt { get; private set; } = someILInt;
     public override string TypeName => nameof(TestSignable);
 
     protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {

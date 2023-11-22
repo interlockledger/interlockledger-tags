@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public class ILTagDataField : ILTagExplicit<DataField>
+public class ILTagDataField : ILTagOfExplicit<DataField>
 {
     public ILTagDataField(DataField field) : base(ILTagId.DataField, field) {
     }
@@ -40,61 +40,57 @@ public class ILTagDataField : ILTagExplicit<DataField>
     public ILTagDataField(Stream s) : base(ILTagId.DataField, s) {
     }
 
-    protected override DataField FromBytes(byte[] bytes) {
+    protected override DataField? ValueFromStream(StreamSpan s) {
         ushort serVersion = 0;
-        return FromBytesHelper(bytes, s => new DataField {
+        return new DataField {
             Version = s.DecodeUShort(),
             TagId = s.DecodeILInt(),
             Name = s.DecodeString() ?? "*ERROR*",
             IsOptional_Deprecated = s.DecodeBool(),
             IsOpaque = s.DecodeBool(),
             ElementTagId = s.DecodeILInt(),
-            SubDataFields = s.DecodeTagArray<ILTagDataField>()?.Select(t => t.Value),
+            SubDataFields = s.DecodeTagArray<ILTagDataField>()?.SelectSkippingNulls(t => t.Value),
             Cast = s.HasBytes() ? (CastType)s.DecodeByte() : CastType.None,
             SerializationVersion = serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0,
             Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
             EnumerationDefinition = (serVersion > 2) ? DecodeEnumeration(s) : null,
             EnumerationAsFlags = (serVersion > 3) && s.DecodeBool(),
             IsDeprecated = (serVersion > 4) && s.DecodeBool(),
-        });
+        };
     }
-
-    protected override byte[] ToBytes(DataField value)
-        => TagHelpers.ToBytesHelper(s => {
-            s.EncodeUShort(Value.Version);
-            s.EncodeILInt(Value.TagId);
-            s.EncodeString(Value.Name);
-            s.EncodeBool(false);
-            s.EncodeBool(Value.IsOpaque);
-            s.EncodeILInt(Value.ElementTagId);
-            s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
-            s.EncodeByte((byte)value.Cast);
-            s.EncodeUShort(Value.SerializationVersion);
-            s.EncodeString(Value.Description);
-            EncodeEnumeration(s, value.EnumerationDefinition);
-            s.EncodeBool(Value.EnumerationAsFlags);
-            s.EncodeBool(Value.IsDeprecated);
-        });
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        s.EncodeUShort(Value.Required().Version);
+        s.EncodeILInt(Value.TagId);
+        s.EncodeString(Value.Name);
+        s.EncodeBool(false);
+        s.EncodeBool(Value.IsOpaque);
+        s.EncodeILInt(Value.ElementTagId);
+        s.EncodeTagArray(Value.SubDataFields?.Select(df => new ILTagDataField(df)));
+        s.EncodeByte((byte)Value.Cast);
+        s.EncodeUShort(Value.SerializationVersion);
+        s.EncodeString(Value.Description);
+        EncodeEnumeration(s, Value.EnumerationDefinition);
+        s.EncodeBool(Value.EnumerationAsFlags);
+        s.EncodeBool(Value.IsDeprecated);
+        return Task.FromResult(s);
+    }
 
     private static EnumerationDictionary DecodeEnumeration(Stream s) {
         var triplets = s.DecodeArray<Triplet, Triplet.Tag>(s => new Triplet.Tag(s));
         return new EnumerationDictionary(triplets.Safe()
                                                  .Where(t => t is not null)
-                                                 .ToDictionary(t => t!.Value, t => new EnumerationDetails(t.Name, t.Description)));
+                                                 .ToDictionary(t => t!.Value, t => new EnumerationDetails(t!.Name, t.Description)));
     }
 
     private static void EncodeEnumeration(Stream s, EnumerationDictionary? enumeration)
         => s.EncodeTagArray(enumeration?.Select(p => new Triplet(p.Key, p.Value.Name, p.Value.Description).AsTag));
-
-    private class Triplet : EnumerationDetails
+    private class Triplet(ulong value, string? name, string? description) : EnumerationDetails(name.Required(), description.Required())
     {
-        public readonly ulong Value;
-
-        public Triplet(ulong value, string? name, string? description) : base(name.Required(), description.Required()) => Value = value;
+        public readonly ulong Value = value;
 
         public Tag AsTag => new(this);
 
-        public class Tag : ILTagOfExplicit<Triplet>
+        public class Tag : ILTagOfExplicit<Triplet?>
         {
             public Tag(Triplet v) : base(0, v) {
             }
@@ -105,7 +101,7 @@ public class ILTagDataField : ILTagExplicit<DataField>
             protected override Triplet ValueFromStream(StreamSpan s) =>
                 new(s.DecodeILInt(), s.DecodeString(), s.DecodeString());
             protected override Task<Stream> ValueToStreamAsync(Stream s) {
-                s.EncodeILInt(Value.Value);
+                s.EncodeILInt(Value.Required().Value);
                 s.EncodeString(Value.Name);
                 s.EncodeString(Value.Description);
                 return Task.FromResult(s);

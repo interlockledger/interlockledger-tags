@@ -60,5 +60,5 @@ public abstract class Owner : ISigningKey, IPasswordProvider
 
     public override string ToString() => ToShortString() + $"\r\n-- {Description}\r\n-- Email {Email}\r\n-- {PublicKey}\r\n-- Purposes {keyPurposes.ToStringAsList()}";
 
-    protected static readonly KeyPurpose[] keyPurposes = new KeyPurpose[] { KeyPurpose.ChainOperation, KeyPurpose.Protocol };
+    protected static readonly KeyPurpose[] keyPurposes = [KeyPurpose.ChainOperation, KeyPurpose.Protocol];
 }

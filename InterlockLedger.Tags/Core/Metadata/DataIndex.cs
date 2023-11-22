@@ -61,13 +61,11 @@ public class DataIndex : IEquatable<DataIndex>
     public override string ToString() => $"{Name}^{ElementsAsString}";
 }
 
-public class DataIndexElement
+public class DataIndexElement(string fieldPath)
 {
     public bool DescendingOrder { get; set; }
 
-    public string FieldPath { get; set; } // in the form 'FieldName.ChildrenFieldName'
-
-    public DataIndexElement(string fieldPath) => FieldPath = fieldPath;
+    public string FieldPath { get; set; } = fieldPath; // in the form 'FieldName.ChildrenFieldName'
 
     public string? Function { get; set; }
 

@@ -66,7 +66,7 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
             : $"{_detailSeparator}{_details.JoinedBy(_detailSeparator)}";
     }
 
-    private readonly List<FullEnumerationDetails> _details = new();
+    private readonly List<FullEnumerationDetails> _details = [];
 
     [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]*)?\|)*$""")]
     private static partial Regex AnythingRegex();

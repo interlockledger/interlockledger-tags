@@ -37,7 +37,7 @@ namespace InterlockLedger.Tags;
 public partial class InterlockId : ILTagExplicit<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
 {
 
-    private InterlockId() : this(DefaultType, HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    private InterlockId() : this(DefaultType, HashAlgorithm.Invalid, []) { }
     public static IEnumerable<string> AllTypes => Parts.AllTypes;
     public static HashAlgorithm DefaultAlgorithm => Parts.DefaultAlgorithm;
 

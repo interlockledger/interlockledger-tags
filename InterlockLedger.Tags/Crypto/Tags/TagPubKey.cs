@@ -103,5 +103,5 @@ public partial class TagPubKey : ILTagExplicit<TagKeyParts>, ITextual<TagPubKey>
         => TagHelpers.ToBytesHelper(s => s.BigEndianWriteUShort((ushort)value.Algorithm).WriteBytes(Value.Data));
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
-    private TagPubKey() : this(Algorithm.Invalid, Array.Empty<byte>()) { }
+    private TagPubKey() : this(Algorithm.Invalid, []) { }
 }

@@ -41,7 +41,7 @@ public class InterlockSigningKeyData : ILTagExplicit<InterlockSigningKeyData.Par
         public byte[] Encrypted;
         public EncryptedContentType EncryptedContentType;
 
-        public Parts() => Encrypted = Array.Empty<byte>();
+        public Parts() => Encrypted = [];
 
         public Parts(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, TagPubKey pubKey, byte[] encrypted, string? description, EncryptedContentType encryptedContentType, BaseKeyId? keyId)
             : base(purposes, name, description, pubKey, keyId, permissions) {

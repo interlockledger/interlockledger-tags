@@ -44,10 +44,11 @@ public class AES256EncryptedTests
 
     [Test]
     public void DecryptParameterValidation() {
-        var tag = new AES256Encrypted<ILTagBool>(new MemoryStream(new byte[] { 42, 68, 0, 0, 16, 64,
+        var tag = new AES256Encrypted<ILTagBool>(new MemoryStream([
+            42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }));
+            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 ]));
         AssertRequiredException(() => tag.Decrypt(null), "password");
     }
 
@@ -66,16 +67,16 @@ public class AES256EncryptedTests
             72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }));
 
     [Test]
-    public void FromStreamFalse() => NewAES256EncryptedFromStream(new byte[] { 42, 68, 0, 0, 16, 64,
+    public void FromStreamFalse() => NewAES256EncryptedFromStream([ 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 }, false, "password");
+            82, 117, 243, 216, 107, 79, 184, 104, 69, 147, 19, 62, 191, 165, 60, 211 ], false, "password");
 
     [Test]
-    public void FromStreamTrue() => NewAES256EncryptedFromStream(new byte[] { 42, 68, 0, 0, 16, 64,
+    public void FromStreamTrue() => NewAES256EncryptedFromStream([ 42, 68, 0, 0, 16, 64,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100, 112, 97, 115, 115, 119, 111, 114, 100,
-            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 }, true, "password");
+            72, 104, 36, 141, 30, 66, 29, 203, 15, 6, 42, 29, 52, 96, 232, 3 ], true, "password");
 
     private static bool AsBool(ILTagBool tag) => tag?.Value ?? throw new InvalidDataException("Not an ILTagBool");
 
@@ -94,9 +95,7 @@ public class AES256EncryptedTests
         return result.EncodedBytes;
     }
 
-    private class TestableAES256Encrypted : AES256Encrypted<ILTagBool>
+    private class TestableAES256Encrypted(ILTagBool value, string password) : AES256Encrypted<ILTagBool>(value, password, new byte[32], new byte[16])
     {
-        public TestableAES256Encrypted(ILTagBool value, string password) : base(value, password, new byte[32], new byte[16]) {
-        }
     }
 }

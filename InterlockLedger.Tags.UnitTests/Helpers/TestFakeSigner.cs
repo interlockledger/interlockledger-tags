@@ -61,21 +61,21 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
         => cipher != CipherAlgorithm.AES256
             ? throw new InvalidOperationException("Only AES256 is valid for now")
             : new AES256Engine().Encrypt(clearText, key: _fakeCipherKey, iv: _fakeCipherIV);
-    public TagHash Hash(byte[] data, HashAlgorithm hashAlgorithm) => new(hashAlgorithm, Array.Empty<byte>());
+    public TagHash Hash(byte[] data, HashAlgorithm hashAlgorithm) => new(hashAlgorithm, []);
     public TagHash Hash(byte[] data) => Hash(data, DefaultHashAlgorithm);
     public void RegenerateKeys() {
         // For testing it is not needed
     }
 
     public TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null)
-        => _generateEmptySignatures ? new(Algorithm.RSA, Array.Empty<byte>()) : Key.Sign(data);
+        => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(data);
 
     public override TagSignature Sign(byte[] data) => Sign(data, KeyPurpose.Any);
 
     public override TagSignature Sign<T>(T data)
-        => _generateEmptySignatures ? new(Algorithm.RSA, Array.Empty<byte>()) : Key.Sign(data);
+        => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(data);
     public IdentifiedSignature SignWithId(byte[] data)
-        => _generateEmptySignatures ? new(new(Algorithm.RSA, Array.Empty<byte>()), Id, PublicKey) : Key.SignWithId(data);
+        => _generateEmptySignatures ? new(new(Algorithm.RSA, []), Id, PublicKey) : Key.SignWithId(data);
 
     public void SwitchSession(SenderIdentity senderIdentity) {
         // Method intentionally left empty.
@@ -92,10 +92,10 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
 
     public static InterlockSigningKeyData DummyFor(TagPubKey pubKey, string name) =>
      new(
-         new KeyPurpose[] { KeyPurpose.Protocol },
+         [KeyPurpose.Protocol],
          _fakePermissions,
          name,
-         Array.Empty<byte>(),
+         [],
          pubKey);
 
     private static readonly AppPermissions[] _fakePermissions =
@@ -105,7 +105,7 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
         Name = "Fake Owner";
         Id = new OwnerId(TagHash.Empty);
         _tagRSAParameters = TagRSAParameters.DecodeFromBytes(
-                    new byte[] { 41, 249, 3, 157, 16, 248, 8, 210, 171, 20, 8, 209, 144, 192, 9, 196, 104, 106, 190, 94, 52, 111, 15,
+                    [ 41, 249, 3, 157, 16, 248, 8, 210, 171, 20, 8, 209, 144, 192, 9, 196, 104, 106, 190, 94, 52, 111, 15,
                     93, 181, 35, 78, 249, 139, 59, 117, 204, 168, 76, 29, 221, 68, 104, 193, 112, 195, 136, 200, 168, 152, 173,
                     206, 212, 152, 74, 167, 40, 233, 91, 117, 166, 78, 170, 13, 25, 39, 225, 3, 75, 86, 166, 80, 23, 36, 205, 7,
                     87, 208, 216, 124, 115, 33, 203, 116, 61, 169, 57, 57, 64, 164, 225, 33, 174, 130, 53, 111, 210, 205, 26, 242,
@@ -153,7 +153,7 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
                     147, 198, 75, 107, 83, 151, 29, 121, 154, 187, 119, 245, 158, 123, 190, 254, 19, 126, 41, 169, 138, 11, 178, 150,
                     40, 242, 166, 182, 189, 87, 86, 198, 114, 74, 119, 19, 24, 250, 60, 155, 229, 126, 50, 94, 99, 135, 147, 231, 45,
                     206, 127, 156, 224, 235, 28, 167, 252, 48, 185, 192, 224, 251, 45, 33, 128, 38, 170, 214, 83, 218, 243, 27, 222, 119,
-                    203, 110, 138, 19, 81, 164, 102, 57 });
+                    203, 110, 138, 19, 81, 164, 102, 57 ]);
         _generateEmptySignatures = generateEmptySignatures;
         PublicKey = _tagRSAParameters.PublicKey;
         _key = new RSAInterlockSigningKey(DummyFor(PublicKey, Name), _tagRSAParameters);

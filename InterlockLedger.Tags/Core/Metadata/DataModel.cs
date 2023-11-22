@@ -228,7 +228,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             var tags = new List<ILTag>();
             ushort version = minVersion;
             if (dataFields is null)
-                return Array.Empty<byte>();
+                return [];
             bool isVersioned = IsVersioned(dataFields);
             ScanFieldsToTags(ExtractVersion());
             return AppendRemainingBytes(tags.Select(t => t.EncodedBytes).SelectMany(b => b).ToArray());

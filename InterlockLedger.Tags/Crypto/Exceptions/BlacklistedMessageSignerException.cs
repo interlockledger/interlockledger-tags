@@ -31,8 +31,6 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class BlacklistedMessageSignerException : InterlockLedgerException
+public class BlacklistedMessageSignerException(SenderIdentity senderIdentity) : InterlockLedgerException($"{senderIdentity} is blacklisted!")
 {
-    public BlacklistedMessageSignerException(SenderIdentity senderIdentity) : base($"{senderIdentity} is blacklisted!") {
-    }
 }

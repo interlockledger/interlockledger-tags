@@ -68,7 +68,7 @@ public static partial class StreamExtensions
             return arrayOfTags is null
                 ? null
                 : arrayOfTags.Length == 0
-                    ? Array.Empty<T>()
+                    ? []
                     : arrayOfTags.Select(element => element is null ? default : element.Value)
                                  .ToArray();
         }
@@ -96,7 +96,7 @@ public static partial class StreamExtensions
 
     public static ulong DecodeILInt(this Stream s) => s.Decode<ILTagILInt>()?.Value ?? 0;
 
-    public static ulong[] DecodeILIntArray(this Stream s) => s.Decode<ILTagArrayOfILInt>()?.Value ?? Array.Empty<ulong>();
+    public static ulong[] DecodeILIntArray(this Stream s) => s.Decode<ILTagArrayOfILInt>()?.Value ?? [];
 
     public static int DecodeInt(this Stream s) => s.Decode<ILTagInt32>()?.Value ?? 0;
 

@@ -69,7 +69,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]?> where T : ILTag
                         break;
                     }
                 }
-                return list.ToArray();
+                return [.. list];
             } catch (Exception e) {
                 Console.WriteLine($"Error decoding ILTagArrayOfILTag<{typeof(T).FullName}>, failed with: {e}");
             }

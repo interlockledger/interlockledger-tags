@@ -127,6 +127,6 @@ public class SequenceTests
                 lastSplit = split;
             }
         }
-        return list.ToArray();
+        return [.. list];
     }
 }

@@ -50,5 +50,5 @@ public class ILTagStringDictionary : ILTagAbstractDictionary<string>
     protected override void EncodeValue(Stream s, string? value) => s.EncodeString(value);
 
     private static Dictionary<string, string?> Elicit(object opaqueValue)
-        => (opaqueValue as Dictionary<string, string?>) ?? new Dictionary<string, string?>();
+        => (opaqueValue as Dictionary<string, string?>) ?? [];
 }

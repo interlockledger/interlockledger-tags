@@ -93,11 +93,11 @@ public class ILTagJsonTests
             Name = "TestFields",
             TagId = 3,
             SubDataFields = new DataField[] {
-                    new DataField {
+                    new() {
                         Name = "Field1",
                         TagId = 31
                     },
-                    new DataField {
+                    new() {
                         Name = "Field2",
                         TagId = 32
                     },
@@ -197,7 +197,7 @@ public class ILTagJsonTests
     public void TagHashConverter() {
         TestTwiceWith(TagHash.Empty);
         TestTwiceWith(new TagHash(HashAlgorithm.SHA3_256, TagHash.HashSha256Of(TagHash.Empty.Data).Data));
-        TestTwiceWith(TagHash.HashSha256Of(new byte[] { 3, 2, 1 }));
+        TestTwiceWith(TagHash.HashSha256Of([3, 2, 1]));
     }
 
     [TestCase("true")]

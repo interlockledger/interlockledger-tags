@@ -142,11 +142,8 @@ public class FileBackedByteArrayTests
         return mso;
     }
 
-    private class FileBackedByteArrayWithPublicMethods : FileBackedByteArray
+    private class FileBackedByteArrayWithPublicMethods(FileInfo fileInfo) : FileBackedByteArray(fileInfo)
     {
-        public FileBackedByteArrayWithPublicMethods(FileInfo fileInfo) : base(fileInfo) {
-        }
-
         public Task PublicCopyFromAsync(Stream source, long fileSizeLimit, bool noRemoval = false, CancellationToken cancellationToken = default)
             => CopyFromAsync(source, fileSizeLimit, noRemoval, cancellationToken);
     }

@@ -39,7 +39,7 @@ public class VersionedValueTests
     public void SerializeDeserialize() {
         var vvt = new VersionedValueForTests("Yeah!");
         var bytes = vvt.AsPayload.EncodedBytes;
-        byte[] expectedBytes = new byte[] { 27, 10, 5, 1, 0, 17, 5, (byte)'Y', (byte)'e', (byte)'a', (byte)'h', (byte)'!' };
+        byte[] expectedBytes = [27, 10, 5, 1, 0, 17, 5, (byte)'Y', (byte)'e', (byte)'a', (byte)'h', (byte)'!'];
         CollectionAssert.AreEqual(expectedBytes, bytes);
         TagProvider.RegisterDeserializer(27, s => new VersionedValueForTests.Payload(27, s));
         AssertThings(vvt, (VersionedValueForTests.Payload)TagProvider.DeserializeFrom(new MemoryStream(bytes)));

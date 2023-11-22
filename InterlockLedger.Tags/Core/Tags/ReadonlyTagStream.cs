@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 public class ReadonlyTagStream : Stream
 {
     public ReadonlyTagStream(ulong tagId, byte[] bytes) {
-        _bytes = bytes ?? Array.Empty<byte>();
+        _bytes = bytes ?? [];
         _tagId = tagId.AsILInt();
         _contentLength = ((ulong)_bytes.Length).AsILInt();
         _length = _tagId.Length + _contentLength.Length + _bytes.Length;

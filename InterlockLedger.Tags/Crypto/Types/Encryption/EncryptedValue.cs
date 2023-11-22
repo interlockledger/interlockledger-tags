@@ -32,13 +32,12 @@
 
 namespace InterlockLedger.Tags;
 
-public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> where T : ILTag
-{
-    public const int CurrentVersion = 1;
-
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    public EncryptedValue(ulong tagId) => TagId = tagId;
+public class EncryptedValue<T>(ulong tagId) : IVersionedEmbeddedValue<EncryptedValue<T>> where T : ILTag
+{
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+    public const int CurrentVersion = 1;
 
     public EncryptedValue(ulong tagId, CipherAlgorithm cipher, IEncryptor encryptor, T payloadInClearText, IIdentifiedPublicKey author, IEnumerable<TagReader> readers) : this(tagId) {
         author.Required();
@@ -58,7 +57,7 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
         new DataField(nameof(CipherText), ILTagId.ByteArray) { IsOpaque = true }
             .AppendedOf(new DataField(nameof(ReadingKeys), ILTagId.ILTagArray) { ElementTagId = ILTagId.ReadingKey });
 
-    public ulong TagId { get; }
+    public ulong TagId { get; } = tagId;
     public string TypeDescription => $"EncryptedValueOf{typeof(T).Name}";
     public string TypeName => $"EncryptedValueOf{typeof(T).Name}";
     public ushort Version { get; set; }
@@ -94,6 +93,6 @@ public class EncryptedValue<T> : IVersionedEmbeddedValue<EncryptedValue<T>> wher
         var readingKeys = new List<TagReadingKey> { BuildReadingKey(symmetricKey, IV, id, publicKey) };
         foreach (var reader in readers)
             readingKeys.Add(BuildReadingKey(symmetricKey, IV, reader.Name, reader.PublicKey));
-        return readingKeys.ToArray();
+        return [.. readingKeys];
     }
 }

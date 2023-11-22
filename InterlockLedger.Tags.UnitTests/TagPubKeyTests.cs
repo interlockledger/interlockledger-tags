@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 [TestFixture]
 public class TagPubKeyTests
 {
-    private static readonly byte[] _bytesToSign = new byte[] { 1, 2, 3 };
+    private static readonly byte[] _bytesToSign = [1, 2, 3];
 
     [TestCase("PubKey!Fl9ud3p6acZqZRfx0GF8PjmBEpwXf_PQYqPHcM6cDUU#EdDSA", Algorithm.EdDSA, typeof(TagPublicEdDSAKey))]
     public void ParsePubKey(string pubKey, Algorithm algorithm, Type type) {
@@ -61,8 +61,8 @@ public class TagPubKeyTests
         var signature = new TagSignature(Algorithm.EdDSA, signatureBytes);
         Assert.That(pubkey.Verify(_bytesToSign, signature), "Signature failed!");
         var keyData = new InterlockSigningKeyData(
-                        new KeyPurpose[] { KeyPurpose.Protocol },
-                        new AppPermissions[] { new AppPermissions(3) },
+                        [KeyPurpose.Protocol],
+                        new AppPermissions[] { new(3) },
                         name: "EdDSA Test Key",
                         encrypted: _bytesToSign, // fake
                         pubKey: pubkey);
@@ -114,8 +114,6 @@ public class TagPubKeyTests
     public byte[] SerializeTagPubKey(Algorithm algorithm, byte[] data) => new TestTagPubKey(algorithm, data).EncodedBytes;
 }
 
-public class TestTagPubKey : TagPubKey
+public class TestTagPubKey(Algorithm algorithm, byte[] data) : TagPubKey(algorithm, data)
 {
-    public TestTagPubKey(Algorithm algorithm, byte[] data) : base(algorithm, data) {
-    }
 }

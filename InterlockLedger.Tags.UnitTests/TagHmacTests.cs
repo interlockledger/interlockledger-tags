@@ -45,7 +45,7 @@ public class TagHmacTests
             Assert.That(tag.TagId, Is.EqualTo(ILTagId.Hmac));
             Assert.That(tag.Algorithm, Is.EqualTo(algorithm));
             Assert.That(tag.Data?.Length ?? 0, Is.EqualTo(data.Length));
-            Assert.That(tag.Data ?? Array.Empty<byte>(), Is.EqualTo(data));
+            Assert.That(tag.Data ?? [], Is.EqualTo(data));
         });
     }
 

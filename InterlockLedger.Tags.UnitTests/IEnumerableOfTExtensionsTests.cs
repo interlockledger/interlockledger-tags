@@ -39,7 +39,7 @@ public class IEnumerableOfTExtensionsTests
         Assert.Multiple(() => {
             Assert.That(() => ((object)null).AppendedOf(null), Is.EquivalentTo(new object[] { null }), "Null concat Null should be equal to [Null]");
             Assert.That(() => ((object)null).AppendedOf(Enumerable.Empty<object>()), Is.EquivalentTo(new object[] { null }), "Null concat Empty should be equal to [Null]");
-            Assert.That(() => ((string)null).AppendedOf(new string[] { "A" }), Is.EquivalentTo(new string[] { null, "A" }), "Null concat [A] should be equal to [Null, A]");
+            Assert.That(() => ((string)null).AppendedOf(["A"]), Is.EquivalentTo(new string[] { null, "A" }), "Null concat [A] should be equal to [Null, A]");
             Assert.That(() => 1.AppendedOf(null), Is.EquivalentTo(new int[] { 1 }), "1 concat Null should be equal to [1]");
             Assert.That(() => 1.AppendedOf((IEnumerable<int>)new int[] { 2, 3 }), Is.EquivalentTo(new int[] { 1, 2, 3 }), "1 concat [2,3] should be equal to [1, 2, 3]");
         });

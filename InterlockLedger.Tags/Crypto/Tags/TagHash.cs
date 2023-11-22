@@ -41,7 +41,7 @@ namespace InterlockLedger.Tags;
 [SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>", Justification = "Implemented sealed in base class")]
 public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<TagHash>
 {
-    private TagHash() : this(HashAlgorithm.Invalid, Array.Empty<byte>()) { }
+    private TagHash() : this(HashAlgorithm.Invalid, []) { }
     public static TagHash InvalidBy(string cause) =>
          new() { InvalidityCause = cause };
     public TagHash(HashAlgorithm algorithm, byte[] data) : this(new Parts { Algorithm = algorithm, Data = data }) { }
@@ -55,7 +55,7 @@ public sealed partial class TagHash : ILTagExplicit<TagHash.Parts>, ITextual<Tag
     protected override bool AreEquivalent(ILTagOf<Parts?> other) =>
         other.Value is not null && Algorithm == other.Value.Algorithm && DataEquals(other.Value.Data);
     public override string ToString() => Textual.FullRepresentation;
-    public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256(Array.Empty<byte>()));
+    public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256([]));
     public static Regex Mask { get; } = AnythingRegex();
     public static TagHash Build(string textualRepresentation) => new(Split(textualRepresentation.Safe().Trim()));
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
