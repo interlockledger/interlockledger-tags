@@ -73,7 +73,7 @@ public sealed partial class TagHmac : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     }
     private bool DataEquals(byte[]? otherData) => (Data.None() && otherData.None()) || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
     protected override string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
-    protected override TagHash.Parts? ValueFromStream(StreamSpan s) => new() {
+    protected override TagHash.Parts? ValueFromStream(WrappedReadonlyStream s) => new() {
         Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
         Data = s.ReadAllBytesAsync().Result
     };

@@ -76,7 +76,7 @@ public class TagReadingKey : ILTagOfExplicit<TagReadingKey.Parts>
     internal TagReadingKey(Stream s) : base(ILTagId.ReadingKey, s) {
     }
 
-    protected override Parts ValueFromStream(StreamSpan s) =>
+    protected override Parts ValueFromStream(WrappedReadonlyStream s) =>
         new(id: s.DecodeString().Required(),
             publicKeyHash: s.Decode<TagHash>().Required(),
             encryptedKey: s.DecodeByteArray().Required(),

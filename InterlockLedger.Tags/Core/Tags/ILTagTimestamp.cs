@@ -36,7 +36,7 @@ public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>
 {
     internal ILTagTimestamp(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Timestamp, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override DateTimeOffset ValueFromStream(StreamSpan s) =>
+    protected override DateTimeOffset ValueFromStream(WrappedReadonlyStream s) =>
         DateTimeOffset.FromUnixTimeMilliseconds(s.ILIntDecode().AsSignedILInt());
 
     protected override Stream ValueToStream(Stream s) {

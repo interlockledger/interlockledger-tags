@@ -62,7 +62,7 @@ public class TagSignature : ILTagOfExplicit<TagSignatureParts>
 
     internal TagSignature(Stream s) : base(ILTagId.Signature, s) => Value.Required();
 
-    protected override TagSignatureParts? ValueFromStream(StreamSpan s) => new() {
+    protected override TagSignatureParts? ValueFromStream(WrappedReadonlyStream s) => new() {
         Algorithm = (Algorithm)s.BigEndianReadUShort(),
         Data = s.ReadAllBytesAsync().Result
     };

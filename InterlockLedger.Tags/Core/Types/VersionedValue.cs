@@ -114,7 +114,7 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
 
         protected override ulong CalcValueLength() => Value!.CalcValueLength();
 
-        protected override T ValueFromStream(StreamSpan s) => new T().FromStream(s);
+        protected override T ValueFromStream(WrappedReadonlyStream s) => new T().FromStream(s);
 
         protected override Stream ValueToStream(Stream s) {
             Value!.ToStream(s);

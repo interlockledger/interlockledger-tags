@@ -98,7 +98,7 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
 
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
-    protected override TagKeyParts? ValueFromStream(StreamSpan s) =>
+    protected override TagKeyParts? ValueFromStream(WrappedReadonlyStream s) =>
         new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().Result);
     protected override Stream ValueToStream(Stream s) =>
         s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);

@@ -157,7 +157,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
     internal InterlockKey(Stream s) : base(ILTagId.InterlockKey, s) {
     }
 
-    protected override Parts? ValueFromStream(StreamSpan s) {
+    protected override Parts? ValueFromStream(WrappedReadonlyStream s) {
         var version = s.DecodeUShort();
         var result = new Parts {
             Version = version,                                // Field index 0 //

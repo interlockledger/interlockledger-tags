@@ -78,7 +78,7 @@ public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVers
     [GeneratedRegex("""^\d+(\.\d+){1,3}$""")]
     private static partial Regex Version_Regex();
 
-    protected override Version? ValueFromStream(StreamSpan s) =>
+    protected override Version? ValueFromStream(WrappedReadonlyStream s) =>
         BuildVersion(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt());
     protected override Stream ValueToStream(Stream s) =>
         s.BigEndianWriteInt(Value!.Major)

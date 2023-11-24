@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using Org.BouncyCastle.Utilities;
+
 namespace InterlockLedger.Tags;
 
 [TestFixture]
@@ -210,5 +212,24 @@ public class ILTagTests
             Assert.That(tag.ValueIs<ushort>(out var v) && v == tag.Value, "Not an ushort value");
             Assert.That(tag.ValueIs<ulong>(out var l) || l != default, Is.False, "An ulong value?");
         });
+    }
+
+    [Test]
+    public void DeserializeBigArrays() {
+        DeserializeFor(32);
+        DeserializeFor(ILTag.TAG_SIZE_TO_CACHE_TO_FILE + 10);
+
+        static void DeserializeFor(ulong size) {
+            using var stream = new FakeLargeILTagByteArrayStream(size);
+            var tag = stream.Decode<ILTagByteArray>();
+            Assert.Multiple(() => {
+                Assert.That(tag.ValueLength, Is.EqualTo(size));
+                using var readStream = tag.OpenReadingStreamAsync().Result;
+                var somebytes = readStream.ReadBytes(20);
+                Assert.That(somebytes[0], Is.EqualTo((byte)ILTagId.ByteArray));
+                CollectionAssert.AreEqual(new byte[10], somebytes[10..]);
+            });
+            tag.Dispose();
+        }
     }
 }

@@ -49,7 +49,7 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
         internal Tag(Stream s) : base(ILTagId.InterlockKeyAppPermission, s) {
         }
 
-        protected override AppPermissions ValueFromStream(StreamSpan s) => new(s.DecodeILInt(), s.DecodeILIntArray());
+        protected override AppPermissions ValueFromStream(WrappedReadonlyStream s) => new(s.DecodeILInt(), s.DecodeILIntArray());
         protected override Stream ValueToStream(Stream s) => s.EncodeILInt(Value!.AppId).EncodeILIntArray(Value.ActionIds);
     }
 

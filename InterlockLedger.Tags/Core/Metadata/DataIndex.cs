@@ -105,7 +105,7 @@ public class ILTagDataIndex : ILTagOfExplicit<DataIndex>
     public ILTagDataIndex(Stream s) : base(ILTagId.DataIndex, s) {
     }
 
-    protected override DataIndex? ValueFromStream(StreamSpan s) => new() {
+    protected override DataIndex? ValueFromStream(WrappedReadonlyStream s) => new() {
         Name = s.DecodeString().WithDefault("?"),
         IsUnique = s.DecodeBool(),
         ElementsAsString = s.DecodeString().Safe(),

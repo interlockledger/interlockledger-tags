@@ -48,7 +48,7 @@ public abstract class ILTagInBytesExplicit<T> : ILTagOfExplicit<T> where T : cla
         using var s = new MemoryStream(bytes, writable: false);
         return deserialize(s);
     }
-    protected sealed override T ValueFromStream(StreamSpan s) => FromBytes(s.ReadAllBytesAsync().Result);
+    protected sealed override T ValueFromStream(WrappedReadonlyStream s) => FromBytes(s.ReadAllBytesAsync().Result);
 
     protected abstract T FromBytes(byte[] bytes);
 

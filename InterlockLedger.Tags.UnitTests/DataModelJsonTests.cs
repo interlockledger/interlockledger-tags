@@ -471,7 +471,7 @@ public class DataModelJsonTests
                 public string Name { get; set; } = name.Required();
             }
 
-            protected override Data? ValueFromStream(StreamSpan s) => new(s.DecodeILInt(), s.DecodeString()!);
+            protected override Data? ValueFromStream(WrappedReadonlyStream s) => new(s.DecodeILInt(), s.DecodeString()!);
             protected override Stream ValueToStream(Stream s) => s.EncodeILInt(Value!.Id).EncodeString(Value.Name);
         }
 

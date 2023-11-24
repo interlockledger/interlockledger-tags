@@ -34,6 +34,8 @@ namespace InterlockLedger.Tags;
 
 public abstract class ILTag : AbstractDisposable, ITag
 {
+    public const ulong TAG_SIZE_TO_CACHE_TO_FILE = 128 * 1024ul;
+ 
     [JsonIgnore]
     public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
 

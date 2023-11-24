@@ -40,5 +40,5 @@ public class FileBackedByteArray : FileBackedILTag<object?>
 
     public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
 
-    protected override object? ValueFromStream(StreamSpan s) => null;
+    protected override object? ValueFromStream(WrappedReadonlyStream s) => null;
 }

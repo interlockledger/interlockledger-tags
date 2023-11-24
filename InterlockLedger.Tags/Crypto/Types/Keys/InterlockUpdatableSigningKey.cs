@@ -164,7 +164,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
 
     protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
 
-    protected override UpdatableParts ValueFromStream(StreamSpan s) {
+    protected override UpdatableParts ValueFromStream(WrappedReadonlyStream s) {
         var version = s.DecodeUShort();
         return new UpdatableParts {
             Version = version,                                      // Field index 0 //

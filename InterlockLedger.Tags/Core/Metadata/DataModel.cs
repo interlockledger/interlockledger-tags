@@ -335,7 +335,7 @@ public class ILTagDataModel : ILTagOfExplicit<DataModel>
     public ILTagDataModel(Stream s) : base(ILTagId.DataModel, s) {
     }
 
-    protected override DataModel? ValueFromStream(StreamSpan s) {
+    protected override DataModel? ValueFromStream(WrappedReadonlyStream s) {
         var payloadTagId = s.DecodeILInt();
         s.DecodeILInt(); // drop deprecated field
         return new DataModel {

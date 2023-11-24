@@ -65,7 +65,7 @@ public class CachedTagPart : AbstractDisposable
             _file.Delete();
     }
     private async Task<CachedTagPart> DoExtractTagPartAsync(Stream source, ulong tagId, ulong size) {
-        var destination = File.Open(_file.FullName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
+        var destination = File.Open(_file.FullName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
         TagId = tagId;
         Size = size;
         destination.ILIntEncode(tagId);
@@ -95,11 +95,8 @@ public class CachedTagPart : AbstractDisposable
     }
 
 
-    private CachedTagPart() {
+    private CachedTagPart() =>
         _file = new FileInfo(Path.GetTempFileName());
-        if (_file.Exists)
-            throw new IOException("Temporary file already exists");
-    }
 
     private readonly FileInfo _file;
 }

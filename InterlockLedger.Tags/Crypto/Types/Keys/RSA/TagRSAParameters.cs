@@ -81,6 +81,6 @@ public class TagRSAParameters : ILTagOfExplicit<KeyParameters>, IKeyParameters
 
     internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) => Value.Required();
 
-    protected override KeyParameters? ValueFromStream(StreamSpan s) => new(s);
+    protected override KeyParameters? ValueFromStream(WrappedReadonlyStream s) => new(s);
     protected override Stream ValueToStream(Stream s) => Value!.EncodeTo(s);
 }

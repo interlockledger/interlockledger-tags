@@ -31,17 +31,8 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagUInt16 : ILTagOfImplicit<ushort>
+
+public class StreamIsReadonlyException : Exception
 {
-    public ILTagUInt16(ushort value) : base(ILTagId.UInt16, value) {
-    }
-
-    internal ILTagUInt16(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt16, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
-
-    protected override ushort ValueFromStream(WrappedReadonlyStream s) => s.BigEndianReadUShort();
-
-    protected override Stream ValueToStream(Stream s) {
-        s.BigEndianWriteUShort(Value);
-        return s;
-    }
+    public StreamIsReadonlyException() : base("This stream is readonly") { }
 }

@@ -103,7 +103,7 @@ public class RecordLoader<T, TV> : AbstractDisposable, IRecordLoader<T, TV> wher
         return s;
     }
     void IPreloadableTagStorage.Mark(StreamSpan s) {
-        _preloadOffset = s.OriginalPosition;
+        _preloadOffset = s.PositionOnOriginalStream;
         _preloadLength = s.Length;
     }
 

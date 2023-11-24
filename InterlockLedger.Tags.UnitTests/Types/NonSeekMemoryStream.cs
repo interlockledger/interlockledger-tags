@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2023 InterlockLedger Network
 // All rights reserved.
@@ -30,18 +30,9 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags;
-public class ILTagUInt16 : ILTagOfImplicit<ushort>
+namespace System.IO;
+
+internal class NonSeekMemoryStream(byte[] buffer) : MemoryStream(buffer, writable: true)
 {
-    public ILTagUInt16(ushort value) : base(ILTagId.UInt16, value) {
-    }
-
-    internal ILTagUInt16(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt16, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
-
-    protected override ushort ValueFromStream(WrappedReadonlyStream s) => s.BigEndianReadUShort();
-
-    protected override Stream ValueToStream(Stream s) {
-        s.BigEndianWriteUShort(Value);
-        return s;
-    }
+    public override bool CanSeek => false;
 }

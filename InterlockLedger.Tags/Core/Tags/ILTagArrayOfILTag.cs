@@ -53,7 +53,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]> where T : ILTag
     private protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s, null) {
     }
 
-    protected override T?[]? ValueFromStream(StreamSpan s) {
+    protected override T?[]? ValueFromStream(WrappedReadonlyStream s) {
         if (s.Length > s.Position) {
             try {
                 var arrayLength = (int)s.ILIntDecode();

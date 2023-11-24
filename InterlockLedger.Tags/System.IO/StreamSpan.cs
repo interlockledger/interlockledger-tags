@@ -31,17 +31,25 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagUInt16 : ILTagOfImplicit<ushort>
+
+public sealed class StreamSpan : WrappedReadonlyStream
 {
-    public ILTagUInt16(ushort value) : base(ILTagId.UInt16, value) {
+    public StreamSpan(Stream s, ulong length) : this(s.Required(), s.Position, length) {
     }
 
-    internal ILTagUInt16(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt16, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    public StreamSpan(Stream s, long offset, ulong length, bool closeWrappedStreamOnDispose = false) : base(s.Required(), offset, ValidateLength(length), closeWrappedStreamOnDispose)
+        => _positionAfterSpan = Length + _begin;
 
-    protected override ushort ValueFromStream(WrappedReadonlyStream s) => s.BigEndianReadUShort();
-
-    protected override Stream ValueToStream(Stream s) {
-        s.BigEndianWriteUShort(Value);
-        return s;
+    private static long ValidateLength(ulong length) {
+        long signedLength = (long)length;
+        return signedLength < 0 ? throw new ArgumentException("length is too large and wrapped around!!!") : signedLength;
     }
+
+    protected sealed override void DisposingButNotClosingWrappedStream() {
+        if ((_positionAfterSpan - _originalStream.Position) > 0) {
+            _originalStream.Position = _positionAfterSpan;
+        }
+    }
+
+    private readonly long _positionAfterSpan;
 }

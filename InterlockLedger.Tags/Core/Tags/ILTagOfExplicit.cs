@@ -35,8 +35,6 @@ namespace InterlockLedger.Tags;
 
 public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
 {
-    public const int MaxEncodedValueLength = int.MaxValue / 16;
-
     [JsonIgnore]
     public ulong ValueLength => _valueLength ??= CalcValueLength();
 
@@ -64,9 +62,9 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
             throw new InvalidDataException("Tag content is TOO BIG to deserialize!");
         if (length == 0)
             return ZeroLengthDefault;
-        if (s is StreamSpan sp && (ulong)(sp.Length - sp.Position) < length)
+        if ((s.Length - s.Position) < (long)length)
             throw new InvalidDataException($"Decoded tag content length ({length}) is larger than total available bytes in stream");
-        if (length > 128 * 1024ul) {
+        if (length > TAG_SIZE_TO_CACHE_TO_FILE) {
             _cache = await CachedTagPart.ExtractTagPartAsync(s, TagId, length);
             return await _cache.PerformReadingOfStreamAsync(ValueFromStreamAsync, justBody: true);
         }

@@ -112,6 +112,6 @@ public partial class InterlockId : ILTagOfExplicit<InterlockId.Parts>, IComparab
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();
-    protected override Parts? ValueFromStream(StreamSpan s) => Parts.FromStream(s);
+    protected override Parts? ValueFromStream(WrappedReadonlyStream s) => Parts.FromStream(s);
     protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
 }

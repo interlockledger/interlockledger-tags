@@ -53,7 +53,7 @@ public class Payload<T> : ILTagOfExplicit<T>, IVersion, INamed where T : IRecord
         }
     }
 
-    protected override T ValueFromStream(StreamSpan s) => TryBuildFrom(() => new T().FromStream(s));
+    protected override T ValueFromStream(WrappedReadonlyStream s) => TryBuildFrom(() => new T().FromStream(s));
     protected override Stream ValueToStream(Stream s) {
         Value.ToStream(s);
         return s;

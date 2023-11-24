@@ -40,7 +40,7 @@ public sealed class ILTagBool : ILTagOfImplicit<bool>
 
     public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
 
-    protected override bool ValueFromStream(StreamSpan s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
+    protected override bool ValueFromStream(WrappedReadonlyStream s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
 
     protected override Stream ValueToStream(Stream s) {
         s.WriteByte((byte)(Value ? 1 : 0));

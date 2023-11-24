@@ -57,8 +57,8 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
     }
     private protected abstract Task<T> DeserializeInnerAsync(Stream s);
 
-    protected abstract T ValueFromStream(StreamSpan s);
-    protected virtual Task<T> ValueFromStreamAsync(StreamSpan s) => Task.FromResult(ValueFromStream(s));
+    protected abstract T ValueFromStream(WrappedReadonlyStream s);
+    protected virtual Task<T> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(ValueFromStream(s));
 
     protected abstract Stream ValueToStream(Stream s);
     protected virtual Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(ValueToStream(s));

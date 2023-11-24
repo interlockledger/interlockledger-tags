@@ -59,7 +59,7 @@ public class TagEncrypted : ILTagOfExplicit<TagEncryptedParts>
 
     internal TagEncrypted(Stream s) : base(ILTagId.Encrypted, s) {
     }
-    protected override TagEncryptedParts ValueFromStream(StreamSpan s) => new() {
+    protected override TagEncryptedParts ValueFromStream(WrappedReadonlyStream s) => new() {
         Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
         CipherData = s.DecodeByteArray().Required(),
     };

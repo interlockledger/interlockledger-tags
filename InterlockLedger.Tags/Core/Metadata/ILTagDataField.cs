@@ -42,7 +42,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
     public ILTagDataField(Stream s) : base(ILTagId.DataField, s) {
     }
 
-    protected override DataField? ValueFromStream(StreamSpan s) {
+    protected override DataField? ValueFromStream(WrappedReadonlyStream s) {
         ushort serVersion = 0;
         return new DataField {
             Version = s.DecodeUShort(),
@@ -100,7 +100,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
             public Tag(Stream s) : base(s.DecodeTagId(), s) {
             }
 
-            protected override Triplet ValueFromStream(StreamSpan s) =>
+            protected override Triplet ValueFromStream(WrappedReadonlyStream s) =>
                 new(s.DecodeILInt(), s.DecodeString(), s.DecodeString());
             protected override Stream ValueToStream(Stream s) {
                 s.EncodeILInt(Value.Required().Value);

@@ -120,6 +120,6 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
 
     internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
     }
-    protected override Parts? ValueFromStream(StreamSpan s) => Parts.FromStream(s);
+    protected override Parts? ValueFromStream(WrappedReadonlyStream s) => Parts.FromStream(s);
     protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
 }
