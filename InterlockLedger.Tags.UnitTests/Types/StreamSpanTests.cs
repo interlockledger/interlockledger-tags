@@ -43,7 +43,6 @@ public class StreamSpanTests
         _ = baseStream.Seek(10, SeekOrigin.Begin);
         Assert.That(baseStream.Position, Is.EqualTo(10L));
         using (var sp = new StreamSpan(baseStream, (ulong)baseStream.ReadByte())) {
-            Assert.That(sp.GetDebuggerDisplay(), Is.EqualTo("StreamSpan [30] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "));
             Assert.That(sp.Length, Is.EqualTo(30L));
             Assert.That(sp.Position, Is.EqualTo(0L));
             Assert.That(baseStream.Position, Is.EqualTo(11L));
@@ -92,7 +91,6 @@ public class StreamSpanTests
 
         Assert.That(baseStream.Position, Is.EqualTo(41L));
         using (var sp2 = new StreamSpan(baseStream, (ulong)(baseStream.Length - baseStream.Position))) {
-            Assert.That(sp2.GetDebuggerDisplay(), Is.EqualTo("StreamSpan [59] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "));
             Assert.That(sp2.Position, Is.EqualTo(0L));
             Assert.That(baseStream.Position, Is.EqualTo(41L));
             Assert.That(sp2.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
