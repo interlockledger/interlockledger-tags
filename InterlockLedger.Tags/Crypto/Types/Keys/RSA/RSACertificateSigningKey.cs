@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,9 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingK
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
-            ms.EncodeTag(_data);
-            ms.EncodeByteArray(_x509Certificate.Export(X509ContentType.Pfx, _data.Name));
-            return ms.ToArray();
+            return ms.EncodeTag(_data)
+                     .EncodeByteArray(_x509Certificate.Export(X509ContentType.Pfx, _data.Name))
+                     .ToArray();
         }
     }
 
@@ -93,5 +93,5 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingK
 
     private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() =>
         DoWithPrivateKey(rsa =>
-            rsa.SignData(data.OpenReadingStreamAsync().Result, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
+            rsa.SignData(data.OpenReadingStreamAsync().WaitResult(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
 }

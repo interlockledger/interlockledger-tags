@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-using System;
 using System.Text.Json;
 
 namespace InterlockLedger.Tags;

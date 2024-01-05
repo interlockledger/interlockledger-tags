@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,20 @@
 //
 // ******************************************************************************************************************************
 
+using System.Security.Cryptography;
+
 namespace InterlockLedger.Tags;
 
 public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
 {
-    public RSAInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : base(data) {
-        if (data.Required().EncryptedContentType != EncryptedContentType.EncryptedKey)
-            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
-        using var ms = new MemoryStream(decrypted);
-        _keyParameters = ms.Decode<TagRSAParameters>().Required();
+    public RSAInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : this(data, DecodeTagRSAParameters(decrypted)) {
     }
 
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
             ms.EncodeTag(_data);
-            ms.EncodeTag(_keyParameters);
+            ms.EncodeTag(_tagRSAParameters);
             return ms.ToArray();
         }
     }
@@ -57,13 +55,21 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
         return new RSAInterlockSigningKey(tag, parameters);
     }
 
-    public byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters.Value.Parameters);
+    public byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters);
+    public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSign(data, _keyParameters));
 
-    public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSign(data, _keyParameters.Value.Parameters));
+    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters));
 
-    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters.Value.Parameters));
+    private readonly TagRSAParameters _tagRSAParameters;
+    private readonly RSAParameters _keyParameters;
+    public RSAInterlockSigningKey(InterlockSigningKeyData data, TagRSAParameters tagRSAParameters) : base(data.ValidateIsEncryptedKey()) {
+        _tagRSAParameters = tagRSAParameters.Required();
+        _keyParameters = _tagRSAParameters.Value.Required().Parameters;
+    }
 
-    private readonly TagRSAParameters _keyParameters;
+    private static TagRSAParameters DecodeTagRSAParameters(byte[] decrypted) {
+        using var ms = new MemoryStream(decrypted);
+        return ms.Decode<TagRSAParameters>().Required();
+    }
 
-    public RSAInterlockSigningKey(InterlockSigningKeyData tag, TagRSAParameters parameters) : base(tag) => _keyParameters = parameters;
 }

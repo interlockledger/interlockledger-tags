@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 
     protected ILTagOf(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId) {
         setup?.Invoke(this);
-        Value = DeserializeInnerAsync(s).Result;
+        Value = DeserializeInnerAsync(s).WaitResult();
     }
     private protected abstract Task<T> DeserializeInnerAsync(Stream s);
 

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T>
 {
     public FileBackedILTag(ulong tagId, FileInfo fileInfo, Stream source) : base(tagId, default!) {
         _fileInfo = fileInfo.Required();
-        CopyFromAsync(source).Wait();
+        CopyFromAsync(source).WaitResult();
     }
 
     public FileBackedILTag(ulong tagId, FileInfo fileInfo, long offset = 0, ulong length = 0) : base(tagId, default!) {

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ public class ILTagByteArray : ILTagOfExplicit<byte[]>
     }
 
     protected override byte[]? ZeroLengthDefault => Array.Empty<byte>();
-    protected override byte[] ValueFromStream(WrappedReadonlyStream s) => s.ReadAllBytesAsync().Result;
+    protected override byte[] ValueFromStream(WrappedReadonlyStream s) => s.ReadAllBytesAsync().WaitResult();
 
     protected override Stream ValueToStream(Stream s) {
         if (Value is not null && Value.Length > 0) {

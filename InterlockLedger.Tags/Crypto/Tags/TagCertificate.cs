@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -43,5 +43,5 @@ public class TagCertificate : ILTagInBytesExplicit<X509Certificate2>
 
     protected override X509Certificate2 FromBytes(byte[] bytes) => new(bytes);
 
-    protected override byte[] ToBytes(X509Certificate2 value) => value.RawData;
+    protected override byte[] ToBytes(X509Certificate2? value) => value?.RawData ?? [];
 }

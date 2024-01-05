@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 
     protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
 
-    private IEnumerable<IdentifiedSignature> FailedSignaturesFor(T data)
+    private IdentifiedSignature[] FailedSignaturesFor(T data)
         => Signatures.Where(sig => !sig.Verify(data)).ToArray();
 
     private void Init(T signedContent, IEnumerable<IdentifiedSignature> signatures) {

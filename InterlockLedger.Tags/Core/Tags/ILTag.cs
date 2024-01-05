@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,6 @@ namespace InterlockLedger.Tags;
 
 public abstract class ILTag : AbstractDisposable, ITag
 {
-    public const ulong TAG_SIZE_TO_CACHE_TO_FILE = 128 * 1024ul;
- 
     [JsonIgnore]
     public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
 
@@ -93,7 +91,7 @@ public abstract class ILTag : AbstractDisposable, ITag
 
     private byte[] ToBytes() {
         using var stream = new MemoryStream();
-        SerializeIntoAsync(stream).Wait();
+        SerializeIntoAsync(stream).WaitResult();
         stream.Flush();
         return stream.ToArray();
     }

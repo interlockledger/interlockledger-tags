@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ public static class RSAHelper
         while (true)
             try {
                 using var RSAalg = OpenProvider(parameters);
-                using var dataStream = dataToSign.OpenReadingStreamAsync().Result;
+                using var dataStream = dataToSign.OpenReadingStreamAsync().WaitResult();
                 return RSAalg.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             } catch (CryptographicException e) {
                 if (retries-- <= 0)
@@ -97,7 +97,7 @@ public static class RSAHelper
     }
 
     public static bool Verify<T>(T dataToVerify, TagSignature signature, RSAParameters parameters) where T : Signable<T>, new() {
-        using var dataStream = dataToVerify.Required().OpenReadingStreamAsync().Result;
+        using var dataStream = dataToVerify.Required().OpenReadingStreamAsync().WaitResult();
         return VerifyStream(dataStream, signature, parameters);
     }
 

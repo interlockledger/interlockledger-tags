@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
-
-using Org.BouncyCastle.Utilities;
 
 namespace InterlockLedger.Tags;
 public class TagSignatureParts : IEquatable<TagSignatureParts>
@@ -64,7 +62,7 @@ public class TagSignature : ILTagOfExplicit<TagSignatureParts>
 
     protected override TagSignatureParts? ValueFromStream(WrappedReadonlyStream s) => new() {
         Algorithm = (Algorithm)s.BigEndianReadUShort(),
-        Data = s.ReadAllBytesAsync().Result
+        Data = s.ReadAllBytesAsync().WaitResult()
     };
     protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
 }

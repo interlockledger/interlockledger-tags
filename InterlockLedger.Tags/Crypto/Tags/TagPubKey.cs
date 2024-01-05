@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
     protected override TagKeyParts? ValueFromStream(WrappedReadonlyStream s) =>
-        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().Result);
+        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().WaitResult());
     protected override Stream ValueToStream(Stream s) =>
         s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
 

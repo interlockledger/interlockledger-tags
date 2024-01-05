@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,5 +53,5 @@ public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyPar
 
     protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
 
-    protected override byte[] ToBytes(EdDSAParameters Value) => Value.AsBytes;
+    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
 }

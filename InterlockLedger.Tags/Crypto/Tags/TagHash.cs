@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,6 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-using Org.BouncyCastle.Utilities;
-
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<TagHash>))]
@@ -67,7 +65,7 @@ public sealed partial class TagHash : ILTagOfExplicit<TagHash.Parts>, ITextual<T
 
     protected override Parts ValueFromStream(WrappedReadonlyStream s) => new() {
         Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-        Data = s.ReadAllBytesAsync().Result
+        Data = s.ReadAllBytesAsync().WaitResult()
     };
     protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty());
     private TagHash(Parts parts) : base(ILTagId.Hash, parts) { }

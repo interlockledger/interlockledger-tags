@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ public class AESCipher : ISymmetricCipher
 {
     public byte[] Decrypt(byte[] ownerBytes, string composedPassword) {
         using var ms = new MemoryStream(ownerBytes.Required());
-        return new AES256Encrypted<ILTagByteArray>(ms).Required().Decrypt(composedPassword).Required().Value;
+        return new AES256Encrypted<ILTagByteArray>(ms).Required().Decrypt(composedPassword).Required().Value!;
     }
 
     public byte[] Encrypt(byte[] ownerBytes, string composedPassword) =>

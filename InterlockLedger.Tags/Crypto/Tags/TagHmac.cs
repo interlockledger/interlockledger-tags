@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ public sealed partial class TagHmac : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     protected override string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
     protected override TagHash.Parts? ValueFromStream(WrappedReadonlyStream s) => new() {
         Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-        Data = s.ReadAllBytesAsync().Result
+        Data = s.ReadAllBytesAsync().WaitResult()
     };
     protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty());
 }

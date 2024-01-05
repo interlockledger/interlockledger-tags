@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ public partial class InterlockId
         public static Parts FromStream(Stream s) => new() {
             Type = s.ReadSingleByte(),
             Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-            Data = s.ReadAllBytesAsync().Result
+            Data = s.ReadAllBytesAsync().WaitResult()
         };
 
 

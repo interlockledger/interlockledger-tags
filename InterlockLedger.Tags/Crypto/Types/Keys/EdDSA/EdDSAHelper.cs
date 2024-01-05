@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ namespace InterlockLedger.Tags;
 
 public static class EdDSAHelper
 {
-    public static TagEdDSAParameters Validate(this TagEdDSAParameters? tagEdDSAParameters)
+    public static TagEdDSAParameters Validate([NotNull]this TagEdDSAParameters? tagEdDSAParameters)
         => tagEdDSAParameters.Required().Value.Required().HasPrivatePart
             ? tagEdDSAParameters
             : throw new InvalidDataException("Key parameters don't have private key");
@@ -61,7 +61,7 @@ public static class EdDSAHelper
     }
 
     public static byte[] HashAndSignBytes<T>(T dataToSign, EdDSAParameters parameters) where T : Signable<T>, new() {
-        using var dataStream = dataToSign.OpenReadingStreamAsync().Result;
+        using var dataStream = dataToSign.OpenReadingStreamAsync().WaitResult();
         return HashAndSignStream(dataStream, parameters);
     }
 
@@ -78,7 +78,7 @@ public static class EdDSAHelper
     }
 
     public static bool Verify<T>(T dataToVerify, TagSignature signature, EdDSAParameters parameters) where T : Signable<T>, new() {
-        using var dataStream = dataToVerify.Required("dataToVerify").OpenReadingStreamAsync().Result;
+        using var dataStream = dataToVerify.Required("dataToVerify").OpenReadingStreamAsync().WaitResult();
         return VerifyStream(dataStream, signature, parameters);
     }
 

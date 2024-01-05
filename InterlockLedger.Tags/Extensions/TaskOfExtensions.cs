@@ -31,9 +31,9 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public interface ISymmetricCipher
-{
-    byte[] Decrypt(byte[] ownerBytes, string composedPassword);
 
-    byte[] Encrypt(byte[] ownerBytes, string composedPassword);
+public static class TaskOfExtensions
+{
+    public static T WaitResult<T>(this Task<T> task) => task.GetAwaiter().GetResult();
+    public static void WaitResult(this Task task) => task.GetAwaiter().GetResult();
 }

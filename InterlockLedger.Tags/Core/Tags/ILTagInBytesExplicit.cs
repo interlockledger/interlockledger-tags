@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,13 @@ public abstract class ILTagInBytesExplicit<T> : ILTagOfExplicit<T> where T : cla
         using var s = new MemoryStream(bytes, writable: false);
         return deserialize(s);
     }
-    protected sealed override T ValueFromStream(WrappedReadonlyStream s) => FromBytes(s.ReadAllBytesAsync().Result);
+    protected sealed override T ValueFromStream(WrappedReadonlyStream s) => FromBytes(s.ReadAllBytesAsync().WaitResult());
 
     protected abstract T FromBytes(byte[] bytes);
 
     protected sealed override Stream ValueToStream(Stream s) => s.WriteBytes(ToBytes(Value));
 
-    protected abstract byte[] ToBytes(T Value);
+    protected abstract byte[] ToBytes(T? Value);
 
     protected override ulong CalcValueLength() => (ulong)ToBytes(Value).Length;
 }

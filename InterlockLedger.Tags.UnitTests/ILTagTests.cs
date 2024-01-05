@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -217,7 +217,7 @@ public class ILTagTests
     [Test]
     public void DeserializeBigArrays() {
         DeserializeFor(32);
-        DeserializeFor(ILTag.TAG_SIZE_TO_CACHE_TO_FILE + 10);
+        DeserializeFor(1024*256);
 
         static void DeserializeFor(ulong size) {
             using var stream = new FakeLargeILTagByteArrayStream(size);

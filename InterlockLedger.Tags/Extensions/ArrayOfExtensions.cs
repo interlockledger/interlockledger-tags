@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 using System.Runtime.CompilerServices;
 
 namespace InterlockLedger.Tags;
-
 public static class ArrayOfExtensions
 {
     [return: NotNull]

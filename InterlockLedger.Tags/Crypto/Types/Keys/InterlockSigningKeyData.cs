@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-
 public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.Parts>, IInterlockKeySecretData, IBaseKey
 {
     public class Parts : InterlockKey.Parts
@@ -88,7 +87,6 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
         }
 
     }
-
 
     public InterlockSigningKeyData(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, byte[] encrypted, TagPubKey pubKey, string? description = null, BaseKeyId? keyId = null, EncryptedContentType encryptedContentType = EncryptedContentType.EncryptedKey)
         : this(new Parts(purposes, permissions, name, pubKey, encrypted, description, encryptedContentType, keyId)) { }

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,7 @@ namespace InterlockLedger.Tags;
 
 public static partial class StreamExtensions
 {
-    public static Task<CachedTagPart> ExtractTagPartAsync(this Stream source, ulong tagId, ulong size) =>
-        CachedTagPart.ExtractTagPartAsync(source, tagId, size);
-
-    public static BaseKeyId? DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
+     public static BaseKeyId? DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
 
     public static OwnerId? DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
 

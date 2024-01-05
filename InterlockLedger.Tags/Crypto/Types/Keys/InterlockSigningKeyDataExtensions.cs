@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -30,10 +30,15 @@
 //
 // ******************************************************************************************************************************
 
-namespace InterlockLedger.Tags;
-public interface ISymmetricCipher
-{
-    byte[] Decrypt(byte[] ownerBytes, string composedPassword);
+using System.Runtime.CompilerServices;
 
-    byte[] Encrypt(byte[] ownerBytes, string composedPassword);
+namespace InterlockLedger.Tags;
+
+public static class InterlockSigningKeyDataExtensions
+{
+    public static InterlockSigningKeyData ValidateIsEncryptedKey([NotNull] this InterlockSigningKeyData? keyData, [CallerArgumentExpression(nameof(keyData))] string? name = null) =>
+        keyData.Required(name).EncryptedContentType == EncryptedContentType.EncryptedKey
+            ? keyData
+            : throw new ArgumentException($"Wrong kind of EncryptedContentType {keyData.EncryptedContentType}", name);
+
 }

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ public class AES256Engine : ISymmetricEngine
         return EncryptInner(key, iv, (cs) => clearDataStream.CopyTo(cs), writeHeader);
     }
 
-    private static SymmetricAlgorithm BuildAlgorithm(byte[]? key, byte[]? iv) {
+    private static Aes BuildAlgorithm(byte[]? key, byte[]? iv) {
         var AES = Aes.Create();
         AES.KeySize = 256;
         AES.BlockSize = 128;

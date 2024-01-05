@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,10 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
     protected virtual ulong CalcValueLength() {
         if (Value is null)
             return 0;
-        using var stream = new MemoryStream();
-        ValueToStreamAsync(stream).Wait();
+        using var stream = BuildTempStreamAsync().WaitResult();
+        ValueToStreamAsync(stream).WaitResult();
         stream.Flush();
-        return (ulong)stream.ToArray().Length;
+        return (ulong)stream.Length;
     }
 
     private protected sealed async override Task<T?> DeserializeInnerAsync(Stream s) {
@@ -64,16 +64,10 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
             return ZeroLengthDefault;
         if ((s.Length - s.Position) < (long)length)
             throw new InvalidDataException($"Decoded tag content length ({length}) is larger than total available bytes in stream");
-        if (length > TAG_SIZE_TO_CACHE_TO_FILE) {
-            _cache = await CachedTagPart.ExtractTagPartAsync(s, TagId, length);
-            return await _cache.PerformReadingOfStreamAsync(ValueFromStreamAsync, justBody: true);
-        }
         using var ss = new StreamSpan(s, length);
         return await ValueFromStreamAsync(ss);
     }
     public override async Task<Stream> OpenReadingStreamAsync() {
-        if (_cache is not null)
-            return await _cache.OpenReadingStreamAsync();
         if (KeepEncodedBytesInMemory)
             return new MemoryStream(EncodedBytes, writable: false);
         var s = await BuildTempStreamAsync();
@@ -100,10 +94,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
     }
 
     private ulong? _valueLength;
-    private CachedTagPart? _cache;
-
+ 
     protected override void DisposeManagedResources() {
-        _cache?.Dispose();
-        _cache = null;
     }
 }

@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2023 InterlockLedger Network
+// Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
     public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignBytes(data, _keyParameters.Required().Value));
 
     private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
+        _ = _data.Value.Required();
         if (_destroyKeysAfterSigning) {
             _keyParameters = null;
             _nextKeyParameters = null;
@@ -69,14 +70,12 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
                 _data.Value.Encrypted = func(_keyParameters!.EncodedBytes);
                 _data.Value.PublicKey = _keyParameters!.PublicKey;
                 _nextKeyParameters = null;
-                //_data.SignaturesWithCurrentKey = 0uL;
+                _data.SignaturesWithCurrentKey = 0uL;
             } else {
-                //_data.SignaturesWithCurrentKey++;
+                _data.SignaturesWithCurrentKey++;
             }
-
-            //_data.LastSignatureTimeStamp = _timeStamper.Now;
+            _data.LastSignatureTimeStamp = _timeStamper.Now;
         }
-
         _data.Changed();
         return new TagSignature(Algorithm.EdDSA, signatureData);
     }
