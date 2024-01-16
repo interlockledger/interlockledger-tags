@@ -61,19 +61,19 @@ public class WrappedReadonlyStreamTests
             CollectionAssert.AreEqual(new byte[] { 2, 3, 4 }, wrs.ReadBytes(3));
         }
         Assert.That(ms.Position, Is.EqualTo(4L));
-        Assert.False(ms.Disposed, "Original stream was disposed");
+        Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
         using (var wrs = new WrappedReadonlyStream(ms, 0, -1, closeWrappedStreamOnDispose: false)) {
             Assert.That(wrs.Length, Is.EqualTo(12L));
             CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4 }, wrs.ReadBytes(4));
         }
         Assert.That(ms.Position, Is.EqualTo(4L));
-        Assert.False(ms.Disposed, "Original stream was disposed");
+        Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
         using (var wrs = new WrappedReadonlyStream(ms)) {
             Assert.That(wrs.Length, Is.EqualTo(8L));
             CollectionAssert.AreEqual(new byte[] { 5, 6, 7, 8, 9 }, wrs.ReadBytes(5));
         }
         Assert.That(ms.Position, Is.EqualTo(9L));
-        Assert.False(ms.Disposed, "Original stream was disposed");
+        Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
         using (var wrs = new WrappedReadonlyStream(ms, 1, 10, closeWrappedStreamOnDispose: true)) {
             Assert.That(wrs.Length, Is.EqualTo(10L));
             wrs.Position = 5;
@@ -83,7 +83,7 @@ public class WrappedReadonlyStreamTests
             CollectionAssert.AreEqual(new byte[] { 7, 8, 9, 10, 11, 0 }, buffer);
             Assert.That(ms.Position, Is.EqualTo(11L));
         }
-        Assert.True(ms.Disposed, "Original stream was not disposed");
+        Assert.That(ms.Disposed, "Original stream was not disposed");
     }
 
     [Test]
