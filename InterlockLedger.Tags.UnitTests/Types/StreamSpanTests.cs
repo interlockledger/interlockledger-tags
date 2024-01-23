@@ -44,60 +44,88 @@ public class StreamSpanTests
         Assert.That(baseStream.Position, Is.EqualTo(10L));
         using (var sp = new StreamSpan(baseStream, (ulong)baseStream.ReadByte())) {
             Assert.That(sp.Length, Is.EqualTo(30L));
-            Assert.That(sp.Position, Is.EqualTo(0L));
-            Assert.That(baseStream.Position, Is.EqualTo(11L));
-            Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            Assert.Multiple(() => {
+                Assert.That(sp.Position, Is.EqualTo(0L));
+                Assert.That(baseStream.Position, Is.EqualTo(11L));
+                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            });
             _ = sp.ReadBytes(20);
-            Assert.That(sp.Position, Is.EqualTo(20L));
-            Assert.That(baseStream.Position, Is.EqualTo(31L));
-            Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            Assert.Multiple(() => {
+                Assert.That(sp.Position, Is.EqualTo(20L));
+                Assert.That(baseStream.Position, Is.EqualTo(31L));
+                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            });
             if (sp.CanSeek) {
                 sp.Position = 30;
-                Assert.That(baseStream.Position, Is.EqualTo(41L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(41L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 sp.Position = 5;
-                Assert.That(baseStream.Position, Is.EqualTo(16L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(16L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 _ = sp.Seek(30, SeekOrigin.Begin);
-                Assert.That(baseStream.Position, Is.EqualTo(41L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(41L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 sp.Position = 5;
-                Assert.That(baseStream.Position, Is.EqualTo(16L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(16L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 _ = sp.Seek(0, SeekOrigin.End);
-                Assert.That(baseStream.Position, Is.EqualTo(41L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(41L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 sp.Position = 5;
-                Assert.That(baseStream.Position, Is.EqualTo(16L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(16L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 _ = sp.Seek(25, SeekOrigin.Current);
-                Assert.That(baseStream.Position, Is.EqualTo(41L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(41L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 sp.Position = 5;
-                Assert.That(baseStream.Position, Is.EqualTo(16L));
-                Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                Assert.Multiple(() => {
+                    Assert.That(baseStream.Position, Is.EqualTo(16L));
+                    Assert.That(sp.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                });
                 using var ss = new StreamSpan(sp, 20);
-                Assert.That(ss.Position, Is.EqualTo(0L));
-                Assert.That(sp.Position, Is.EqualTo(5L));
-                Assert.That(ss.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
-                Assert.That(baseStream.Position, Is.EqualTo(16L));
+                Assert.Multiple(() => {
+                    Assert.That(ss.Position, Is.EqualTo(0L));
+                    Assert.That(sp.Position, Is.EqualTo(5L));
+                    Assert.That(ss.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                    Assert.That(baseStream.Position, Is.EqualTo(16L));
+                });
                 _ = ss.Seek(8, SeekOrigin.Current);
-                Assert.That(ss.Position, Is.EqualTo(8L));
-                Assert.That(sp.Position, Is.EqualTo(13L));
-                Assert.That(ss.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
-                Assert.That(baseStream.Position, Is.EqualTo(24L));
+                Assert.Multiple(() => {
+                    Assert.That(ss.Position, Is.EqualTo(8L));
+                    Assert.That(sp.Position, Is.EqualTo(13L));
+                    Assert.That(ss.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+                    Assert.That(baseStream.Position, Is.EqualTo(24L));
+                });
             }
         }
 
         Assert.That(baseStream.Position, Is.EqualTo(41L));
         using (var sp2 = new StreamSpan(baseStream, (ulong)(baseStream.Length - baseStream.Position))) {
-            Assert.That(sp2.Position, Is.EqualTo(0L));
-            Assert.That(baseStream.Position, Is.EqualTo(41L));
-            Assert.That(sp2.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            Assert.Multiple(() => {
+                Assert.That(sp2.Position, Is.EqualTo(0L));
+                Assert.That(baseStream.Position, Is.EqualTo(41L));
+                Assert.That(sp2.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            });
             _ = sp2.ReadBytes(20);
-            Assert.That(sp2.Position, Is.EqualTo(20L));
-            Assert.That(baseStream.Position, Is.EqualTo(61L));
-            Assert.That(sp2.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            Assert.Multiple(() => {
+                Assert.That(sp2.Position, Is.EqualTo(20L));
+                Assert.That(baseStream.Position, Is.EqualTo(61L));
+                Assert.That(sp2.PositionOnOriginalStream, Is.EqualTo(baseStream.Position));
+            });
         }
 
         Assert.That(baseStream.Position, Is.EqualTo(baseStream.Length));
@@ -112,7 +140,7 @@ public class StreamSpanTests
     [Test]
     public void RejectNegativeOriginOnOriginalStream() {
         var e = Assert.Throws<ArgumentOutOfRangeException>(() => new StreamSpan(new MemoryStream([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]), -1, 10));
-        StringAssert.Contains("offset ('-1') must be a non-negative value. (Parameter 'offset')", e?.Message);
+        Assert.That(e?.Message, Does.Contain("offset ('-1') must be a non-negative value. (Parameter 'offset')"));
     }
 
     [Test]

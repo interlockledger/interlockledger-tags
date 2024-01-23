@@ -58,7 +58,7 @@ public class FileBackedByteArrayTests
             mso.Position = 0;
             var tagArray = TagProvider.DeserializeFrom(mso);
             Assert.That(tagArray, Is.InstanceOf<ILTagByteArray>());
-            CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
+            Assert.That(tagArray.EncodedBytes, Is.EqualTo(prefixedArrayBytes).AsCollection);
         } finally {
             fi.Delete();
         }
@@ -92,7 +92,7 @@ public class FileBackedByteArrayTests
             Assert.That(fbba.Offset, Is.EqualTo(0L));
             using (var s = fbba.ReadingStream) {
                 var readBytes = s.ReadAllBytesAsync().Result;
-                CollectionAssert.AreEqual(bytes, readBytes);
+                Assert.That(readBytes, Is.EqualTo(bytes).AsCollection);
             }
             var prefixedArrayBytes = bytes.Prepend((byte)bytes.Length).Prepend((byte)ILTagId.ByteArray).ToArray();
             using var mso = SerializeInto(fbba, prefixedArrayBytes);
@@ -119,15 +119,15 @@ public class FileBackedByteArrayTests
             mso.Position = 0;
             var tagArray = TagProvider.DeserializeFrom(mso);
             Assert.That(tagArray, Is.InstanceOf<ILTagByteArray>());
-            CollectionAssert.AreEqual(prefixedArrayBytes, tagArray.EncodedBytes);
+            Assert.That(tagArray.EncodedBytes, Is.EqualTo(prefixedArrayBytes).AsCollection);
             var fbba2 = new FileBackedByteArray(fi);
             using (var fs = fbba2.OpenReadingStreamAsync().Result)
-                CollectionAssert.AreEqual(prefixedArrayBytes, fs.ReadAllBytesAsync().Result);
+                Assert.That(fs.ReadAllBytesAsync().Result, Is.EqualTo(prefixedArrayBytes).AsCollection);
             Assert.That(fbba2.Length, Is.EqualTo(arrayBytes.Length));
             using var s = fbba2.ReadingStream;
             var bytes = s.ReadAllBytesAsync().Result;
             Assert.That(bytes, Is.Not.Null);
-            CollectionAssert.AreEqual(arrayBytes, bytes);
+            Assert.That(bytes, Is.EqualTo(arrayBytes).AsCollection);
         } finally {
             fi.Delete();
         }
@@ -138,7 +138,7 @@ public class FileBackedByteArrayTests
         _ = fbba.SerializeIntoAsync(mso).Result;
         var outputBytes = mso.ToArray();
         Assert.That(outputBytes, Is.Not.Null);
-        CollectionAssert.AreEqual(prefixedArrayBytes, outputBytes);
+        Assert.That(outputBytes, Is.EqualTo(prefixedArrayBytes).AsCollection);
         return mso;
     }
 

@@ -56,7 +56,7 @@ public class TagPubKeyTests
         var tag = ms.Decode<TagPubKey>();
         Assert.That(tag, Is.Not.Null);
         Assert.That(tag, Is.EqualTo(pubkey));
-        CollectionAssert.AreEqual(pubkeyencodedbytes, tag.EncodedBytes);
+        Assert.That(tag.EncodedBytes, Is.EqualTo(pubkeyencodedbytes).AsCollection);
         var signatureBytes = EdDSAHelper.HashAndSign(_bytesToSign, parameters.Value);
         var signature = new TagSignature(Algorithm.EdDSA, signatureBytes);
         Assert.That(pubkey.Verify(_bytesToSign, signature), "Signature failed!");

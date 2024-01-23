@@ -36,7 +36,9 @@ public static class TestHelpers
 {
     public static void AssertRequiredException(Action code, string paramName) {
         var ae = Assert.Throws<ArgumentException>(() => code());
-        Assert.That(ae.ParamName, Is.EqualTo(paramName));
-        StringAssert.StartsWith("Required", ae.Message);
+        Assert.Multiple(() => {
+            Assert.That(ae.ParamName, Is.EqualTo(paramName));
+            Assert.That(ae.Message, Does.StartWith("Required"));
+        });
     }
 }

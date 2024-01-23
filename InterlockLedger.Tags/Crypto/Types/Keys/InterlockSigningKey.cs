@@ -76,6 +76,7 @@ public abstract class InterlockSigningKey : ISigningKey
 
     ~InterlockSigningKey() { Dispose(disposing: false); }
 
+#pragma warning disable CA1859 // Use concrete types when possible for improved performance
     private static InterlockSigningKey? RCSKFrom(byte[] bytes) {
         try {
             return RSACertificateSigningKey.FromSessionState(bytes);
@@ -87,6 +88,7 @@ public abstract class InterlockSigningKey : ISigningKey
             return RSAInterlockSigningKey.FromSessionState(bytes);
         } catch { return null; }
     }
+#pragma warning restore CA1859 // Use concrete types when possible for improved performance
 
     private void Dispose(bool disposing) {
         if (!_disposedValue) {

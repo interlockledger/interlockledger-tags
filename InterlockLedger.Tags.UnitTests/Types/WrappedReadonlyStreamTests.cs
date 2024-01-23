@@ -51,37 +51,48 @@ public class WrappedReadonlyStreamTests
     [Test]
     public void RejectNegativeOriginOnOriginalStream() {
         var e = Assert.Throws<ArgumentOutOfRangeException>(() => new WrappedReadonlyStream(new MemoryStream([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]), -1, 10, closeWrappedStreamOnDispose: false));
-        StringAssert.Contains("offset ('-1') must be a non-negative value. (Parameter 'offset')", e?.Message);
+        Assert.That(e?.Message, Does.Contain("offset ('-1') must be a non-negative value. (Parameter 'offset')"));
     }
     [Test]
     public void AssertDisposalOfOriginalStreamOnCondition() {
         var ms = new DisposableMemoryStream([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
         using (var wrs = new WrappedReadonlyStream(ms, 1, 10, closeWrappedStreamOnDispose: false)) {
             Assert.That(wrs.Length, Is.EqualTo(10L));
-            CollectionAssert.AreEqual(new byte[] { 2, 3, 4 }, wrs.ReadBytes(3));
+            Assert.That(wrs.ReadBytes(3), Is.EqualTo(new byte[] { 2, 3, 4 }).AsCollection);
         }
-        Assert.That(ms.Position, Is.EqualTo(4L));
-        Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
+
+        Assert.Multiple(() => {
+            Assert.That(ms.Position, Is.EqualTo(4L));
+            Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
+        });
         using (var wrs = new WrappedReadonlyStream(ms, 0, -1, closeWrappedStreamOnDispose: false)) {
             Assert.That(wrs.Length, Is.EqualTo(12L));
-            CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4 }, wrs.ReadBytes(4));
+            Assert.That(wrs.ReadBytes(4), Is.EqualTo(new byte[] { 1, 2, 3, 4 }).AsCollection);
         }
-        Assert.That(ms.Position, Is.EqualTo(4L));
-        Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
+
+        Assert.Multiple(() => {
+            Assert.That(ms.Position, Is.EqualTo(4L));
+            Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
+        });
         using (var wrs = new WrappedReadonlyStream(ms)) {
             Assert.That(wrs.Length, Is.EqualTo(8L));
-            CollectionAssert.AreEqual(new byte[] { 5, 6, 7, 8, 9 }, wrs.ReadBytes(5));
+            Assert.That(wrs.ReadBytes(5), Is.EqualTo(new byte[] { 5, 6, 7, 8, 9 }).AsCollection);
         }
-        Assert.That(ms.Position, Is.EqualTo(9L));
-        Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
+
+        Assert.Multiple(() => {
+            Assert.That(ms.Position, Is.EqualTo(9L));
+            Assert.That(ms.Disposed, Is.False, "Original stream was disposed");
+        });
         using (var wrs = new WrappedReadonlyStream(ms, 1, 10, closeWrappedStreamOnDispose: true)) {
             Assert.That(wrs.Length, Is.EqualTo(10L));
             wrs.Position = 5;
             byte[] buffer = new byte[6];
             int count = wrs.Read(buffer, 0, buffer.Length);
-            Assert.That(count, Is.EqualTo(5));
-            CollectionAssert.AreEqual(new byte[] { 7, 8, 9, 10, 11, 0 }, buffer);
-            Assert.That(ms.Position, Is.EqualTo(11L));
+            Assert.Multiple(() => {
+                Assert.That(count, Is.EqualTo(5));
+                Assert.That(buffer, Is.EqualTo(new byte[] { 7, 8, 9, 10, 11, 0 }).AsCollection);
+                Assert.That(ms.Position, Is.EqualTo(11L));
+            });
         }
         Assert.That(ms.Disposed, "Original stream was not disposed");
     }

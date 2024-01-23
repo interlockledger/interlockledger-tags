@@ -194,7 +194,7 @@ public class ILTagTests
     [Test]
     public void ULongsAsILintArrayVariations() {
         var tag = (ILTagArrayOfILInt)TagProvider.DeserializeFrom(new MemoryStream([20, 5, 3, 1, 248, 7, 3]));
-        CollectionAssert.AreEqual(new ulong[] { 1, 255, 3 }, tag.Value);
+        Assert.That(tag.Value, Is.EqualTo(new ulong[] { 1, 255, 3 }).AsCollection);
         Assert.Multiple(() => {
             Assert.That(tag.ValueIs<ulong[]>(out var v) && v.EqualTo(tag.Value), "Not an ulong[] value");
             Assert.That(tag.ValueIs<ulong>(out var l) || l != default, Is.False, "An ushort value?");
@@ -225,7 +225,7 @@ public class ILTagTests
                 using var readStream = tag.OpenReadingStreamAsync().Result;
                 var somebytes = readStream.ReadBytes(20);
                 Assert.That(somebytes[0], Is.EqualTo((byte)ILTagId.ByteArray));
-                CollectionAssert.AreEqual(new byte[10], somebytes[10..]);
+                Assert.That(somebytes[10..], Is.EqualTo(new byte[10]).AsCollection);
             });
             tag.Dispose();
         }
