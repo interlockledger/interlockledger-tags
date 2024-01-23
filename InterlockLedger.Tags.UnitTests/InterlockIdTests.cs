@@ -33,7 +33,6 @@
 namespace InterlockLedger.Tags;
 
 
-
 public class InterlockIdPlus : InterlockId
 {
     public const byte Chain = 0;
@@ -56,6 +55,7 @@ public class InterlockIdPlus : InterlockId
 }
 
 [TestFixture]
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Buggy warning")]
 public class InterlockIdTests
 {
     [OneTimeSetUp]

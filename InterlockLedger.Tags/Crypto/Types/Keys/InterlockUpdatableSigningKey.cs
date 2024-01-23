@@ -112,22 +112,22 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
     public InterlockUpdatableSigningKeyData(UpdatableParts parts) : base(ILTagId.InterlockUpdatableSigningKey, parts) {
     }
 
-    public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Value.Permissions, Strength, Description);
-    public string? Description => Value.Description;
+    public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
+    public string? Description => Value.Required().Description;
 
-    byte[] IInterlockKeySecretData.Encrypted => Value.Encrypted;
+    byte[] IInterlockKeySecretData.Encrypted => Value.Required().Encrypted;
     EncryptedContentType IInterlockKeySecretData.EncryptedContentType => EncryptedContentType.EncryptedKey;
-    public BaseKeyId Id => Value.Id;
-    public BaseKeyId Identity => Value.Identity;
-    public DateTimeOffset LastSignatureTimeStamp { get => Value.LastSignatureTimeStamp; internal set => Value.LastSignatureTimeStamp = value; }
-    public string Name => Value.Name;
-    public TagPubKey PublicKey => Value.PublicKey;
-    public KeyPurpose[] Purposes => Value.Purposes;
-    public ulong SignaturesWithCurrentKey { get => Value.SignaturesWithCurrentKey; internal set => Value.SignaturesWithCurrentKey = value; }
-    public KeyStrength Strength => Value.Strength;
-    public ushort Version => Value.Version;
+    public BaseKeyId Id => Value.Required().Id;
+    public BaseKeyId Identity => Value.Required().Identity;
+    public DateTimeOffset LastSignatureTimeStamp { get => Value.Required().LastSignatureTimeStamp; internal set => Value.Required().LastSignatureTimeStamp = value; }
+    public string Name => Value.Required().Name;
+    public TagPubKey PublicKey => Value.Required().PublicKey;
+    public KeyPurpose[] Purposes => Value.Required().Purposes;
+    public ulong SignaturesWithCurrentKey { get => Value.Required().SignaturesWithCurrentKey; internal set => Value.Required().SignaturesWithCurrentKey = value; }
+    public KeyStrength Strength => Value.Required().Strength;
+    public ushort Version => Value.Required().Version;
 
-    public IEnumerable<AppPermissions> Permissions { get; } = Enumerable.Empty<AppPermissions>();
+    public IEnumerable<AppPermissions> Permissions => Value.Required().Permissions;
 
     public static InterlockUpdatableSigningKeyData DecodeFromBytes(byte[] bytes) {
         using var stream = new MemoryStream(bytes);

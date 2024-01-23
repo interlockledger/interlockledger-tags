@@ -32,6 +32,7 @@
 
 namespace InterlockLedger.Tags;
 [TestFixture]
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Buggy warning")]
 public class TagEncryptedTests
 {
     [TestCase(new byte[] { 42, 6, 0, 0, 16, 2, 0, 0 }, CipherAlgorithm.AES256, new byte[] { 0, 0 }, TestName = "NewTagEncryptedFromStream00")]

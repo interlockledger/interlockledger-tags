@@ -95,29 +95,29 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
     }
 
     public InterlockKey AsInterlockKey => new(Purposes, Name, PublicKey, Id, Permissions, Strength, Description);
-    public string? Description => Value.Description;
-    public byte[] Encrypted => Value.Encrypted;
-    public EncryptedContentType EncryptedContentType => Value.EncryptedContentType;
-    public BaseKeyId Id => Value.Id;
-    public BaseKeyId Identity => Value.Identity ?? Id;
-    public string Name => Value.Name;
-    public IEnumerable<AppPermissions> Permissions => Value.Permissions;
-    public TagPubKey PublicKey => Value.PublicKey;
-    public KeyPurpose[] Purposes => Value.Purposes;
-    public KeyStrength Strength => Value.Strength;
-    public ushort Version => Value.Version;
+    public string? Description => Value?.Description;
+    public byte[] Encrypted => Value.Required().Encrypted;
+    public EncryptedContentType EncryptedContentType => Value.Required().EncryptedContentType;
+    public BaseKeyId Id => Value.Required().Id;
+    public BaseKeyId Identity => Value.Required().Identity ?? Id;
+    public string Name => Value.Required().Name;
+    public IEnumerable<AppPermissions> Permissions => Value.Required().Permissions;
+    public TagPubKey PublicKey => Value.Required().PublicKey;
+    public KeyPurpose[] Purposes => Value.Required().Purposes;
+    public KeyStrength Strength => Value.Required().Strength;
+    public ushort Version => Value.Required().Version;
 
     public static InterlockSigningKeyData DecodeFromBytes(byte[] bytes) {
         using var stream = new MemoryStream(bytes);
         return stream.Decode<InterlockSigningKeyData>().Required();
     }
 
-    public string ToShortString() => Value.ToShortString();
+    public string ToShortString() => Value.Required().ToShortString();
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Value.Required().ToString();
 
     internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
     }
     protected override Parts? ValueFromStream(WrappedReadonlyStream s) => Parts.FromStream(s);
-    protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
+    protected override Stream ValueToStream(Stream s) => Value.Required().ToStream(s);
 }

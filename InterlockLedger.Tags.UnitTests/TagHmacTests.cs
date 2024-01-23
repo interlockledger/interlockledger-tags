@@ -32,6 +32,7 @@
 
 namespace InterlockLedger.Tags;
 [TestFixture]
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Buggy warning")]
 public class TagHmacTests
 {
     [TestCase(new byte[] { 47, 4, 4, 0, 0, 0 }, HashAlgorithm.SHA3_512, new byte[] { 0, 0 })]

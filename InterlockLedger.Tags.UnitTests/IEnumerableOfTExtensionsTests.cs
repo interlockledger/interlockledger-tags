@@ -32,6 +32,7 @@
 
 namespace InterlockLedger.Tags;
 [TestFixture]
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Buggy warning")]
 public class IEnumerableOfTExtensionsTests
 {
     [Test]

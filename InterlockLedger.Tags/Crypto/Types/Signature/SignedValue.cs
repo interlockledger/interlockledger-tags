@@ -35,6 +35,7 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 {
     public const int CurrentVersion = 1;
 
+#pragma warning disable IDE0079
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public SignedValue() : base(ILTagId.SignedValue, CurrentVersion) {
     }

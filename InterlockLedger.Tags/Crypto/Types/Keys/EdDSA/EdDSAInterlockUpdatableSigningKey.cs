@@ -52,9 +52,9 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 
     public override void GenerateNextKeys() => _nextKeyParameters = EdDSAHelper.CreateNewTagEdDSAParameters();
 
-    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(data, _keyParameters.Required().Value));
-
-    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignBytes(data, _keyParameters.Required().Value));
+    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(data, _parameters));
+    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignBytes(data, _parameters));
+    private EdDSAParameters _parameters => _keyParameters.Required().Value.Required();
 
     private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
         _ = _data.Value.Required();

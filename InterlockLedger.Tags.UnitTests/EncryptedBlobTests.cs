@@ -34,6 +34,7 @@ namespace InterlockLedger.Tags;
 
 
 [TestFixture]
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Buggy warning")]
 public class EncryptedBlobTests
 {
     [TestCase(new byte[] {

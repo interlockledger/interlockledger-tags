@@ -36,6 +36,7 @@ using System.Text.Json;
 
 namespace InterlockLedger.Tags;
 [TestFixture]
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Buggy warning")]
 public class ILTagDictionaryTests
 {
     public static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
