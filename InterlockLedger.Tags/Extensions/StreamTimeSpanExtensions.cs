@@ -32,8 +32,16 @@
 
 namespace InterlockLedger.Tags;
 
-public static class TaskOfExtensions
+public static class StreamTimeSpanExtensions
 {
-    public static T WaitResult<T>(this Task<T> task) => task.GetAwaiter().GetResult();
-    public static void WaitResult(this Task task) => task.GetAwaiter().GetResult();
+    public static TimeSpan DecodeTimeSpan(this Stream s) {
+        try {
+            return TimeSpan.FromMilliseconds((long)s.DecodeILInt());
+        } catch {
+            return TimeSpan.Zero;
+        }
+    }
+
+    public static Stream EncodeTimeSpan(this Stream s, TimeSpan interval) =>
+        s.EncodeILInt((ulong)interval.TotalMilliseconds);
 }

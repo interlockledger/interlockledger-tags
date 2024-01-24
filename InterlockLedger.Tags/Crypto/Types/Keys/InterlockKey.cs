@@ -70,6 +70,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
 
     public override string ToString() => Value!.ToString();
 
+
     public class Parts
     {
         public const ushort InterlockKeyVersion = 0x0004;
