@@ -62,7 +62,7 @@ public class TagPubKeyTests
         Assert.That(pubkey.Verify(_bytesToSign, signature), "Signature failed!");
         var keyData = new InterlockSigningKeyData(
                         [KeyPurpose.Protocol],
-                        new AppPermissions[] { new(3) },
+                        [_permission3],
                         name: "EdDSA Test Key",
                         encrypted: _bytesToSign, // fake
                         pubKey: pubkey);
@@ -70,6 +70,8 @@ public class TagPubKeyTests
         var newSignature = signingKey.Sign(_bytesToSign);
         Assert.That(pubkey.Verify(_bytesToSign, signature), "New signature failed!");
     }
+
+    private static readonly AppPermissions _permission3 = new(3);
 
     [TestCase(
         Algorithm.EdDSA,

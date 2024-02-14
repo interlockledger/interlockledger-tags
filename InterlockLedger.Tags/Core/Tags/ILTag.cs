@@ -32,12 +32,12 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class ILTag : AbstractDisposable, ITag
+public abstract class ILTag(ulong tagId) : AbstractDisposable, ITag
 {
     [JsonIgnore]
     public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
 
-    public ulong TagId { get; set; }
+    public ulong TagId { get; set; } = tagId;
 
     public abstract object? Content { get; }
 
@@ -75,8 +75,6 @@ public abstract class ILTag : AbstractDisposable, ITag
         value = default;
         return false;
     }
-
-    protected ILTag(ulong tagId) => TagId = tagId;
 
     [JsonIgnore]
     protected virtual bool KeepEncodedBytesInMemory => true;

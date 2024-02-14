@@ -38,7 +38,7 @@ public enum EncryptedContentType
     EmbeddedCertificate = 1
 }
 
-public abstract class InterlockSigningKey : ISigningKey
+public abstract class InterlockSigningKey(InterlockSigningKeyData data) : ISigningKey
 {
     public abstract byte[] AsSessionState { get; }
     public string? Description => _data.Description;
@@ -62,9 +62,7 @@ public abstract class InterlockSigningKey : ISigningKey
     public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
     public override string ToString() => _data.ToString();
 
-    protected readonly InterlockSigningKeyData _data;
-
-    protected InterlockSigningKey(InterlockSigningKeyData data) => _data = data.Required();
+    protected readonly InterlockSigningKeyData _data = data.Required();
 
     protected EncryptedContentType EncryptedContentType => _data.EncryptedContentType;
 

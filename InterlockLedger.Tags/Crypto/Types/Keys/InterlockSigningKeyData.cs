@@ -80,7 +80,7 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
             s.EncodeByteArray(Encrypted);         // Field index 7 //
             s.EncodeILInt(FirstAppId);            // Field index 8 //
             s.EncodeILInt((ulong)Strength);       // Field index 9 //
-            s.EncodeILIntArray(FirstActions ?? Enumerable.Empty<ulong>());  // Field index 10 - since version 2 //
+            s.EncodeILIntArray(FirstActions ?? []);  // Field index 10 - since version 2 //
             s.EncodeILInt((ulong)EncryptedContentType); // Field index 11 - since version 5
             s.EncodeTagArray(Permissions.Select(p => p.AsTag)); // Field index 12 - since version 6 //
             return s;

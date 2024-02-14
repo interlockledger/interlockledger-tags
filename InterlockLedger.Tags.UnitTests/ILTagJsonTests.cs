@@ -92,7 +92,7 @@ public class ILTagJsonTests
         TestWith(new DataField {
             Name = "TestFields",
             TagId = 3,
-            SubDataFields = new DataField[] {
+            SubDataFields = [
                     new() {
                         Name = "Field1",
                         TagId = 31
@@ -101,7 +101,7 @@ public class ILTagJsonTests
                         Name = "Field2",
                         TagId = 32
                     },
-                }
+                ]
         });
     }
 

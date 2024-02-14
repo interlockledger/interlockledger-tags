@@ -121,7 +121,7 @@ public class SignedValueOfSignableTests
         using var x509Certificate = new X509Certificate2(bytes, "password");
         var data = new InterlockSigningKeyData(
             [KeyPurpose.Protocol],
-            Array.Empty<AppPermissions>(),
+            [],
             $"{nameof(SignWithRSA)} test key",
             bytes,
             TagPubKey.Resolve(x509Certificate),

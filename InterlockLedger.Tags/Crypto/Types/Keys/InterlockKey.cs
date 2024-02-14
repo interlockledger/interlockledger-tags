@@ -123,7 +123,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         internal static AppPermissions[] NoPermissions = [];
 
         internal IEnumerable<ulong> FirstActions {
-            get => Permissions?.FirstOrDefault()?.ActionIds ?? Array.Empty<ulong>();
+            get => Permissions?.FirstOrDefault()?.ActionIds ?? [];
             set => Permissions = new AppPermissions(_firstAppId, value).ToEnumerable();
         }
 

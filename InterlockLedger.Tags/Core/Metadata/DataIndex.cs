@@ -36,7 +36,7 @@ public class DataIndex : IEquatable<DataIndex>
 {
     public const string PrimaryIndexName = "~Primary~";
 
-    public IEnumerable<DataIndexElement> Elements { get; set; } = Enumerable.Empty<DataIndexElement>();
+    public IEnumerable<DataIndexElement> Elements { get; set; } = [];
 
     [JsonIgnore]
     public string ElementsAsString {

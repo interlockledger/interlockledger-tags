@@ -57,7 +57,7 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
 
     public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
         AppId = appId;
-        ActionIds = actionIds ?? Array.Empty<ulong>();
+        ActionIds = actionIds ?? [];
         TextualRepresentation = BuildTextualRepresentation();
     }
 

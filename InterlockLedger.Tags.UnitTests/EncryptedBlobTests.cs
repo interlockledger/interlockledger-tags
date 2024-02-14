@@ -185,7 +185,7 @@ public class EncryptedBlobTests
                                         data,
                                         TestFakeSigner.FixedKeysInstance,
                                         TestFakeSigner.FixedKeysInstance,
-                                        Array.Empty<TagReader>()).AsPayload;
+                                        []).AsPayload;
         byte[] encodedBytes = payload.EncodedBytes;
         TestContext.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes.PartOf(124);

@@ -127,7 +127,7 @@ public class EncryptedTextTests
                                              clearText,
                                              TestFakeSigner.FixedKeysInstance,
                                              TestFakeSigner.FixedKeysInstance,
-                                             Array.Empty<TagReader>()).AsPayload.EncodedBytes;
+                                             []).AsPayload.EncodedBytes;
         TestContext.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes.PartOf(124);
     }

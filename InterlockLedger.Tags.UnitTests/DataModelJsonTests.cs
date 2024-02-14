@@ -355,7 +355,7 @@ public class DataModelJsonTests
                     TagId = DataTagId,
                     Name = nameof(Fancy),
                     Version = 4,
-                    SubDataFields = new DataField[] {
+                    SubDataFields = [
                         new() {
                             TagId = ILTagId.ILInt,
                             Name = nameof(Reference.Data.Id)
@@ -364,7 +364,7 @@ public class DataModelJsonTests
                             TagId = ILTagId.String,
                             Name = nameof(Reference.Data.Name)
                         },
-                    }
+                    ]
                 },
                 new() {
                     TagId = ILTagId.ILTagArray,

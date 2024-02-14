@@ -45,7 +45,7 @@ public class ILTagByteArray : ILTagOfExplicit<byte[]>
     internal ILTagByteArray(Stream s) : base(ILTagId.ByteArray, s) {
     }
 
-    protected override byte[]? ZeroLengthDefault => Array.Empty<byte>();
+    protected override byte[]? ZeroLengthDefault => [];
     protected override byte[] ValueFromStream(WrappedReadonlyStream s) => s.ReadAllBytesAsync().WaitResult();
 
     protected override Stream ValueToStream(Stream s) {

@@ -38,11 +38,11 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
 {
     public const ushort CurrentVersion = 2;
 
-    public IEnumerable<DataField> DataFields { get; set; } = Enumerable.Empty<DataField>();
+    public IEnumerable<DataField> DataFields { get; set; } = [];
 
     public string? Description { get; set; }
 
-    public IEnumerable<DataIndex> Indexes { get; set; } = Enumerable.Empty<DataIndex>();
+    public IEnumerable<DataIndex> Indexes { get; set; } = [];
 
     public string? PayloadName { get; set; }
 
