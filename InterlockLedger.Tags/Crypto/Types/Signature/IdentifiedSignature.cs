@@ -36,7 +36,7 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     public const string Description = "A signature identified with the signerId and the corresponding PublickKey";
     public const ushort ImplementedVersion = 1;
 
-    public IdentifiedSignature(TagSignature signature, KeyId id, TagPubKey publicKey) : this() {
+    public IdentifiedSignature(TagSignature signature, BaseKeyId id, TagPubKey publicKey) : this() {
         Signature = signature.Required();
         SignerId = id.Required();
         PublicKey = publicKey.Required();
@@ -48,7 +48,7 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public TagPubKey PublicKey { get; set; }
     public TagSignature Signature { get; set; }
-    public KeyId SignerId { get; set; }
+    public BaseKeyId SignerId { get; set; }
 
     [JsonIgnore]
     public override string TypeName => nameof(IdentifiedSignature);
@@ -63,7 +63,7 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
 
     protected override void DecodeRemainingStateFrom(Stream s) {
         Signature = s.Decode<TagSignature>().Required();
-        SignerId = s.Decode<KeyId>().Required();
+        SignerId = s.Decode<BaseKeyId>().Required();
         PublicKey = s.Decode<TagPubKey>().Required();
     }
 

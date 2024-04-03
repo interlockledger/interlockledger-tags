@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 public record TagSignatureParts(Algorithm Algorithm, byte[] Data) { }
 
-[JsonConverter(typeof(JsonTagConverter<TagSignature>))]
+[JsonConverter(typeof(JsonNotNullConverter<TagSignature>))]
 public class TagSignature : ILTagOfExplicit<TagSignatureParts>, ITextualLight<TagSignature>
 {
     public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts(algorithm, data)) {
@@ -64,4 +64,6 @@ public class TagSignature : ILTagOfExplicit<TagSignatureParts>, ITextualLight<Ta
         result = null;
         return false;
     }
+
+    public bool Equals(TagSignature? other) => other is not null && other.Value == Value;
 }

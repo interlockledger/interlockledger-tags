@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>48.2.0</Version>
+        <Version>48.3.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>Json fixes for signatures and other tags</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -70,7 +70,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="17.0.1" />
+        <PackageReference Include="InterlockLedger.Commons" Version="18.0.0" />
         <PackageReference Include="InterlockLedger.Tags.ILInt" Version="14.0.0" />
         <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.0" />
     </ItemGroup>

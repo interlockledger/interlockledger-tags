@@ -166,8 +166,8 @@ public class ILTagJsonTests
         TestTwiceWith(new LimitedRange(100));
         TestTwiceWith(LimitedRange.Empty);
         TestTwiceWith(new LimitedRange(200, 50));
-        TestTwiceWith(ITextual<LimitedRange>.Parse("[10-19]"));
-        TestTwiceWith(ITextual<LimitedRange>.Parse("10-9"));
+        TestTwiceWith(LimitedRange.Parse("[10-19]", null));
+        TestTwiceWith(LimitedRange.Parse("10-9", null));
         TestTwiceWith(new ILTagRange(new LimitedRange(300, 50)));
         TestTwiceWith(new ILTagRange(new LimitedRange(400)));
         TestTwiceWith(new ILTagRange(LimitedRange.Empty));
