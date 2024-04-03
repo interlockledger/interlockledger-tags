@@ -30,38 +30,20 @@
 //
 // ******************************************************************************************************************************
 
+using System.Text.Json;
+
 namespace InterlockLedger.Tags;
 
-public record TagSignatureParts(Algorithm Algorithm, byte[] Data) { }
-
-[JsonConverter(typeof(JsonTagConverter<TagSignature>))]
-public class TagSignature : ILTagOfExplicit<TagSignatureParts>, ITextualLight<TagSignature>
+public class JsonTagConverter<T> : JsonConverter<T> where T : notnull, ITextualLight<T>
 {
-    public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts(algorithm, data)) {
-    }
+    public override bool CanConvert(Type typeToConvert) =>
+        typeToConvert.Required() == typeof(T) || typeToConvert.IsSubclassOf(typeof(T));
 
-    public Algorithm Algorithm => Value!.Algorithm;
+    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        reader.TokenType != JsonTokenType.String
+            ? throw new NotSupportedException($"{reader.TokenType}")
+            : T.Parse(reader.GetString().Safe(), CultureInfo.InvariantCulture);
 
-    public byte[] Data => Value!.Data;
-
-    internal TagSignature(Stream s) : base(ILTagId.Signature, s) => Value.Required();
-
-    protected override TagSignatureParts? ValueFromStream(WrappedReadonlyStream s) =>
-        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().WaitResult());
-
-    protected override string? BuildTextualRepresentation() => $"Signature!{Data.ToSafeBase64()}#{Algorithm}";
-    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
-    public static TagSignature Parse(string textualRepresentation, IFormatProvider? provider) =>
-        TryParse(textualRepresentation, provider, out var value) ? value : throw new InvalidDataException($"Not a {typeof(TagSignature)} representation");
-    public static bool TryParse([NotNullWhen(true)] string? textualRepresentation, IFormatProvider? provider, [MaybeNullWhen(false)] out TagSignature result) {
-        var parts = textualRepresentation.Safe().Split('!', '#');
-        if (parts.Length == 3
-               && parts[0].Equals("Signature", StringComparison.OrdinalIgnoreCase)
-               && Enum.TryParse(parts[2], ignoreCase: true, out Algorithm algorithm)) {
-            result = new(algorithm, parts[1].FromSafeBase64());
-            return true;
-        }
-        result = null;
-        return false;
-    }
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) =>
+        writer.Required().WriteStringValue(value.TextualRepresentation);
 }

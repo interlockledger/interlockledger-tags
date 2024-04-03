@@ -46,12 +46,14 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-    [JsonIgnore]
-    public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
     public TagPubKey PublicKey { get; set; }
 
     public TagSignature Signature { get; set; }
     public BaseKeyId SignerId { get; set; }
+
+    [JsonIgnore]
+    public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
+    [JsonIgnore]
     public override string TypeName => nameof(IdentifiedSignature);
 
     public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);

@@ -38,10 +38,11 @@ public enum HashAlgorithm : ushort
 {
     SHA1 = 0,
     SHA256 = 1,
+    SHA384 = 5,
     SHA512 = 2,
     SHA3_256 = 3,
+    SHA3_384 = 6,
     SHA3_512 = 4,
-    SHA384 = 5,
 
     Invalid = 0xFFFE,
     Copy = 0xFFFF
@@ -52,8 +53,11 @@ public static class HashAlgorithmExtensions
     public static HashAlgorithmName ToName(this HashAlgorithm value) => value switch {
         HashAlgorithm.SHA1 => HashAlgorithmName.SHA1,
         HashAlgorithm.SHA256 => HashAlgorithmName.SHA256,
-        HashAlgorithm.SHA512 => HashAlgorithmName.SHA512,
         HashAlgorithm.SHA384 => HashAlgorithmName.SHA384,
-        _ => throw new InvalidDataException()
+        HashAlgorithm.SHA512 => HashAlgorithmName.SHA512,
+        HashAlgorithm.SHA3_256 => HashAlgorithmName.SHA3_256,
+        HashAlgorithm.SHA3_384 => HashAlgorithmName.SHA3_384,
+        HashAlgorithm.SHA3_512 => HashAlgorithmName.SHA3_512,
+        _ => throw new NotSupportedException()
     };
 }
