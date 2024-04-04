@@ -75,7 +75,7 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
     public override TagSignature Sign<T>(T data)
         => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(data);
     public IdentifiedSignature SignWithId(byte[] data)
-        => _generateEmptySignatures ? new(new(Algorithm.RSA, []), Id, PublicKey) : Key.SignWithId(data);
+        => _generateEmptySignatures ? new(new(Algorithm.RSA, []), (KeyId)Id, PublicKey) : Key.SignWithId(data);
 
     public void SwitchSession(SenderIdentity senderIdentity) {
         // Method intentionally left empty.

@@ -36,7 +36,7 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     public const string Description = "A signature identified with the signerId and the corresponding PublickKey";
     public const ushort ImplementedVersion = 1;
 
-    public IdentifiedSignature(TagSignature signature, BaseKeyId id, TagPubKey publicKey) : this() {
+    public IdentifiedSignature(TagSignature signature, KeyId id, TagPubKey publicKey) : this() {
         Signature = signature.Required();
         SignerId = id.Required();
         PublicKey = publicKey.Required();
@@ -46,13 +46,14 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
     public IdentifiedSignature() : base(ILTagId.IdentifiedSignature, ImplementedVersion) {
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    public TagPubKey PublicKey { get; set; }
+    public TagSignature Signature { get; set; }
+    public KeyId SignerId { get; set; }
+
+    [JsonIgnore]
+    public override string TypeName => nameof(IdentifiedSignature);
     [JsonIgnore]
     public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
-    public TagPubKey PublicKey { get; set; }
-
-    public TagSignature Signature { get; set; }
-    public BaseKeyId SignerId { get; set; }
-    public override string TypeName => nameof(IdentifiedSignature);
 
     public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data, Signature);
 
@@ -62,7 +63,7 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
 
     protected override void DecodeRemainingStateFrom(Stream s) {
         Signature = s.Decode<TagSignature>().Required();
-        SignerId = s.DecodeBaseKeyId().Required();
+        SignerId = s.Decode<KeyId>().Required();
         PublicKey = s.Decode<TagPubKey>().Required();
     }
 

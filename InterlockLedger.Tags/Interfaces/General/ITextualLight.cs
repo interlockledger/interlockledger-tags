@@ -31,14 +31,9 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public interface ISigningKey : IBaseKey
+
+public interface ITextualLight<T> : IParsable<T> where T : notnull, IParsable<T>
 {
-    TagSignature Sign(byte[] data);
-
-    TagSignature Sign<T>(T data) where T : Signable<T>, new();
-
-    IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), (KeyId)Id, PublicKey);
-
-    IdentifiedSignature SignWithId(byte[] data) => new(Sign(data), (KeyId)Id, PublicKey);
-
+    string TextualRepresentation { get; }
 }
+

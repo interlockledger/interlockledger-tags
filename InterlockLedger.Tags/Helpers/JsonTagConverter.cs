@@ -30,15 +30,20 @@
 //
 // ******************************************************************************************************************************
 
+using System.Text.Json;
+
 namespace InterlockLedger.Tags;
-public interface ISigningKey : IBaseKey
+
+public class JsonTagConverter<T> : JsonConverter<T> where T : notnull, ITextualLight<T>
 {
-    TagSignature Sign(byte[] data);
+    public override bool CanConvert(Type typeToConvert) =>
+        typeToConvert.Required() == typeof(T) || typeToConvert.IsSubclassOf(typeof(T));
 
-    TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+        reader.TokenType != JsonTokenType.String
+            ? throw new NotSupportedException($"{reader.TokenType}")
+            : T.Parse(reader.GetString().Safe(), CultureInfo.InvariantCulture);
 
-    IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), (KeyId)Id, PublicKey);
-
-    IdentifiedSignature SignWithId(byte[] data) => new(Sign(data), (KeyId)Id, PublicKey);
-
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) =>
+        writer.Required().WriteStringValue(value.TextualRepresentation);
 }

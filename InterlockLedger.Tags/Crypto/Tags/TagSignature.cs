@@ -31,38 +31,37 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class TagSignatureParts : IEquatable<TagSignatureParts>
+
+public record TagSignatureParts(Algorithm Algorithm, byte[] Data) { }
+
+[JsonConverter(typeof(JsonTagConverter<TagSignature>))]
+public class TagSignature : ILTagOfExplicit<TagSignatureParts>, ITextualLight<TagSignature>
 {
-    public Algorithm Algorithm;
-    public byte[] Data = [];
-
-    public static bool operator !=(TagSignatureParts left, TagSignatureParts right) => !(left == right);
-
-    public static bool operator ==(TagSignatureParts left, TagSignatureParts right) => left.Equals(right);
-
-    public override bool Equals(object? obj) => obj is TagSignatureParts parts && Equals(parts);
-
-    public bool Equals(TagSignatureParts? other) => other is not null && Algorithm == other.Algorithm && EqualityComparer<byte[]>.Default.Equals(Data, other.Data);
-
-    public override int GetHashCode() => HashCode.Combine(Algorithm, Data);
-}
-
-public class TagSignature : ILTagOfExplicit<TagSignatureParts>
-{
-    public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts { Algorithm = algorithm, Data = data }) {
+    public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts(algorithm, data)) {
     }
 
-    [JsonIgnore]
     public Algorithm Algorithm => Value!.Algorithm;
 
-    [JsonIgnore]
     public byte[] Data => Value!.Data;
 
     internal TagSignature(Stream s) : base(ILTagId.Signature, s) => Value.Required();
 
-    protected override TagSignatureParts? ValueFromStream(WrappedReadonlyStream s) => new() {
-        Algorithm = (Algorithm)s.BigEndianReadUShort(),
-        Data = s.ReadAllBytesAsync().WaitResult()
-    };
+    protected override TagSignatureParts? ValueFromStream(WrappedReadonlyStream s) =>
+        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().WaitResult());
+
+    protected override string? BuildTextualRepresentation() => $"Signature!{Data.ToSafeBase64()}#{Algorithm}";
     protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
+    public static TagSignature Parse(string textualRepresentation, IFormatProvider? provider) =>
+        TryParse(textualRepresentation, provider, out var value) ? value : throw new InvalidDataException($"Not a {typeof(TagSignature)} representation");
+    public static bool TryParse([NotNullWhen(true)] string? textualRepresentation, IFormatProvider? provider, [MaybeNullWhen(false)] out TagSignature result) {
+        var parts = textualRepresentation.Safe().Split('!', '#');
+        if (parts.Length == 3
+               && parts[0].Equals("Signature", StringComparison.OrdinalIgnoreCase)
+               && Enum.TryParse(parts[2], ignoreCase: true, out Algorithm algorithm)) {
+            result = new(algorithm, parts[1].FromSafeBase64());
+            return true;
+        }
+        result = null;
+        return false;
+    }
 }
