@@ -54,10 +54,14 @@ public sealed partial class TagHash : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     public bool Equals(TagHash? other) => base.Equals(other);
     protected override bool AreEquivalent(ILTagOf<Parts?> other) =>
         other.Value is not null && Algorithm == other.Value.Algorithm && DataEquals(other.Value.Data);
-    public override string ToString() => Textual.FullRepresentation;
+    public override string ToString() => Textual.FullRepresentation();
     public static TagHash Empty { get; } = new(HashAlgorithm.SHA256, HashSha256([]));
     public static Regex Mask { get; } = AnythingRegex();
-    public static TagHash Build(string textualRepresentation) => new(Split(textualRepresentation.Safe().Trim()));
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagHash result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
+    public static TagHash Parse(string s, IFormatProvider? provider) => new(Split(s.Safe().Trim()));
     public static TagHash HashSha256Of(byte[] data) => new(HashAlgorithm.SHA256, HashSha256(data));
     public static TagHash HashSha256Of(IEnumerable<byte> data) => HashSha256Of(data.ToArray());
     internal TagHash(Stream s) : base(ILTagId.Hash, s) { }

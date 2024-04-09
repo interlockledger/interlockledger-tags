@@ -34,30 +34,32 @@ using System.Text.Json;
 
 namespace InterlockLedger.Tags;
 
-[TypeConverter(typeof(TypeCustomConverter<ILTagRange>))]
-[JsonConverter(typeof(JsonCustomConverter<ILTagRange>))]
-public class ILTagRange : ILTagOfExplicit<LimitedRange>, ITextual<ILTagRange>
+[TypeConverter(typeof(TypeNotNullConverter<ILTagRange>))]
+[JsonConverter(typeof(JsonNotNullConverter<ILTagRange>))]
+public class ILTagRange : ILTagOfExplicit<LimitedRange>, ITextualLight<ILTagRange>
 {
     public ILTagRange() : this(LimitedRange.Empty) { }
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
-
-    public static ILTagRange FromJson(object json) {
-        var range = json is JsonElement je && je.ValueKind == JsonValueKind.String
-                ? LimitedRange.Build(je.GetString()!)
-                : json is string js
-                    ? LimitedRange.Build(js)
-                    : throw new InvalidDataException($"Could not parse '{json}' to an ILTagRange");
-        return new(range);
-    }
-
     public static ILTagRange Empty { get; } = new ILTagRange();
-    public static Regex Mask => LimitedRange.Mask;
     public bool IsEmpty => Value.IsEmpty;
     public string? InvalidityCause => Value.InvalidityCause;
-    public ITextual<ILTagRange> Textual => this;
-    public static ILTagRange Build(string textualRepresentation) => new(LimitedRange.Build(textualRepresentation));
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagRange result) {
+        result = Parse(s.Safe(), provider);
+        return !result.Value.IsInvalid();
+    }
+    public static ILTagRange Parse(string s, IFormatProvider? provider) {
+        var range = LimitedRange.Parse(s, provider);
+        return new(range);
+    }
+    public static ILTagRange FromJson(object json) {
+        var range = json is JsonElement je && je.ValueKind == JsonValueKind.String
+                ? LimitedRange.Parse(je.GetString()!, null)
+                : json is string js
+                    ? LimitedRange.Parse(js, null)
+                    : throw new InvalidDataException($"Could not parse '{json}' to an ILTagRange");
+        return new ILTagRange(range);
+    }
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
-    static ILTagRange ITextual<ILTagRange>.InvalidBy(string cause) => new(LimitedRange.InvalidBy(cause));
     public bool Equals(ILTagRange? other) => base.Equals(other);
     protected override LimitedRange ValueFromStream(WrappedReadonlyStream s) => new(s.ILIntDecode(), s.BigEndianReadUShort());
     protected override Stream ValueToStream(Stream s) => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count);

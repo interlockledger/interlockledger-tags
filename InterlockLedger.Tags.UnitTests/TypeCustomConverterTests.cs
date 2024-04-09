@@ -81,7 +81,7 @@ public class TypeCustomConverterTests
     private static void ConvertFromStringAndAssert(TypeCustomConverter<AppPermissions> converter, string value, AppPermissions expectedAppPermissions) =>
         Assert.Multiple(() => {
             Assert.That((AppPermissions)converter.ConvertFrom(null, CultureInfo.InvariantCulture, value), Is.EqualTo(expectedAppPermissions));
-            Assert.That(AppPermissions.Build(value), Is.EqualTo(expectedAppPermissions));
+            Assert.That(AppPermissions.Parse(value, null), Is.EqualTo(expectedAppPermissions));
         });
 
     private static void ConvertToStringAndAssert(TypeCustomConverter<AppPermissions> converter, AppPermissions permissions)

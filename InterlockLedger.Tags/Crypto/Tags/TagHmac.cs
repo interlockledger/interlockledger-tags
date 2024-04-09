@@ -47,14 +47,18 @@ public sealed partial class TagHmac : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     public byte[] Data => Value?.Data ?? [];
     public bool IsEmpty => Data is not null && Data.None();
     public string? InvalidityCause { get; init; }
-    public override string ToString() => Textual.FullRepresentation;
+    public override string ToString() => Textual.FullRepresentation();
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, []);
     public static Regex Mask { get; } = AnythingRegex();
 
     private static readonly string[] _prefixSeparator = ["#HMAC-"];
 
-    public static TagHmac Build(string textualRepresentation) => new(Split(textualRepresentation));
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagHmac result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
+    public static TagHmac Parse(string s, IFormatProvider? provider) => new(Split(s));
     public bool Equals(TagHmac? other) => other is not null && Algorithm == other.Algorithm && DataEquals(other.Data);
     public static TagHmac HmacSha256Of(byte[] key, byte[] content) {
         using var hash = new HMACSHA256(key);

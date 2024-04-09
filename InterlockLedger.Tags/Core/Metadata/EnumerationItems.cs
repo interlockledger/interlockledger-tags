@@ -31,6 +31,7 @@
 // ******************************************************************************************************************************
 
 
+
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<EnumerationItems>))]
@@ -42,26 +43,22 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
     public string? InvalidityCause { get; private init; }
     public static EnumerationItems Empty { get; } = new EnumerationItems();
     public static Regex Mask { get; } = AnythingRegex();
-    public static EnumerationItems Build(string textualRepresentation) =>
-        new(textualRepresentation.Safe()
-                                 .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
-                                 .Select(t => new FullEnumerationDetails(t)));
     public static EnumerationItems InvalidBy(string cause) => new() { InvalidityCause = cause };
 
     public bool Equals(EnumerationItems? other) => other is not null && _details.EquivalentTo(other._details);
     public ITextual<EnumerationItems> Textual => this;
-    public override string ToString() => Textual.FullRepresentation;
+    public override string ToString() => Textual.FullRepresentation();
     public override bool Equals(object? obj) => Equals(obj as EnumerationItems);
-    public override int GetHashCode() => HashCode.Combine(Textual.FullRepresentation);
+    public override int GetHashCode() => HashCode.Combine(Textual.FullRepresentation());
 
     internal const string _detailSeparator = "#";
     internal EnumerationDictionary? ToDefinition() =>
-        IsEmpty || Textual.IsInvalid ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
+        IsEmpty || Textual.IsInvalid() ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
     internal EnumerationItems(EnumerationDictionary values) : this(values.Safe().Select(p => p.Value.ToFull(p.Key))) { }
     private EnumerationItems() => TextualRepresentation = null!;
     private EnumerationItems(IEnumerable<FullEnumerationDetails> values) {
         _details.AddRange(values);
-        TextualRepresentation = IsEmpty || Textual.IsInvalid
+        TextualRepresentation = IsEmpty || Textual.IsInvalid()
             ? null!
             : $"{_detailSeparator}{_details.JoinedBy(_detailSeparator)}";
     }
@@ -70,5 +67,12 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
 
     [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]*)?\|)*$""")]
     private static partial Regex AnythingRegex();
-
+    public static EnumerationItems Parse(string s, IFormatProvider? provider) =>
+        new(s.Safe()
+             .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
+             .Select(t => new FullEnumerationDetails(t)));
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out EnumerationItems result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
 }

@@ -60,14 +60,18 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
 
     public static TagPubKey InvalidBy(string cause) =>
          new() { InvalidityCause = cause };
-    public static TagPubKey Build(string textualRepresentation) {
-        if (string.IsNullOrWhiteSpace(textualRepresentation))
-            throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(textualRepresentation));
-        var parts = textualRepresentation.Split('!', '#');
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagPubKey result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
+    public static TagPubKey Parse(string s, IFormatProvider? provider) {
+        if (string.IsNullOrWhiteSpace(s))
+            throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(s));
+        var parts = s.Split('!', '#');
         return parts.Length != 3
                || (!parts[0].Equals("PubKey", StringComparison.OrdinalIgnoreCase))
                || !Enum.TryParse(parts[2], ignoreCase: true, out Algorithm algorithm)
-            ? throw new ArgumentException($"Bad format of pubkey textual representation: '{textualRepresentation}'!!!", nameof(textualRepresentation))
+            ? throw new ArgumentException($"Bad format of pubkey textual representation: '{s}'!!!", nameof(s))
             : ResolveAs(algorithm, parts[1].FromSafeBase64());
     }
 
@@ -81,7 +85,7 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
 
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
 
-    public override string ToString() => Textual.FullRepresentation;
+    public override string ToString() => Textual.FullRepresentation();
 
     public bool Equals(TagPubKey? other) => other is not null && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 

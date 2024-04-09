@@ -42,7 +42,7 @@ public class ILTagJsonTests
         TestTwiceWith(new AppPermissions(0, null));
         TestTwiceWith(new AppPermissions(1, 100));
         TestTwiceWith(new AppPermissions(2, 100, 101));
-        var ap = AppPermissions.Build("#3,1,2,3");
+        var ap = AppPermissions.Parse("#3,1,2,3", null);
         Assert.That(ap.TextualRepresentation, Is.EqualTo("#3,1,2,3"));
         TestTwiceWith(ap);
         TestTwiceWith(new AppPermissions(4, 100, 4, 101, 3));
@@ -108,7 +108,7 @@ public class ILTagJsonTests
     [Test]
     public void ILTagVersionConverter() {
         TestTwiceWith(ILTagVersion.Empty);
-        TestTwiceWith(ILTagVersion.Build("7.6.5"));
+        TestTwiceWith(ILTagVersion.Parse("7.6.5", null));
         TestTwiceWith(ITextual<ILTagVersion>.Parse("7.6.5"));
         TestTwiceWith(new ILTagVersion(new Version(1, 0, 0)));
         TestTwiceWith(new ILTagVersion(new Version(1, 2, 3, 4)));

@@ -42,7 +42,7 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
     public class Tag : ILTagOfExplicit<AppPermissions>
     {
         public Tag(AppPermissions value) : base(ILTagId.InterlockKeyAppPermission, value) {
-            if (value.Textual.IsInvalid)
+            if (value.Textual.IsInvalid())
                 throw new InvalidOperationException(value.ToString());
         }
 
@@ -57,15 +57,20 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
 
     public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
         AppId = appId;
-        ActionIds = actionIds ?? [];
-        TextualRepresentation = BuildTextualRepresentation();
+        ActionIds = (actionIds ?? []).Order();
+        TextualRepresentation = $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
     }
+    private AppPermissions(string invalidityCause) {
+        AppId = ulong.MaxValue;
+        ActionIds = [];
+        InvalidityCause = invalidityCause.Required();
+        TextualRepresentation = $"#?{InvalidityCause}";
+    }
+    public static AppPermissions InvalidBy(string cause) => new(cause);
 
     public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
     public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
-
     public Tag AsTag => new(this);
-
     public string VerboseRepresentation {
         get {
             var plural = ActionIds.SafeCount() == 1 ? "" : "s";
@@ -74,28 +79,29 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
     }
     public bool IsEmpty => AppId == 0 && ActionIds.None();
     public string? InvalidityCause { get; private init; }
-    public string TextualRepresentation { get; private init; }
-    private string BuildTextualRepresentation() => Textual.IsInvalid
-            ? $"#?{InvalidityCause}"
-            : $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
+    public string TextualRepresentation { get; }
 
     public static AppPermissions Empty { get; } = new AppPermissions(0);
     public static Regex Mask { get; } = PermissionsListRegex();
-    private static readonly string _invalidTextualRepresentation = "#?";
-    public static AppPermissions InvalidBy(string cause) =>
-        new(ulong.MaxValue) { InvalidityCause = cause, TextualRepresentation = _invalidTextualRepresentation };
-    public static AppPermissions Build(string textualRepresentation) {
-        if (textualRepresentation.FirstOrDefault() != '#')
-            InvalidBy(Mask.InvalidityByNotMatching(textualRepresentation));
-        var parts = textualRepresentation[1..].Split(',').AsOrderedUlongs();
+    public static AppPermissions Parse(string s, IFormatProvider? provider) {
+        if (s.IsBlank() || s[0] != '#')
+            InvalidBy(Mask.InvalidityByNotMatching(s));
+        if (s.Length > 2 && s[1] == '?')
+            return new AppPermissions(invalidityCause: s[2..]);
+        var parts = s[1..].Split(',').AsOrderedUlongs();
         return new AppPermissions(parts.First(), parts.Skip(1));
     }
-    public bool Equals(AppPermissions? other) => other is not null && other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AppPermissions result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
 
+    public bool Equals(AppPermissions? other) => other is not null && other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
     public override bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
     public ITextual<AppPermissions> Textual => this;
-    public override int GetHashCode() => HashCode.Combine(AppId, ActionIds);
-    public override string ToString() => Textual.FullRepresentation;
+    public int CompareTo(AppPermissions? other) => Equals(other) ? 0 : other is null ? 1 : AppId.CompareTo(other.AppId);
+    public override int GetHashCode() => HashCode.Combine(AppId, ActionIds, InvalidityCause);
+    public override string ToString() => Textual.FullRepresentation();
     public static bool operator ==(AppPermissions left, AppPermissions right) =>
          left.Equals(right);
     public static bool operator !=(AppPermissions left, AppPermissions right) =>
@@ -113,6 +119,5 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
 
     [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
     private static partial Regex PermissionsListRegex();
-    public int CompareTo(AppPermissions? other) => Equals(other) ? 0 : other is null ? 1 : AppId.CompareTo(other.AppId);
 
 }

@@ -64,8 +64,8 @@ public class InterlockIdTests
     [Test]
     public void IsEmpty() =>
         Assert.Multiple(() => {
-            Assert.That(InterlockId.Build("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU").IsEmpty, Is.EqualTo(true));
-            Assert.That(InterlockId.Build("#SHA3_256").IsEmpty, Is.EqualTo(false));
+            Assert.That(InterlockId.Parse("47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU", null).IsEmpty, Is.EqualTo(true));
+            Assert.That(InterlockId.Parse("#SHA3_256", null).IsEmpty, Is.EqualTo(false));
         });
 
     [Test]
@@ -77,8 +77,8 @@ public class InterlockIdTests
 
     [Test]
     public void CompareFromTextualRepresentation() {
-        var a = InterlockId.Build("Key!AAA#SHA1");
-        var b = InterlockId.Build("Owner!AAA#SHA1");
+        var a = InterlockId.Parse("Key!AAA#SHA1", null);
+        var b = InterlockId.Parse("Owner!AAA#SHA1", null);
         var c = (KeyId)a;
         Assert.Multiple(() => {
 #pragma warning disable NUnit2010, NUnit2043 // Use EqualConstraint for better assertion messages in case of failure
@@ -98,8 +98,8 @@ public class InterlockIdTests
     [Test]
     public void ResolveFromTextualRepresentation() =>
         Assert.Multiple(() => {
-            Assert.That(InterlockId.Build("Owner!AAA#SHA1"), Is.InstanceOf<OwnerId>());
-            Assert.That(InterlockId.Build("Key!AAA#SHA1"), Is.InstanceOf<KeyId>());
+            Assert.That(InterlockId.Parse("Owner!AAA#SHA1", null), Is.InstanceOf<OwnerId>());
+            Assert.That(InterlockId.Parse("Key!AAA#SHA1", null), Is.InstanceOf<KeyId>());
         });
 
     [TestCase(HashAlgorithm.SHA512, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 4, 2, 0 }, TestName = "SerializeKeyIdFromParts#SHA512")]
@@ -127,7 +127,7 @@ InterlockIdPlus.Chain, HashAlgorithm.SHA256, new byte[] { 227, 176, 196, 66, 152
     [TestCase(new byte[] { 43, 5, 4, 0, 0, 0, 0 }, InterlockIdPlus.Key, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "Key!AAA#SHA1", "Key!AAA#SHA1", TestName = "NewKeyIdFromString")]
     public void NewInterlockIdFromString(byte[] bytes, byte type, HashAlgorithm algorithm, byte[] data, string textualRepresentation, string fullTextual) {
         _ = data.Required();
-        var id = InterlockId.Build(textualRepresentation);
+        var id = InterlockId.Parse(textualRepresentation, null);
         Assert.Multiple(() => {
             Assert.That(id.TagId, Is.EqualTo(ILTagId.InterlockId));
             Assert.That(id.Algorithm, Is.EqualTo(algorithm));

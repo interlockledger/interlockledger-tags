@@ -65,10 +65,10 @@ public static class ListOfClaimsExtensions
         => BuildFrom(ClaimValue(claims, _senderNameClaimType), textual => textual);
 
     internal static TagPubKey? PublicKey(this IEnumerable<Claim> claims)
-        => BuildFrom(ClaimValue(claims, _publicKeyClaimType), textual => TagPubKey.Build(textual));
+        => BuildFrom(ClaimValue(claims, _publicKeyClaimType), textual => TagPubKey.Parse(textual, null));
 
     internal static BaseKeyId? Sender(this IEnumerable<Claim> claims)
-        => BuildFrom(ClaimValue(claims, _senderIdClaimType), textual => InterlockId.Build(textual) as BaseKeyId);
+        => BuildFrom(ClaimValue(claims, _senderIdClaimType), textual => InterlockId.Parse(textual, null) as BaseKeyId);
 
     private const string _publicKeyClaimType = "InterlockLedger.PublicKey";
     private const string _senderIdClaimType = "InterlockLedger.SenderId";

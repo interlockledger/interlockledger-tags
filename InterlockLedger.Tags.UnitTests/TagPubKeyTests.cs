@@ -38,7 +38,7 @@ public class TagPubKeyTests
 
     [TestCase("PubKey!Fl9ud3p6acZqZRfx0GF8PjmBEpwXf_PQYqPHcM6cDUU#EdDSA", Algorithm.EdDSA, typeof(TagPublicEdDSAKey))]
     public void ParsePubKey(string pubKey, Algorithm algorithm, Type type) {
-        var pubkey = TagPubKey.Build(pubKey);
+        var pubkey = TagPubKey.Parse(pubKey, null);
         Assert.That(pubkey, Is.Not.Null);
         Assert.That(pubkey, Is.InstanceOf(type));
         Assert.That(pubkey, Is.AssignableTo<TagPubKey>());

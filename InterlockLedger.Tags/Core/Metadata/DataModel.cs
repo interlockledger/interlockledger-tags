@@ -152,13 +152,13 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             if (fieldValue is JsonElement je) {
                 fieldValue = FromJsonElement(field, je).Required();
             }
-            return field.IsEnumeration && fieldValue is string value
-                ? field.EnumerationFromString(value)
-                : field.IsArray
-                    ? SpecialCaseSomeArrays(field, fieldValue)
-                    : TagProvider.HasDeserializer(field.TagId)
-                        ? TagProvider.DeserializeFromJson(field.TagId, fieldValue)
-                        : DeserializePartialFromJson(field, fieldValue);
+            if (field.IsEnumeration && fieldValue is string value)
+                return field.EnumerationFromString(value);
+            if (field.IsArray)
+                return SpecialCaseSomeArrays(field, fieldValue);
+            return TagProvider.HasDeserializer(field.TagId)
+                ? TagProvider.DeserializeFromJson(field.TagId, fieldValue)
+                : DeserializePartialFromJson(field, fieldValue);
         } catch (Exception e) {
             throw new InvalidOperationException($"Could not deserialize json field '{field.Name}' of type {field.TagId}\r\nfrom value:\r\n{fieldValue}", e);
         }
@@ -170,7 +170,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
                 _ => throw new InvalidOperationException($"Can't extract array elements from '{fieldValue}'"),
             };
             return field.ElementTagId == 23
-                ? new ILTagArrayOfILTag<ILTagRange>(array.Select(r => r is ILTagRange it ? it : ILTagRange.Build((string)r)))
+                ? new ILTagArrayOfILTag<ILTagRange>(array.Select(r => r is ILTagRange it ? it : ILTagRange.Parse((string)r, null)))
                 : new ILTagSequence(array);
         }
 
@@ -310,12 +310,14 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
                 ? field.EnumerationToString(value)
                 : field.IsArray
                     ? ToJsonArray(value)
-                    : value.Content;
+                    : value is ITextualCore it
+                        ? it.TextualRepresentation
+                        : value.Content;
 
         static IEnumerable<object>? ToJsonArray(ILTag value) =>
             value.Content is null
             ? null
-            : ((IEnumerable<object>)value.Content).Select(o => o is ITextual it ? it.TextualRepresentation : o).ToArray();
+            : ((IEnumerable<object>)value.Content).Select(o => o is ITextualCore it ? it.TextualRepresentation : o).ToArray();
     }
 
     private static ushort ToUInt16(object fieldValue)

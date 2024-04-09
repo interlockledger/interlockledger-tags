@@ -229,6 +229,43 @@ public class DataModelJsonTests
                 23, 3, 21, 13, 0,
             16, 2, 6, 12,
             3, 3);
+    [Test]
+    public void FromJsonObjectV8() => FromJsonObjectBaseTest(
+        new {
+            Version = 8,
+            Id = 32,
+            Name = "DataModelToJson",
+            Hidden = "Shown From Version 1",
+            SemanticVersion = "1.0.1.33",
+            Values = new byte[] { 6, 12 },
+            Fancy = new {
+                Id = 320,
+                Name = "Fancy DataModelToJson"
+            },
+            Ranges = new {
+                Elements = _rangesList,
+                ElementTagId = 23
+            },
+            Bytes = "Bgw=",
+            Enumeration = "Some|Lots",
+            Timestamp = "1980-01-01 13:00:00Z"
+        },
+        249, 49, 221, 123,
+            5, 8, 0,
+            10, 32,
+            17, 15, 68, 97, 116, 97, 77, 111, 100, 101, 108, 84, 111, 74, 115, 111, 110,
+            17, 20, 83, 104, 111, 119, 110, 32, 70, 114, 111, 109, 32, 86, 101, 114, 115, 105, 111, 110, 32, 49,
+            24, 16, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 33, 0, 0, 0,
+            20, 3, 2, 6, 12,
+            249, 49, 222, 26,
+                10, 248, 72,
+                17, 21, 70, 97, 110, 99, 121, 32, 68, 97, 116, 97, 77, 111, 100, 101, 108, 84, 111, 74, 115, 111, 110,
+            21, 11, 2,
+                23, 3, 10, 5, 0,
+                23, 3, 21, 13, 0,
+            16, 2, 6, 12,
+            3, 3,
+            15, 252, 146, 244, 5, 24, 8);
 
     [Test]
     public void ToFromJsonV0()
@@ -263,6 +300,10 @@ public class DataModelJsonTests
     [Test]
     public void ToFromJsonV7()
         => ToFromBaseTest(new JsonTestTaggedData(7, 32, "DataModelToJson", "Shown From Version 1", some: SomeEnumeration.Lots | SomeEnumeration.Some, 7, 12).AsPayload);
+
+    [Test]
+    public void ToFromJsonV8()
+        => ToFromBaseTest(new JsonTestTaggedData(8, 32, "DataModelToJson", "Shown From Version 1", some: SomeEnumeration.Lots | SomeEnumeration.Some, 7, 12).AsPayload);
 
     private static readonly JsonSerializerOptions _options = new() {
         WriteIndented = true,
@@ -387,8 +428,13 @@ public class DataModelJsonTests
                         [(byte)SomeEnumeration.Lots] = new EnumerationDetails(nameof(SomeEnumeration.Lots), "A large number"),
                     },
                     EnumerationAsFlags = true
+                },
+                new() {
+                    TagId = ILTagId.Timestamp,
+                    Name = nameof(Timestamp),
+                    Version = 8
                 }
-                ]
+           ]
         };
         private readonly string? _hidden;
         private readonly Reference? _fancy;
@@ -403,6 +449,7 @@ public class DataModelJsonTests
         public LimitedRange[]? Ranges { get; }
         public byte[]? Bytes { get; }
         public SomeEnumeration? Enumeration { get; }
+        public ILTagTimestamp? Timestamp { get; }
 
         public JsonTestTaggedData() => AsPayload = new Payload<JsonTestTaggedData>(PayloadTagId, this);
 
@@ -417,6 +464,7 @@ public class DataModelJsonTests
             Ranges = version <= 4 ? null : [new(10, 5), new(21, 13)];
             Bytes = version <= 5 ? null : Values!.Select(u => (byte)u).ToArray();
             Enumeration = version <= 6 ? null : some;
+            Timestamp = version <= 7 ? null : new ILTagTimestamp(new DateTimeOffset(1980, 1, 1, 13, 0, 0, TimeSpan.Zero));
             AsPayload = new Payload<JsonTestTaggedData>(PayloadTagId, this);
         }
 
@@ -437,6 +485,8 @@ public class DataModelJsonTests
                 s.EncodeByteArray(Bytes);
             if (Version > 6)
                 s.EncodeByte((byte)Enumeration!);
+            if (Version > 7)
+                s.EncodeTag(Timestamp!);
         }
 
         [JsonIgnore]
@@ -449,6 +499,7 @@ public class DataModelJsonTests
             5 => AsJsonV5(),
             6 => AsJsonV6(),
             7 => AsJsonV7(),
+            8 => AsJsonV8(),
             _ => throw new InvalidDataException($"Unknown version {Version}"),
         };
 
@@ -492,5 +543,7 @@ public class DataModelJsonTests
         private object AsJsonV6() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy, Ranges = _taggedRanges, Bytes };
 
         private object AsJsonV7() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy, Ranges = _taggedRanges, Bytes, Enumeration };
+
+        private object AsJsonV8() => new { Version, Id, Name, Hidden, SemanticVersion = SemanticVersion?.ToString(4), Values, Fancy, Ranges = _taggedRanges, Bytes, Enumeration, Timestamp!.TextualRepresentation };
     }
 }

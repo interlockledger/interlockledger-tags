@@ -71,6 +71,9 @@ public static class TagProvider
                 RegisterDeserializer(id, deserializer, jsonDeserializer);
     }
 
+    public static T FromJson<T>(object json) where T : IParsable<T> => T.Parse((string)json, null);
+    public static T FromJsonInvariant<T>(object json) where T : IParsable<T> => T.Parse((string)json, CultureInfo.InvariantCulture);
+
     private static readonly Dictionary<ulong, (Func<Stream, ILTag> fromStream, Func<object, ILTag> fromJson)> _deserializers
     = new() {
         [ILTagId.Null] = (_ => ILTagNull.Instance, _ => ILTagNull.Instance),
@@ -85,7 +88,7 @@ public static class TagProvider
         [ILTagId.UInt64] = (s => new ILTagUInt64(s, ILTagId.UInt64), o => new ILTagUInt64(Convert.ToUInt64(o, CultureInfo.InvariantCulture))),
         [ILTagId.ILInt] = (s => new ILTagILInt(s, ILTagId.ILInt), o => new ILTagILInt(Convert.ToUInt64(o, CultureInfo.InvariantCulture))),
         [ILTagId.ILIntSigned] = (s => new ILTagILIntSigned(s, ILTagId.ILIntSigned), o => new ILTagILIntSigned(Convert.ToInt64(o, CultureInfo.InvariantCulture))),
-        [ILTagId.Timestamp] = (s => new ILTagTimestamp(s, ILTagId.Timestamp), o => new ILTagTimestamp(DateTimeOffset.Parse(Convert.ToString(o).Safe(), CultureInfo.InvariantCulture))),
+        [ILTagId.Timestamp] = (s => new ILTagTimestamp(s, ILTagId.Timestamp), FromJsonInvariant<ILTagTimestamp>),
         [ILTagId.Binary32] = (s => new ILTagBinary32(s), NoJson),
         [ILTagId.Binary64] = (s => new ILTagBinary64(s), NoJson),
         [ILTagId.Binary128] = (s => new ILTagBinary128(s), NoJson),
@@ -100,17 +103,17 @@ public static class TagProvider
         [ILTagId.Range] = (s => new ILTagRange(s), ILTagRange.FromJson),
         [ILTagId.Dictionary] = (s => new ILTagDictionary<ILTag>(s), o => new ILTagDictionary<ILTag>(o)),
         [ILTagId.StringDictionary] = (s => new ILTagStringDictionary(s), o => new ILTagStringDictionary(o)),
-        [ILTagId.PubKey] = (TagPubKey.Resolve, o => TagPubKey.Build((string)o)),
+        [ILTagId.PubKey] = (TagPubKey.Resolve, FromJson<TagPubKey>),
         [ILTagId.Signature] = (s => new TagSignature(s), NoJson),
-        [ILTagId.Hash] = (s => new TagHash(s), o => TagHash.Build((string)o)),
+        [ILTagId.Hash] = (s => new TagHash(s), FromJson<TagHash>),
         [ILTagId.RSAParametersPublic] = (s => new TagRSAPublicParameters(s), NoJson),
         [ILTagId.RSAParameters] = (s => new TagRSAParameters(s), NoJson),
         [ILTagId.Encrypted] = (s => new TagEncrypted(s), NoJson),
-        [ILTagId.InterlockId] = (InterlockId.DeserializeAndResolve, o => InterlockId.Build((string)o)),
+        [ILTagId.InterlockId] = (InterlockId.DeserializeAndResolve, FromJson<InterlockId>),
         [ILTagId.InterlockKey] = (s => new InterlockKey(s), NoJson),
         [ILTagId.InterlockSigningKey] = (s => new InterlockSigningKeyData(s), NoJson),
         [ILTagId.InterlockUpdatableSigningKey] = (s => new InterlockUpdatableSigningKeyData(s), NoJson),
-        [ILTagId.Hmac] = (s => new TagHmac(s), o => TagHmac.Build((string)o)),
+        [ILTagId.Hmac] = (s => new TagHmac(s), FromJson<TagHmac>),
         [ILTagId.Certificate] = (s => new TagCertificate(s), NoJson),
         [ILTagId.SignedValue] = (s => s.SignedValueFromStream(), NoJson),
         [ILTagId.IdentifiedSignature] = (s => new IdentifiedSignature.Payload(ILTagId.IdentifiedSignature, s), NoJson),

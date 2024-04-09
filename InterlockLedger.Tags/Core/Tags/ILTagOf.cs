@@ -38,7 +38,7 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
     public T Value { get; set; }
     [JsonIgnore]
     public sealed override string TextualRepresentation => (_textualRepresentation ??= BuildTextualRepresentation()) ?? string.Empty;
-    protected virtual string? BuildTextualRepresentation() => (Value is ITextual textual) ? textual.TextualRepresentation : null;
+    protected virtual string? BuildTextualRepresentation() => (Value is ITextualCore textual) ? textual.TextualRepresentation : null;
     private string? _textualRepresentation;
     public override object? Content => Value;
     public override bool ValueIs<TV>(out TV? value) where TV : default {

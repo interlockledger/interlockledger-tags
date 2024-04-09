@@ -30,10 +30,15 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
 
-public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>
+[TypeConverter(typeof(TypeNotNullConverter<ILTagTimestamp>))]
+[JsonConverter(typeof(JsonNotNullConverter<ILTagTimestamp>))]
+public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>, ITextualLight<ILTagTimestamp>
 {
+    private const string _fixedFormat = "u";
+
     internal ILTagTimestamp(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Timestamp, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
     protected override DateTimeOffset ValueFromStream(WrappedReadonlyStream s) =>
@@ -44,5 +49,11 @@ public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>
         return s;
     }
     public ILTagTimestamp(DateTimeOffset value) : base(ILTagId.Timestamp, value) { }
-    protected override string? BuildTextualRepresentation() => Value.ToString("u");
+    protected override string? BuildTextualRepresentation() => Value.ToString(_fixedFormat, CultureInfo.InvariantCulture);
+    public bool Equals(ILTagTimestamp? other) => other is not null && other.Value == Value;
+    public static ILTagTimestamp Parse(string s, IFormatProvider? provider) => new(DateTimeOffset.ParseExact(s, _fixedFormat, CultureInfo.InvariantCulture));
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagTimestamp result) {
+        result = Parse(s.Safe(), provider);
+        return true;
+    }
 }

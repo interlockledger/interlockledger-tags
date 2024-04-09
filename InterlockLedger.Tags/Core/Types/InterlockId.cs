@@ -64,7 +64,11 @@ public partial class InterlockId : ILTagOfExplicit<InterlockId.Parts>, IComparab
     public string AsBase64 => Value!.Data.Safe().ToSafeBase64();
 
     public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause };
-    public static InterlockId Build(string textualRepresentation) => new Parts(textualRepresentation).Resolve();
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out InterlockId result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
+    public static InterlockId Parse(string s, IFormatProvider? provider) => new Parts(s).Resolve();
     public bool Equals(InterlockId? other) => base.Equals(other);
     public sealed override string ToString() => TextualRepresentation;
     public string ToFullString() => Value!.ToFullString();

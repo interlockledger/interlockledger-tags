@@ -42,9 +42,13 @@ public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVers
     public static ILTagVersion Empty { get; } = new() { IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
     public string? InvalidityCause { get; private init; }
-    public static ILTagVersion Build(string textualRepresentation) {
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagVersion result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
+    public static ILTagVersion Parse(string s, IFormatProvider? provider) {
         try {
-            var parsedVersion = Version.Parse(textualRepresentation);
+            var parsedVersion = Version.Parse(s);
             return new(parsedVersion);
         } catch (Exception ex) {
             return InvalidBy(ex.Message);
@@ -53,7 +57,7 @@ public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVers
     public static ILTagVersion InvalidBy(string cause) => new() { InvalidityCause = cause };
     public bool Equals(ILTagVersion? other) => base.Equals(other);
     protected override bool AreEquivalent(ILTagOf<Version?> other) => TextualRepresentation == other.TextualRepresentation;
-    public static ILTagVersion FromJson(object o) => o is Version version ? new(version) : Build((string)o);
+    public static ILTagVersion FromJson(object o) => o is Version version ? new(version) : Parse((string)o, CultureInfo.InvariantCulture);
     public ITextual<ILTagVersion> Textual => this;
 
     public int CompareTo(ILTagVersion? other) => Value?.CompareTo(other?.Value) ?? -1;
