@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>49.2.0</Version>
+        <Version>49.2.1</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>Upgrade to fixed il2-commons</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -70,7 +70,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="18.2.0" />
+        <PackageReference Include="InterlockLedger.Commons" Version="18.2.1" />
         <PackageReference Include="InterlockLedger.Tags.ILInt" Version="14.0.0" />
         <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.0" />
     </ItemGroup>

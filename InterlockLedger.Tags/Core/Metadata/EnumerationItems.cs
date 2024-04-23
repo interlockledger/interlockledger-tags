@@ -44,7 +44,14 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
     public static EnumerationItems Empty { get; } = new EnumerationItems();
     public static Regex Mask { get; } = AnythingRegex();
     public static EnumerationItems InvalidBy(string cause) => new() { InvalidityCause = cause };
-
+    public static EnumerationItems Parse(string s, IFormatProvider? provider) =>
+        new(s.Safe()
+             .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
+             .Select(t => new FullEnumerationDetails(t)));
+    public static bool TryParse(string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out EnumerationItems result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
     public bool Equals(EnumerationItems? other) => other is not null && _details.EquivalentTo(other._details);
     public ITextual<EnumerationItems> Textual => this;
     public override string ToString() => Textual.FullRepresentation();
@@ -55,6 +62,7 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
     internal EnumerationDictionary? ToDefinition() =>
         IsEmpty || Textual.IsInvalid() ? null : new(_details!.ToDictionary(d => d.Index, dd => dd.Shorter));
     internal EnumerationItems(EnumerationDictionary values) : this(values.Safe().Select(p => p.Value.ToFull(p.Key))) { }
+
     private EnumerationItems() => TextualRepresentation = null!;
     private EnumerationItems(IEnumerable<FullEnumerationDetails> values) {
         _details.AddRange(values);
@@ -65,14 +73,6 @@ public partial class EnumerationItems : ITextual<EnumerationItems>
 
     private readonly List<FullEnumerationDetails> _details = [];
 
-    [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]*)?\|)*$""")]
+    [GeneratedRegex("""^(#\d+\|[^\|#]+(\|[^\|#]*\|?)?)*$""")]
     private static partial Regex AnythingRegex();
-    public static EnumerationItems Parse(string s, IFormatProvider? provider) =>
-        new(s.Safe()
-             .Split(_detailSeparator, StringSplitOptions.RemoveEmptyEntries)
-             .Select(t => new FullEnumerationDetails(t)));
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out EnumerationItems result) {
-        result = Parse(s.Safe(), provider);
-        return !result.IsInvalid();
-    }
 }

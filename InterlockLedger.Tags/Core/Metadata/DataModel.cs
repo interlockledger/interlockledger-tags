@@ -149,16 +149,15 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
         try {
             if (fieldValue is null)
                 return ILTagNull.Instance;
-            if (fieldValue is JsonElement je) {
+            if (fieldValue is JsonElement je)
                 fieldValue = FromJsonElement(field, je).Required();
-            }
-            if (field.IsEnumeration && fieldValue is string value)
-                return field.EnumerationFromString(value);
-            if (field.IsArray)
-                return SpecialCaseSomeArrays(field, fieldValue);
-            return TagProvider.HasDeserializer(field.TagId)
-                ? TagProvider.DeserializeFromJson(field.TagId, fieldValue)
-                : DeserializePartialFromJson(field, fieldValue);
+            return field.IsEnumeration && fieldValue is string value
+                ? field.EnumerationFromString(value)
+                : field.IsArray
+                    ? SpecialCaseSomeArrays(field, fieldValue)
+                    : TagProvider.HasDeserializer(field.TagId)
+                        ? TagProvider.DeserializeFromJson(field.TagId, fieldValue)
+                        : DeserializePartialFromJson(field, fieldValue);
         } catch (Exception e) {
             throw new InvalidOperationException($"Could not deserialize json field '{field.Name}' of type {field.TagId}\r\nfrom value:\r\n{fieldValue}", e);
         }
@@ -326,36 +325,4 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
             JsonElement je when je.ValueKind == JsonValueKind.Number => je.GetUInt16(),
             _ => throw new InvalidDataException($"Not a number! {fieldValue}")
         };
-}
-
-public class ILTagDataModel : ILTagOfExplicit<DataModel>
-{
-    public ILTagDataModel(DataModel model) : base(ILTagId.DataModel, model) {
-    }
-
-    public ILTagDataModel(Stream s) : base(ILTagId.DataModel, s) {
-    }
-
-    protected override DataModel? ValueFromStream(WrappedReadonlyStream s) {
-        var payloadTagId = s.DecodeILInt();
-        s.DecodeILInt(); // drop deprecated field
-        return new DataModel {
-            PayloadTagId = payloadTagId,
-            DataFields = s.DecodeTagArray<ILTagDataField>().Safe().Select(t => t.Required().Value.Required()),
-            Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Required().Value.Required()),
-            PayloadName = s.DecodeString(),
-            Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
-            Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null
-        };
-    }
-    protected override Stream ValueToStream(Stream s) {
-        s.EncodeILInt(Value.Required().PayloadTagId);
-        s.EncodeILInt(0); // deprecated field
-        s.EncodeTagArray(Value.DataFields.Select(df => new ILTagDataField(df)));
-        s.EncodeTagArray(Value.Indexes.Select(index => new ILTagDataIndex(index)));
-        s.EncodeString(Value.PayloadName);
-        s.EncodeUShort(Value.Version);
-        s.EncodeString(Value.Description.TrimToNull());
-        return s;
-    }
 }

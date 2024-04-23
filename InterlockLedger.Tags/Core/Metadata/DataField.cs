@@ -44,10 +44,7 @@ public sealed partial class DataField : IEquatable<DataField>
         Version = 1;
     }
 
-    public DataField() {
-        Name = "Invalid";
-        Version = 1;
-    }
+    public DataField() => Name = "Invalid";
 
     public CastType Cast { get; set; }
 

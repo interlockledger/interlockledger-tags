@@ -305,12 +305,107 @@ public class DataModelJsonTests
     public void ToFromJsonV8()
         => ToFromBaseTest(new JsonTestTaggedData(8, 32, "DataModelToJson", "Shown From Version 1", some: SomeEnumeration.Lots | SomeEnumeration.Some, 7, 12).AsPayload);
 
+    [Test]
+    public void DataModelAsJsonAndBack() {
+        var json = JsonSerializer.Serialize(JsonTestTaggedData.Model, _modelOptions);
+        TestContext.Write(json);
+        Assert.That(json, Is.EqualTo(_dataModelAsJson));
+        var model = JsonSerializer.Deserialize<DataModel>(json, _modelOptions);
+        Assert.That(model, Is.Not.Null);
+        Assert.That(model, Is.EqualTo(JsonTestTaggedData.Model));
+    }
+
+    private const string _dataModelAsJson = /*lang=json,strict*/ """
+        {
+          "dataFields": [
+            {
+              "name": "Version",
+              "tagId": 5
+            },
+            {
+              "name": "Id",
+              "tagId": 10
+            },
+            {
+              "name": "Name",
+              "tagId": 17
+            },
+            {
+              "name": "Hidden",
+              "tagId": 17,
+              "version": 1
+            },
+            {
+              "name": "SemanticVersion",
+              "tagId": 24,
+              "version": 2
+            },
+            {
+              "name": "Values",
+              "tagId": 20,
+              "version": 3
+            },
+            {
+              "name": "Fancy",
+              "subDataFields": [
+                {
+                  "name": "Id",
+                  "tagId": 10
+                },
+                {
+                  "name": "Name",
+                  "tagId": 17
+                }
+              ],
+              "tagId": 13014,
+              "version": 4
+            },
+            {
+              "elementTagId": 23,
+              "name": "Ranges",
+              "tagId": 21,
+              "version": 5
+            },
+            {
+              "name": "Bytes",
+              "tagId": 16,
+              "version": 6
+            },
+            {
+              "enumeration": "#0|None|Nothing|#1|Some|A small number|#2|Lots|A large number|",
+              "enumerationAsFlags": true,
+              "name": "Enumeration",
+              "tagId": 3,
+              "version": 7
+            },
+            {
+              "name": "Timestamp",
+              "tagId": 15,
+              "version": 8
+            }
+          ],
+          "indexes": [],
+          "payloadName": "JsonTestTaggedData",
+          "payloadTagId": 13013,
+          "version": 2
+        }
+        """;
     private static readonly JsonSerializerOptions _options = new() {
         WriteIndented = true,
         PropertyNamingPolicy = null,
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
+
+    private static readonly JsonSerializerOptions _modelOptions = new() {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+        AllowTrailingCommas = true,
+        IgnoreReadOnlyProperties = true        
+    };
+
 
     private static readonly string[] _rangesList = ["[10-14]", "[21-33]"];
 
