@@ -46,7 +46,7 @@ public class ILTagDataModel : ILTagOfExplicit<DataModel>
         return new DataModel {
             PayloadTagId = payloadTagId,
             DataFields = s.DecodeTagArray<ILTagDataField>().Safe().Select(t => t.Required().Value.Required()),
-            Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Required().Value.Required()),
+            Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Required().Value.Required()).NullIfEmpty(),
             PayloadName = s.DecodeString(),
             Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
             Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null

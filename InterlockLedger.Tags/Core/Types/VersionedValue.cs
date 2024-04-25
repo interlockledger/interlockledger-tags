@@ -147,7 +147,7 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
         });
     }
 
-    protected virtual DataIndex[] PayloadIndexes => [];
+    protected virtual DataIndex[]? PayloadIndexes => null;
 
     protected abstract IEnumerable<DataField> RemainingStateFields { get; }
 

@@ -232,7 +232,7 @@ public sealed partial class DataField : IEquatable<DataField>
         IsOpaque = source.IsOpaque;
         Name = source.Name;
         SerializationVersion = source.SerializationVersion;
-        SubDataFields = source.SubDataFields;
+        SubDataFields = source.SubDataFields.NullIfEmpty();
         TagId = source.TagId;
         Version = source.Version;
     }

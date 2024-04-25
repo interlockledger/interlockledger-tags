@@ -384,7 +384,6 @@ public class DataModelJsonTests
               "version": 8
             }
           ],
-          "indexes": [],
           "payloadName": "JsonTestTaggedData",
           "payloadTagId": 13013,
           "version": 2
