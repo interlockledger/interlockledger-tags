@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -56,7 +56,7 @@ public class ILTagDataModel : ILTagOfExplicit<DataModel>
         s.EncodeILInt(Value.Required().PayloadTagId);
         s.EncodeILInt(0); // deprecated field
         s.EncodeTagArray(Value.DataFields.Select(df => new ILTagDataField(df)));
-        s.EncodeTagArray(Value.Indexes.Select(index => new ILTagDataIndex(index)));
+        s.EncodeTagArray(Value.Indexes?.Select(index => new ILTagDataIndex(index)));
         s.EncodeString(Value.PayloadName);
         s.EncodeUShort(Value.Version);
         s.EncodeString(Value.Description.TrimToNull());

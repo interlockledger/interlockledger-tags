@@ -42,7 +42,7 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
 
     public string? Description { get; set; }
 
-    public IEnumerable<DataIndex> Indexes { get; set; } = [];
+    public IEnumerable<DataIndex>? Indexes { get; set; }
 
     public string? PayloadName { get; set; }
 
@@ -111,8 +111,8 @@ public class DataModel : IEquatable<DataModel>, IDataModel, IVersion
            && older.Zip(newer!, areCompatible).AllTrue(); // true only if all pre-existing elements are compatible
 
     private static bool CompareFields(IEnumerable<DataField>? oldFields, IEnumerable<DataField>? newFields)
-        => Compare(oldFields,
-                   newFields,
+        => Compare(oldFields.Safe(),
+                   newFields.Safe(),
                    (o, n) => o.Name == n.Name // Names diverge
                              && (o.TagId == n.TagId || o.IsOpaque) // Changing type is only allowed if previously it was an opaque type
                              && o.Version <= n.Version // Misversioning

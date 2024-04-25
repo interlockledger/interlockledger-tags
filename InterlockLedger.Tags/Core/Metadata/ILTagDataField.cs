@@ -49,7 +49,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
             IsOptional_Deprecated = s.DecodeBool(),
             IsOpaque = s.DecodeBool(),
             ElementTagId = s.DecodeILInt(),
-            SubDataFields = s.DecodeTagArray<ILTagDataField>()?.SelectSkippingNulls(t => t.Value),
+            SubDataFields = s.DecodeTagArray<ILTagDataField>()?.SelectSkippingNulls(t => t.Value).NullIfEmpty(),
             Cast = s.HasBytes() ? (CastType)s.DecodeByte() : CastType.None,
             SerializationVersion = serVersion = s.HasBytes() ? s.DecodeUShort() : (ushort)0,
             Description = (serVersion > 1) ? s.DecodeString().TrimToNull() : null,
