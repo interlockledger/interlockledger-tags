@@ -42,7 +42,7 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
         public Parts() => Encrypted = [];
 
         public Parts(KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, string name, TagPubKey pubKey, byte[] encrypted, string? description, EncryptedContentType encryptedContentType, BaseKeyId? keyId)
-            : base(purposes, name, description, pubKey, keyId, permissions) {
+            : base(keyId, name, description, pubKey, purposes, permissions) {
             Version = InterlockSigningKeyVersion;
             Encrypted = encrypted;
             EncryptedContentType = encryptedContentType;

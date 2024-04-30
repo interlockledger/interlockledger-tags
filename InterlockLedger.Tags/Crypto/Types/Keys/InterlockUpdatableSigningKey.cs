@@ -152,7 +152,7 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         public UpdatableParts() => Encrypted = [];
 
         public UpdatableParts(KeyPurpose[] purposes, string name, byte[] encrypted, TagPubKey pubKey, string? description, KeyStrength strength, BaseKeyId? keyId)
-            : base(purposes, name, description, pubKey, keyId, null) {
+            : base(keyId, name, description, pubKey, purposes, null) {
             Version = InterlockUpdatableSigningKeyVersion;
             Encrypted = encrypted.Required();
             LastSignatureTimeStamp = DateTimeOffsetExtensions.TimeZero;

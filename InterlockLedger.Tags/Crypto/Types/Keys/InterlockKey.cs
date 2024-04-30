@@ -35,26 +35,25 @@ namespace InterlockLedger.Tags;
 public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<InterlockKey>, IBaseKey
 {
     public InterlockKey(KeyPurpose[] purposes, string name, TagPubKey pubKey, BaseKeyId keyId, IEnumerable<AppPermissions>? permissions, KeyStrength? strength = null, string? description = null)
-        : this(new Parts(purposes,
+        : this(new Parts(keyId,
             name,
             description,
             pubKey.Required(),
-            keyId,
+            purposes,
             permissions)) { }
 
     public InterlockKey(IBaseKey key)
         : this(new Parts(
-            key.Required().Purposes,
+            key.Id,
             key.Name,
             key.Description,
             key.PublicKey,
-            key.Id,
+            key.Required().Purposes,
             key.Permissions)) {
     }
 
     public string? Description => Value!.Description;
     public BaseKeyId Id => Value!.Id;
-    public BaseKeyId Identity => Value!.Identity;
     public string Name => Value!.Name;
     public IEnumerable<AppPermissions> Permissions => Value!.Permissions;
     public TagPubKey PublicKey => Value!.PublicKey;
@@ -66,10 +65,17 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
 
     public bool Matches(BaseKeyId senderId, TagPubKey publicKey) => Id == senderId && PublicKey.Equals(publicKey);
 
+    public string ToShortestString() => Value!.ToShortestString();
+
     public string ToShortString() => Value!.ToShortString();
 
     public override string ToString() => Value!.ToString();
 
+    [JsonIgnore]
+    public BaseKeyId Identity => Value!.Identity;
+
+    [JsonIgnore]
+    public override object? Content => null;
 
     public class Parts
     {
@@ -80,7 +86,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        public Parts(KeyPurpose[] purposes, string name, string? description, TagPubKey pubKey, BaseKeyId? keyId, IEnumerable<AppPermissions>? permissions) {
+        public Parts(BaseKeyId? keyId, string name, string? description, TagPubKey pubKey, KeyPurpose[] purposes, IEnumerable<AppPermissions>? permissions) {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
             Version = InterlockKeyVersion;
@@ -109,7 +115,8 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         public KeyStrength Strength { get; init; }
         public ushort Version { get; init; }
 
-        public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)}";
+        public string ToShortestString() => $"{Name} ({Id})";
+        public string ToShortString() => $"{Name.Safe(),-58} [{_displayablePurposes}] {GetPermissions(" ", firstSep: string.Empty)} ({Id})";
 
         public override string ToString() =>
         $@"## {GetType().Name}#{Version}
