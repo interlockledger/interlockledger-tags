@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>51.0.1</Version>
+        <Version>52.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Upgrading BouncyCastle.Cryptography nuget to version 2.3.1</PackageReleaseNotes>
+        <PackageReleaseNotes>BREAKING CHANGE: Add TimeProvider property to ITimeStamper and auto-implement property Now using it</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>

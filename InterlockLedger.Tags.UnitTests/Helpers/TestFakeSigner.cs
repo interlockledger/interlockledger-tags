@@ -51,6 +51,8 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
     public ulong SignaturesWithCurrentKey => 14;
     public ITimeStamper TimeStamper => this;
     public IReader Reader { get; }
+    TimeProvider ITimeStamper.Provider => TimeProvider.System;
+
     public IUpdatingSigner DestroyKeys() => this;
     public override void Dispose() { }
     public (byte[] cypherText, byte[] key, byte[] iv) Encrypt<T>(CipherAlgorithm cipher, T clearText) where T : ILTag

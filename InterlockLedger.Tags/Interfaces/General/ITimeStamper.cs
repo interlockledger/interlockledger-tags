@@ -41,9 +41,9 @@ public enum TimeStampStatus
 public interface ITimeStamper
 {
     ulong Nonce { get; }
-    DateTimeOffset Now { get; }
+    DateTimeOffset Now => Provider.GetLocalNow();
     TagHash Session { get; }
-
+    TimeProvider Provider { get; }
     void SwitchSession(SenderIdentity senderIdentity);
 
     TimeStampStatus Validate(DateTimeOffset timeStamp, SenderIdentity senderIdentity);
