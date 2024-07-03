@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>52.0.0</Version>
+        <Version>52.1.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>BREAKING CHANGE: Add TimeProvider property to ITimeStamper and auto-implement property Now using it</PackageReleaseNotes>
+        <PackageReleaseNotes>Update i2l-commons</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -70,9 +70,9 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="18.2.1" />
+        <PackageReference Include="InterlockLedger.Commons" Version="18.3.0" />
         <PackageReference Include="InterlockLedger.Tags.ILInt" Version="14.0.0" />
-        <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.1" />
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
     </ItemGroup>
 
 </Project>
