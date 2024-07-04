@@ -65,7 +65,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-       dotnet build
+       dotnet test --configuration Release -v:m
     #   make release
 
     - name: Perform CodeQL Analysis
