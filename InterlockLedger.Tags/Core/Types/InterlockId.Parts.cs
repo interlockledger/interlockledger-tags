@@ -35,7 +35,7 @@ namespace InterlockLedger.Tags;
 [SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>", Justification = "Implemented sealed in base class")]
 public partial class InterlockId
 {
-    public sealed class Parts : IEquatable<Parts>, ITextualCore
+    public sealed class Parts : IEquatable<Parts>, ITextualCore, IInvalidable
     {
         public HashAlgorithm Algorithm;
         public byte[]? Data;
@@ -120,7 +120,7 @@ public partial class InterlockId
 
         public bool IsEmpty => Data is null;
         public string TextualRepresentation => InvalidityCause ?? ToShortString() ?? string.Empty;
-        public string? InvalidityCause { get; }
+        public string? InvalidityCause { get; internal init; }
 
         private static string BuildTypePrefix(byte type) => $"{ToTypeName(type)}{_prefixSeparator}";
 

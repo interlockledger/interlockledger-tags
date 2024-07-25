@@ -35,7 +35,7 @@ namespace InterlockLedger.Tags;
 public record TagSignatureParts(Algorithm Algorithm, byte[] Data) { }
 
 [JsonConverter(typeof(JsonNotNullConverter<TagSignature>))]
-public class TagSignature : ILTagOfExplicit<TagSignatureParts>, ITextualLight<TagSignature>
+public class TagSignature : ILTagOfExplicitTextual<TagSignatureParts>, ITextualLight<TagSignature>
 {
     public TagSignature(Algorithm algorithm, byte[] data) : base(ILTagId.Signature, new TagSignatureParts(algorithm, data)) {
     }
@@ -46,11 +46,11 @@ public class TagSignature : ILTagOfExplicit<TagSignatureParts>, ITextualLight<Ta
 
     internal TagSignature(Stream s) : base(ILTagId.Signature, s) => Value.Required();
 
-    protected override TagSignatureParts? ValueFromStream(WrappedReadonlyStream s) =>
-        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().WaitResult());
+    protected override async Task<TagSignatureParts?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        new((Algorithm)s.BigEndianReadUShort(), await s.ReadAllBytesAsync().ConfigureAwait(false));
 
     protected override string? BuildTextualRepresentation() => $"Signature!{Data.ToSafeBase64()}#{Algorithm}";
-    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
+    protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data));
     public static TagSignature Parse(string textualRepresentation, IFormatProvider? provider) =>
         TryParse(textualRepresentation, provider, out var value) ? value : throw new InvalidDataException($"Not a {typeof(TagSignature)} representation");
     public static bool TryParse([NotNullWhen(true)] string? textualRepresentation, IFormatProvider? provider, [MaybeNullWhen(false)] out TagSignature result) {

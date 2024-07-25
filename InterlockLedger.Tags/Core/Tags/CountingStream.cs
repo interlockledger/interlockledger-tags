@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -30,19 +30,22 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
-public class ILTagInt8 : ILTagOfImplicit<sbyte>
+
+internal class CountingStream : Stream
 {
-    public ILTagInt8(sbyte value) : base(ILTagId.Int8, value) {
-    }
+    private long _length;
 
-    internal ILTagInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
+    public override bool CanRead => false;
+    public override bool CanSeek => false;
+    public override bool CanWrite => true;
+    public override long Length => _length;
+    public override long Position { get; set; }
 
-    protected override Task<sbyte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult((sbyte)s.ReadSingleByte());
-
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
-    {
-        s.WriteSingleByte((byte)Value);
-        return Task.FromResult(s);
-    }
+    public override void Flush() { }
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+    public override void SetLength(long value) => throw new NotSupportedException();
+    public override void Write(byte[] buffer, int offset, int count) => _length += count;
 }

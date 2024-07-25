@@ -44,7 +44,7 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
             throw new InvalidDataException($"Not AES 256 encrypted!!! {_encrypted.Algorithm}");
     }
 
-    public byte[] EncodedBytes => _encrypted.EncodedBytes;
+    public byte[] EncodedBytes => _encrypted.EncodedBytes();
 
     public T? Decrypt(string password) {
         password.Required();
@@ -58,7 +58,7 @@ public class AES256Encrypted<T> : AES256Engine where T : ILTag
         password.Required();
         if (password.Length < 6)
             throw new ArgumentException($"Password '{password}' is too weak!!!", nameof(password));
-        (byte[] cipherData, _, _) = Encrypt(value.EncodedBytes, key, iv, (s, _key, _iv) => WriteHeader(password, s, _key, _iv));
+        (byte[] cipherData, _, _) = Encrypt(value.EncodedBytes(), key, iv, (s, _key, _iv) => WriteHeader(password, s, _key, _iv));
         _encrypted = new TagEncrypted(CipherAlgorithm.AES256, cipherData);
     }
 

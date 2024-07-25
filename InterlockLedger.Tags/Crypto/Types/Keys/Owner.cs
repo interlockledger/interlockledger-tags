@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
 
 public abstract class Owner : ISigningKey, IPasswordProvider
@@ -48,11 +49,11 @@ public abstract class Owner : ISigningKey, IPasswordProvider
     public abstract void Dispose();
 
     public ISigningKey Traits => this;
-    public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes).Data);
+    public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes()).Data);
 
     public abstract TagSignature Sign(byte[] data);
-
     public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    public abstract TagSignature Sign(Stream dataStream);
 
     public string ToListing() => $"'{Name}' {Id}";
 

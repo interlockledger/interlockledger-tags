@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
 internal class TestSignable(ulong someILInt) : Signable<TestSignable>(FieldTagId, CurrentVersion)
 {
@@ -50,7 +51,12 @@ internal class TestSignable(ulong someILInt) : Signable<TestSignable>(FieldTagId
 
     protected override string TypeDescription => "Signable for unit testing";
 
-    protected override void DecodeRemainingStateFrom(Stream s) => SomeILInt = s.DecodeILInt();
-
-    protected override void EncodeRemainingStateTo(Stream s) => s.EncodeILInt(SomeILInt);
+    protected override Task DecodeRemainingStateFromAsync(Stream s) {
+        SomeILInt = s.DecodeILInt();
+        return Task.CompletedTask;
+    }
+    protected override Task EncodeRemainingStateToAsync(Stream s) {
+        s.EncodeILInt(SomeILInt);
+        return Task.CompletedTask;
+    }
 }

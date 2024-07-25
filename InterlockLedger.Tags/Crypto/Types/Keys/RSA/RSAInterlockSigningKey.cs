@@ -32,6 +32,8 @@
 
 using System.Security.Cryptography;
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace InterlockLedger.Tags;
 
 public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
@@ -57,8 +59,8 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
 
     public byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters);
     public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, RSAHelper.HashAndSign(data, _keyParameters));
-
     public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignBytes(data, _keyParameters));
+    public override TagSignature Sign(Stream dataStream) => new(Algorithm.RSA, RSAHelper.HashAndSignStream(dataStream, _keyParameters));
 
     private readonly TagRSAParameters _tagRSAParameters;
     private readonly RSAParameters _keyParameters;

@@ -53,7 +53,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]> where T : ILTag
     private protected ILTagArrayOfILTag(ulong tagId, Stream s) : base(tagId, s, null) {
     }
 
-    protected override T?[]? ValueFromStream(WrappedReadonlyStream s) {
+    protected override async Task<T?[]?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         if (s.Length > s.Position) {
             try {
                 var arrayLength = (int)s.ILIntDecode();
@@ -67,6 +67,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]> where T : ILTag
                             break;
                     } catch (Exception e) {
                         Console.WriteLine($"Error decoding ILTagArrayOfILTag<{typeof(T).FullName}>, expecting {arrayLength} items but failed at item {i} with: {e}");
+                        await Task.Yield();
                         break;
                     }
                 }
@@ -78,7 +79,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]> where T : ILTag
         return null;
     }
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null) {
             s.ILIntEncode((ulong)Value.Length);
             if (Value.Length > 0) {
@@ -86,8 +87,7 @@ public class ILTagArrayOfILTag<T> : ILTagOfExplicit<T?[]> where T : ILTag
                     s.EncodeTag(tag);
             }
         }
-        return s;
-
+        return Task.FromResult(s);
     }
 
     private Func<Stream, T?> _decoder = s => AllowNull(s.DecodeTag());

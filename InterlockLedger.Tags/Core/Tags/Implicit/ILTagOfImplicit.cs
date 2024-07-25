@@ -30,8 +30,9 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
-public abstract class ILTagOfImplicit<T> : ILTagOf<T> where T: struct, IParsable<T> 
+public abstract class ILTagOfImplicit<T> : ILTagOf<T> where T : struct, IParsable<T>
 {
     protected ILTagOfImplicit(ulong tagId, T value) : base(tagId, value) {
     }
@@ -45,4 +46,6 @@ public abstract class ILTagOfImplicit<T> : ILTagOf<T> where T: struct, IParsable
 
     protected sealed override void DisposeManagedResources() { }
 
+    public override async Task<Stream> OpenReadingStreamAsync() =>
+        await BuildReadingStreamAsync().ConfigureAwait(false);
 }

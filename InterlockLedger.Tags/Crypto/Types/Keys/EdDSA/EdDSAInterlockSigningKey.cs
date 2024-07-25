@@ -30,6 +30,8 @@
 //
 // ******************************************************************************************************************************
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace InterlockLedger.Tags;
 
 public class EdDSAInterlockSigningKey : InterlockSigningKey
@@ -53,8 +55,8 @@ public class EdDSAInterlockSigningKey : InterlockSigningKey
 
 
     public override TagSignature Sign(byte[] data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSign(data, _keyParameters));
-
     public override TagSignature Sign<T>(T data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSignBytes(data, _keyParameters));
+    public override TagSignature Sign(Stream dataStream) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSign(dataStream.ReadAllBytesAsync().WaitResult(), _keyParameters));
 
     private readonly TagEdDSAParameters _tagEdDSAParameters;
     private readonly EdDSAParameters _keyParameters;
@@ -68,4 +70,5 @@ public class EdDSAInterlockSigningKey : InterlockSigningKey
         using var s = new MemoryStream(decrypted);
         return s.Decode<TagEdDSAParameters>();
     }
+
 }

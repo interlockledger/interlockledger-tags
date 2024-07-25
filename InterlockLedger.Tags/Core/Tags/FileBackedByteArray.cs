@@ -34,11 +34,12 @@ namespace InterlockLedger.Tags;
 
 public class FileBackedByteArray : FileBackedILTag<object?>
 {
+    private static readonly Task<object?> _nullReturningTask = Task.FromResult<object?>(null);
     public FileBackedByteArray(FileInfo fileInfo, Stream source) : base(ILTagId.ByteArray, fileInfo, source) { }
 
     public FileBackedByteArray(FileInfo fileInfo) : base(ILTagId.ByteArray, fileInfo) { }
 
     public FileBackedByteArray(FileInfo fileInfo, long offset, ulong length) : base(ILTagId.ByteArray, fileInfo, offset, length) { }
 
-    protected override object? ValueFromStream(WrappedReadonlyStream s) => null;
+    protected override Task<object?> ValueFromStreamAsync(WrappedReadonlyStream s) => _nullReturningTask;
 }

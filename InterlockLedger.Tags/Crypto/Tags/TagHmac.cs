@@ -36,17 +36,16 @@ using System.Security.Cryptography;
 namespace InterlockLedger.Tags;
 
 [JsonConverter(typeof(JsonCustomConverter<TagHmac>))]
-public sealed partial class TagHmac : ILTagOfExplicit<TagHash.Parts>, ITextual<TagHmac>
+public sealed partial class TagHmac : ILTagOfExplicitTextual<TagHash.Parts>, ITextual<TagHmac>
 {
     private TagHmac() : this(HashAlgorithm.Invalid, []) { }
     public static TagHmac InvalidBy(string cause) =>
-        new() { InvalidityCause = cause };
+        new( new TagHash.Parts() { InvalidityCause = cause });
     public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value?.Algorithm ?? HashAlgorithm.Invalid;
     public byte[] Data => Value?.Data ?? [];
     public bool IsEmpty => Data is not null && Data.None();
-    public string? InvalidityCause { get; init; }
     public override string ToString() => Textual.FullRepresentation();
     public ITextual<TagHmac> Textual => this;
     public static TagHmac Empty { get; } = new TagHmac(HashAlgorithm.SHA256, []);
@@ -77,9 +76,11 @@ public sealed partial class TagHmac : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     }
     private bool DataEquals(byte[]? otherData) => (Data.None() && otherData.None()) || Data.OrEmpty().HasSameBytesAs(otherData.OrEmpty());
     protected override string BuildTextualRepresentation() => $"{Data?.ToSafeBase64() ?? ""}#HMAC-{Algorithm}";
-    protected override TagHash.Parts? ValueFromStream(WrappedReadonlyStream s) => new() {
-        Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-        Data = s.ReadAllBytesAsync().WaitResult()
-    };
-    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty());
+    protected override async Task<TagHash.Parts?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        new() {
+            Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
+            Data = await s.ReadAllBytesAsync().ConfigureAwait(false),
+        };
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty()));
 }

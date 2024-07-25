@@ -50,5 +50,5 @@ public class TagEncryptedTests
 
     [TestCase(CipherAlgorithm.AES256, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 42, 6, 0, 0, 16, 2, 0, 0 }, TestName = "SerializeTagEncrypted00")]
     [TestCase(CipherAlgorithm.AES256, new byte[] { }, ExpectedResult = new byte[] { 42, 4, 0, 0, 16, 0 }, TestName = "SerializeTagEncrypted")]
-    public byte[] SerializeTagEncrypted(CipherAlgorithm algorithm, byte[] data) => new TagEncrypted(algorithm, data).EncodedBytes;
+    public byte[] SerializeTagEncrypted(CipherAlgorithm algorithm, byte[] data) => new TagEncrypted(algorithm, data).EncodedBytes();
 }

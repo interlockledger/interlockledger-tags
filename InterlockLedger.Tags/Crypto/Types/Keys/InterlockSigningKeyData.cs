@@ -118,6 +118,6 @@ public class InterlockSigningKeyData : ILTagOfExplicit<InterlockSigningKeyData.P
 
     internal InterlockSigningKeyData(Stream s) : base(ILTagId.InterlockSigningKey, s) {
     }
-    protected override Parts? ValueFromStream(WrappedReadonlyStream s) => Parts.FromStream(s);
-    protected override Stream ValueToStream(Stream s) => Value.Required().ToStream(s);
+    protected override Task<Parts?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<Parts?>(Parts.FromStream(s));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(Value.Required().ToStream(s));
 }

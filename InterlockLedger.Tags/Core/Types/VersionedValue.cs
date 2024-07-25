@@ -30,10 +30,8 @@
 //
 // ******************************************************************************************************************************
 
-using System.Buffers;
-
 namespace InterlockLedger.Tags;
-public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : notnull, VersionedValue<T>, new()
+public abstract partial class VersionedValue<T> : IVersion, ITaggableOf<T> where T : notnull, VersionedValue<T>, new()
 {
     [JsonIgnore]
     public ILTag AsILTag => AsPayload;
@@ -57,9 +55,6 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
     public string? IncompletenessReason { get; private set; }
 
     [JsonIgnore]
-    public virtual bool KeepEncodedBytesInMemory => true;
-
-    [JsonIgnore]
     public DataModel PayloadDataModel => _payloadDataModel.Value;
 
     [JsonIgnore]
@@ -74,15 +69,14 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
             ? throw new InvalidDataException($"Instance of {typeof(T)} is incompletely deserialized")
             : (T)this;
 
-    public void Changed() => _payload = null;
 
-    public T FromUnknown(ILTagUnknown unknown) {
+    public async Task<T> FromUnknownAsync(ILTagUnknown unknown) {
         if (unknown.Required().TagId != TagId)
             throw new InvalidCastException($"Wrong tagId! Expecting {TagId} but came {unknown.TagId}");
         if (unknown.Value.None())
             throw new ArgumentException("Empty tagged value not expected!", nameof(unknown));
         using var s = new MemoryStream(unknown.Value);
-        return FromStream(s);
+        return await FromStreamAsync(s);
     }
 
     public Task<Stream> OpenReadingStreamAsync() => AsPayload.OpenReadingStreamAsync();
@@ -90,44 +84,6 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
     public bool RegisterAsField(ITagRegistrar registrar)
         => registrar.Required()
             .RegisterILTag(TagId, s => new Payload(TagId, s), TagProvider.NoJson);
-
-    public sealed class Payload : ILTagOfExplicit<T>, IVersion, INamed
-    {
-        public Payload(ulong alreadyDeserializedTagId, Stream s)
-            : base(alreadyDeserializedTagId, s)
-            => Initialize();
-
-        public Payload(ulong alreadyDeserializedTagId, ReadOnlySequence<byte> bytes)
-            : base(alreadyDeserializedTagId, new ReadOnlySequenceStream(bytes), it => SetLength(it, (ulong)bytes.Length))
-            => Initialize();
-
-        protected override bool KeepEncodedBytesInMemory => Value!.KeepEncodedBytesInMemory;
-
-        public string TypeName => typeof(T).Name;
-
-        public ushort Version => Value!.Version;
-
-        public override string ToString() => Value?.ToString() ?? "?";
-
-        internal Payload(T value) : base(value.Required().TagId, value) {
-        }
-
-        protected override ulong CalcValueLength() => Value!.CalcValueLength();
-
-        protected override T ValueFromStream(WrappedReadonlyStream s) => new T().FromStream(s);
-
-        protected override Stream ValueToStream(Stream s) {
-            Value!.ToStream(s);
-            return s;
-        }
-
-        private void Initialize() {
-            if (Value is not null) {
-                Traits.ValidateTagId(Value.TagId);
-                Value._payload = this;
-            }
-        }
-    }
 
     protected static readonly DataField VersionField = new(nameof(Version), ILTagId.UInt16);
 
@@ -155,33 +111,26 @@ public abstract class VersionedValue<T> : IVersion, ITaggableOf<T> where T : not
 
     protected virtual Stream BuildTempStream() => new MemoryStream();
 
-    protected virtual ulong CalcValueLength() {
-        using var stream = new MemoryStream();
-        ToStream(stream);
-        stream.Flush();
-        return (ulong)stream.Length;
-    }
+    protected abstract Task DecodeRemainingStateFromAsync(Stream s);
 
-    protected abstract void DecodeRemainingStateFrom(Stream s);
-
-    protected abstract void EncodeRemainingStateTo(Stream s);
+    protected abstract Task EncodeRemainingStateToAsync(Stream s);
 
     private readonly Lazy<DataField> _fieldModel;
     private readonly Lazy<DataModel> _payloadDataModel;
     private Payload? _payload;
 
-    private T FromStream(Stream s) {
+    private async Task<T> FromStreamAsync(Stream s) {
         try {
             Version = s.DecodeUShort(); // Field index 0 //
-            DecodeRemainingStateFrom(s);
+            await DecodeRemainingStateFromAsync(s).ConfigureAwait(false);
         } catch (Exception e) {
             IncompletenessReason = e.ToString();
         }
         return (T)this;
     }
 
-    private void ToStream(Stream s) {
+    private async Task ToStreamAsync(Stream s) {
         s.EncodeUShort(Version);    // Field index 0 //
-        EncodeRemainingStateTo(s);
+        await EncodeRemainingStateToAsync(s).ConfigureAwait(false);
     }
 }

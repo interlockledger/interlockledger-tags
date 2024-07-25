@@ -40,11 +40,12 @@ public class TagRSAPublicParameters : ILTagOfExplicit<RSAParameters>
 
     internal TagRSAPublicParameters(Stream s) : base(ILTagId.RSAParametersPublic, s) {
     }
-    protected override RSAParameters ValueFromStream(WrappedReadonlyStream s) => new() {
-        Modulus = s.DecodeByteArray(),
-        Exponent = s.DecodeByteArray()
-    };
-    protected override Stream ValueToStream(Stream s) =>
-        s.EncodeByteArray(Value.Modulus)
-         .EncodeByteArray(Value.Exponent);
+    protected override Task<RSAParameters> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult<RSAParameters>(new() {
+            Modulus = s.DecodeByteArray(),
+            Exponent = s.DecodeByteArray()
+        });
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.EncodeByteArray(Value.Modulus)
+                         .EncodeByteArray(Value.Exponent));
 }

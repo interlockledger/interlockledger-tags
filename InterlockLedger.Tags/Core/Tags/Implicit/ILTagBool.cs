@@ -40,13 +40,12 @@ public sealed class ILTagBool : ILTagOfImplicit<bool>
 
     public static ILTagBool From(byte[] bytes) => (bytes?.Length == 2 && bytes[0] == ILTagId.Bool && bytes[1] == 1) ? True : False;
 
-    protected override bool ValueFromStream(WrappedReadonlyStream s) => throw new InvalidOperationException("Should reuse local singletons instead of deserializing");
+    protected override Task<bool> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult(s.ReadByte() == 1);
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.WriteByte((byte)(Value ? 1 : 0));
-        return s;
+        return Task.FromResult(s);
     }
     private ILTagBool(bool value) : base(ILTagId.Bool, value) { }
-
-    protected override string? BuildTextualRepresentation() => Value.ToString(CultureInfo.InvariantCulture);
 }

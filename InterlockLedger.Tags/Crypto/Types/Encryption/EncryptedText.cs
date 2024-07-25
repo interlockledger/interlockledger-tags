@@ -59,9 +59,9 @@ public class EncryptedText : VersionedValue<EncryptedText>
 
     protected override string TypeDescription => "A text encrypted for some readers";
 
-    protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
+    protected override Task DecodeRemainingStateFromAsync(Stream s) => _encrypted.DecodeRemainingStateFromAsync(s);
 
-    protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
+    protected override Task EncodeRemainingStateToAsync(Stream s) => _encrypted.EncodeRemainingStateToAsync(s);
 
     private readonly EncryptedValue<ILTagString> _encrypted;
 

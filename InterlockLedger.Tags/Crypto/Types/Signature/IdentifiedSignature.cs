@@ -61,16 +61,18 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
 
     protected override string TypeDescription => Description;
 
-    protected override void DecodeRemainingStateFrom(Stream s) {
+    protected override Task DecodeRemainingStateFromAsync(Stream s) {
         Signature = s.Decode<TagSignature>().Required();
         SignerId = s.Decode<BaseKeyId>().Required();
         PublicKey = s.Decode<TagPubKey>().Required();
+        return Task.CompletedTask;
     }
 
-    protected override void EncodeRemainingStateTo(Stream s) {
+    protected override Task EncodeRemainingStateToAsync(Stream s) {
         s.EncodeTag(Signature);
         s.EncodeTag(SignerId);
         s.EncodeTag(PublicKey);
+        return Task.CompletedTask;
     }
 
     private static readonly DataField[] _remainingDataFields = [

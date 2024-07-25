@@ -36,13 +36,12 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeNotNullConverter<ILTagRange>))]
 [JsonConverter(typeof(JsonNotNullConverter<ILTagRange>))]
-public class ILTagRange : ILTagOfExplicit<LimitedRange>, ITextualLight<ILTagRange>
+public class ILTagRange : ILTagOfExplicitTextual<LimitedRange>, ITextualLight<ILTagRange>
 {
     public ILTagRange() : this(LimitedRange.Empty) { }
     public ILTagRange(LimitedRange range) : base(ILTagId.Range, range) { }
     public static ILTagRange Empty { get; } = new ILTagRange();
     public bool IsEmpty => Value.IsEmpty;
-    public string? InvalidityCause => Value.InvalidityCause;
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagRange result) {
         result = Parse(s.Safe(), provider);
         return !result.Value.IsInvalid();
@@ -61,6 +60,6 @@ public class ILTagRange : ILTagOfExplicit<LimitedRange>, ITextualLight<ILTagRang
     }
     internal ILTagRange(Stream s) : base(ILTagId.Range, s) { }
     public bool Equals(ILTagRange? other) => base.Equals(other);
-    protected override LimitedRange ValueFromStream(WrappedReadonlyStream s) => new(s.ILIntDecode(), s.BigEndianReadUShort());
-    protected override Stream ValueToStream(Stream s) => s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count);
+    protected override Task<LimitedRange> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<LimitedRange>(new(s.ILIntDecode(), s.BigEndianReadUShort()));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.ILIntEncode(Value.Start).BigEndianWriteUShort(Value.Count));
 }

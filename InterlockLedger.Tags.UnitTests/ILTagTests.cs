@@ -87,14 +87,11 @@ public class ILTagTests
     [TestCase(new byte[] { 17, 2, 65, 66 }, ExpectedResult = "AB", TestName = "AsString_AB")]
     [TestCase(new byte[] { 17, 1, 65 }, ExpectedResult = "A", TestName = "AsString_A")]
     [TestCase(new byte[] { 17, 0 }, ExpectedResult = "", TestName = "AsString_NullAsEmpty")]
-    public string AsString(byte[] bytes) => TagProvider.DeserializeFrom(new MemoryStream(bytes)).TextualRepresentation;
-
-    [TestCase(new byte[] { 10, 0xF8, 0xFF }, ExpectedResult = "00000000000001F7", TestName = "AsStringMixedTags_ILint:1F7")]
     [TestCase(new byte[] { 17, 6, 0x41, 0xC3, 0xA7, 0xC3, 0xA3, 0x6F }, ExpectedResult = "Ação", TestName = "AsStringMixedTags_Ação")]
     [TestCase(new byte[] { 17, 2, 65, 66 }, ExpectedResult = "AB", TestName = "AsStringMixedTags_AB")]
     [TestCase(new byte[] { 17, 1, 65 }, ExpectedResult = "A", TestName = "AsStringMixedTags_A")]
     [TestCase(new byte[] { 17, 0 }, ExpectedResult = "", TestName = "AsStringMixedTags_NullAsEmpty")]
-    public string AsStringMixedTags(byte[] bytes) => TagProvider.DeserializeFrom(new MemoryStream(bytes)).TextualRepresentation;
+    public string AsString(byte[] bytes) => (TagProvider.DeserializeFrom(new MemoryStream(bytes)) as ILTagString)?.TextualRepresentation;
 
     [TestCase(new byte[] { 7, 255, 255, 255, 255 }, ExpectedResult = 0xFFFFFFFF, TestName = "AsUInt_0xFFFFFFFF")]
     [TestCase(new byte[] { 7, 0, 0, 0, 1 }, ExpectedResult = (uint)0x01000000, TestName = "AsUInt_0x01000000")]
@@ -150,7 +147,7 @@ public class ILTagTests
     }
 
     [Test]
-    public void ILTagNullInstanceBytes() => Assert.ByVal(ILTagNull.Instance.EncodedBytes, Is.EquivalentTo(new byte[] { 0 }));
+    public void ILTagNullInstanceBytes() => Assert.ByVal(ILTagNull.Instance.EncodedBytes(), Is.EquivalentTo(new byte[] { 0 }));
 
     [TestCase(new byte[] { 0 }, ExpectedResult = true)]
     public bool IsNull(byte[] bytes) {
@@ -159,18 +156,18 @@ public class ILTagTests
     }
 
     [TestCase(252, ExpectedResult = new byte[] { 14, 0xF9, 1, 0 })]
-    public byte[] SerializeILIntSigned(long value) => new ILTagILIntSigned(value).EncodedBytes;
+    public byte[] SerializeILIntSigned(long value) => new ILTagILIntSigned(value).EncodedBytes();
 
     [TestCase(null, ExpectedResult = new byte[] { 20, 0 }, TestName = "SerializeILTagArrayOfILInt_null")]
     [TestCase(new ulong[0], ExpectedResult = new byte[] { 20, 1, 0 }, TestName = "SerializeILTagArrayOfILInt")]
     [TestCase(new ulong[] { 2 }, ExpectedResult = new byte[] { 20, 2, 1, 2 }, TestName = "SerializeILTagArrayOfILInt_2")]
     [TestCase(new ulong[] { 1, 255, 3 }, ExpectedResult = new byte[] { 20, 5, 3, 1, 248, 7, 3 }, TestName = "SerializeILTagArrayOfILInt_1_255_3")]
-    public byte[] SerializeILTagArrayOfILInt(ulong[] ilints) => new ILTagArrayOfILInt(ilints).EncodedBytes;
+    public byte[] SerializeILTagArrayOfILInt(ulong[] ilints) => new ILTagArrayOfILInt(ilints).EncodedBytes();
 
     [TestCase(new byte[0], ExpectedResult = new byte[] { 16, 0 }, TestName = "SerializeILTagByteArray")]
     [TestCase(new byte[] { 2 }, ExpectedResult = new byte[] { 16, 1, 2 }, TestName = "SerializeILTagByteArray_2")]
     [TestCase(new byte[] { 1, 2, 3 }, ExpectedResult = new byte[] { 16, 3, 1, 2, 3 }, TestName = "SerializeILTagByteArray_1_2_3")]
-    public byte[] SerializeILTagByteArray(byte[] bytes) => new ILTagByteArray(bytes).EncodedBytes;
+    public byte[] SerializeILTagByteArray(byte[] bytes) => new ILTagByteArray(bytes).EncodedBytes();
 
     [TestCase(null, ExpectedResult = new byte[] { 17, 0 }, TestName = "SerializeILTagString_null")]
     [TestCase("", ExpectedResult = new byte[] { 17, 0 }, TestName = "SerializeILTagString_empty")]
@@ -179,7 +176,7 @@ public class ILTagTests
     [TestCase("Ação", ExpectedResult = new byte[] { 17, 6, 0x41, 0xC3, 0xA7, 0xC3, 0xA3, 0x6F }, TestName = "SerializeILTagString_Ação")]
     [TestCase("The fool doth think he is wise, but the wise man knows himself to be a fool.",
      ExpectedResult = new byte[] { 17, 76, 0x54, 0x68, 0x65, 0x20, 0x66, 0x6F, 0x6F, 0x6C, 0x20, 0x64, 0x6F, 0x74, 0x68, 0x20, 0x74, 0x68, 0x69, 0x6E, 0x6B, 0x20, 0x68, 0x65, 0x20, 0x69, 0x73, 0x20, 0x77, 0x69, 0x73, 0x65, 0x2C, 0x20, 0x62, 0x75, 0x74, 0x20, 0x74, 0x68, 0x65, 0x20, 0x77, 0x69, 0x73, 0x65, 0x20, 0x6D, 0x61, 0x6E, 0x20, 0x6B, 0x6E, 0x6F, 0x77, 0x73, 0x20, 0x68, 0x69, 0x6D, 0x73, 0x65, 0x6C, 0x66, 0x20, 0x74, 0x6F, 0x20, 0x62, 0x65, 0x20, 0x61, 0x20, 0x66, 0x6F, 0x6F, 0x6C, 0x2E }, TestName = "SerializeILTagString_The_fool_doth_...")]
-    public byte[] SerializeILTagString(string value) => new ILTagString(value).EncodedBytes;
+    public byte[] SerializeILTagString(string value) => new ILTagString(value).EncodedBytes();
 
     [Test]
     public void ULongAsILintVariations() {

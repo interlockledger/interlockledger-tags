@@ -30,20 +30,26 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
-public class ILTagString : ILTagOfExplicit<string>
+
+
+public partial class ILTagString : ILTagOfExplicitTextual<string>
 {
+
     public ILTagString(string? value) : base(ILTagId.String, value.Safe()) { }
 
     internal ILTagString(Stream s) : base(ILTagId.String, s) { }
 
     protected override bool AreEquivalent(ILTagOf<string?> other) => Value.Safe().Equals(other.Value);
 
-    protected override string ValueFromStream(WrappedReadonlyStream s) => s.Length == 0 ? string.Empty : Encoding.UTF8.GetString(s.ReadAllBytesAsync().WaitResult());
+    protected override async Task<string?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        s.Length == 0 ? string.Empty : Encoding.UTF8.GetString(await s.ReadAllBytesAsync().ConfigureAwait(false));
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.WriteBytes(Value.UTF8Bytes());
-        return s;
+        return Task.FromResult(s);
     }
+
     protected override string? BuildTextualRepresentation() => Value;
 }

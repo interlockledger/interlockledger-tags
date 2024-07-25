@@ -30,6 +30,9 @@
 //
 // ******************************************************************************************************************************
 
+
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace InterlockLedger.Tags;
 
 public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHasher, IEncryptor
@@ -79,6 +82,8 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
     public IdentifiedSignature SignWithId(byte[] data)
         => _generateEmptySignatures ? new(new(Algorithm.RSA, []), (KeyId)Id, PublicKey) : Key.SignWithId(data);
 
+    public override TagSignature Sign(Stream dataStream) => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(dataStream);
+
     public void SwitchSession(SenderIdentity senderIdentity) {
         // Method intentionally left empty.
     }
@@ -99,7 +104,6 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
          name,
          [],
          pubKey);
-
     private static readonly AppPermissions[] _fakePermissions =
         Enumerable.Range(0, 101).Select(i => new AppPermissions((ulong)i)).ToArray();
 
@@ -159,6 +163,6 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
         _generateEmptySignatures = generateEmptySignatures;
         PublicKey = _tagRSAParameters.PublicKey;
         _key = new RSAInterlockSigningKey(DummyFor(PublicKey, Name), _tagRSAParameters);
-        Reader = new ReaderWrapper(_key, Id.TextualRepresentation, PublicKey.Hash);
+        Reader = new ReaderWrapper(_key, Id.Value.TextualRepresentation, PublicKey.Hash);
     }
 }

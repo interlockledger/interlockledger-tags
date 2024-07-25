@@ -62,17 +62,17 @@ public abstract class ILTagAbstractDictionary<T> : ILTagOfExplicit<Dictionary<st
 
     protected abstract void EncodeValue(Stream s, T? value);
 
-    protected override Dictionary<string, T?>? ValueFromStream(WrappedReadonlyStream s) {
+    protected override Task<Dictionary<string, T?>?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         if (s.Length == 0)
-            return null;
+            return Task.FromResult<Dictionary<string, T?>?>(null);
         var result = new Dictionary<string, T?>();
         var length = (int)s.ILIntDecode();
         for (var i = 0; i < length; i++) {
             result[s.DecodeString()!] = DecodeValue(s);
         }
-        return result;
+        return Task.FromResult<Dictionary<string, T?>?>(result);
     }
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null) {
             s.ILIntEncode((ulong)Value.Count);
             if (Value.Count > 0)
@@ -81,6 +81,6 @@ public abstract class ILTagAbstractDictionary<T> : ILTagOfExplicit<Dictionary<st
                     EncodeValue(s, pair.Value);
                 }
         }
-        return s;
+        return Task.FromResult(s);
     }
 }

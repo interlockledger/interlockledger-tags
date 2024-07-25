@@ -74,9 +74,6 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
     [JsonIgnore]
     public BaseKeyId Identity => Value!.Identity;
 
-    [JsonIgnore]
-    public override object? Content => null;
-
     public class Parts
     {
         public const ushort InterlockKeyVersion = 0x0004;
@@ -150,7 +147,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
 
         private string _displayablePurposes => Purposes.ToStringAsList();
 
-        private byte[] _hashable => PublicKey.EncodedBytes.Append(GetPermissions().UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes);
+        private byte[] _hashable => PublicKey.EncodedBytes().Append(GetPermissions().UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes());
 
         private static ulong[] AsUlongs(IEnumerable<KeyPurpose> purposes) => purposes.Select(p => (ulong)p).ToArray();
 
@@ -165,7 +162,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
     internal InterlockKey(Stream s) : base(ILTagId.InterlockKey, s) {
     }
 
-    protected override Parts? ValueFromStream(WrappedReadonlyStream s) {
+    protected override Task<Parts?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         var version = s.DecodeUShort();
         var result = new Parts {
             Version = version,                                // Field index 0 //
@@ -181,9 +178,9 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         };
         if (version > 3)
             result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().SelectSkippingNulls(t => t?.Value).Distinct().ToArray();
-        return result;
+        return Task.FromResult<Parts?>( result);
     }
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null) {
             s.EncodeUShort(Value.Version);              // Field index 0 //
             s.EncodeString(Value.Name);                 // Field index 1 //
@@ -197,7 +194,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
             s.EncodeILIntArray(Value.FirstActions);     // Field index 9 - since version 3 //
             s.EncodeTagArray(Value.Permissions.Select(p => p.AsTag)); // Field index 10 - since version 4 //
         }
-        return s;
+        return Task.FromResult(s);
     }
 
     private InterlockKey(Parts parts) : base(ILTagId.InterlockKey, parts) {

@@ -37,11 +37,10 @@ public class ILTagILIntSigned : ILTagOfImplicit<long>
 
     internal ILTagILIntSigned(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.ILIntSigned, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override long ValueFromStream(WrappedReadonlyStream s) => s.ILIntDecode().AsSignedILInt();
+    protected override Task<long> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(s.ILIntDecode().AsSignedILInt());
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.ILIntEncode(Value.AsUnsignedILInt());
-        return s;
+        return Task.FromResult(s);
     }
-    protected override string? BuildTextualRepresentation() => Value.ToString("X16", CultureInfo.InvariantCulture);
 }

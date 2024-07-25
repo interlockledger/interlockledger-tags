@@ -104,11 +104,11 @@ public class InterlockIdTests
 
     [TestCase(HashAlgorithm.SHA512, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 4, 2, 0 }, TestName = "SerializeKeyIdFromParts#SHA512")]
     public byte[] SerializeKeyIdFromParts(HashAlgorithm algorithm, byte[] data)
-        => new KeyId(new TagHash(algorithm, data)).EncodedBytes;
+        => new KeyId(new TagHash(algorithm, data)).EncodedBytes();
 
     [TestCase(HashAlgorithm.SHA256, new byte[] { }, ExpectedResult = new byte[] { 43, 3, 1, 1, 0 }, TestName = "SerializeOwnerIdFromParts#SHA512")]
     public byte[] SerializeOwnerIdFromParts(HashAlgorithm algorithm, byte[] data)
-        => new OwnerId(new TagHash(algorithm, data)).EncodedBytes;
+        => new OwnerId(new TagHash(algorithm, data)).EncodedBytes();
 
     [TestCase(new byte[] { 43, 5, 0, 0, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA1, new byte[] { 0, 0 }, "AAA#SHA1", "Chain!AAA#SHA1", TestName = "NewChainIdFromShortStringWithSHA1Suffix")]
     [TestCase(new byte[] { 43, 5, 0, 1, 0, 0, 0 }, InterlockIdPlus.Chain, HashAlgorithm.SHA256, new byte[] { 0, 0 }, "AAA", "Chain!AAA#SHA256", TestName = "NewChainIdFromShortStringWithSHA256Suffix")]

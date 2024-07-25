@@ -40,7 +40,7 @@ public class ILTagCertificateTests
     public void GuaranteeBijectiveBehavior() {
         var x509 = new X509Certificate2(Convert.FromBase64String(_certificateInBase64));
         var tag = new TagCertificate(x509);
-        var encodedBytes = tag.EncodedBytes;
+        var encodedBytes = tag.EncodedBytes();
         using var ms = new MemoryStream(encodedBytes);
         var retag = ms.Decode<TagCertificate>();
         Assert.That(retag.Value, Is.EqualTo(x509));

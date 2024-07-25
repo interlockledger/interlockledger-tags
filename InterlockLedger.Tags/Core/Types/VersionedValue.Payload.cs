@@ -30,19 +30,36 @@
 //
 // ******************************************************************************************************************************
 
+using System.Buffers;
+
 namespace InterlockLedger.Tags;
-public class ILTagInt8 : ILTagOfImplicit<sbyte>
+public abstract partial class VersionedValue<T> where T : notnull, VersionedValue<T>, new()
 {
-    public ILTagInt8(sbyte value) : base(ILTagId.Int8, value) {
-    }
-
-    internal ILTagInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
-
-    protected override Task<sbyte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult((sbyte)s.ReadSingleByte());
-
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
+    public sealed class Payload : ILTagOfExplicit<T>
     {
-        s.WriteSingleByte((byte)Value);
-        return Task.FromResult(s);
+        public Payload(ulong alreadyDeserializedTagId, Stream s)
+            : base(alreadyDeserializedTagId, s)
+            => Initialize();
+
+        public Payload(ulong alreadyDeserializedTagId, ReadOnlySequence<byte> bytes)
+            : base(alreadyDeserializedTagId, new ReadOnlySequenceStream(bytes), it => SetLength(it, (ulong)bytes.Length))
+            => Initialize();
+
+        internal Payload(T value) : base(value.Required().TagId, value) {
+        }
+ 
+        private void Initialize() {
+            if (Value is not null) {
+                Traits.ValidateTagId(Value.TagId);
+                Value._payload = this;
+            }
+        }
+
+        protected override async Task<T?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+            await new T().FromStreamAsync(s).ConfigureAwait(false);
+        protected override async Task<Stream> ValueToStreamAsync(Stream s) {
+            await Value!.ToStreamAsync(s).ConfigureAwait(false);
+            return s;
+        }
     }
 }

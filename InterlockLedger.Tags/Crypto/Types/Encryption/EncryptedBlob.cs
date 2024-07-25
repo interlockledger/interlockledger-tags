@@ -60,9 +60,9 @@ public class EncryptedBlob : VersionedValue<EncryptedBlob>
     protected override IEnumerable<DataField> RemainingStateFields => _encrypted.RemainingStateFields;
     protected override string TypeDescription => "An array of bytes encrypted for some readers";
 
-    protected override void DecodeRemainingStateFrom(Stream s) => _encrypted.DecodeRemainingStateFrom(s);
+    protected override Task DecodeRemainingStateFromAsync(Stream s) => _encrypted.DecodeRemainingStateFromAsync(s);
 
-    protected override void EncodeRemainingStateTo(Stream s) => _encrypted.EncodeRemainingStateTo(s);
+    protected override Task EncodeRemainingStateToAsync(Stream s) => _encrypted.EncodeRemainingStateToAsync(s);
 
     private readonly EncryptedValue<ILTagByteArray> _encrypted;
 

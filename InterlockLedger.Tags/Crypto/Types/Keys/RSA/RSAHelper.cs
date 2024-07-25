@@ -83,18 +83,20 @@ public static class RSAHelper
             }
     }
 
-    public static byte[] HashAndSignBytes<T>(T dataToSign, RSAParameters parameters) where T : Signable<T>, new() {
+    public static byte[] HashAndSignStream(Stream dataStream, RSAParameters parameters) {
         int retries = _maxRetries;
         while (true)
             try {
                 using var RSAalg = OpenProvider(parameters);
-                using var dataStream = dataToSign.OpenReadingStreamAsync().WaitResult();
                 return RSAalg.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             } catch (CryptographicException e) {
                 if (retries-- <= 0)
                     throw new InterlockLedgerCryptographicException($"Failed to sign data with current parameters after {_maxRetries} retries", e);
             }
     }
+
+    public static byte[] HashAndSignBytes<T>(T dataToSign, RSAParameters parameters) where T : Signable<T>, new()
+        => HashAndSignStream(dataToSign.OpenReadingStreamAsync().WaitResult(), parameters);
 
     public static bool Verify<T>(T dataToVerify, TagSignature signature, RSAParameters parameters) where T : Signable<T>, new() {
         using var dataStream = dataToVerify.Required().OpenReadingStreamAsync().WaitResult();
@@ -106,15 +108,7 @@ public static class RSAHelper
         return VerifyStream(dataStream, signature, parameters);
     }
 
-    private const int _maxRetries = 3;
-
-    private static RSACryptoServiceProvider OpenProvider(RSAParameters parameters) {
-        var RSAalg = new RSACryptoServiceProvider();
-        RSAalg.ImportParameters(parameters);
-        return RSAalg;
-    }
-
-    private static bool VerifyStream(Stream dataStream, TagSignature signature, RSAParameters parameters) {
+    public static bool VerifyStream(Stream dataStream, TagSignature signature, RSAParameters parameters) {
         try {
             if (signature.Required().Algorithm != Algorithm.RSA)
                 throw new InvalidDataException($"Signature uses different algorithm {signature.Algorithm} from this RSA key!");
@@ -126,4 +120,13 @@ public static class RSAHelper
             throw new InterlockLedgerCryptographicException("Failed to verify data with current parameters and signature", e);
         }
     }
+
+    private const int _maxRetries = 3;
+
+    private static RSACryptoServiceProvider OpenProvider(RSAParameters parameters) {
+        var RSAalg = new RSACryptoServiceProvider();
+        RSAalg.ImportParameters(parameters);
+        return RSAalg;
+    }
+
 }

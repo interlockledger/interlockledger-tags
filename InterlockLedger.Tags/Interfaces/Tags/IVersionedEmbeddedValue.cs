@@ -38,7 +38,7 @@ public interface IVersionedEmbeddedValue<T> where T : IVersionedEmbeddedValue<T>
     string TypeDescription { get; }
     string TypeName { get; }
 
-    void DecodeRemainingStateFrom(Stream s);
+    Task DecodeRemainingStateFromAsync(Stream s);
 
-    void EncodeRemainingStateTo(Stream s);
+    Task EncodeRemainingStateToAsync(Stream s);
 }

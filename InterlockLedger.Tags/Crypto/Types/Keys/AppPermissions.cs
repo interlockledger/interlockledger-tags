@@ -49,8 +49,8 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
         internal Tag(Stream s) : base(ILTagId.InterlockKeyAppPermission, s) {
         }
 
-        protected override AppPermissions ValueFromStream(WrappedReadonlyStream s) => new(s.DecodeILInt(), s.DecodeILIntArray());
-        protected override Stream ValueToStream(Stream s) => s.EncodeILInt(Value!.AppId).EncodeILIntArray(Value.ActionIds);
+        protected override Task<AppPermissions?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<AppPermissions?>(new(s.DecodeILInt(), s.DecodeILIntArray()));
+        protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.EncodeILInt(Value!.AppId).EncodeILIntArray(Value.ActionIds));
     }
 
     public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }

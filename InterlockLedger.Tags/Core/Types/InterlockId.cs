@@ -30,11 +30,13 @@
 //
 // ******************************************************************************************************************************
 
+
+
 namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<InterlockId>))]
 [JsonConverter(typeof(JsonCustomConverter<InterlockId>))]
-public partial class InterlockId : ILTagOfExplicit<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
+public partial class InterlockId : ILTagOfExplicitTextual<InterlockId.Parts>, IComparable<InterlockId>, ITextual<InterlockId>
 {
 
     private InterlockId() : this(DefaultType, HashAlgorithm.Invalid, []) { }
@@ -55,15 +57,15 @@ public partial class InterlockId : ILTagOfExplicit<InterlockId.Parts>, IComparab
     public byte Type => Value!.Type;
     public static InterlockId Empty { get; } = new(new Parts(DefaultType, TagHash.Empty));
     public static Regex Mask { get; } = InterlockIdRegex();
-    public string? InvalidityCause { get; protected init; }
     public bool IsEmpty => Data.EqualTo(TagHash.Empty.Data);
     public int CompareTo(InterlockId? other) => SafeCompare(this, other);
     [JsonIgnore]
     public ITextual<InterlockId> Textual => this;
     [JsonIgnore]
     public string AsBase64 => Value!.Data.Safe().ToSafeBase64();
+    protected override string? BuildTextualRepresentation() => Value?.TextualRepresentation ?? "?";
 
-    public static InterlockId InvalidBy(string cause) => new() { InvalidityCause = cause };
+    public static InterlockId InvalidBy(string cause) => new(new Parts() { InvalidityCause = cause });
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out InterlockId result) {
         result = Parse(s.Safe(), provider);
         return !result.IsInvalid();
@@ -116,6 +118,6 @@ public partial class InterlockId : ILTagOfExplicit<InterlockId.Parts>, IComparab
 
     [GeneratedRegex("""^(\w+\!)?(?:[A-Za-z0-9_-]{4}?)*(?:[A-Za-z0-9_-]{2,3})?(#\w+)?$""")]
     private static partial Regex InterlockIdRegex();
-    protected override Parts? ValueFromStream(WrappedReadonlyStream s) => Parts.FromStream(s);
-    protected override Stream ValueToStream(Stream s) => Value!.ToStream(s);
+    protected override Task<Parts?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<Parts?>(Parts.FromStream(s));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(Value!.ToStream(s));
 }

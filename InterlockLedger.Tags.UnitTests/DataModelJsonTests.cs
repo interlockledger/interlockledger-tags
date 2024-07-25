@@ -45,7 +45,7 @@ public enum SomeEnumeration
 }
 
 [TestFixture]
-public class DataModelJsonTests
+public partial class DataModelJsonTests
 {
     static DataModelJsonTests() {
         if (_options.Converters.None(c => c.GetType() == typeof(JsonStringEnumConverter)))
@@ -410,7 +410,7 @@ public class DataModelJsonTests
 
     private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
         var tag = JsonTestTaggedData.Model.FromJson(json);
-        byte[] encodedBytes = tag.EncodedBytes;
+        byte[] encodedBytes = tag.EncodedBytes();
         TestContext.WriteLine("===== Expected");
         TestContext.WriteLine(expectedBytes.WithCommas());
         TestContext.WriteLine("===== Actual");
@@ -419,7 +419,7 @@ public class DataModelJsonTests
     }
 
     private static void ToFromBaseTest(ILTag data, Func<string, string>? adjustExpected = null) {
-        var encodedBytes = data.EncodedBytes;
+        var encodedBytes = data.EncodedBytes();
         var modelJson = JsonTestTaggedData.Model.ToJson(encodedBytes);
         var expected = JsonSerializer.Serialize(data.Content, _options);
         if (adjustExpected is not null)
@@ -434,19 +434,19 @@ public class DataModelJsonTests
         TestContext.WriteLine(encodedBytes.WithCommas());
         var backFrom = JsonTestTaggedData.Model.FromNavigable(modelJson);
         Assert.That(backFrom, Is.InstanceOf<ILTag>());
-        byte[] backFromEncodedBytes = backFrom.EncodedBytes;
+        byte[] backFromEncodedBytes = backFrom.EncodedBytes();
         TestContext.WriteLine("===== Back EncodedBytes");
         TestContext.WriteLine(backFromEncodedBytes.WithCommas());
         Assert.That(backFromEncodedBytes, Is.EqualTo(encodedBytes), "Bytes back from modelJson did not match");
         var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object?>>(actual));
         Assert.That(parsedFrom, Is.InstanceOf<ILTag>());
-        byte[] parsedFromEncodedBytes = parsedFrom.EncodedBytes;
+        byte[] parsedFromEncodedBytes = parsedFrom.EncodedBytes();
         TestContext.WriteLine("===== Parsed EncodedBytes");
         TestContext.WriteLine(parsedFromEncodedBytes.WithCommas());
         //Assert.AreEqual(encodedBytes, parsedFromEncodedBytes, "Bytes parsed from json did not match");
     }
 
-    private class JsonTestTaggedData : IRecordData<JsonTestTaggedData>
+    private partial class JsonTestTaggedData : IRecordData<JsonTestTaggedData>
     {
         public const ulong DataTagId = 13014;
 
@@ -599,26 +599,7 @@ public class DataModelJsonTests
 
         [JsonIgnore]
         public Payload<JsonTestTaggedData> AsPayload { get; }
-
-
         public JsonTestTaggedData FromStream(Stream s) => throw new NotImplementedException();
-
-        public class Reference : ILTagOfExplicit<Reference.Data>
-        {
-            public Reference(ulong id, string name) : base(DataTagId, new Data(id, name)) {
-            }
-
-            public Reference(Stream s) : base(DataTagId, s) {
-            }
-            public class Data(ulong id, string name)
-            {
-                public ulong Id { get; set; } = id;
-                public string Name { get; set; } = name.Required();
-            }
-
-            protected override Data? ValueFromStream(WrappedReadonlyStream s) => new(s.DecodeILInt(), s.DecodeString()!);
-            protected override Stream ValueToStream(Stream s) => s.EncodeILInt(Value!.Id).EncodeString(Value.Name);
-        }
 
         private ILTagArrayOfILTag<ILTagRange>? _taggedRanges => Ranges is not null ? new(Ranges.Select(r => new ILTagRange(r))) : null;
 

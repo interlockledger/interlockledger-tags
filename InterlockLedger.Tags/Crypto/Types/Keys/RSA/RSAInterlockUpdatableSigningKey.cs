@@ -49,6 +49,8 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
         => Update(encrypt, RSAHelper.HashAndSign(data, _parameters.Parameters));
     public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null)
         => Update(encrypt, RSAHelper.HashAndSignBytes(data, _parameters.Parameters));
+    public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) =>
+        Update(encrypt, RSAHelper.HashAndSign(dataStream.ReadAllBytesAsync().WaitResult(), _parameters.Parameters));
     private KeyParameters _parameters => _keyParameters.Required().Value.Required();
 
     private bool _destroyKeysAfterSigning;
@@ -68,7 +70,7 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             var encryptionHandler = encrypt.Required();
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
-                _data.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
+                _data.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes());
                 _data.Value.PublicKey = _keyParameters.PublicKey;
                 _nextKeyParameters = null;
                 _data.SignaturesWithCurrentKey = 0;
@@ -77,7 +79,6 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             }
             _data.LastSignatureTimeStamp = _timeStamper.Now;
         }
-        _data.Changed();
         return new TagSignature(Algorithm.RSA, signatureData);
     }
 }

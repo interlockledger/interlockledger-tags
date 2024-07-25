@@ -46,13 +46,13 @@ public class ILTagByteArray : ILTagOfExplicit<byte[]>
     }
 
     protected override byte[]? ZeroLengthDefault => [];
-    protected override byte[] ValueFromStream(WrappedReadonlyStream s) => s.ReadAllBytesAsync().WaitResult();
+    protected override async Task<byte[]?> ValueFromStreamAsync(WrappedReadonlyStream s) => await s.ReadAllBytesAsync().ConfigureAwait(false);
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null && Value.Length > 0) {
             s.WriteBytes(Value);
         }
-        return s;
+        return Task.FromResult(s);
     }
 
     protected override ulong CalcValueLength() => (ulong)(Value?.Length ?? 0);

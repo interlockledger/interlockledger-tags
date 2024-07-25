@@ -34,11 +34,12 @@ namespace InterlockLedger.Tags;
 public interface ISigningKey : IBaseKey
 {
     TagSignature Sign(byte[] data);
-
+    TagSignature Sign(Stream dataStream);
     TagSignature Sign<T>(T data) where T : Signable<T>, new();
 
     IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), (KeyId)Id, PublicKey);
 
     IdentifiedSignature SignWithId(byte[] data) => new(Sign(data), (KeyId)Id, PublicKey);
 
+    IdentifiedSignature SignWithId(Stream dataStream) => new(Sign(dataStream), (KeyId)Id, PublicKey);
 }

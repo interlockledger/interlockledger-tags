@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
 [TestFixture]
 public class ILTagArrayOfILTagTests
@@ -89,7 +90,7 @@ public class ILTagArrayOfILTagTests
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 2, 1, 2, 16, 2, 3, 2 }, TestName = "Serialize_Two_Arrays_with_Two_Bytes")]
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize_Two_Arrays_with_One_and_Three_Bytes")]
     public byte[] SerializeILTagILTagArray(byte[] bytes, byte[] splits) {
-        byte[] encodedBytes = new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).EncodedBytes;
+        byte[] encodedBytes = new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).EncodedBytes();
         TestContext.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }
@@ -126,20 +127,20 @@ public class ILTagArrayOfILTagTests
 
     private static void GuaranteeBijectiveBehavior(ILTagBool[] array) {
         var ilarray = new ILTagArrayOfILTag<ILTagBool>(array);
-        var encodedBytes = ilarray.EncodedBytes;
+        var encodedBytes = ilarray.EncodedBytes();
         using var ms = new MemoryStream(encodedBytes);
         var value = ms.DecodeTagArray<ILTagBool>();
         CompareArrays<ILTagBool, bool>(array, value);
-        var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes;
+        var newEncodedBytes = new ILTagArrayOfILTag<ILTagBool>(value).EncodedBytes();
         Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
     private class TestTagOfOneByte(ulong tagId, Stream s) : ILTagOfExplicit<byte>(tagId, s)
     {
-        protected override byte ValueFromStream(WrappedReadonlyStream s) => s.ReadSingleByte();
-        protected override Stream ValueToStream(Stream s) {
+        protected override Task<byte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(s.ReadSingleByte());
+        protected override Task<Stream> ValueToStreamAsync(Stream s) {
             s.WriteByte(Value);
-            return s;
+            return Task.FromResult(s);
         }
     }
 }

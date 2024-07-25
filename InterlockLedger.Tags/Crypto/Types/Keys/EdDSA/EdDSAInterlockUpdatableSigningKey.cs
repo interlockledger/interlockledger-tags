@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
 
 public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
@@ -54,6 +55,7 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 
     public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(data, _parameters));
     public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignBytes(data, _parameters));
+    public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(dataStream.ReadAllBytesAsync().WaitResult(), _parameters));
     private EdDSAParameters _parameters => _keyParameters.Required().Value.Required();
 
     private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
@@ -67,7 +69,7 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             var func = encrypt.Required("encrypt");
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
-                _data.Value.Encrypted = func(_keyParameters!.EncodedBytes);
+                _data.Value.Encrypted = func(_keyParameters!.EncodedBytes());
                 _data.Value.PublicKey = _keyParameters!.PublicKey;
                 _nextKeyParameters = null;
                 _data.SignaturesWithCurrentKey = 0uL;
@@ -76,7 +78,7 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             }
             _data.LastSignatureTimeStamp = _timeStamper.Now;
         }
-        _data.Changed();
         return new TagSignature(Algorithm.EdDSA, signatureData);
     }
+
 }

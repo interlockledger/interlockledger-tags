@@ -76,12 +76,16 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
 
     protected override string TypeDescription => $"SignedValueOf{typeof(T).Name}";
 
-    protected override void DecodeRemainingStateFrom(Stream s) {
+    protected override Task DecodeRemainingStateFromAsync(Stream s) {
         SignedContent = s.DecodeAny<T>().Required();
         Signatures = s.DecodeArray<IdentifiedSignature>().RequireNonNulls().NonEmpty();
+        return Task.CompletedTask;
     }
 
-    protected override void EncodeRemainingStateTo(Stream s) => s.EncodeAny(SignedContent).EncodeArray(Signatures);
+    protected override Task EncodeRemainingStateToAsync(Stream s) {
+        s.EncodeAny(SignedContent).EncodeArray(Signatures);
+        return Task.CompletedTask;
+    }
 
     private IdentifiedSignature[] FailedSignaturesFor(T data)
         => Signatures.Where(sig => !sig.Verify(data)).ToArray();

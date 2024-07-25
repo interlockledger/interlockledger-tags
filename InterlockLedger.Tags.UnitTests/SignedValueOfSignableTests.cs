@@ -110,7 +110,7 @@ public class SignedValueOfSignableTests
         })]
     public byte[] SerializeSignedValueOfSignable(ulong someILInt) {
         var signedValue = new TestSignable(someILInt).SignWith(TestFakeSigner.FixedKeysInstance);
-        var encodedBytes = signedValue.AsPayload.EncodedBytes;
+        var encodedBytes = signedValue.AsPayload.EncodedBytes();
         TestContext.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }

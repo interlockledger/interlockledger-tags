@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -30,19 +30,29 @@
 //
 // ******************************************************************************************************************************
 
+#nullable enable
+
 namespace InterlockLedger.Tags;
-public class ILTagInt8 : ILTagOfImplicit<sbyte>
+
+public partial class DataModelJsonTests
 {
-    public ILTagInt8(sbyte value) : base(ILTagId.Int8, value) {
-    }
 
-    internal ILTagInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
-
-    protected override Task<sbyte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult((sbyte)s.ReadSingleByte());
-
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
+    private partial class JsonTestTaggedData
     {
-        s.WriteSingleByte((byte)Value);
-        return Task.FromResult(s);
+        public class Reference : ILTagOfExplicit<Reference.Data>
+        {
+            public Reference(ulong id, string name) : base(DataTagId, new Data(id, name)) {
+            }
+
+            public Reference(Stream s) : base(DataTagId, s) {
+            }
+            public class Data(ulong id, string name)
+            {
+                public ulong Id { get; set; } = id;
+                public string Name { get; set; } = name.Required();
+            }
+            protected override Task<Data?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<Data?>(new(s.DecodeILInt(), s.DecodeString()!));
+            protected override Task<Stream> ValueToStreamAsync(Stream s) =>Task.FromResult(s.EncodeILInt(Value!.Id).EncodeString(Value.Name));
+        }
     }
 }

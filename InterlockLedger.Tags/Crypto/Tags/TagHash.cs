@@ -39,17 +39,16 @@ namespace InterlockLedger.Tags;
 [TypeConverter(typeof(TypeCustomConverter<TagHash>))]
 [JsonConverter(typeof(JsonCustomConverter<TagHash>))]
 [SuppressMessage("Design", "CA1067:Override Object.Equals(object) when implementing IEquatable<T>", Justification = "Implemented sealed in base class")]
-public sealed partial class TagHash : ILTagOfExplicit<TagHash.Parts>, ITextual<TagHash>
+public sealed partial class TagHash : ILTagOfExplicitTextual<TagHash.Parts>, ITextual<TagHash>
 {
     private TagHash() : this(HashAlgorithm.Invalid, []) { }
     public static TagHash InvalidBy(string cause) =>
-         new() { InvalidityCause = cause };
+         new(new Parts() { InvalidityCause = cause });
     public TagHash(HashAlgorithm algorithm, byte[] data) : this(new Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value!.Algorithm;
     public byte[] Data => Value!.Data;
     public bool IsEmpty => Data.EqualTo(Empty.Data);
-    public string? InvalidityCause { get; private init; }
     public ITextual<TagHash> Textual => this;
     public bool Equals(TagHash? other) => base.Equals(other);
     protected override bool AreEquivalent(ILTagOf<Parts?> other) =>
@@ -67,11 +66,11 @@ public sealed partial class TagHash : ILTagOfExplicit<TagHash.Parts>, ITextual<T
     internal TagHash(Stream s) : base(ILTagId.Hash, s) { }
     internal static TagHash HashFrom(X509Certificate2 certificate) => new(HashAlgorithm.SHA1, certificate.Required().GetCertHash());
 
-    protected override Parts ValueFromStream(WrappedReadonlyStream s) => new() {
+    protected override async Task<Parts?> ValueFromStreamAsync(WrappedReadonlyStream s) => new() {
         Algorithm = (HashAlgorithm)s.BigEndianReadUShort(),
-        Data = s.ReadAllBytesAsync().WaitResult()
+        Data = await s.ReadAllBytesAsync().ConfigureAwait(false),
     };
-    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty());
+    protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Data.OrEmpty()));
     private TagHash(Parts parts) : base(ILTagId.Hash, parts) { }
     private static byte[] HashSha256(byte[] data) {
         using var hasher = SHA256.Create();

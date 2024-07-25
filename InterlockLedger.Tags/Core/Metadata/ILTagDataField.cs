@@ -40,9 +40,9 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
     public ILTagDataField(Stream s) : base(ILTagId.DataField, s) {
     }
 
-    protected override DataField? ValueFromStream(WrappedReadonlyStream s) {
+    protected override Task<DataField?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         ushort serVersion = 0;
-        return new DataField {
+        var result = new DataField {
             Version = s.DecodeUShort(),
             TagId = s.DecodeILInt(),
             Name = s.DecodeString() ?? "*ERROR*",
@@ -57,8 +57,9 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
             EnumerationAsFlags = (serVersion > 3) && s.DecodeBool(),
             IsDeprecated = (serVersion > 4) && s.DecodeBool(),
         };
+        return Task.FromResult<DataField?>(result);
     }
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.EncodeUShort(Value.Required().Version);
         s.EncodeILInt(Value.TagId);
         s.EncodeString(Value.Name);
@@ -72,7 +73,7 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
         EncodeEnumeration(s, Value.EnumerationDefinition);
         s.EncodeBool(Value.EnumerationAsFlags);
         s.EncodeBool(Value.IsDeprecated);
-        return s;
+        return Task.FromResult(s);
     }
 
     private static EnumerationDictionary DecodeEnumeration(Stream s) {
@@ -98,13 +99,13 @@ public class ILTagDataField : ILTagOfExplicit<DataField>
             public Tag(Stream s) : base(s.DecodeTagId(), s) {
             }
 
-            protected override Triplet ValueFromStream(WrappedReadonlyStream s) =>
-                new(s.DecodeILInt(), s.DecodeString(), s.DecodeString());
-            protected override Stream ValueToStream(Stream s) {
+            protected override Task<Triplet?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+                Task.FromResult<Triplet?>(new(s.DecodeILInt(), s.DecodeString(), s.DecodeString()));
+            protected override Task<Stream> ValueToStreamAsync(Stream s) {
                 s.EncodeILInt(Value.Required().Value);
                 s.EncodeString(Value.Name);
                 s.EncodeString(Value.Description);
-                return s;
+                return Task.FromResult(s);
             }
         }
     }

@@ -70,7 +70,7 @@ public class TagHmacTests
     [TestCase(HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 47, 4, 4, 0, 0, 0 })]
     [TestCase(HashAlgorithm.SHA1, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 47, 4, 0, 0, 0, 0 })]
     [TestCase(HashAlgorithm.SHA3_256, new byte[] { }, ExpectedResult = new byte[] { 47, 2, 3, 0 })]
-    public byte[] SerializeTagHmac(HashAlgorithm algorithm, byte[] data) => new TagHmac(algorithm, data).EncodedBytes;
+    public byte[] SerializeTagHmac(HashAlgorithm algorithm, byte[] data) => new TagHmac(algorithm, data).EncodedBytes();
 
     [TestCase(HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, ExpectedResult = "AAA#HMAC-SHA3_512")]
     [TestCase(HashAlgorithm.SHA1, new byte[] { 0, 0 }, ExpectedResult = "AAA#HMAC-SHA1")]

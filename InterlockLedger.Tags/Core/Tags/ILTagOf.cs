@@ -36,10 +36,6 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
 {
     [JsonIgnore]
     public T Value { get; set; }
-    [JsonIgnore]
-    public sealed override string TextualRepresentation => (_textualRepresentation ??= BuildTextualRepresentation()) ?? string.Empty;
-    protected virtual string? BuildTextualRepresentation() => (Value is ITextualCore textual) ? textual.TextualRepresentation : null;
-    private string? _textualRepresentation;
     public override object? Content => Value;
     public override bool ValueIs<TV>(out TV? value) where TV : default {
         if (Value is TV tvalue) {
@@ -56,12 +52,8 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
         Value = DeserializeInnerAsync(s).WaitResult();
     }
     private protected abstract Task<T> DeserializeInnerAsync(Stream s);
-
-    protected abstract T ValueFromStream(WrappedReadonlyStream s);
-    protected virtual Task<T> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(ValueFromStream(s));
-
-    protected abstract Stream ValueToStream(Stream s);
-    protected virtual Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(ValueToStream(s));
+    protected abstract Task<T> ValueFromStreamAsync(WrappedReadonlyStream s);
+    protected abstract Task<Stream> ValueToStreamAsync(Stream s);
 
     public sealed override int GetHashCode() => HashCode.Combine(TagId, Value);
     public sealed override bool Equals(object? obj) => Equals(obj as ILTagOf<T>);

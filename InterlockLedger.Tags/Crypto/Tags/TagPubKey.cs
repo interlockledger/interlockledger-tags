@@ -38,7 +38,7 @@ public record TagKeyParts(Algorithm Algorithm, byte[] Data) { }
 
 [TypeConverter(typeof(TypeCustomConverter<TagPubKey>))]
 [JsonConverter(typeof(JsonCustomConverter<TagPubKey>))]
-public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKey>
+public partial class TagPubKey : ILTagOfExplicitTextual<TagKeyParts>, ITextual<TagPubKey>
 {
     public Algorithm Algorithm => Value!.Algorithm;
     public byte[] Data => Value!.Data;
@@ -58,12 +58,12 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
             _ => throw new NotSupportedException("Only support RSA/EdDSA for now!!!")
         };
 
-    public static TagPubKey InvalidBy(string cause) =>
-         new() { InvalidityCause = cause };
+    public static TagPubKey InvalidBy(string cause) => throw new NotSupportedException(cause);
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagPubKey result) {
         result = Parse(s.Safe(), provider);
         return !result.IsInvalid();
     }
+
     public static TagPubKey Parse(string s, IFormatProvider? provider) {
         if (string.IsNullOrWhiteSpace(s))
             throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(s));
@@ -77,7 +77,6 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
 
     public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
     public static Regex Mask { get; } = AnythingRegex();
-    public string? InvalidityCause { get; private init; }
     public ITextual<TagPubKey> Textual => this;
 
     [GeneratedRegex(".+")]
@@ -102,10 +101,10 @@ public partial class TagPubKey : ILTagOfExplicit<TagKeyParts>, ITextual<TagPubKe
 
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
-    protected override TagKeyParts? ValueFromStream(WrappedReadonlyStream s) =>
-        new((Algorithm)s.BigEndianReadUShort(), s.ReadAllBytesAsync().WaitResult());
-    protected override Stream ValueToStream(Stream s) =>
-        s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data);
+    protected override async Task<TagKeyParts?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        new((Algorithm)s.BigEndianReadUShort(), await s.ReadAllBytesAsync().ConfigureAwait(false));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data));
 
     private TagPubKey() : this(Algorithm.Invalid, []) { }
 }

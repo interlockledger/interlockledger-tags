@@ -62,8 +62,6 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T>
 
     public override Task<Stream> OpenReadingStreamAsync() => Task.FromResult<Stream>(new TagStream(TagId, _contentStream));
 
-    protected override bool KeepEncodedBytesInMemory => false;
-
     protected string TagTypeName => $"{GetType().Name}#{TagId}";
 
     protected override ulong CalcValueLength() => Length;
@@ -82,10 +80,10 @@ public abstract class FileBackedILTag<T> : ILTagOfExplicit<T>
         Initialize(0, 0, FileInfo.Length);
     }
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override async Task<Stream> ValueToStreamAsync(Stream s) {
         using var fileStream = FileInfo.OpenRead();
         using var streamSlice = new StreamSpan(fileStream, Offset, Length);
-        streamSlice.CopyTo(s, _bufferLength);
+        await streamSlice.CopyToAsync(s, _bufferLength).ConfigureAwait(false);
         return s;
     }
 

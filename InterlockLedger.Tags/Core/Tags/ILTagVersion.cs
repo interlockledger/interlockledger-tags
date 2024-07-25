@@ -34,14 +34,13 @@ namespace InterlockLedger.Tags;
 
 [TypeConverter(typeof(TypeCustomConverter<ILTagVersion>))]
 [JsonConverter(typeof(JsonCustomConverter<ILTagVersion>))]
-public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVersion>, IComparable<ILTagVersion>
+public partial class ILTagVersion : ILTagOfExplicitTextual<Version>, ITextual<ILTagVersion>, IComparable<ILTagVersion>
 {
     protected override string? BuildTextualRepresentation() => InvalidityCause ?? Value?.ToString();
     public ILTagVersion(Version version) : base(ILTagId.Version, version) { }
     public bool IsEmpty { get; private init; }
     public static ILTagVersion Empty { get; } = new() { IsEmpty = true };
     public static Regex Mask { get; } = Version_Regex();
-    public string? InvalidityCause { get; private init; }
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagVersion result) {
         result = Parse(s.Safe(), provider);
         return !result.IsInvalid();
@@ -54,9 +53,8 @@ public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVers
             return InvalidBy(ex.Message);
         }
     }
-    public static ILTagVersion InvalidBy(string cause) => new() { InvalidityCause = cause };
+    public static ILTagVersion InvalidBy(string cause) => Empty;
     public bool Equals(ILTagVersion? other) => base.Equals(other);
-    protected override bool AreEquivalent(ILTagOf<Version?> other) => TextualRepresentation == other.TextualRepresentation;
     public static ILTagVersion FromJson(object o) => o is Version version ? new(version) : Parse((string)o, CultureInfo.InvariantCulture);
     public ITextual<ILTagVersion> Textual => this;
 
@@ -82,13 +80,13 @@ public partial class ILTagVersion : ILTagOfExplicit<Version>, ITextual<ILTagVers
     [GeneratedRegex("""^\d+(\.\d+){1,3}$""")]
     private static partial Regex Version_Regex();
 
-    protected override Version? ValueFromStream(WrappedReadonlyStream s) =>
-        BuildVersion(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt());
-    protected override Stream ValueToStream(Stream s) =>
-        s.BigEndianWriteInt(Value!.Major)
-         .BigEndianWriteInt(Value.Minor)
-         .BigEndianWriteInt(Value.Build)
-         .BigEndianWriteInt(Value.Revision);
+    protected override Task<Version?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult<Version?>(BuildVersion(s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt(), s.BigEndianReadInt()));
+    protected override Task<Stream> ValueToStreamAsync(Stream s)
+        => Task.FromResult(s.BigEndianWriteInt(Value!.Major)
+                            .BigEndianWriteInt(Value.Minor)
+                            .BigEndianWriteInt(Value.Build)
+                            .BigEndianWriteInt(Value.Revision));
 
     private ILTagVersion() : this(Version.Parse("0.0.0.0".AsSpan())) { }
 }

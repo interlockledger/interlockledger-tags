@@ -66,5 +66,5 @@ public class TagPubRSAKey : TagPubKey
     }
 
     private static byte[] EncodeParameters(RSAParameters parameters)
-        => new TagRSAPublicParameters(parameters).EncodedBytes;
+        => new TagRSAPublicParameters(parameters).EncodedBytes();
 }

@@ -35,9 +35,8 @@ public class ILTagBigDecimal : ILTag
 {
     public ILTagBigDecimal(Stream s) : base(ILTagId.BigDecimal) => throw new NotImplementedException();
 
-    public override object? Content { get; }
-    public override string TextualRepresentation { get; }
-
     protected override Task<Stream> SerializeInnerAsync(Stream s) => throw new NotImplementedException();
     protected sealed override void DisposeManagedResources() { }
+
+    public override Task<Stream> OpenReadingStreamAsync() => throw new NotImplementedException();
 }

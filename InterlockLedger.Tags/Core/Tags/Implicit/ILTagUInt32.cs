@@ -38,10 +38,11 @@ public class ILTagUInt32 : ILTagOfImplicit<uint>
 
     internal ILTagUInt32(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.UInt32, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override uint ValueFromStream(WrappedReadonlyStream s) => s.BigEndianReadUInt();
+    protected override Task<uint> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(s.BigEndianReadUInt());
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s)
+    {
         s.BigEndianWriteUInt(Value);
-        return s;
+        return Task.FromResult(s);
     }
 }

@@ -38,7 +38,7 @@ public class VersionedValueTests
     [Test]
     public void SerializeDeserialize() {
         var vvt = new VersionedValueForTests("Yeah!");
-        var bytes = vvt.AsPayload.EncodedBytes;
+        var bytes = vvt.AsPayload.EncodedBytes();
         byte[] expectedBytes = [27, 10, 5, 1, 0, 17, 5, (byte)'Y', (byte)'e', (byte)'a', (byte)'h', (byte)'!'];
         Assert.That(bytes, Is.EqualTo(expectedBytes).AsCollection);
         TagProvider.RegisterDeserializer(27, s => new VersionedValueForTests.Payload(27, s));
@@ -47,7 +47,7 @@ public class VersionedValueTests
 
         static void AssertThings(VersionedValueForTests vvt, VersionedValue<VersionedValueForTests>.Payload tag) {
             Assert.Multiple(() => {
-                Assert.That(tag.Version, Is.EqualTo((ushort)1), "Version");
+                Assert.That(tag.Value.Version, Is.EqualTo((ushort)1), "Version");
                 Assert.That(tag.ValueLength, Is.EqualTo((ulong)10), "ValueLength");
             });
             var data = tag.Value;
@@ -72,9 +72,13 @@ public class VersionedValueTests
 
         protected override IEnumerable<DataField> RemainingStateFields { get; }
         protected override string TypeDescription { get; }
-
-        protected override void DecodeRemainingStateFrom(Stream s) => UserMessage = s.DecodeString();
-
-        protected override void EncodeRemainingStateTo(Stream s) => s.EncodeString(UserMessage);
+        protected override Task DecodeRemainingStateFromAsync(Stream s) {
+            UserMessage = s.DecodeString();
+            return Task.CompletedTask;
+        }
+        protected override Task EncodeRemainingStateToAsync(Stream s) {
+            s.EncodeString(UserMessage);
+            return Task.CompletedTask;
+        }
     }
 }

@@ -30,6 +30,7 @@
 //
 // ******************************************************************************************************************************
 
+
 namespace InterlockLedger.Tags;
 
 public enum EncryptedContentType
@@ -56,8 +57,8 @@ public abstract class InterlockSigningKey(InterlockSigningKeyData data) : ISigni
     }
 
     public abstract TagSignature Sign(byte[] data);
-
     public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    public abstract TagSignature Sign(Stream dataStream);
 
     public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
     public override string ToString() => _data.ToString();
@@ -98,5 +99,6 @@ public abstract class InterlockSigningKey(InterlockSigningKeyData data) : ISigni
             _disposedValue = true;
         }
     }
+
 }
 

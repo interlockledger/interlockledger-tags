@@ -154,7 +154,7 @@ public class DataFieldTests
     private static ulong Reverse(ulong key) => ulong.MaxValue - key;
 
     private static void TestWith(DataField dataField) {
-        var encodedBytes = new ILTagDataField(dataField).EncodedBytes;
+        var encodedBytes = new ILTagDataField(dataField).EncodedBytes();
         using var ms = new MemoryStream(encodedBytes);
         var tagValue = ms.DecodeTag();
         Assert.That(tagValue, Is.InstanceOf<ILTagDataField>());

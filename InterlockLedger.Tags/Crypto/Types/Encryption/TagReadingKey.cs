@@ -76,14 +76,15 @@ public class TagReadingKey : ILTagOfExplicit<TagReadingKey.Parts>
     internal TagReadingKey(Stream s) : base(ILTagId.ReadingKey, s) {
     }
 
-    protected override Parts ValueFromStream(WrappedReadonlyStream s) =>
-        new(id: s.DecodeString().Required(),
-            publicKeyHash: s.Decode<TagHash>().Required(),
-            encryptedKey: s.DecodeByteArray().Required(),
-            encryptedIV: s.DecodeByteArray().Required());
-    protected override Stream ValueToStream(Stream s) =>
-        s.EncodeString(Value.ReaderId)
-         .EncodeTag(Value.PublicKeyHash)
-         .EncodeByteArray(Value.EncryptedKey)
-         .EncodeByteArray(Value.EncryptedIV);
+    protected override Task<Parts> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult<Parts>(
+            new(id: s.DecodeString().Required(),
+                publicKeyHash: s.Decode<TagHash>().Required(),
+                encryptedKey: s.DecodeByteArray().Required(),
+                encryptedIV: s.DecodeByteArray().Required()));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.EncodeString(Value.ReaderId)
+                         .EncodeTag(Value.PublicKeyHash)
+                         .EncodeByteArray(Value.EncryptedKey)
+                         .EncodeByteArray(Value.EncryptedIV));
 }

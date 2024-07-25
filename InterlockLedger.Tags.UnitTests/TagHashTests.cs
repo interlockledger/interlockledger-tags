@@ -70,7 +70,7 @@ public class TagHashTests
     [TestCase(HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 39, 4, 4, 0, 0, 0 })]
     [TestCase(HashAlgorithm.SHA1, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 39, 4, 0, 0, 0, 0 })]
     [TestCase(HashAlgorithm.SHA3_256, new byte[] { }, ExpectedResult = new byte[] { 39, 2, 3, 0 })]
-    public byte[] SerializeTagHash(HashAlgorithm algorithm, byte[] data) => new TagHash(algorithm, data).EncodedBytes;
+    public byte[] SerializeTagHash(HashAlgorithm algorithm, byte[] data) => new TagHash(algorithm, data).EncodedBytes();
 
     [TestCase(HashAlgorithm.SHA3_512, new byte[] { 0, 0 }, ExpectedResult = "AAA#SHA3_512")]
     [TestCase(HashAlgorithm.SHA1, new byte[] { 0, 0 }, ExpectedResult = "AAA#SHA1")]

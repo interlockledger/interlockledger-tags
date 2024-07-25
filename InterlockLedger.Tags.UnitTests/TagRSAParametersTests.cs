@@ -67,5 +67,5 @@ public class TagRSAParametersTests
             Modulus = [6],
             P = [7],
             Q = [8],
-        }, KeyStrength.Normal).EncodedBytes;
+        }, KeyStrength.Normal).EncodedBytes();
 }

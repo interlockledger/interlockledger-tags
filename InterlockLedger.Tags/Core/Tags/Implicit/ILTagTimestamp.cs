@@ -38,18 +38,20 @@ namespace InterlockLedger.Tags;
 public class ILTagTimestamp : ILTagOfImplicit<DateTimeOffset>, ITextualLight<ILTagTimestamp>
 {
     private const string _fixedFormat = "u";
+    private string? _textualRepresentation;
 
+    public string TextualRepresentation => _textualRepresentation ??= BuildTextualRepresentation();
     internal ILTagTimestamp(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Timestamp, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
 
-    protected override DateTimeOffset ValueFromStream(WrappedReadonlyStream s) =>
-        DateTimeOffset.FromUnixTimeMilliseconds(s.ILIntDecode().AsSignedILInt());
+    protected override Task<DateTimeOffset> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult(DateTimeOffset.FromUnixTimeMilliseconds(s.ILIntDecode().AsSignedILInt()));
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.ILIntEncode(Value.ToUnixTimeMilliseconds().AsUnsignedILInt());
-        return s;
+        return Task.FromResult(s);
     }
     public ILTagTimestamp(DateTimeOffset value) : base(ILTagId.Timestamp, value) { }
-    protected override string? BuildTextualRepresentation() => Value.ToString(_fixedFormat, CultureInfo.InvariantCulture);
+    private string BuildTextualRepresentation() => Value.ToString(_fixedFormat, CultureInfo.InvariantCulture);
     public bool Equals(ILTagTimestamp? other) => other is not null && other.Value == Value;
     public static ILTagTimestamp Parse(string s, IFormatProvider? provider) => new(DateTimeOffset.ParseExact(s, _fixedFormat, CultureInfo.InvariantCulture));
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out ILTagTimestamp result) {

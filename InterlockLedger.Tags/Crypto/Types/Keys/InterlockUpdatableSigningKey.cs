@@ -35,7 +35,6 @@ namespace InterlockLedger.Tags;
 public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
 {
     public string? Description => _data.Description;
-    public byte[] EncodedBytes => _data.EncodedBytes;
     public BaseKeyId Id => _data.Id;
     public BaseKeyId Identity => _data.Identity;
     public DateTimeOffset LastSignatureTimeStamp => _data.LastSignatureTimeStamp;
@@ -60,10 +59,11 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
     public TagSignature Sign(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
 
     public TagSignature Sign<T>(T data) where T : Signable<T>, new() => throw new InvalidOperationException("Can't sign without possibly updating the key");
+    public TagSignature Sign(Stream dataStream) => throw new InvalidOperationException("Can't sign without possibly updating the key");
 
     public abstract TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();
-
     public abstract TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null);
+    public abstract TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null);
 
     public string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
 
@@ -95,6 +95,7 @@ public abstract class InterlockUpdatableSigningKey : IUpdatableSigningKey
             _disposedValue = true;
         }
     }
+
 }
 
 public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<InterlockUpdatableSigningKeyData.UpdatableParts>, IInterlockKeySecretData, IBaseKey
@@ -134,8 +135,6 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         return stream.Decode<InterlockUpdatableSigningKeyData>().Required();
     }
 
-    public void InvalidateBytes() => Changed();
-
     public string ToShortString() => $"InterlockUpdatableSigningKey '{Name}' by {Identity}";
 
     public override string ToString() => $@"InterlockUpdatableSigningKey
@@ -164,9 +163,9 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
 
     protected override ulong CalcValueLength() => (ulong)(ToBytes()?.Length ?? 0);
 
-    protected override UpdatableParts ValueFromStream(WrappedReadonlyStream s) {
+    protected override Task<UpdatableParts?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         var version = s.DecodeUShort();
-        return new UpdatableParts {
+        var result = new UpdatableParts {
             Version = version,                                      // Field index 0 //
             Name = s.DecodeString().Safe(),                         // Field index 1 //
             PurposesAsUlongs = s.DecodeILIntArray(),                // Field index 2 //
@@ -179,9 +178,10 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
             SignaturesWithCurrentKey = s.DecodeILInt(),             // Field index 9 //
             Strength = version > 0 ? (KeyStrength)s.DecodeILInt() : KeyStrength.Normal, // Field index 10 //
         };
+        return Task.FromResult<UpdatableParts?>(result);
     }
 
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.EncodeUShort(Value.Required().Version);               // Field index 0 //
         s.EncodeString(Value.Name);                             // Field index 1 //
         s.EncodeILIntArray(Value.PurposesAsUlongs);             // Field index 2 //
@@ -193,8 +193,8 @@ public sealed class InterlockUpdatableSigningKeyData : ILTagOfExplicit<Interlock
         s.EncodeDateTimeOffset(Value.LastSignatureTimeStamp);   // Field index 8 //
         s.EncodeILInt(Value.SignaturesWithCurrentKey);          // Field index 9 //
         s.EncodeILInt((ulong)Value.Strength);                   // Field index 10 //
-        return s;
+        return Task.FromResult(s);
     }
 
-    private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStreamAsync(s));
+    private byte[] ToBytes() => TagHelpers.ToBytesHelper(s => ValueToStreamAsync(s).WaitResult());
 }

@@ -105,15 +105,16 @@ public class ILTagDataIndex : ILTagOfExplicit<DataIndex>
     public ILTagDataIndex(Stream s) : base(ILTagId.DataIndex, s) {
     }
 
-    protected override DataIndex? ValueFromStream(WrappedReadonlyStream s) => new() {
-        Name = s.DecodeString().WithDefault("?"),
-        IsUnique = s.DecodeBool(),
-        ElementsAsString = s.DecodeString().Safe(),
-    };
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<DataIndex?> ValueFromStreamAsync(WrappedReadonlyStream s)
+        => Task.FromResult<DataIndex?>(new() {
+            Name = s.DecodeString().WithDefault("?"),
+            IsUnique = s.DecodeBool(),
+            ElementsAsString = s.DecodeString().Safe(),
+        });
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.EncodeString(Value.Required().Name);
         s.EncodeBool(Value.IsUnique);
         s.EncodeString(Value.ElementsAsString);
-        return s;
+        return Task.FromResult(s);
     }
 }

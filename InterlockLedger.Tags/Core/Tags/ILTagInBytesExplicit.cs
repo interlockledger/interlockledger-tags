@@ -34,6 +34,7 @@ namespace InterlockLedger.Tags;
 
 public abstract class ILTagInBytesExplicit<T> : ILTagOfExplicit<T> where T : class
 {
+
     protected ILTagInBytesExplicit(ulong tagId, T value) : base(tagId, value) {
     }
 
@@ -41,18 +42,17 @@ public abstract class ILTagInBytesExplicit<T> : ILTagOfExplicit<T> where T : cla
             : base(alreadyDeserializedTagId, s, setup) {
     }
 
-    protected sealed override bool KeepEncodedBytesInMemory => true;
 
     protected static T FromBytesHelper(byte[] bytes, Func<Stream, T> deserialize) {
         deserialize.Required();
         using var s = new MemoryStream(bytes, writable: false);
         return deserialize(s);
     }
-    protected sealed override T ValueFromStream(WrappedReadonlyStream s) => FromBytes(s.ReadAllBytesAsync().WaitResult());
+    protected sealed override async Task<T?> ValueFromStreamAsync(WrappedReadonlyStream s) => FromBytes(await s.ReadAllBytesAsync().ConfigureAwait(false));
 
     protected abstract T FromBytes(byte[] bytes);
 
-    protected sealed override Stream ValueToStream(Stream s) => s.WriteBytes(ToBytes(Value));
+    protected sealed override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.WriteBytes(ToBytes(Value)));
 
     protected abstract byte[] ToBytes(T? Value);
 

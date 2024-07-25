@@ -40,10 +40,10 @@ public class ILTagDataModel : ILTagOfExplicit<DataModel>
     public ILTagDataModel(Stream s) : base(ILTagId.DataModel, s) {
     }
 
-    protected override DataModel? ValueFromStream(WrappedReadonlyStream s) {
+    protected override Task<DataModel?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         var payloadTagId = s.DecodeILInt();
         s.DecodeILInt(); // drop deprecated field
-        return new DataModel {
+        var result = new DataModel {
             PayloadTagId = payloadTagId,
             DataFields = s.DecodeTagArray<ILTagDataField>().Safe().Select(t => t.Required().Value.Required()),
             Indexes = s.DecodeTagArray<ILTagDataIndex>().Safe().Select(t => t.Required().Value.Required()).NullIfEmpty(),
@@ -51,8 +51,9 @@ public class ILTagDataModel : ILTagOfExplicit<DataModel>
             Version = s.HasBytes() ? s.DecodeUShort() : (ushort)1,
             Description = s.HasBytes() ? s.DecodeString().TrimToNull() : null
         };
+        return Task.FromResult<DataModel?>(result);
     }
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.EncodeILInt(Value.Required().PayloadTagId);
         s.EncodeILInt(0); // deprecated field
         s.EncodeTagArray(Value.DataFields.Select(df => new ILTagDataField(df)));
@@ -60,6 +61,6 @@ public class ILTagDataModel : ILTagOfExplicit<DataModel>
         s.EncodeString(Value.PayloadName);
         s.EncodeUShort(Value.Version);
         s.EncodeString(Value.Description.TrimToNull());
-        return s;
+        return Task.FromResult(s);
     }
 }

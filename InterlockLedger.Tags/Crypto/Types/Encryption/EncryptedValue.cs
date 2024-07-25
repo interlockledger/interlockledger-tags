@@ -62,9 +62,10 @@ public class EncryptedValue<T>(ulong tagId) : IVersionedEmbeddedValue<EncryptedV
     public string TypeName => $"EncryptedValueOf{typeof(T).Name}";
     public ushort Version { get; set; }
 
-    public void DecodeRemainingStateFrom(Stream s) {
+    public Task DecodeRemainingStateFromAsync(Stream s) {
         CipherText = s.DecodeByteArray().Required();
         ReadingKeys = s.DecodeTagArray<TagReadingKey>().RequireNonNulls().NonEmpty();
+        return Task.CompletedTask;
     }
 
     public T Decrypt(IReader reader, Func<CipherAlgorithm, ISymmetricEngine> findEngine) {
@@ -85,7 +86,10 @@ public class EncryptedValue<T>(ulong tagId) : IVersionedEmbeddedValue<EncryptedV
         throw new InvalidOperationException($"Reader {reader.Id} does not match any reading key to be able to decrypt this content");
     }
 
-    public void EncodeRemainingStateTo(Stream s) => s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);
+    public Task EncodeRemainingStateToAsync(Stream s) {
+        s.EncodeByteArray(CipherText).EncodeTagArray(ReadingKeys);
+        return Task.CompletedTask;
+    }
 
     private static TagReadingKey BuildReadingKey(byte[] symmetricKey, byte[] IV, string id, TagPubKey publicKey)
         => new(id, publicKey.Hash, publicKey.Encrypt(symmetricKey), publicKey.Encrypt(IV));

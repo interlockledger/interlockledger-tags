@@ -34,32 +34,18 @@ namespace InterlockLedger.Tags;
 
 public abstract class ILTag(ulong tagId) : AbstractDisposable, ITag
 {
-    [JsonIgnore]
-    public byte[] EncodedBytes => KeepEncodedBytesInMemory ? (_encodedBytes ??= ToBytes()) : ToBytes();
-
     public ulong TagId { get; set; } = tagId;
-
-    public abstract object? Content { get; }
 
     [JsonIgnore]
     public ITag Traits => this;
+    public virtual object? Content => null;
 
-    [JsonIgnore]
-    public abstract string TextualRepresentation { get; }
+    public abstract Task<Stream> OpenReadingStreamAsync();
 
-
-    internal void Changed() {
-        _encodedBytes = null;
-        OnChanged();
-    }
-
-    public virtual async Task<Stream> OpenReadingStreamAsync() {
-        if (KeepEncodedBytesInMemory)
-            return new MemoryStream(EncodedBytes, writable: false);
+    protected async Task<Stream> BuildReadingStreamAsync() {
         var s = await BuildTempStreamAsync();
         await SerializeIntoAsync(s);
-        s.Position = 0;
-        return new StreamSpan(s, 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
+        return new StreamSpan(s, s.Position = 0, (ulong)s.Length, closeWrappedStreamOnDispose: true);
     }
 
     public async Task<Stream> SerializeIntoAsync(Stream s) {
@@ -69,28 +55,12 @@ public abstract class ILTag(ulong tagId) : AbstractDisposable, ITag
         return s;
     }
 
-    public override string ToString() => TextualRepresentation;
-
     public virtual bool ValueIs<TV>(out TV? value) {
         value = default;
         return false;
     }
 
-    [JsonIgnore]
-    protected virtual bool KeepEncodedBytesInMemory => true;
-
     protected virtual Task<Stream> BuildTempStreamAsync() => Task.FromResult<Stream>(new MemoryStream());
 
     protected abstract Task SerializeInnerAsync(Stream s);
-
-    protected virtual void OnChanged() { }
-
-    private byte[]? _encodedBytes;
-
-    private byte[] ToBytes() {
-        using var stream = new MemoryStream();
-        SerializeIntoAsync(stream).WaitResult();
-        stream.Flush();
-        return stream.ToArray();
-    }
 }

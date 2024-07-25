@@ -52,5 +52,5 @@ public class TagSignatureTests
     [TestCase(Algorithm.EcDSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 38, 4, 4, 0, 0, 0 })]
     [TestCase(Algorithm.RSA, new byte[] { 0, 0 }, ExpectedResult = new byte[] { 38, 4, 0, 0, 0, 0 })]
     [TestCase(Algorithm.ElGamal, new byte[] { }, ExpectedResult = new byte[] { 38, 2, 3, 0 })]
-    public byte[] SerializeTagSignature(Algorithm algorithm, byte[] data) => new TagSignature(algorithm, data).EncodedBytes;
+    public byte[] SerializeTagSignature(Algorithm algorithm, byte[] data) => new TagSignature(algorithm, data).EncodedBytes();
 }

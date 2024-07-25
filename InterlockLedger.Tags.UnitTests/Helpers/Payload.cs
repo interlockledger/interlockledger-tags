@@ -32,6 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
+
 public class Payload<T> : ILTagOfExplicit<T>, IVersion, INamed where T : IRecordData<T>, new()
 {
     public Payload(ulong tagId, T jsonTestTaggedData) : base(tagId, jsonTestTaggedData) {
@@ -41,9 +42,9 @@ public class Payload<T> : ILTagOfExplicit<T>, IVersion, INamed where T : IRecord
     }
 
     public string TypeName => typeof(T).Name;
-    public ushort Version => Value.Version;
+    public ushort Version => Value!.Version;
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Value?.ToString();
 
     private static TR TryBuildFrom<TR>(Func<TR> func) {
         try {
@@ -53,9 +54,10 @@ public class Payload<T> : ILTagOfExplicit<T>, IVersion, INamed where T : IRecord
         }
     }
 
-    protected override T ValueFromStream(WrappedReadonlyStream s) => TryBuildFrom(() => new T().FromStream(s));
-    protected override Stream ValueToStream(Stream s) {
-        Value.ToStream(s);
-        return s;
+    protected override Task<T> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult(TryBuildFrom(() => new T().FromStream(s)));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
+        Value?.ToStream(s);
+        return Task.FromResult(s);
     }
 }

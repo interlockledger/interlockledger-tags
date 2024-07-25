@@ -143,13 +143,13 @@ public class ILTagDictionaryTests
     [TestCase(new string[] { "B", "C" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 66, 16, 2, 1, 2, 17, 1, 67, 16, 2, 3, 2 }, TestName = "Serialize_One_Dictionary_with_Two_Bytes")]
     [TestCase(new string[] { "D", "E" }, new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 30, 15, 2, 17, 1, 68, 16, 3, 1, 2, 3, 17, 1, 69, 16, 1, 2 }, TestName = "Serialize_One_Dictionary_with_One_and_Three_Bytes")]
     public byte[] SerializeILTagDictionaryOfILTagArray(string[] keys, byte[]? bytes, byte[] splits)
-        => new ILTagDictionary<ILTagByteArray>(BuildDictionary(keys, bytes, splits)).EncodedBytes;
+        => new ILTagDictionary<ILTagByteArray>(BuildDictionary(keys, bytes, splits)).EncodedBytes();
 
     [TestCase(new string[] { "B", "C" }, new string[] { "b", "c" }, ExpectedResult = new byte[] { 31, 13, 2, 17, 1, 66, 17, 1, 98, 17, 1, 67, 17, 1, 99 }, TestName = "Serialize_One_String_Dictionary_with_two_strings")]
     [TestCase(new string[] { "D", "E" }, new string?[] { "Demo", null }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 68, 17, 4, 68, 101, 109, 111, 17, 1, 69, 17, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_string_and_a_null")]
     [TestCase(new string[] { "F", "G" }, new string[] { "Demo", "" }, ExpectedResult = new byte[] { 31, 15, 2, 17, 1, 70, 17, 4, 68, 101, 109, 111, 17, 1, 71, 17, 0 }, TestName = "Serialize_One_String_Dictionary_with_one_non_empty_string_and_one_empty_string")]
     public byte[] SerializeILTagStringDictionary(string[]? keys, string?[] values)
-        => new ILTagStringDictionary(BuildStringDictionary(keys, values)).EncodedBytes;
+        => new ILTagStringDictionary(BuildStringDictionary(keys, values)).EncodedBytes();
 
     private static Dictionary<string, ILTagByteArray?>? BuildDictionary(string[]? keys, byte[]? bytes, byte[] splits) {
         if (keys is null || bytes is null)
@@ -210,7 +210,7 @@ public class ILTagDictionaryTests
                 else if (otherDictValue is not null)
                     Assert.Multiple(() => {
                         Assert.That(otherDictValue.TagId, Is.EqualTo(dictValue.TagId), nameof(otherDictValue.TagId));
-                        Assert.That(otherDictValue.EncodedBytes, Is.EqualTo(dictValue.EncodedBytes), nameof(otherDictValue.EncodedBytes));
+                        Assert.That(otherDictValue.EncodedBytes(), Is.EqualTo(dictValue.EncodedBytes()), "EncodedBytes");
                     });
             }
         }
@@ -231,21 +231,21 @@ public class ILTagDictionaryTests
 
     private static void GuaranteeBijectiveBehavior(Dictionary<string, ILTagBool?>? dict) {
         var ilarray = new ILTagDictionary<ILTagBool>(dict);
-        var encodedBytes = ilarray.EncodedBytes;
+        var encodedBytes = ilarray.EncodedBytes();
         using var ms = new MemoryStream(encodedBytes);
         var value = ms.DecodeDictionary<ILTagBool>();
         CompareDicts<ILTagBool, bool>(dict, value);
-        var newEncodedBytes = new ILTagDictionary<ILTagBool>(value).EncodedBytes;
+        var newEncodedBytes = new ILTagDictionary<ILTagBool>(value).EncodedBytes();
         Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 
     private static void GuaranteeBijectiveBehaviorForString(Dictionary<string, string?>? dict) {
         var ilarray = new ILTagStringDictionary(dict);
-        var encodedBytes = ilarray.EncodedBytes;
+        var encodedBytes = ilarray.EncodedBytes();
         using var ms = new MemoryStream(encodedBytes);
         var value = ms.DecodeStringDictionary();
         CompareStringDicts(dict, value);
-        var newEncodedBytes = new ILTagStringDictionary(value).EncodedBytes;
+        var newEncodedBytes = new ILTagStringDictionary(value).EncodedBytes();
         Assert.That(newEncodedBytes, Is.EqualTo(encodedBytes));
     }
 }

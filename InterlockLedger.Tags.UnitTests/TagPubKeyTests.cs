@@ -49,7 +49,7 @@ public class TagPubKeyTests
     public void CreateEdDSAKeySerializeDeserializeSignAndVerify() {
         var parameters = EdDSAHelper.CreateNewTagEdDSAParameters();
         var pubkey = parameters.PublicKey;
-        var pubkeyencodedbytes = pubkey.EncodedBytes;
+        var pubkeyencodedbytes = pubkey.EncodedBytes();
         TestContext.WriteLine(pubkey.ToString());
         TestContext.WriteLine(pubkeyencodedbytes.AsLiteral());
         using var ms = new MemoryStream(pubkeyencodedbytes);
@@ -113,7 +113,7 @@ public class TagPubKeyTests
                 190, 243, 109, 10, 8, 14, 248, 173, 115, 242, 96, 71, 191, 173, 251, 94,
                     46, 245, 64, 18, 30, 248, 50, 172, 36, 29, 97, 226, 238, 19, 60, 61
         })]
-    public byte[] SerializeTagPubKey(Algorithm algorithm, byte[] data) => new TestTagPubKey(algorithm, data).EncodedBytes;
+    public byte[] SerializeTagPubKey(Algorithm algorithm, byte[] data) => new TestTagPubKey(algorithm, data).EncodedBytes();
 }
 
 public class TestTagPubKey(Algorithm algorithm, byte[] data) : TagPubKey(algorithm, data)

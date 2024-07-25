@@ -30,19 +30,20 @@
 //
 // ******************************************************************************************************************************
 
+
+
 namespace InterlockLedger.Tags;
-public class ILTagInt8 : ILTagOfImplicit<sbyte>
+
+public abstract class ILTagOfExplicitTextual<T> : ILTagOfExplicit<T>
 {
-    public ILTagInt8(sbyte value) : base(ILTagId.Int8, value) {
+    protected ILTagOfExplicitTextual(ulong tagId, T? value) : base(tagId, value) {
+    }
+    protected ILTagOfExplicitTextual(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId, s, setup) {
     }
 
-    internal ILTagInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
-
-    protected override Task<sbyte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult((sbyte)s.ReadSingleByte());
-
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
-    {
-        s.WriteSingleByte((byte)Value);
-        return Task.FromResult(s);
-    }
+    [JsonIgnore]
+    public string TextualRepresentation => (_textualRepresentation ??= BuildTextualRepresentation()) ?? string.Empty;
+    public string? InvalidityCause => Value is IInvalidable invalidable ? invalidable.InvalidityCause : null;
+    protected virtual string? BuildTextualRepresentation() => (Value is ITextualCore textual) ? textual.TextualRepresentation : null;
+    private string? _textualRepresentation;
 }

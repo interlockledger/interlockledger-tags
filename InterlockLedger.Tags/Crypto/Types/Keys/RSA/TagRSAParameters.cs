@@ -73,6 +73,7 @@ public class TagRSAParameters : ILTagOfExplicit<KeyParameters>, IKeyParameters
     public TagPubKey PublicKey => new TagPubRSAKey(Value!.Parameters);
 
     public KeyStrength Strength => Value!.Strength;
+    byte[] IKeyParameters.EncodedBytes => this.EncodedBytes();
 
     public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
         using var s = new MemoryStream(encodedBytes);
@@ -81,6 +82,6 @@ public class TagRSAParameters : ILTagOfExplicit<KeyParameters>, IKeyParameters
 
     internal TagRSAParameters(Stream s) : base(ILTagId.RSAParameters, s) => Value.Required();
 
-    protected override KeyParameters? ValueFromStream(WrappedReadonlyStream s) => new(s);
-    protected override Stream ValueToStream(Stream s) => Value!.EncodeTo(s);
+    protected override Task<KeyParameters?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<KeyParameters?>(new(s));
+    protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(Value!.EncodeTo(s));
 }

@@ -50,11 +50,10 @@ public sealed class ILTagUnknown : ILTagOfExplicit<byte[]>
     [JsonIgnore]
     public IDataModel? Model { get; }
 
-    protected override async Task<byte[]?> ValueFromStreamAsync(WrappedReadonlyStream s) => await s.ReadAllBytesAsync();
-    protected override byte[]? ValueFromStream(WrappedReadonlyStream s) => throw new InvalidOperationException("Can only be read on the Async version of this method");
-    protected override Stream ValueToStream(Stream s) {
+    protected override async Task<byte[]?> ValueFromStreamAsync(WrappedReadonlyStream s) => await s.ReadAllBytesAsync().ConfigureAwait(false);
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null)
             s.WriteBytes(Value);
-        return s;
+        return Task.FromResult(s);
     }
 }

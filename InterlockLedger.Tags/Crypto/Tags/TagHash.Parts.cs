@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -36,9 +36,13 @@ namespace InterlockLedger.Tags;
 
 public sealed partial class TagHash
 {
-    public class Parts
+    public class Parts: IInvalidable
     {
-        public required HashAlgorithm Algorithm;
-        public required byte[] Data;
+        private string? _textualRepresentation;
+        public  HashAlgorithm Algorithm;
+        public  byte[] Data = [];
+
+        public string? InvalidityCause { get; internal init; }
+        public string TextualRepresentation => _textualRepresentation ??= $"{Data?.ToSafeBase64() ?? ""}#{Algorithm}";
     }
 }

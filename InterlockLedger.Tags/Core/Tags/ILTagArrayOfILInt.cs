@@ -42,17 +42,17 @@ public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]>
     }
     internal static ILTagArrayOfILInt FromJson(object opaqueValue) => new(Elicit(opaqueValue));
     protected override bool AreEquivalent(ILTagOf<ulong[]?> other) => Value.EquivalentTo(other?.Value!);
-    protected override ulong[]? ValueFromStream(WrappedReadonlyStream s) {
+    protected override Task<ulong[]?> ValueFromStreamAsync(WrappedReadonlyStream s) {
         if (s.Length <= s.Position)
-            return null;
+            return Task.FromResult<ulong[]?>(null);
         var length = (int)s.ILIntDecode();
         var result = new ulong[length];
         for (var i = 0; i < length; i++) {
             result[i] = s.ILIntDecode();
         }
-        return result;
+        return Task.FromResult<ulong[]?>(result);
     }
-    protected override Stream ValueToStream(Stream s) {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null) {
             s.ILIntEncode((ulong)Value.Length);
             if (Value.Length > 0) {
@@ -61,7 +61,7 @@ public class ILTagArrayOfILInt : ILTagOfExplicit<ulong[]>
             }
         } else
             s.ILIntEncode(0ul);
-        return s;
+        return Task.FromResult(s);
     }
 
     private static ulong[] Elicit(object? opaqueValue)

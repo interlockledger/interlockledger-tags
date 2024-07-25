@@ -59,9 +59,11 @@ public class TagEncrypted : ILTagOfExplicit<TagEncryptedParts>
 
     internal TagEncrypted(Stream s) : base(ILTagId.Encrypted, s) {
     }
-    protected override TagEncryptedParts ValueFromStream(WrappedReadonlyStream s) => new() {
-        Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
-        CipherData = s.DecodeByteArray().Required(),
-    };
-    protected override Stream ValueToStream(Stream s) => s.BigEndianWriteUShort((ushort)Value.Algorithm).EncodeByteArray(Value.CipherData);
+    protected override Task<TagEncryptedParts> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult<TagEncryptedParts>(new() {
+            Algorithm = (CipherAlgorithm)s.BigEndianReadUShort(),
+            CipherData = s.DecodeByteArray().Required(),
+        });
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.BigEndianWriteUShort((ushort)Value.Algorithm).EncodeByteArray(Value.CipherData));
 }

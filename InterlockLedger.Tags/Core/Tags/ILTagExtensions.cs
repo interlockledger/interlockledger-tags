@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -31,18 +31,12 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public class ILTagInt8 : ILTagOfImplicit<sbyte>
+
+public static class ILTagExtensions
 {
-    public ILTagInt8(sbyte value) : base(ILTagId.Int8, value) {
-    }
-
-    internal ILTagInt8(Stream s, ulong alreadyDeserializedTagId) : base(ILTagId.Int8, s) => Traits.ValidateTagId(alreadyDeserializedTagId);
-
-    protected override Task<sbyte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult((sbyte)s.ReadSingleByte());
-
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
-    {
-        s.WriteSingleByte((byte)Value);
-        return Task.FromResult(s);
+    public static byte[] EncodedBytes(this ILTag tag) {
+        using var ms = new MemoryStream();
+        tag.SerializeIntoAsync(ms).WaitResult();
+        return ms.ToArray();
     }
 }
