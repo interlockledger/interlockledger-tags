@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-
 namespace InterlockLedger.Tags;
 
 public enum EncryptedContentType
@@ -39,66 +38,40 @@ public enum EncryptedContentType
     EmbeddedCertificate = 1
 }
 
-public abstract class InterlockSigningKey(InterlockSigningKeyData data) : ISigningKey
+public abstract class InterlockSigningKey(InterlockSigningKeyData data) : AbstractDisposable, ISigningKey
 {
+    public string? Description => KeyData.Description;
+    public BaseKeyId Id => KeyData.Id;
+    public string Name => KeyData.Name;
+    public IEnumerable<AppPermissions> Permissions => KeyData.Permissions;
+    public TagPubKey PublicKey => KeyData.PublicKey;
+    public KeyPurpose[] Purposes => KeyData.Purposes;
+    public KeyStrength Strength => KeyData.Strength;
+    public EncryptedContentType EncryptedContentType => KeyData.EncryptedContentType;
+
     public abstract byte[] AsSessionState { get; }
-    public string? Description => _data.Description;
-    public BaseKeyId Id => _data.Id;
-    public string Name => _data.Name;
-    public IEnumerable<AppPermissions> Permissions => _data.Permissions;
-    public TagPubKey PublicKey => _data.PublicKey;
-    public KeyPurpose[] Purposes => _data.Purposes;
-    public KeyStrength Strength => _data.Strength;
+    public static InterlockSigningKey? FromSessionState(byte[] bytes) {
+        return RISKFrom(bytes) ?? RCSKFrom(bytes);
 
-    public static InterlockSigningKey? FromSessionState(byte[] bytes) => RISKFrom(bytes) ?? RCSKFrom(bytes);
-    public void Dispose() {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        static InterlockSigningKey? RCSKFrom(byte[] bytes) {
+            try { return RSACertificateSigningKey.FromSessionState(bytes); } catch { return null; }
+        }
+        static InterlockSigningKey? RISKFrom(byte[] bytes) {
+            try { return RSAInterlockSigningKey.FromSessionState(bytes); } catch { return null; }
+        }
     }
-
+    public async Task SaveToAsync(Stream store) {
+        using var s = await KeyData.OpenReadingStreamAsync().ConfigureAwait(false);
+        await s.CopyToAsync(store).ConfigureAwait(false);
+        await store.FlushAsync().ConfigureAwait(false);
+    }
     public abstract TagSignature Sign(byte[] data);
     public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
     public abstract TagSignature Sign(Stream dataStream);
-
     public string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
-    public override string ToString() => _data.ToString();
+    public override string ToString() => KeyData.ToString();
+    protected override void DisposeManagedResources() {}
 
-    protected readonly InterlockSigningKeyData _data = data.Required();
-
-    protected EncryptedContentType EncryptedContentType => _data.EncryptedContentType;
-
-    protected virtual void DisposeManagedResources() { }
-
-    protected virtual void DisposeUnmanagedResources() { }
-
-    private bool _disposedValue;
-
-    ~InterlockSigningKey() { Dispose(disposing: false); }
-
-#pragma warning disable CA1859 // Use concrete types when possible for improved performance
-    private static InterlockSigningKey? RCSKFrom(byte[] bytes) {
-        try {
-            return RSACertificateSigningKey.FromSessionState(bytes);
-        } catch { return null; }
-    }
-
-    private static InterlockSigningKey? RISKFrom(byte[] bytes) {
-        try {
-            return RSAInterlockSigningKey.FromSessionState(bytes);
-        } catch { return null; }
-    }
-#pragma warning restore CA1859 // Use concrete types when possible for improved performance
-
-    private void Dispose(bool disposing) {
-        if (!_disposedValue) {
-            if (disposing) {
-                DisposeManagedResources();
-            }
-
-            DisposeUnmanagedResources();
-            _disposedValue = true;
-        }
-    }
-
+    protected readonly InterlockSigningKeyData KeyData = data.Required();
 }
 

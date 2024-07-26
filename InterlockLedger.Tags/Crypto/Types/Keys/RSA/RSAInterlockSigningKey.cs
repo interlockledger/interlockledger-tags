@@ -44,7 +44,7 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
-            ms.EncodeTag(_data);
+            ms.EncodeTag(KeyData);
             ms.EncodeTag(_tagRSAParameters);
             return ms.ToArray();
         }

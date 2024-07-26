@@ -68,7 +68,12 @@ public class TagPubKeyTests
                         pubKey: pubkey);
         var signingKey = new EdDSAInterlockSigningKey(keyData, parameters);
         var newSignature = signingKey.Sign(_bytesToSign);
-        Assert.That(pubkey.Verify(_bytesToSign, signature), "New signature failed!");
+        Assert.That(pubkey.Verify(_bytesToSign, newSignature), "New signature failed!");
+        var streamSignature = signingKey.Sign(new MemoryStream(_bytesToSign));
+        Assert.That(pubkey.Verify(_bytesToSign, streamSignature), "Stream signature failed!");
+        using var msout = new MemoryStream();
+        signingKey.SaveToAsync(msout).WaitResult();
+        Assert.That(msout.ToArray(), Is.EquivalentTo(keyData.EncodedBytes()));
     }
 
     private static readonly AppPermissions _permission3 = new(3);

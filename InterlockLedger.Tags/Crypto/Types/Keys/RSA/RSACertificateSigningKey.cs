@@ -56,8 +56,8 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingK
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
-            return ms.EncodeTag(_data)
-                     .EncodeByteArray(_x509Certificate.Export(X509ContentType.Pfx, _data.Name))
+            return ms.EncodeTag(KeyData)
+                     .EncodeByteArray(_x509Certificate.Export(X509ContentType.Pfx, KeyData.Name))
                      .ToArray();
         }
     }

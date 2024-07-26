@@ -41,7 +41,7 @@ public class EdDSAInterlockSigningKey : InterlockSigningKey
     public override byte[] AsSessionState {
         get {
             using var ms = new MemoryStream();
-            return ms.EncodeTag(_data)
+            return ms.EncodeTag(KeyData)
                      .EncodeTag(_tagEdDSAParameters)
                      .ToArray();
         }
@@ -52,11 +52,9 @@ public class EdDSAInterlockSigningKey : InterlockSigningKey
         return new EdDSAInterlockSigningKey(s.Decode<InterlockSigningKeyData>(), s.Decode<TagEdDSAParameters>());
     }
 
-
-
     public override TagSignature Sign(byte[] data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSign(data, _keyParameters));
     public override TagSignature Sign<T>(T data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSignBytes(data, _keyParameters));
-    public override TagSignature Sign(Stream dataStream) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSign(dataStream.ReadAllBytesAsync().WaitResult(), _keyParameters));
+    public override TagSignature Sign(Stream dataStream) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSignStream(dataStream, _keyParameters));
 
     private readonly TagEdDSAParameters _tagEdDSAParameters;
     private readonly EdDSAParameters _keyParameters;

@@ -51,10 +51,6 @@ public static class EdDSAHelper
         return new(new EdDSAParameters(pubKey, privKey));
     }
 
-    //public static byte[] Decrypt(byte[] data, EdDSAParameters Key) => throw new NotImplementedException();
-
-    //public static byte[] Encrypt(byte[] data, EdDSAParameters Key) => throw new NotImplementedException();
-
     public static byte[] HashAndSign(byte[] data, EdDSAParameters parameters) {
         using var dataStream = new MemoryStream(data, writable: false);
         return HashAndSignStream(dataStream, parameters);
