@@ -33,6 +33,8 @@
 namespace InterlockLedger.Tags;
 public interface ISigningKey : IBaseKey
 {
+    EncryptedContentType EncryptedContentType { get; }
+
     TagSignature Sign(byte[] data);
     TagSignature Sign(Stream dataStream);
     TagSignature Sign<T>(T data) where T : Signable<T>, new();

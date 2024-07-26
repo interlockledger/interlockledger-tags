@@ -49,6 +49,9 @@ public abstract class Owner : ISigningKey, IPasswordProvider
     public abstract void Dispose();
 
     public ISigningKey Traits => this;
+
+    EncryptedContentType ISigningKey.EncryptedContentType => EncryptedContentType.EncryptedKey;
+
     public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes()).Data);
 
     public abstract TagSignature Sign(byte[] data);

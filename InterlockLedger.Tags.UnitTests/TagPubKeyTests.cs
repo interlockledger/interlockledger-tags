@@ -71,11 +71,31 @@ public class TagPubKeyTests
         Assert.That(pubkey.Verify(_bytesToSign, newSignature), "New signature failed!");
         var streamSignature = signingKey.Sign(new MemoryStream(_bytesToSign));
         Assert.That(pubkey.Verify(_bytesToSign, streamSignature), "Stream signature failed!");
-        using var msout = new MemoryStream();
-        signingKey.SaveToAsync(msout).WaitResult();
-        Assert.That(msout.ToArray(), Is.EquivalentTo(keyData.EncodedBytes()));
-    }
 
+        var updatableKeyData = new InterlockUpdatableSigningKeyData(
+                        [KeyPurpose.Protocol],
+                        name: "EdDSA Updatable Test Key",
+                        encrypted: _bytesToSign, // fake
+                        pubKey: pubkey,
+                        KeyStrength.Normal,
+                        DateTimeOffset.UnixEpoch);
+        var updatableKey = new EdDSAInterlockUpdatableSigningKey(updatableKeyData, parameters.EncodedBytes(), FakeTimeStamper.Instance);
+        using var msout = new MemoryStream();
+        updatableKey.SaveToAsync(msout).WaitResult();
+        Assert.That(msout.ToArray(), Is.EquivalentTo(updatableKeyData.EncodedBytes()));
+    }
+    private class FakeTimeStamper : ITimeStamper
+    {
+        public static FakeTimeStamper Instance = new FakeTimeStamper();
+
+        private FakeTimeStamper() { }   
+        public ulong Nonce => 13;
+        public TagHash Session => TagHash.Empty;
+        public TimeProvider Provider => TimeProvider.System;
+
+        public void SwitchSession(SenderIdentity senderIdentity) {}
+        public TimeStampStatus Validate(DateTimeOffset timeStamp, SenderIdentity senderIdentity) => TimeStampStatus.OK;
+    }
     private static readonly AppPermissions _permission3 = new(3);
 
     [TestCase(

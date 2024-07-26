@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -32,20 +32,30 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class InterlockSigningKey : InterlockSigningKeyOf<InterlockSigningKeyData>
+public enum EncryptedContentType
 {
-    public abstract byte[] AsSessionState { get; }
-    public static InterlockSigningKey? FromSessionState(byte[] bytes) {
-        return RISKFrom(bytes) ?? RCSKFrom(bytes);
+    EncryptedKey = 0,
+    EmbeddedCertificate = 1
+}
 
-        static InterlockSigningKey? RCSKFrom(byte[] bytes) {
-            try { return RSACertificateSigningKey.FromSessionState(bytes); } catch { return null; }
-        }
-        static InterlockSigningKey? RISKFrom(byte[] bytes) {
-            try { return RSAInterlockSigningKey.FromSessionState(bytes); } catch { return null; }
-        }
-    }
-    protected InterlockSigningKey(InterlockSigningKeyData data) : base(data) {
-    }
+public abstract class InterlockSigningKeyOf<T>(T data)  : AbstractDisposable, ISigningKey where T : class, IInterlockKeySecretData, IBaseKey
+{
+    public string? Description => KeyData.Description;
+    public BaseKeyId Id => KeyData.Id;
+    public string Name => KeyData.Name;
+    public IEnumerable<AppPermissions> Permissions => KeyData.Permissions;
+    public TagPubKey PublicKey => KeyData.PublicKey;
+    public KeyPurpose[] Purposes => KeyData.Purposes;
+    public KeyStrength Strength => KeyData.Strength;
+    public EncryptedContentType EncryptedContentType => KeyData.EncryptedContentType;
+
+    public abstract TagSignature Sign(byte[] data);
+    public abstract TagSignature Sign<TD>(TD data) where TD : Signable<TD>, new();
+    public abstract TagSignature Sign(Stream dataStream);
+    public virtual string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
+    public override string? ToString() => KeyData.ToString();
+    protected override void DisposeManagedResources() { }
+
+    protected readonly T KeyData = data.Required();
 }
 

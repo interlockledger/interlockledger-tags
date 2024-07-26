@@ -43,7 +43,7 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 
     public override void DestroyKeys() => _destroyKeysAfterSigning = true;
 
-    public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(_data.Strength);
+    public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(KeyData.Strength);
 
     public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null)
         => Update(encrypt, RSAHelper.HashAndSign(data, _parameters.Parameters));
@@ -62,22 +62,22 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
         if (_destroyKeysAfterSigning) {
             _keyParameters = null;
             _nextKeyParameters = null;
-            if (_data.Value is not null) {
-                _data.Value.Encrypted = null!;
-                _data.Value.PublicKey = null!;
+            if (KeyData.Value is not null) {
+                KeyData.Value.Encrypted = null!;
+                KeyData.Value.PublicKey = null!;
             }
         } else {
             var encryptionHandler = encrypt.Required();
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
-                _data.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes());
-                _data.Value.PublicKey = _keyParameters.PublicKey;
+                KeyData.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes());
+                KeyData.Value.PublicKey = _keyParameters.PublicKey;
                 _nextKeyParameters = null;
-                _data.SignaturesWithCurrentKey = 0;
+                KeyData.SignaturesWithCurrentKey = 0;
             } else {
-                _data.SignaturesWithCurrentKey++;
+                KeyData.SignaturesWithCurrentKey++;
             }
-            _data.LastSignatureTimeStamp = _timeStamper.Now;
+            KeyData.LastSignatureTimeStamp = _timeStamper.Now;
         }
         return new TagSignature(Algorithm.RSA, signatureData);
     }

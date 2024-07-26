@@ -59,24 +59,24 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
     private EdDSAParameters _parameters => _keyParameters.Required().Value.Required();
 
     private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
-        _ = _data.Value.Required();
+        _ = KeyData.Value.Required();
         if (_destroyKeysAfterSigning) {
             _keyParameters = null;
             _nextKeyParameters = null;
-            _data.Value.Encrypted = null!;
-            _data.Value.PublicKey = null!;
+            KeyData.Value.Encrypted = null!;
+            KeyData.Value.PublicKey = null!;
         } else {
             var func = encrypt.Required("encrypt");
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
-                _data.Value.Encrypted = func(_keyParameters!.EncodedBytes());
-                _data.Value.PublicKey = _keyParameters!.PublicKey;
+                KeyData.Value.Encrypted = func(_keyParameters!.EncodedBytes());
+                KeyData.Value.PublicKey = _keyParameters!.PublicKey;
                 _nextKeyParameters = null;
-                _data.SignaturesWithCurrentKey = 0uL;
+                KeyData.SignaturesWithCurrentKey = 0uL;
             } else {
-                _data.SignaturesWithCurrentKey++;
+                KeyData.SignaturesWithCurrentKey++;
             }
-            _data.LastSignatureTimeStamp = _timeStamper.Now;
+            KeyData.LastSignatureTimeStamp = _timeStamper.Now;
         }
         return new TagSignature(Algorithm.EdDSA, signatureData);
     }
