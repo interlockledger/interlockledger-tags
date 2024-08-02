@@ -51,16 +51,6 @@ public static class EdDSAHelper
         return new(new EdDSAParameters(pubKey, privKey));
     }
 
-    public static byte[] HashAndSign(byte[] data, EdDSAParameters parameters) {
-        using var dataStream = new MemoryStream(data, writable: false);
-        return HashAndSignStream(dataStream, parameters);
-    }
-
-    public static byte[] HashAndSignBytes<T>(T dataToSign, EdDSAParameters parameters) where T : Signable<T>, new() {
-        using var dataStream = dataToSign.OpenReadingStreamAsync().WaitResult();
-        return HashAndSignStream(dataStream, parameters);
-    }
-
     public static byte[] HashAndSignStream(Stream dataStream, EdDSAParameters parameters) {
         var signer = new Ed25519Signer();
         signer.Init(forSigning: true, parameters.PrivateKeyParameters);
@@ -78,12 +68,7 @@ public static class EdDSAHelper
         return VerifyStream(dataStream, signature, parameters);
     }
 
-    public static bool Verify(byte[] dataToVerify, TagSignature signature, EdDSAParameters parameters) {
-        using var dataStream = new MemoryStream(dataToVerify, writable: false);
-        return VerifyStream(dataStream, signature, parameters);
-    }
-
-    private static bool VerifyStream(Stream dataStream, TagSignature signature, EdDSAParameters parameters) {
+    public static bool VerifyStream(Stream dataStream, TagSignature signature, EdDSAParameters parameters) {
         if (signature.Required().Algorithm != Algorithm.EdDSA)
             throw new InvalidDataException($"Signature uses different algorithm {signature.Algorithm} from this EdDSA key!");
         var validator = new Ed25519Signer();

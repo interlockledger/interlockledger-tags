@@ -52,9 +52,8 @@ public abstract class Owner : ISigningKey, IPasswordProvider
 
     EncryptedContentType ISigningKey.EncryptedContentType => EncryptedContentType.EncryptedKey;
 
-    public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().EncodedBytes()).Data);
+    public string PasswordFor(InterlockId id) => Convert.ToBase64String(Sign(id.Required().OpenReadingStreamAsync().WaitResult()).Data);
 
-    public abstract TagSignature Sign(byte[] data);
     public abstract TagSignature Sign<T>(T data) where T : Signable<T>, new();
     public abstract TagSignature Sign(Stream dataStream);
 

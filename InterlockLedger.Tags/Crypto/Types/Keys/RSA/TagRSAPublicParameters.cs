@@ -40,6 +40,15 @@ public class TagRSAPublicParameters : ILTagOfExplicit<RSAParameters>
 
     internal TagRSAPublicParameters(Stream s) : base(ILTagId.RSAParametersPublic, s) {
     }
+
+    internal byte[] EncodedBytes {
+        get {
+            using var ms = new MemoryStream();
+            SerializeIntoAsync(ms).WaitResult();
+            return ms.ToArray();
+        }
+    }
+
     protected override Task<RSAParameters> ValueFromStreamAsync(WrappedReadonlyStream s) =>
         Task.FromResult<RSAParameters>(new() {
             Modulus = s.DecodeByteArray(),

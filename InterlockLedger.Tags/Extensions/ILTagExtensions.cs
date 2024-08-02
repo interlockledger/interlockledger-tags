@@ -31,15 +31,12 @@
 // ******************************************************************************************************************************
 
 namespace InterlockLedger.Tags;
-public interface IUpdatableSigningKey : ISigningKey
+
+internal static class ILTagExtensions
 {
-    BaseKeyId Identity { get; }
-    DateTimeOffset LastSignatureTimeStamp { get; }
-    TagPubKey? NextPublicKey { get; }
-    ulong SignaturesWithCurrentKey { get; }
-
-    void GenerateNextKeys();
-
-    TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null);
-    TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();
+    public static byte[] EncodedBytes(this ILTag tag) {
+        using var ms = new MemoryStream();
+        tag.SerializeIntoAsync(ms).WaitResult();
+        return ms.ToArray();
+    }
 }

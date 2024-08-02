@@ -74,8 +74,7 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingK
 
     protected override void DisposeManagedResources() => _x509Certificate?.Dispose();
 
-    public override TagSignature Sign(byte[] data) => new(Algorithm.RSA, HashAndSign(data));
-    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, HashAndSignBytes(data));
+    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, HashAndSignStream(data.OpenReadingStreamAsync().WaitResult()));
     public override TagSignature Sign(Stream dataStream) => new(Algorithm.RSA, HashAndSignStream(dataStream));
 
     private readonly X509Certificate2 _x509Certificate;
@@ -86,13 +85,6 @@ public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingK
         using var rsa = _x509Certificate.GetRSAPrivateKey();
         return action(rsa.Required());
     }
-
-    private byte[] HashAndSign(byte[] dataToSign) =>
-        DoWithPrivateKey(rsa =>
-            rsa.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
-
-    private byte[] HashAndSignBytes<T>(T data) where T : Signable<T>, new() =>
-        HashAndSignStream(data.OpenReadingStreamAsync().WaitResult());
     private byte[] HashAndSignStream(Stream dataStream) =>
         DoWithPrivateKey(rsa =>
             rsa.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));

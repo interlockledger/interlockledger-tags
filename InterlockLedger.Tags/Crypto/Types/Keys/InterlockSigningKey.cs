@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -32,7 +32,7 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class InterlockSigningKey : InterlockSigningKeyOf<InterlockSigningKeyData>
+public abstract class InterlockSigningKey(InterlockSigningKeyData data) : InterlockSigningKeyOf<InterlockSigningKeyData>(data)
 {
     public abstract byte[] AsSessionState { get; }
     public static InterlockSigningKey? FromSessionState(byte[] bytes) {
@@ -44,8 +44,6 @@ public abstract class InterlockSigningKey : InterlockSigningKeyOf<InterlockSigni
         static InterlockSigningKey? RISKFrom(byte[] bytes) {
             try { return RSAInterlockSigningKey.FromSessionState(bytes); } catch { return null; }
         }
-    }
-    protected InterlockSigningKey(InterlockSigningKeyData data) : base(data) {
     }
 }
 

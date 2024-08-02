@@ -57,9 +57,9 @@ public class TagPubKeyTests
         Assert.That(tag, Is.Not.Null);
         Assert.That(tag, Is.EqualTo(pubkey));
         Assert.That(tag.EncodedBytes, Is.EqualTo(pubkeyencodedbytes).AsCollection);
-        var signatureBytes = EdDSAHelper.HashAndSign(_bytesToSign, parameters.Value);
+        var signatureBytes = EdDSAHelper.HashAndSignStream(new MemoryStream(_bytesToSign), parameters.Value);
         var signature = new TagSignature(Algorithm.EdDSA, signatureBytes);
-        Assert.That(pubkey.Verify(_bytesToSign, signature), "Signature failed!");
+        Assert.That(pubkey.Verify(new MemoryStream(_bytesToSign), signature), "Signature failed!");
         var keyData = new InterlockSigningKeyData(
                         [KeyPurpose.Protocol],
                         [_permission3],
@@ -67,10 +67,8 @@ public class TagPubKeyTests
                         encrypted: _bytesToSign, // fake
                         pubKey: pubkey);
         var signingKey = new EdDSAInterlockSigningKey(keyData, parameters);
-        var newSignature = signingKey.Sign(_bytesToSign);
-        Assert.That(pubkey.Verify(_bytesToSign, newSignature), "New signature failed!");
         var streamSignature = signingKey.Sign(new MemoryStream(_bytesToSign));
-        Assert.That(pubkey.Verify(_bytesToSign, streamSignature), "Stream signature failed!");
+        Assert.That(pubkey.Verify(new MemoryStream(_bytesToSign), streamSignature), "Stream signature failed!");
 
         var updatableKeyData = new InterlockUpdatableSigningKeyData(
                         [KeyPurpose.Protocol],
@@ -86,7 +84,7 @@ public class TagPubKeyTests
     }
     private class FakeTimeStamper : ITimeStamper
     {
-        public static FakeTimeStamper Instance = new FakeTimeStamper();
+        public static FakeTimeStamper Instance = new();
 
         private FakeTimeStamper() { }   
         public ulong Nonce => 13;

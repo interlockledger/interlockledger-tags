@@ -45,12 +45,10 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
 
     public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(KeyData.Strength);
 
-    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null)
-        => Update(encrypt, RSAHelper.HashAndSign(data, _parameters.Parameters));
     public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null)
-        => Update(encrypt, RSAHelper.HashAndSignBytes(data, _parameters.Parameters));
+       => Update(encrypt, RSAHelper.HashAndSignStream(data.OpenReadingStreamAsync().WaitResult(), _parameters.Parameters));
     public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) =>
-        Update(encrypt, RSAHelper.HashAndSign(dataStream.ReadAllBytesAsync().WaitResult(), _parameters.Parameters));
+        Update(encrypt, RSAHelper.HashAndSignStream(dataStream, _parameters.Parameters));
     private KeyParameters _parameters => _keyParameters.Required().Value.Required();
 
     private bool _destroyKeysAfterSigning;
@@ -70,7 +68,7 @@ public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             var encryptionHandler = encrypt.Required();
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
-                KeyData.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes());
+                KeyData.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
                 KeyData.Value.PublicKey = _keyParameters.PublicKey;
                 _nextKeyParameters = null;
                 KeyData.SignaturesWithCurrentKey = 0;

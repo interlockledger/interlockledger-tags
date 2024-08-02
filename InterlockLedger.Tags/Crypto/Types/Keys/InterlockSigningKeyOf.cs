@@ -49,7 +49,6 @@ public abstract class InterlockSigningKeyOf<T>(T data)  : AbstractDisposable, IS
     public KeyStrength Strength => KeyData.Strength;
     public EncryptedContentType EncryptedContentType => KeyData.EncryptedContentType;
 
-    public abstract TagSignature Sign(byte[] data);
     public abstract TagSignature Sign<TD>(TD data) where TD : Signable<TD>, new();
     public abstract TagSignature Sign(Stream dataStream);
     public virtual string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";

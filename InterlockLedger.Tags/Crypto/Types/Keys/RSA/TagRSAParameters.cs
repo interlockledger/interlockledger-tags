@@ -73,8 +73,14 @@ public class TagRSAParameters : ILTagOfExplicit<KeyParameters>, IKeyParameters
     public TagPubKey PublicKey => new TagPubRSAKey(Value!.Parameters);
 
     public KeyStrength Strength => Value!.Strength;
-    byte[] IKeyParameters.EncodedBytes => this.EncodedBytes();
 
+    public byte[] EncodedBytes {
+        get {
+            using var ms = new MemoryStream();
+            SerializeIntoAsync(ms).WaitResult();
+            return ms.ToArray();
+        }
+    }
     public static TagRSAParameters DecodeFromBytes(byte[] encodedBytes) {
         using var s = new MemoryStream(encodedBytes);
         return s.Decode<TagRSAParameters>().Required();

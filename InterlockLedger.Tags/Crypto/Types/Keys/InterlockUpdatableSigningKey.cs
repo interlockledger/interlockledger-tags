@@ -41,11 +41,9 @@ public abstract class InterlockUpdatableSigningKey : InterlockSigningKeyOf<Inter
     public ulong SignaturesWithCurrentKey => KeyData.SignaturesWithCurrentKey;
     public abstract void DestroyKeys();
     public abstract void GenerateNextKeys();
-    public override TagSignature Sign(byte[] data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     public override TagSignature Sign<T>(T data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     public override TagSignature Sign(Stream dataStream) => throw new InvalidOperationException("Can't sign without possibly updating the key");
     public abstract TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();
-    public abstract TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null);
     public abstract TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null);
     public override string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
     public async Task SaveToAsync(Stream store) {

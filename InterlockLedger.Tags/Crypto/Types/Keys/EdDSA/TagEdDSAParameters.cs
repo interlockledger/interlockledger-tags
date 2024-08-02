@@ -38,7 +38,13 @@ public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyPar
 
     public KeyStrength Strength => KeyStrength.Normal;
 
-    byte[] IKeyParameters.EncodedBytes => this.EncodedBytes();
+    public byte[] EncodedBytes {
+        get {
+            using var ms = new MemoryStream();
+            SerializeIntoAsync(ms).WaitResult();
+            return ms.ToArray();
+        }
+    }
 
     public TagEdDSAParameters(EdDSAParameters parameters)
         : base(ILTagId.EdDSAParameters, parameters) {

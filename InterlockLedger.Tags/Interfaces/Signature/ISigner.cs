@@ -35,7 +35,6 @@ public interface ISigner : ISigningContext, IIdentifiedPublicKey
 {
     InterlockKey? AsInterlockKey { get; }
     IReader? Reader { get; }
-
-    IdentifiedSignature SignWithId(byte[] data);
-    TagSignature Sign(byte[] data, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null);
+    IdentifiedSignature SignWithId(Stream dataStream);
+    TagSignature Sign(Stream dataStream, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null);
 }

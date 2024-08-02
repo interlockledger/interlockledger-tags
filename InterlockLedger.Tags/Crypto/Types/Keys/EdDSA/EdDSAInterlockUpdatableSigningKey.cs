@@ -50,12 +50,9 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
     }
 
     public override void DestroyKeys() => _destroyKeysAfterSigning = true;
-
     public override void GenerateNextKeys() => _nextKeyParameters = EdDSAHelper.CreateNewTagEdDSAParameters();
-
-    public override TagSignature SignAndUpdate(byte[] data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(data, _parameters));
-    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignBytes(data, _parameters));
-    public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSign(dataStream.ReadAllBytesAsync().WaitResult(), _parameters));
+    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignStream(data.OpenReadingStreamAsync().WaitResult(), _parameters));
+    public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignStream(dataStream, _parameters));
     private EdDSAParameters _parameters => _keyParameters.Required().Value.Required();
 
     private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
@@ -69,7 +66,7 @@ public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
             var func = encrypt.Required("encrypt");
             if (_nextKeyParameters is not null) {
                 _keyParameters = _nextKeyParameters;
-                KeyData.Value.Encrypted = func(_keyParameters!.EncodedBytes());
+                KeyData.Value.Encrypted = func(_keyParameters!.EncodedBytes);
                 KeyData.Value.PublicKey = _keyParameters!.PublicKey;
                 _nextKeyParameters = null;
                 KeyData.SignaturesWithCurrentKey = 0uL;

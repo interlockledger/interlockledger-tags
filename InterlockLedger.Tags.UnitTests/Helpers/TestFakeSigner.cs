@@ -71,16 +71,19 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
     public void RegenerateKeys() {
         // For testing it is not needed
     }
-
+    private static MemoryStream AsStream(byte[] data) => new(data);
     public TagSignature Sign(byte[] data, KeyPurpose purpose, ulong? appId = null)
-        => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(data);
-
-    public override TagSignature Sign(byte[] data) => Sign(data, KeyPurpose.Any);
+        => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(AsStream(data));
 
     public override TagSignature Sign<T>(T data)
         => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(data);
     public IdentifiedSignature SignWithId(byte[] data)
-        => _generateEmptySignatures ? new(new(Algorithm.RSA, []), (KeyId)Id, PublicKey) : Key.SignWithId(data);
+        => _generateEmptySignatures ? new(new(Algorithm.RSA, []), (KeyId)Id, PublicKey) : Key.SignWithId(AsStream(data));
+    public IdentifiedSignature SignWithId(Stream dataStream)
+        => _generateEmptySignatures ? new(new(Algorithm.RSA, []), (KeyId)Id, PublicKey) : Key.SignWithId(dataStream);
+    public TagSignature Sign(Stream dataStream, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null)
+        => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(dataStream);
+
 
     public override TagSignature Sign(Stream dataStream) => _generateEmptySignatures ? new(Algorithm.RSA, []) : Key.Sign(dataStream);
 
