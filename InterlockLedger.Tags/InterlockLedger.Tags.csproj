@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>55.0.0</Version>
+        <Version>56.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Depend less on converting tags to in-memory byte arrays while signing</PackageReleaseNotes>
+        <PackageReleaseNotes>Async signing/Signing ILTags</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>

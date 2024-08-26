@@ -37,4 +37,8 @@ public interface ISigner : ISigningContext, IIdentifiedPublicKey
     IReader? Reader { get; }
     IdentifiedSignature SignWithId(Stream dataStream);
     TagSignature Sign(Stream dataStream, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null);
+    IdentifiedSignature SignWithId(ILTag tag) => SignWithIdAsync(tag).WaitResult();
+    TagSignature Sign(ILTag tag, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null) => SignAsync(tag, purpose, appId).WaitResult();
+    async Task<IdentifiedSignature> SignWithIdAsync(ILTag tag) => SignWithId(await tag.OpenReadingStreamAsync().ConfigureAwait(false));
+    async Task<TagSignature> SignAsync(ILTag tag, KeyPurpose purpose = KeyPurpose.Any, ulong? appId = null) => Sign(await tag.OpenReadingStreamAsync().ConfigureAwait(false), purpose, appId);
 }
