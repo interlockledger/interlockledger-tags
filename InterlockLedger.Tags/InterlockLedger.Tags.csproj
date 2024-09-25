@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>56.0.0</Version>
+        <Version>57.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Async signing/Signing ILTags</PackageReleaseNotes>
+        <PackageReleaseNotes>Replace public ctor for ILTagByteArray that accepts Span&lt;byte&gt; for one that accepts ReadOnlyMemory&lt;byte&gt;</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -38,15 +38,17 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
     [JsonIgnore]
     public ulong ValueLength => _valueLength ??= CalcValueLength();
 
-    protected ILTagOfExplicit(ulong tagId, T? value) : base(tagId, value) {
+    protected ILTagOfExplicit(ulong tagId, T? value) : base(tagId, value)
+    {
     }
 
-    protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null)
-        : base(alreadyDeserializedTagId, s, setup) {
+    protected ILTagOfExplicit(ulong alreadyDeserializedTagId, Stream s, Action<ITag>? setup = null) : base(alreadyDeserializedTagId, s, setup)
+    {
     }
 
     protected static void SetLength(ITag it, ulong length) => ((ILTagOfExplicit<T>)it)._valueLength = length;
-    protected virtual ulong CalcValueLength() {
+    protected virtual ulong CalcValueLength()
+    {
         if (Value is null)
             return 0;
         using var stream = new CountingStream();
@@ -54,8 +56,8 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
         stream.Flush();
         return (ulong)stream.Length;
     }
-
-    private protected sealed async override Task<T?> DeserializeInnerAsync(Stream s) {
+    private protected sealed async override Task<T?> DeserializeInnerAsync(Stream s)
+    {
         ulong length = _valueLength ??= s.ILIntDecode();
         if (length == 0)
             return ZeroLengthDefault;
@@ -64,7 +66,8 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
         using var ss = new StreamSpan(s, length);
         return await ValueFromStreamAsync(ss);
     }
-    public override async Task<Stream> OpenReadingStreamAsync() {
+    public override async Task<Stream> OpenReadingStreamAsync()
+    {
         var s = await BuildTempStreamAsync();
         await SerializeIntoAsync(s);
         s.Position = 0;
@@ -73,10 +76,12 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
 
     [JsonIgnore]
     protected virtual T? ZeroLengthDefault => default;
-    protected async override Task<Stream> SerializeInnerAsync(Stream s) {
+    protected async override Task<Stream> SerializeInnerAsync(Stream s)
+    {
         if (Value is null)
             s.ILIntEncode(0ul);
-        else {
+        else
+        {
             s.ILIntEncode(ValueLength);
             if (ValueLength > 0)
                 await ValueToStreamAsync(s);
@@ -86,6 +91,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
 
     private ulong? _valueLength;
 
-    protected override void DisposeManagedResources() {
+    protected override void DisposeManagedResources()
+    {
     }
 }

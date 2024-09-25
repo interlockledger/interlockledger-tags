@@ -48,7 +48,7 @@ public static partial class StreamExtensions
     public static TS EncodeByteArray<TS>(this TS s, byte[]? value) where TS : Stream
         => value == null ? s.EncodeNull() : s.EncodeTag(new ILTagByteArray(value));
 
-    public static TS EncodeByteArray<TS>(this TS s, Span<byte> value) where TS : Stream
+    public static TS EncodeByteArray<TS>(this TS s, ReadOnlyMemory<byte> value) where TS : Stream
         => s.EncodeTag(new ILTagByteArray(value));
 
     public static TS EncodeColor<TS>(this TS s, InterlockColor value) where TS : Stream

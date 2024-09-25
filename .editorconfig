@@ -115,6 +115,7 @@ dotnet_diagnostic.CA2225.severity = none
 dotnet_diagnostic.CA2227.severity = none
 dotnet_diagnostic.CS1591.severity = none
 dotnet_diagnostic.IDE0073.severity = error
+dotnet_diagnostic.IDE0130.severity = none
 dotnet_naming_rule.private_fields_should_be_underscored.severity = suggestion
 dotnet_naming_rule.private_fields_should_be_underscored.style = underscored_style
 dotnet_naming_rule.private_fields_should_be_underscored.symbols  = private_fields

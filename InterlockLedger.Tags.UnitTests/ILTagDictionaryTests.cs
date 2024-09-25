@@ -162,8 +162,7 @@ public class ILTagDictionaryTests
             var currentKey = 0;
             foreach (var split in splits) {
                 var length = split - lastSplit;
-                var partialBytes = new byte[length];
-                Array.ConstrainedCopy(bytes, lastSplit, partialBytes, 0, length);
+                var partialBytes = new ReadOnlyMemory<byte>(bytes, lastSplit, length);
                 dict.Add(keys[currentKey], new ILTagByteArray(partialBytes));
                 lastSplit = split;
                 currentKey++;
@@ -183,7 +182,7 @@ public class ILTagDictionaryTests
     }
 
     private static void CompareDicts<T, TT>(Dictionary<string, T?>? dict, Dictionary<string, T?>? otherDict)
-        where T : ILTagOf<TT?>{
+        where T : ILTagOf<TT?> {
         if (dict is null)
             Assert.That(otherDict, Is.Null);
         else {
