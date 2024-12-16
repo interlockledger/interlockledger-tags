@@ -44,6 +44,7 @@ public abstract class Signable<T> : VersionedValue<T>, ISignable, ICacheableTag,
 {
     private int _cachedLength;
     private IMemoryOwner<byte>? _memoryOwner;
+    private bool _disposedValue;
 
     public Signable() : base(0, 0) {
     }
@@ -77,14 +78,24 @@ public abstract class Signable<T> : VersionedValue<T>, ISignable, ICacheableTag,
         return ms;
     }
 
-    public void Dispose() {
-        _memoryOwner?.Dispose();
-        _memoryOwner = null;
-        _cachedLength = 0;
-        GC.SuppressFinalize(this);
-    }
 
     protected Signable(ulong tagId, ushort version) : base(tagId, version) {
     }
 
+    protected virtual void Dispose(bool disposing) {
+        if (!_disposedValue) {
+            if (disposing) {
+                _memoryOwner?.Dispose();
+                _memoryOwner = null;
+                _cachedLength = 0;
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose() {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
