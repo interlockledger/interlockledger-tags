@@ -63,8 +63,8 @@ public static class EdDSAHelper
         } while (true);
     }
 
-    public static bool Verify<T>(T dataToVerify, TagSignature signature, EdDSAParameters parameters) where T : Signable<T>, new() {
-        using var dataStream = dataToVerify.Required("dataToVerify").OpenReadingStreamAsync().WaitResult();
+    public static bool Verify<T>(T dataToVerify, TagSignature signature, EdDSAParameters parameters) where T : Signable<T>, ICacheableTag, new() {
+        using var dataStream = dataToVerify.Required().OpenReadingStreamAsync().WaitResult();
         return VerifyStream(dataStream, signature, parameters);
     }
 

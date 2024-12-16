@@ -36,7 +36,10 @@ public interface ISigningKey : IBaseKey
     EncryptedContentType EncryptedContentType { get; }
 
     TagSignature Sign(Stream dataStream);
-    TagSignature Sign<T>(T data) where T : Signable<T>, new();
+    TagSignature Sign<T>(T data) where T : Signable<T>, new() =>
+        data is ICacheableTag cacheable
+            ? Sign(cacheable.OpenCachedReadingStreamAsync().WaitResult())
+            : Sign(data.OpenReadingStreamAsync().WaitResult());
 
     IdentifiedSignature SignWithId(Stream dataStream) => new(Sign(dataStream), (KeyId)Id, PublicKey);
     IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), (KeyId)Id, PublicKey);

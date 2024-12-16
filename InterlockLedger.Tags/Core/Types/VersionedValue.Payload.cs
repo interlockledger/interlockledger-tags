@@ -46,6 +46,7 @@ public abstract partial class VersionedValue<T> where T : notnull, VersionedValu
             => Initialize();
 
         internal Payload(T value) : base(value.Required().TagId, value) {
+            value._payload = this;
         }
  
         private void Initialize() {

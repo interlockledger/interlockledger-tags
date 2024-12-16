@@ -1,4 +1,4 @@
-// ******************************************************************************************************************************
+﻿// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -30,39 +30,12 @@
 //
 // ******************************************************************************************************************************
 
-using System.Security.Cryptography;
+
 
 namespace InterlockLedger.Tags;
-public class TagPubRSAKey : TagPubKey
+
+public interface ICacheableTag
 {
-    public readonly RSAParameters Parameters;
-
-    public TagPubRSAKey(RSAParameters parameters) : this(EncodeParameters(parameters)) {
-    }
-
-    public override KeyStrength Strength {
-        get {
-            using var RSAalg = new RSACryptoServiceProvider();
-            RSAalg.ImportParameters(Parameters);
-            return RSAalg.KeyStrengthGuess();
-        }
-    }
-
-    public override byte[] Encrypt(byte[] bytes) => RSAHelper.Encrypt(bytes, Parameters);
-
-    //    public override bool Verify<T>(T data, TagSignature signature)        => RSAHelper.Verify(data, signature, Parameters);
-    public override bool Verify(Stream dataStream, TagSignature signature)
-        => RSAHelper.VerifyStream(dataStream, signature, Parameters);
-
-    internal TagPubRSAKey(byte[] data) : base(Algorithm.RSA, data) => Parameters = DecodeParameters(Data);
-
-    private static RSAParameters DecodeParameters(byte[] bytes) {
-        if (bytes == null || bytes.Length == 0)
-            return default;
-        using var s = new MemoryStream(bytes);
-        return s.Decode<TagRSAPublicParameters>().Required().Value;
-    }
-
-    private static byte[] EncodeParameters(RSAParameters parameters)
-        => new TagRSAPublicParameters(parameters).EncodedBytes;
+    Task CacheFromAsync(Stream source);
+    Task<Stream> OpenCachedReadingStreamAsync();
 }

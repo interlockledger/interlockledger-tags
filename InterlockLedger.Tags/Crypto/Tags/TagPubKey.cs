@@ -88,7 +88,7 @@ public partial class TagPubKey : ILTagOfExplicitTextual<TagKeyParts>, ITextual<T
 
     public bool Equals(TagPubKey? other) => other is not null && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
 
-    public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
+//    public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
 
     public virtual bool Verify(Stream dataStream, TagSignature signature) => false;
 
