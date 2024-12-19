@@ -36,8 +36,90 @@ namespace InterlockLedger.Tags;
 [JsonConverter(typeof(JsonCustomConverter<AppPermissions>))]
 public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppPermissions>
 {
-    public ulong AppId;
-    public IEnumerable<ulong> ActionIds;
+    public ulong AppId { get; }
+    public IEnumerable<ulong> ActionIds { get; }
+    public string? InvalidityCause { get; private init; }
+    public string TextualRepresentation { get; }
+    public Tag AsTag => new(this);
+    public string VerboseRepresentation {
+        get {
+            var plural = ActionIds.SafeCount() == 1 ? "" : "s";
+            return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
+        }
+    }
+    public bool IsEmpty => AppId == 0 && ActionIds.None();
+    public static AppPermissions Empty { get; } = new AppPermissions(0);
+    public static Regex Mask { get; } = PermissionsListRegex();
+
+    public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }
+
+    public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
+        AppId = appId;
+        ActionIds = (actionIds ?? []).Order();
+        _noActions = ActionIds.None();
+        _actionsSum = ActionIds.Sum(i => (int)i);
+        TextualRepresentation = $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
+    }
+
+    private AppPermissions(string invalidityCause) {
+        AppId = ulong.MaxValue;
+        ActionIds = [];
+        _noActions = true;
+        _actionsSum = 0;
+        InvalidityCause = invalidityCause.Required();
+        TextualRepresentation = $"#?{InvalidityCause}";
+    }
+
+    public static AppPermissions InvalidBy(string cause) => new(cause);
+
+    public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
+
+    public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
+
+
+    public static AppPermissions Parse(string s, IFormatProvider? provider) {
+        if (s.IsBlank() || s[0] != '#')
+            return InvalidBy(Mask.InvalidityByNotMatching(s));
+        if (s.Length > 2 && s[1] == '?')
+            return new AppPermissions(invalidityCause: s[2..]);
+        var parts = s[1..].Split(',').AsOrderedUlongs();
+        return new AppPermissions(parts.First(), parts.Skip(1));
+    }
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AppPermissions result) {
+        result = Parse(s.Safe(), provider);
+        return !result.IsInvalid();
+    }
+
+    public bool Equals(AppPermissions? other) => other is not null && other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
+
+    public override bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
+
+    public ITextual<AppPermissions> Textual => this;
+
+    public int CompareTo(AppPermissions? other) => Equals(other) ? 0 : other is null ? 1 : AppId.CompareTo(other.AppId);
+
+    public override int GetHashCode() => HashCode.Combine(AppId, _actionsSum, InvalidityCause);
+
+    public override string ToString() => Textual.FullRepresentation();
+
+    public static bool operator ==(AppPermissions left, AppPermissions right) => left.Equals(right);
+
+    public static bool operator !=(AppPermissions left, AppPermissions right) => !(left == right);
+
+    public static bool operator <(AppPermissions left, AppPermissions right) => left.CompareTo(right) < 0;
+
+    public static bool operator <=(AppPermissions left, AppPermissions right) => left.CompareTo(right) <= 0;
+
+    public static bool operator >(AppPermissions left, AppPermissions right) => left.CompareTo(right) > 0;
+
+    public static bool operator >=(AppPermissions left, AppPermissions right) => left.CompareTo(right) >= 0;
+
+    private readonly bool _noActions;
+    private readonly int _actionsSum;
+
+    [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
+    private static partial Regex PermissionsListRegex();
 
     public class Tag : ILTagOfExplicit<AppPermissions>
     {
@@ -50,74 +132,7 @@ public partial class AppPermissions : ITextual<AppPermissions>, IComparable<AppP
         }
 
         protected override Task<AppPermissions?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<AppPermissions?>(new(s.DecodeILInt(), s.DecodeILIntArray()));
+
         protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.EncodeILInt(Value!.AppId).EncodeILIntArray(Value.ActionIds));
     }
-
-    public AppPermissions(ulong appId, params ulong[] actionIds) : this(appId, (IEnumerable<ulong>)actionIds) { }
-
-    public AppPermissions(ulong appId, IEnumerable<ulong> actionIds) {
-        AppId = appId;
-        ActionIds = (actionIds ?? []).Order();
-        TextualRepresentation = $"#{AppId}{(_noActions ? string.Empty : ",")}{ActionIds.WithCommas(noSpaces: true)}";
-    }
-    private AppPermissions(string invalidityCause) {
-        AppId = ulong.MaxValue;
-        ActionIds = [];
-        InvalidityCause = invalidityCause.Required();
-        TextualRepresentation = $"#?{InvalidityCause}";
-    }
-    public static AppPermissions InvalidBy(string cause) => new(cause);
-
-    public bool CanAct(ulong appId, ulong actionId) => appId == AppId && (_noActions || ActionIds.Contains(actionId));
-    public IEnumerable<AppPermissions> ToEnumerable() => new SingleEnumerable<AppPermissions>(this);
-    public Tag AsTag => new(this);
-    public string VerboseRepresentation {
-        get {
-            var plural = ActionIds.SafeCount() == 1 ? "" : "s";
-            return $"App #{AppId} {(_noActions ? "All Actions" : $"Action{plural} {ActionIds.WithCommas(noSpaces: true)}")}";
-        }
-    }
-    public bool IsEmpty => AppId == 0 && ActionIds.None();
-    public string? InvalidityCause { get; private init; }
-    public string TextualRepresentation { get; }
-
-    public static AppPermissions Empty { get; } = new AppPermissions(0);
-    public static Regex Mask { get; } = PermissionsListRegex();
-    public static AppPermissions Parse(string s, IFormatProvider? provider) {
-        if (s.IsBlank() || s[0] != '#')
-            InvalidBy(Mask.InvalidityByNotMatching(s));
-        if (s.Length > 2 && s[1] == '?')
-            return new AppPermissions(invalidityCause: s[2..]);
-        var parts = s[1..].Split(',').AsOrderedUlongs();
-        return new AppPermissions(parts.First(), parts.Skip(1));
-    }
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AppPermissions result) {
-        result = Parse(s.Safe(), provider);
-        return !result.IsInvalid();
-    }
-
-    public bool Equals(AppPermissions? other) => other is not null && other.AppId == AppId && ActionIds.EqualTo(other.ActionIds);
-    public override bool Equals(object? obj) => obj is AppPermissions other && Textual.Equals(other);
-    public ITextual<AppPermissions> Textual => this;
-    public int CompareTo(AppPermissions? other) => Equals(other) ? 0 : other is null ? 1 : AppId.CompareTo(other.AppId);
-    public override int GetHashCode() => HashCode.Combine(AppId, ActionIds, InvalidityCause);
-    public override string ToString() => Textual.FullRepresentation();
-    public static bool operator ==(AppPermissions left, AppPermissions right) =>
-         left.Equals(right);
-    public static bool operator !=(AppPermissions left, AppPermissions right) =>
-        !(left == right);
-    public static bool operator <(AppPermissions left, AppPermissions right) =>
-        left.CompareTo(right) < 0;
-    public static bool operator <=(AppPermissions left, AppPermissions right) =>
-        left.CompareTo(right) <= 0;
-    public static bool operator >(AppPermissions left, AppPermissions right) =>
-        left.CompareTo(right) > 0;
-    public static bool operator >=(AppPermissions left, AppPermissions right) =>
-        left.CompareTo(right) >= 0;
-    private bool _noActions => ActionIds.None();
-
-
-    [GeneratedRegex("^#[0-9]+(,[0-9]+)*$")]
-    private static partial Regex PermissionsListRegex();
-
 }

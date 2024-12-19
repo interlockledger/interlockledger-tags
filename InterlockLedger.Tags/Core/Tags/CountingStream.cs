@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -33,7 +33,7 @@
 
 namespace InterlockLedger.Tags;
 
-internal class CountingStream : Stream
+public class CountingStream : Stream
 {
     private long _length;
 
