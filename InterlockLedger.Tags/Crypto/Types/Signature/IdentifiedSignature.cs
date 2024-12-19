@@ -52,8 +52,6 @@ public sealed class IdentifiedSignature : VersionedValue<IdentifiedSignature>
 
     [JsonIgnore]
     public override string TypeName => nameof(IdentifiedSignature);
-    [JsonIgnore]
-    public override string Formatted => $"Signature by {SignerId.TextualRepresentation} ({PublicKey.TextualRepresentation})";
 
     public bool Verify<T>(T data) where T : Signable<T>, new() => PublicKey.Verify(data.OpenReadingStreamAsync().WaitResult(), Signature);
 

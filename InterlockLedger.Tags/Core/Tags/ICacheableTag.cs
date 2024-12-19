@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2024 InterlockLedger Network
 // All rights reserved.
@@ -37,5 +37,6 @@ namespace InterlockLedger.Tags;
 public interface ICacheableTag
 {
     Task CacheFromAsync(Stream source);
+    Task CachePrefixedFromAsync(Stream source);
     Task<Stream> OpenCachedReadingStreamAsync();
 }

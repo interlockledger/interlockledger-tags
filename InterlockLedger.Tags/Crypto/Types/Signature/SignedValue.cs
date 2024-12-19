@@ -49,8 +49,6 @@ public class SignedValue<T> : VersionedValue<SignedValue<T>> where T : Signable<
     [JsonIgnore]
     public IEnumerable<IdentifiedSignature> FailedSignatures => FailedSignaturesFor(SignedContent);
     [JsonIgnore]
-    public override string Formatted => SignedContent.Formatted + $"\nWith {Signatures.SafeCount()} signatures";
-    [JsonIgnore]
     public override string TypeName => $"SignedValueOf{SignedContent?.TypeName}";
 
     public bool IsSignedBy(BaseKeyId validSigner, TagPubKey validPubKey)

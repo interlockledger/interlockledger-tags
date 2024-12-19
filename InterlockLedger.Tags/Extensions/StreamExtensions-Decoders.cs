@@ -41,7 +41,7 @@ public static partial class StreamExtensions
                 ?? throw new InvalidDataException($"Not a {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
     }
 
-    public static T? DecodeAny<T>(this Stream s) where T : class, ITaggable {
+    public static T? DecodeAny<T>(this Stream s) where T : VersionedValue<T>, new() {
         var tag = s.DecodeTag();
         return tag.Traits.IsNull
             ? null
@@ -50,7 +50,7 @@ public static partial class StreamExtensions
                 : throw new InvalidDataException($"Not a tagged form of {typeof(T).Name} was {tag?.GetType().Name}:{tag}");
     }
 
-    public static T?[]? DecodeArray<T>(this Stream s) where T : class, ITaggableOf<T> =>
+    public static T?[]? DecodeArray<T>(this Stream s) where T : VersionedValue<T>, new() =>
         DecodeArrayInternal(s, s => new ILTagArrayOfILTag<ILTagOfExplicit<T>>(s));
 
     public static T?[]? DecodeArray<T, TT>(this Stream s, Func<Stream, TT> decoder)

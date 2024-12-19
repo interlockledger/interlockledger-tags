@@ -33,11 +33,11 @@
 namespace InterlockLedger.Tags;
 public static partial class StreamExtensions
 {
-    public static TS EncodeAny<T, TS>(this TS s, T? value) where T : ITaggable where TS : Stream
-        => s.EncodeTag(value?.AsILTag);
+    public static TS EncodeAny<T, TS>(this TS s, T? value) where T : VersionedValue<T>, new() where TS : Stream
+        => s.EncodeTag(value?.AsPayload);
 
-    public static TS EncodeArray<T, TS>(this TS s, IEnumerable<T>? values) where T : class, ITaggableOf<T> where TS : Stream
-        => s.EncodeTag(new ILTagArrayOfILTag<ILTagOf<T>>(values.Safe().Select(v => v.AsTag).ToArray()));
+    public static TS EncodeArray<T, TS>(this TS s, IEnumerable<T>? values) where T : VersionedValue<T>, new() where TS : Stream
+        => s.EncodeTag(new ILTagArrayOfILTag<VersionedValue<T>.Payload>(values.Safe().Select(v => v.AsPayload).ToArray()));
 
     public static TS EncodeBool<TS>(this TS s, bool value) where TS : Stream
         => s.EncodeTag(value ? ILTagBool.True : ILTagBool.False);

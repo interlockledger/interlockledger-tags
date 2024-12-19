@@ -67,7 +67,7 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
         using var ss = new StreamSpan(s, length);
         var value = await ValueFromStreamAsync(ss);
         if (value is ICacheableTag cacheable)
-            await cacheable.CacheFromAsync(ss).ConfigureAwait(false);
+            await cacheable.CachePrefixedFromAsync(ss).ConfigureAwait(false);
         return value;
     }
     public override async Task<Stream> OpenReadingStreamAsync() =>
@@ -84,6 +84,8 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
 
     [JsonIgnore]
     protected virtual T? ZeroLengthDefault => default;
+    protected override void DisposeManagedResources() { }
+
     protected async override Task<Stream> SerializeInnerAsync(Stream s) {
         if (Value is null)
             s.ILIntEncode(0ul);
@@ -96,7 +98,4 @@ public abstract class ILTagOfExplicit<T> : ILTagOf<T?>
     }
 
     private ulong? _valueLength;
-
-    protected override void DisposeManagedResources() {
-    }
 }

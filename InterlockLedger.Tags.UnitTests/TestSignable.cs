@@ -39,11 +39,7 @@ internal class TestSignable(ulong someILInt) : Signable<TestSignable>(FieldTagId
 
     public TestSignable() : this(0ul) {
     }
-
-    public override string Formatted => throw new NotImplementedException();
     public ulong SomeILInt { get; private set; } = someILInt;
-    public override string TypeName => nameof(TestSignable);
-
     protected override IEnumerable<DataField> RemainingStateFields { get; } = new DataField {
         Name = nameof(SomeILInt),
         TagId = ILTagId.ILInt
