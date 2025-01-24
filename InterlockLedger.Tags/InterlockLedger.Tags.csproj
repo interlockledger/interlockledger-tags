@@ -6,16 +6,16 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Rafael Teixeira</Authors>
         <Company>InterlockLedger Network</Company>
-        <Copyright>Copyright (c) 2018-2024 InterlockLedger Network</Copyright>
+        <Copyright>Copyright (c) 2018-2025 InterlockLedger Network</Copyright>
         <Description>Upgrading core libs</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageProjectUrl>https://interlockledger.network/</PackageProjectUrl>
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>59.1.1</Version>
+        <Version>60.0.1</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Add some unit tests from GitHub Copilot and fix unearthed errors</PackageReleaseNotes>
+        <PackageReleaseNotes>Moving RecordLoader up to client lib</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
