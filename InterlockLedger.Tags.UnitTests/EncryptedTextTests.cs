@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -128,7 +128,7 @@ public class EncryptedTextTests
                                              TestFakeSigner.FixedKeysInstance,
                                              TestFakeSigner.FixedKeysInstance,
                                              []).AsPayload.EncodedBytes();
-        TestContext.WriteLine(encodedBytes.AsLiteral());
+        TestContext.Out.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes.PartOf(124);
     }
 

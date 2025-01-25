@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@ public class ILTagArrayOfILTagTests
     [TestCase(new byte[] { 1, 2, 3, 2 }, new byte[] { 3, 4 }, ExpectedResult = new byte[] { 21, 9, 2, 16, 3, 1, 2, 3, 16, 1, 2 }, TestName = "Serialize_Two_Arrays_with_One_and_Three_Bytes")]
     public byte[] SerializeILTagILTagArray(byte[] bytes, byte[] splits) {
         byte[] encodedBytes = new ILTagArrayOfILTag<ILTagByteArray>(BuildArrayOfArrays(bytes, splits)).EncodedBytes();
-        TestContext.WriteLine(encodedBytes.AsLiteral());
+        TestContext.Out.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }
 

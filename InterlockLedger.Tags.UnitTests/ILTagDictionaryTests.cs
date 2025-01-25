@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ public class ILTagDictionaryTests
     public void JsonSerializationDictionary() {
         var dict = new ILTagDictionary<ILTag>(("Key1", ILTagBool.False), ("Key2", new ILTagString("Value2")));
         var json = JsonSerializer.Serialize(dict, JsonOptions);
-        TestContext.WriteLine(json);
+        TestContext.Out.WriteLine(json);
         Assert.That(json.RegexReplace("\r\n", "\n"), Is.EqualTo("""
             {
               "Content": {
@@ -124,7 +124,7 @@ public class ILTagDictionaryTests
     public void JsonSerializationStringDictionary() {
         var dict = new ILTagStringDictionary(("Key1", "Value1"), ("Key2", "Value2"));
         var json = JsonSerializer.Serialize(dict, JsonOptions);
-        TestContext.WriteLine(json);
+        TestContext.Out.WriteLine(json);
         Assert.That(json.RegexReplace("\r\n", "\n"), Is.EqualTo("""
             {
               "Content": {

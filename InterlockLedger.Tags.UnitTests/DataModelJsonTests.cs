@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -308,7 +308,7 @@ public partial class DataModelJsonTests
     [Test]
     public void DataModelAsJsonAndBack() {
         var json = JsonSerializer.Serialize(JsonTestTaggedData.Model, _modelOptions);
-        TestContext.Write(json);
+        TestContext.Out.Write(json);
         Assert.That(json, Is.EqualTo(_dataModelAsJson));
         var model = JsonSerializer.Deserialize<DataModel>(json, _modelOptions);
         Assert.That(model, Is.Not.Null);
@@ -411,10 +411,10 @@ public partial class DataModelJsonTests
     private static void FromJsonObjectBaseTest(object json, params byte[] expectedBytes) {
         var tag = JsonTestTaggedData.Model.FromJson(json);
         byte[] encodedBytes = tag.EncodedBytes();
-        TestContext.WriteLine("===== Expected");
-        TestContext.WriteLine(expectedBytes.WithCommas());
-        TestContext.WriteLine("===== Actual");
-        TestContext.WriteLine(encodedBytes.WithCommas());
+        TestContext.Out.WriteLine("===== Expected");
+        TestContext.Out.WriteLine(expectedBytes.WithCommas());
+        TestContext.Out.WriteLine("===== Actual");
+        TestContext.Out.WriteLine(encodedBytes.WithCommas());
         Assert.That(encodedBytes, Is.EqualTo(expectedBytes));
     }
 
@@ -425,24 +425,24 @@ public partial class DataModelJsonTests
         if (adjustExpected is not null)
             expected = adjustExpected(expected);
         var actual = JsonSerializer.Serialize(modelJson, _options);
-        TestContext.WriteLine("===== Expected");
-        TestContext.WriteLine(expected);
-        TestContext.WriteLine("===== Actual");
-        TestContext.WriteLine(actual);
+        TestContext.Out.WriteLine("===== Expected");
+        TestContext.Out.WriteLine(expected);
+        TestContext.Out.WriteLine("===== Actual");
+        TestContext.Out.WriteLine(actual);
         Assert.That(actual, Is.EqualTo(expected));
-        TestContext.WriteLine("===== Initial EncodedBytes");
-        TestContext.WriteLine(encodedBytes.WithCommas());
+        TestContext.Out.WriteLine("===== Initial EncodedBytes");
+        TestContext.Out.WriteLine(encodedBytes.WithCommas());
         var backFrom = JsonTestTaggedData.Model.FromNavigable(modelJson);
         Assert.That(backFrom, Is.InstanceOf<ILTag>());
         byte[] backFromEncodedBytes = backFrom.EncodedBytes();
-        TestContext.WriteLine("===== Back EncodedBytes");
-        TestContext.WriteLine(backFromEncodedBytes.WithCommas());
+        TestContext.Out.WriteLine("===== Back EncodedBytes");
+        TestContext.Out.WriteLine(backFromEncodedBytes.WithCommas());
         Assert.That(backFromEncodedBytes, Is.EqualTo(encodedBytes), "Bytes back from modelJson did not match");
         var parsedFrom = JsonTestTaggedData.Model.FromNavigable(JsonSerializer.Deserialize<Dictionary<string, object?>>(actual));
         Assert.That(parsedFrom, Is.InstanceOf<ILTag>());
         byte[] parsedFromEncodedBytes = parsedFrom.EncodedBytes();
-        TestContext.WriteLine("===== Parsed EncodedBytes");
-        TestContext.WriteLine(parsedFromEncodedBytes.WithCommas());
+        TestContext.Out.WriteLine("===== Parsed EncodedBytes");
+        TestContext.Out.WriteLine(parsedFromEncodedBytes.WithCommas());
         //Assert.AreEqual(encodedBytes, parsedFromEncodedBytes, "Bytes parsed from json did not match");
     }
 

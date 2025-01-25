@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ public class TagEdDSAParametersTests
     [TestCase(new byte[] { 172, 110, 35, 93, 197, 226, 49, 6, 11, 110, 227, 117, 164, 193, 115, 109, 36, 125, 119, 213, 221, 91, 214, 32, 153, 224, 151, 133, 221, 164, 157, 147, 179, 48, 50, 122, 188, 119, 20, 20, 226, 50, 35, 209, 8, 248, 0, 157, 198, 62, 52, 93, 18, 185, 246, 125, 90, 179, 146, 90, 244, 239, 221, 45 }, ExpectedResult = new byte[] { 59, 64, 172, 110, 35, 93, 197, 226, 49, 6, 11, 110, 227, 117, 164, 193, 115, 109, 36, 125, 119, 213, 221, 91, 214, 32, 153, 224, 151, 133, 221, 164, 157, 147, 179, 48, 50, 122, 188, 119, 20, 20, 226, 50, 35, 209, 8, 248, 0, 157, 198, 62, 52, 93, 18, 185, 246, 125, 90, 179, 146, 90, 244, 239, 221, 45 }, TestName = "SerializeTagEdDSAParameters With Private Key")]
     public byte[] SerializeTagEdDSAParameters(byte[] bytes) {
         byte[] encodedBytes = new TagEdDSAParameters(new EdDSAParameters(bytes)).EncodedBytes();
-        TestContext.WriteLine(encodedBytes.AsLiteral());
+        TestContext.Out.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }
 }

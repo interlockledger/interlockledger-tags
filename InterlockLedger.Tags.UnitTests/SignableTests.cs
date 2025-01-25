@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ public class SignableTests
     [TestCase(32ul, ExpectedResult = new byte[] { 250, 15, 65, 72, 5, 5, 1, 0, 10, 32 })]
     public byte[] SerializeSignable(ulong someILInt) {
         var encodedBytes = new TestSignable(someILInt).AsPayload.EncodedBytes();
-        TestContext.WriteLine(encodedBytes.AsLiteral());
+        TestContext.Out.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }
 }

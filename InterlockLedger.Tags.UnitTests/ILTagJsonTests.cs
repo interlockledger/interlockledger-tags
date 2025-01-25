@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ public class ILTagJsonTests
     public void DataFieldToFrom() {
         static void TestWith(DataField datafield) {
             var json = JsonSerializer.Serialize(datafield, _jsonOptions);
-            TestContext.WriteLine(json);
+            TestContext.Out.WriteLine(json);
             var payload = JsonSerializer.Deserialize<DataField>(json, _jsonOptions);
             Assert.That(payload, Is.InstanceOf<DataField>());
             Assert.That(payload, Is.EqualTo(datafield));
@@ -138,13 +138,13 @@ public class ILTagJsonTests
     public void InterlockColorConverter() {
         static void TestWith(InterlockColor color) {
             var json = JsonSerializer.Serialize(color, _jsonOptions);
-            TestContext.WriteLine(json);
+            TestContext.Out.WriteLine(json);
             var payload = JsonSerializer.Deserialize<InterlockColor>(json, _jsonOptions);
             Assert.That(payload, Is.InstanceOf<InterlockColor>());
             Assert.That(payload, Is.EqualTo(color));
             var wrapper = new ColorWrapper(color, color.Opposite);
             var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
-            TestContext.WriteLine(biggerJson);
+            TestContext.Out.WriteLine(biggerJson);
             var biggerPayload = JsonSerializer.Deserialize<ColorWrapper>(biggerJson, _jsonOptions);
             Assert.That(biggerPayload, Is.InstanceOf<ColorWrapper>());
             Assert.That(biggerPayload, Is.EqualTo(wrapper));
@@ -236,11 +236,11 @@ public class ILTagJsonTests
         var json = JsonSerializer.Serialize(value, _jsonOptions);
         var payload = JsonSerializer.Deserialize<T>(json, _jsonOptions);
         Assert.That(payload, Is.InstanceOf<T>());
-        TestContext.WriteLine($"({NoLineBreaks(value)}) => {json} => {NoLineBreaks(payload)}");
+        TestContext.Out.WriteLine($"({NoLineBreaks(value)}) => {json} => {NoLineBreaks(payload)}");
         Assert.That(payload, Is.EqualTo(value));
         var wrapper = new WrapperOf<T> { Item = value };
         var biggerJson = JsonSerializer.Serialize(wrapper, _jsonOptions);
-        TestContext.WriteLine(biggerJson);
+        TestContext.Out.WriteLine(biggerJson);
         var biggerPayload = JsonSerializer.Deserialize<WrapperOf<T>>(biggerJson, _jsonOptions);
         Assert.That(biggerPayload, Is.InstanceOf<WrapperOf<T>>());
         Assert.That(biggerPayload, Is.EqualTo(wrapper));

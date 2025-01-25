@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ public class SequenceTests
     public void JsonSerialization() {
         var seq = new ILTagSequence(new ILTagString("JsonTest"), new ILTagILInt(13), ILTagBool.False);
         var jsonSeq = JsonSerializer.Serialize(seq, ILTagDictionaryTests.JsonOptions);
-        TestContext.WriteLine(jsonSeq);
+        TestContext.Out.WriteLine(jsonSeq);
         Assert.That(jsonSeq.RegexReplace("\r\n", "\n"), Is.EqualTo(/*lang=json,strict*/ """
             {
               "Content": [

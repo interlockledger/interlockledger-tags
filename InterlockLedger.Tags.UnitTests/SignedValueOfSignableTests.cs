@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ public class SignedValueOfSignableTests
         using var testSignable = new TestSignable(someILInt);
         var signedValue = testSignable.SignWith(TestFakeSigner.FixedKeysInstance);
         var encodedBytes = signedValue.AsPayload.EncodedBytes();
-        TestContext.WriteLine(encodedBytes.AsLiteral());
+        TestContext.Out.WriteLine(encodedBytes.AsLiteral());
         return encodedBytes;
     }
 

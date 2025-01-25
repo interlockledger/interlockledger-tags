@@ -13,7 +13,7 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>60.0.1</Version>
+        <Version>60.0.2</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
         <PackageReleaseNotes>Moving RecordLoader up to client lib</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -72,7 +72,7 @@
     <ItemGroup>
         <PackageReference Include="InterlockLedger.Commons" Version="18.3.0" />
         <PackageReference Include="InterlockLedger.Tags.ILInt" Version="14.0.0" />
-        <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.0" />
     </ItemGroup>
 
 </Project>

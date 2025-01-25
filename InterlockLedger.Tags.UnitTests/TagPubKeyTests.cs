@@ -1,6 +1,6 @@
 // ******************************************************************************************************************************
 //  
-// Copyright (c) 2018-2024 InterlockLedger Network
+// Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,8 @@ public class TagPubKeyTests
         var parameters = EdDSAHelper.CreateNewTagEdDSAParameters();
         var pubkey = parameters.PublicKey;
         var pubkeyencodedbytes = pubkey.EncodedBytes();
-        TestContext.WriteLine(pubkey.ToString());
-        TestContext.WriteLine(pubkeyencodedbytes.AsLiteral());
+        TestContext.Out.WriteLine(pubkey.ToString());
+        TestContext.Out.WriteLine(pubkeyencodedbytes.AsLiteral());
         using var ms = new MemoryStream(pubkeyencodedbytes);
         var tag = ms.Decode<TagPubKey>();
         Assert.That(tag, Is.Not.Null);
