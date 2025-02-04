@@ -83,7 +83,7 @@ public partial class TagPubKey : ILTagOfExplicitTextual<TagKeyParts>, ITextual<T
     private static partial Regex AnythingRegex();
 
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
-
+    protected override bool AreEquivalent(ILTagOf<TagKeyParts?> other) => other.Value is not null && other.Value.Algorithm == Algorithm && other.Value.Data.HasSameBytesAs(Data);
     public override string ToString() => Textual.FullRepresentation();
 
     public bool Equals(TagPubKey? other) => other is not null && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);

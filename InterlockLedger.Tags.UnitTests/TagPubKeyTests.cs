@@ -86,15 +86,23 @@ public class TagPubKeyTests
     {
         public static FakeTimeStamper Instance = new();
 
-        private FakeTimeStamper() { }   
+        private FakeTimeStamper() { }
         public ulong Nonce => 13;
         public TagHash Session => TagHash.Empty;
         public TimeProvider Provider => TimeProvider.System;
 
-        public void SwitchSession(SenderIdentity senderIdentity) {}
+        public void SwitchSession(SenderIdentity senderIdentity) { }
         public TimeStampStatus Validate(DateTimeOffset timeStamp, SenderIdentity senderIdentity) => TimeStampStatus.OK;
     }
     private static readonly AppPermissions _permission3 = new(3);
+
+    [TestCase(Algorithm.RSA, new byte[] { 1, 2, 3, 4, 5, 6 }, TestName ="TagPubKey.Equals() RSA, 6 bytes")]
+    [TestCase(Algorithm.Unknown, new byte[] { 0 }, TestName = "TagPubKey.Equals() Unknown, 1 byte")]
+    public void TestEquals(Algorithm algo, byte[] data) {
+        var pubKey1 = new TestTagPubKey(algo, data);
+        var pubKey2 = new TestTagPubKey(algo, data);
+        Assert.That(pubKey1, Is.EqualTo(pubKey2));
+    }
 
     [TestCase(
         Algorithm.EdDSA,
