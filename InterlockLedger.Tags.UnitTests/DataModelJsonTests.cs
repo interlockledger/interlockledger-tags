@@ -307,7 +307,7 @@ public partial class DataModelJsonTests
 
     [Test]
     public void DataModelAsJsonAndBack() {
-        var json = JsonSerializer.Serialize(JsonTestTaggedData.Model, _modelOptions);
+        var json = JsonSerializer.Serialize(JsonTestTaggedData.Model, _modelOptions).ReplaceLineEndings("\n");
         TestContext.Out.Write(json);
         Assert.That(json, Is.EqualTo(_dataModelAsJson));
         var model = JsonSerializer.Deserialize<DataModel>(json, _modelOptions);
@@ -402,7 +402,7 @@ public partial class DataModelJsonTests
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         AllowTrailingCommas = true,
-        IgnoreReadOnlyProperties = true        
+        IgnoreReadOnlyProperties = true,        
     };
 
 

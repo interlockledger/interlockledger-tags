@@ -57,8 +57,8 @@ public sealed class KeyStorageAggregateProvider : IKeyStorageProvider, IKeyPhase
     public InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password, bool overwrite)
         => FindProviderFor(algorithm, ksp => ksp.SupportsKeyCreation, "and key creation").Create(algorithm, purposes, permissions, strength, name, description, password, overwrite);
 
-    public X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength, bool overwrite)
-        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateImport, "certificate creation").CreateCertificate(algorithm, name, password, file, strength, overwrite);
+    public X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength, bool overwrite, CertificateKeyUsage keyUsage)
+        => FindProviderFor(algorithm, ksp => ksp.SupportsCertificateCreation, "certificate creation").CreateCertificate(algorithm, name, password, file, strength, overwrite, keyUsage);
 
     IKeyParameters IKeyPhasedCreationProvider.CreateKeyParameters(Algorithm algorithm, KeyStrength strength) => FindPhasedProvider(algorithm).CreateKeyParameters(algorithm, strength);
 

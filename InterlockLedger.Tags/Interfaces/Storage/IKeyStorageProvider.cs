@@ -33,8 +33,13 @@
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
-public interface IKeyStorageProvider : IKeyFileExporter
-{
+
+public enum CertificateKeyUsage {
+    ServerAuthentication,
+    ClientAuthentication
+}
+
+public interface IKeyStorageProvider : IKeyFileExporter {
 
     string AppKeysFolderPath { get; }
     IEnumerable<InterlockSigningKeyData> Keys { get; }
@@ -42,7 +47,7 @@ public interface IKeyStorageProvider : IKeyFileExporter
 
     InterlockSigningKeyData Create(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, KeyStrength strength, string name, string description, string password, bool overwrite);
 
-    X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength, bool overwrite);
+    X509Certificate2 CreateCertificate(Algorithm algorithm, string name, string password, string file, KeyStrength strength, bool overwrite, CertificateKeyUsage keyUsage);
 
     InterlockSigningKeyData Import(Algorithm algorithm, KeyPurpose[] purposes, IEnumerable<AppPermissions> permissions, byte[] certificateBytes, string password, bool overwrite);
 

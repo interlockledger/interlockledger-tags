@@ -35,6 +35,7 @@ public interface IKeyStorageImplementationProvider : IKeyStorageProvider
 {
     string Name { get; }
     bool SupportsCertificateImport { get; }
+    bool SupportsCertificateCreation { get; }
     bool SupportsKeyCreation { get; }
 
     bool SupportsAlgorithm(Algorithm algorithm);
