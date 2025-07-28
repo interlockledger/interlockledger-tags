@@ -37,8 +37,10 @@ public interface IUpdatableSigningKey : ISigningKey
     DateTimeOffset LastSignatureTimeStamp { get; }
     TagPubKey? NextPublicKey { get; }
     ulong SignaturesWithCurrentKey { get; }
-
+    Algorithm SignAlgorithm { get; }
+    
     void GenerateNextKeys();
+    void DestroyKeys();
 
     TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null);
     TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();

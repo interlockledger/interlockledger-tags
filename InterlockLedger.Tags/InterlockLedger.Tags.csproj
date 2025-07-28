@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>61.0.0</Version>
+        <Version>61.2.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Adding support for ECDsa keys and certificates</PackageReleaseNotes>
+        <PackageReleaseNotes>Needed one more public property in IUpdatableSigningKey SignAlgorithm</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -52,11 +52,11 @@
         <Exec Command="git tag --sort=-creatordate | grep v | head -n 1" ContinueOnError="true" StandardErrorImportance="high" StandardOutputImportance="high" IgnoreExitCode="true" />
     </Target>
 
-    <Target Name="PublishLocally" AfterTargets="Pack" Condition="Exists('$(INTERLOCK_LOCAL_NUGETS_FOLDER)')">
+    <Target Name="PublishLocally" DependsOnTargets="Build;Pack" AfterTargets="Pack" Condition="Exists('$(INTERLOCK_LOCAL_NUGETS_FOLDER)')">
         <ItemGroup>
-            <NugetPackages Include="$(PackageOutputAbsolutePath)\*.nupkg" />
+            <NugetPackages Include="$(PackageOutputAbsolutePath)$(PackageId).$(Version).nupkg" />
         </ItemGroup>
-        <Message Importance="high" Text="Publish to Local Nugets Folder '$(INTERLOCK_LOCAL_NUGETS_FOLDER)'" />
+        <Message Importance="high" Text="Publish to Local Nugets Folder '$(INTERLOCK_LOCAL_NUGETS_FOLDER)': @(NugetPackages)" />
         <Copy DestinationFolder="$(INTERLOCK_LOCAL_NUGETS_FOLDER)" SourceFiles="@(NugetPackages)" ContinueOnError="true" SkipUnchangedFiles="false" />
     </Target>
 
