@@ -43,6 +43,8 @@ public sealed class TestFakeSigner : Owner, IUpdatingSigner, ITimeStamper, IHash
 
     public HashAlgorithm DefaultHashAlgorithm => HashAlgorithm.SHA256;
 
+    public override byte[] EncodedBytes => throw new NotSupportedException("Unneeded for testing");
+
     public TagPubKey EmergencyPublicKey => PublicKey;
     BaseKeyId IUpdatingSigner.Identity => Id;
     public ISigningKey Key => _key;

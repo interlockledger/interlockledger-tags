@@ -47,7 +47,7 @@ public abstract class Owner : ISigningKey, IPasswordProvider
     public IEnumerable<AppPermissions> Permissions { get; } = InterlockKey.Parts.NoPermissions;
     public KeyPurpose[] Purposes => keyPurposes;
     public abstract void Dispose();
-
+    public abstract byte[] EncodedBytes { get; }
     public ISigningKey Traits => this;
 
     EncryptedContentType ISigningKey.EncryptedContentType => EncryptedContentType.EncryptedKey;

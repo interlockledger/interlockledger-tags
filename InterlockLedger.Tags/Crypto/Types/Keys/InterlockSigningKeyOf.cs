@@ -38,7 +38,7 @@ public enum EncryptedContentType
     EmbeddedCertificate = 1
 }
 
-public abstract class InterlockSigningKeyOf<T>(T data) : AbstractDisposable, ISigningKey where T : class, IInterlockKeySecretData, IBaseKey
+public abstract class InterlockSigningKeyOf<T>(T data) : AbstractDisposable, ISigningKey where T : ILTag, IInterlockKeySecretData, IBaseKey
 {
     public string? Description => KeyData.Description;
     public BaseKeyId Id => KeyData.Id;
@@ -48,6 +48,15 @@ public abstract class InterlockSigningKeyOf<T>(T data) : AbstractDisposable, ISi
     public KeyPurpose[] Purposes => KeyData.Purposes;
     public KeyStrength Strength => KeyData.Strength;
     public EncryptedContentType EncryptedContentType => KeyData.EncryptedContentType;
+
+
+    public byte[] EncodedBytes {
+        get {
+            using var ms = new MemoryStream();
+            KeyData.SerializeIntoAsync(ms).WaitResult();
+            return ms.ToArray();
+        }
+    }
 
     public TagSignature Sign<TD>(TD data) where TD : Signable<TD>, new() =>
         this is IUpdatableSigningKey

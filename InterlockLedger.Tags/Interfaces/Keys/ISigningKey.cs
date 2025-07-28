@@ -41,6 +41,7 @@ public interface ISigningKey : IBaseKey
             ? Sign(cacheable.OpenCachedReadingStreamAsync().WaitResult())
             : Sign(data.OpenReadingStreamAsync().WaitResult());
 
+    byte[] EncodedBytes { get; }
     IdentifiedSignature SignWithId(Stream dataStream) => new(Sign(dataStream), (KeyId)Id, PublicKey);
     IdentifiedSignature SignWithId<T>(T data) where T : Signable<T>, new() => new(Sign(data), (KeyId)Id, PublicKey);
 

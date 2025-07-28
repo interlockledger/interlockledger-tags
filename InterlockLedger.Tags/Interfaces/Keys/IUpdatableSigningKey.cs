@@ -42,6 +42,8 @@ public interface IUpdatableSigningKey : ISigningKey
     void GenerateNextKeys();
     void DestroyKeys();
 
+    Task SaveToAsync(Stream store);
+
     TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null);
     TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();
 }
