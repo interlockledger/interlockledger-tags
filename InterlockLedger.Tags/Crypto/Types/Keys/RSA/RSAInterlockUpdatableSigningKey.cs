@@ -30,53 +30,19 @@
 //
 // ******************************************************************************************************************************
 
+using System.Security.Cryptography;
+using Org.BouncyCastle.Asn1.Ocsp;
+
 namespace InterlockLedger.Tags;
 
-public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
+public class RSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey<TagRSAParameters, KeyParameters>
 {
     public RSAInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper) : base(tag, timeStamper) {
         using var ms = new MemoryStream(decrypted);
-        _keyParameters = ms.Decode<TagRSAParameters>();
+        KeyParameters = ms.Decode<TagRSAParameters>();
     }
+    protected override TagRSAParameters CreateNewParameters() => RSAHelper.CreateNewRSAParameters(KeyData.Strength);
+    protected override byte[] HashAndSignStream(Stream dataStream) => RSAHelper.HashAndSignStream(dataStream, Parameters.Parameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => RSAHelper.VerifyStream(dataStream, signature, Parameters.Parameters);
 
-    public override TagPubKey? NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
-
-    public override void DestroyKeys() => _destroyKeysAfterSigning = true;
-
-    public override void GenerateNextKeys() => _nextKeyParameters = RSAHelper.CreateNewRSAParameters(KeyData.Strength);
-
-    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null)
-       => Update(encrypt, RSAHelper.HashAndSignStream(data.OpenReadingStreamAsync().WaitResult(), _parameters.Parameters));
-    public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) =>
-        Update(encrypt, RSAHelper.HashAndSignStream(dataStream, _parameters.Parameters));
-    private KeyParameters _parameters => _keyParameters.Required().Value.Required();
-
-    private bool _destroyKeysAfterSigning;
-
-    private TagRSAParameters? _keyParameters;
-    private TagRSAParameters? _nextKeyParameters;
-
-    private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
-        if (_destroyKeysAfterSigning) {
-            _keyParameters = null;
-            _nextKeyParameters = null;
-            if (KeyData.Value is not null) {
-                KeyData.Value.Encrypted = null!;
-                KeyData.Value.PublicKey = null!;
-            }
-        } else {
-            var encryptionHandler = encrypt.Required();
-            if (_nextKeyParameters is not null) {
-                _keyParameters = _nextKeyParameters;
-                KeyData.Value.Required().Encrypted = encryptionHandler(_keyParameters.EncodedBytes);
-                KeyData.Value.PublicKey = _keyParameters.PublicKey;
-                _nextKeyParameters = null;
-                KeyData.SignaturesWithCurrentKey = 0;
-            } else {
-                KeyData.SignaturesWithCurrentKey++;
-            }
-            KeyData.LastSignatureTimeStamp = _timeStamper.Now;
-        }
-        return new TagSignature(Algorithm.RSA, signatureData);
-    }
 }

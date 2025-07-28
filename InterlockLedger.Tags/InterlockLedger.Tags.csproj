@@ -13,9 +13,9 @@
         <Product>InterlockLedger</Product>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/interlockledger/interlockledger-tags.git</RepositoryUrl>
-        <Version>60.1.0</Version>
+        <Version>61.0.0</Version>
         <PackageId>InterlockLedger.Tags</PackageId>
-        <PackageReleaseNotes>Adding required parameter to CreateCertificate method</PackageReleaseNotes>
+        <PackageReleaseNotes>Adding support for ECDsa keys and certificates</PackageReleaseNotes>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -39,5 +39,5 @@ public interface IInterlockUpdatableSigningKeyServices
 
     byte[] Encrypt(byte[] secret, string password);
 
-    InterlockUpdatableSigningKey? Open(InterlockUpdatableSigningKeyData key, string password);
+    IUpdatableSigningKey? Open(InterlockUpdatableSigningKeyData key, string password);
 }

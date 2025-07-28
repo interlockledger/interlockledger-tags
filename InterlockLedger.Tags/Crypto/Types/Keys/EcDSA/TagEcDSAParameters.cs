@@ -30,28 +30,24 @@
 //
 // ******************************************************************************************************************************
 
+using System.Security.Cryptography;
+
+
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
+public class TagEcDSAParameters : ILTagOfExplicit<ECParameters>, IKeyParameters
 {
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
+    public TagEcDSAParameters(ECParameters parameters) : base(ILTagId.ECParameters, parameters) {
+    }
+    internal TagEcDSAParameters(Stream s) : base(ILTagId.ECParameters, s) { }
+
+    public TagPubKey PublicKey => new TagPubEcDSAKey(Value);
 
     public KeyStrength Strength => KeyStrength.Normal;
 
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
-    }
+    protected override Task<ECParameters> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult(s.DecodeECParameters());
 
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
-    }
-
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
-
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.EncodeECParameters(Value));
 }

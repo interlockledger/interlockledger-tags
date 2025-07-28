@@ -31,16 +31,23 @@
 // ******************************************************************************************************************************
 
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
 
-public class EdDSACryptoServiceProvider : IDisposable
+public sealed class ECDsaCertificateSigningKey : BaseCertificateSigningKey
 {
-    public void Dispose() => GC.SuppressFinalize(this);
-    internal byte[] Decrypt(byte[] data) => throw new NotImplementedException();
-    internal byte[] Encrypt(byte[] data) => throw new NotImplementedException();
-    internal void ImportParameters(EdDSAParameters parameters) => throw new NotImplementedException();
-    internal byte[] SignData(Stream data, HashAlgorithmName sHA256) => throw new NotImplementedException();
-    internal byte[] SignData(byte[] data, HashAlgorithmName sHA256) => throw new NotImplementedException();
-    internal bool VerifyData(Stream dataStream, byte[] data, HashAlgorithmName sHA256) => throw new NotImplementedException();
+    public ECDsaCertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password)
+        : base(data, certificateBytes, password) { }
+    public ECDsaCertificateSigningKey(InterlockSigningKeyData data, X509Certificate2 certificate)
+        : base(data, certificate) { }
+    protected override byte[] HashAndSignStream(Stream dataStream) {
+        using var ecdsa = _x509Certificate.GetECDsaPrivateKey().Required();
+        return ecdsa.SignData(dataStream, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
+    }
+
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) {
+        using var ecdsa = _x509Certificate.GetECDsaPublicKey().Required();
+        return ecdsa.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
+    }
 }

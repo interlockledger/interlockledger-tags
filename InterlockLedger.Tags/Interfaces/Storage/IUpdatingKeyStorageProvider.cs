@@ -35,11 +35,11 @@ public interface IUpdatingKeyStorageProvider
 {
     bool FileExists { get; }
     BaseKeyId OwnerId { get; }
-    InterlockUpdatableSigningKey Resolved { get; }
+    IUpdatableSigningKey Resolved { get; }
 
     InterlockUpdatableSigningKeyData Create();
 
     byte[] Encrypt(byte[] secret);
 
-    void Save(InterlockUpdatableSigningKey key);
+    void Save(IUpdatableSigningKey key);
 }

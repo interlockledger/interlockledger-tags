@@ -30,7 +30,6 @@
 //
 // ******************************************************************************************************************************
 
-
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
@@ -45,25 +44,27 @@ public partial class TagPubKey : ILTagOfExplicitTextual<TagKeyParts>, ITextual<T
     public TagHash Hash => TagHash.HashSha256Of(Data);
     public virtual KeyStrength Strength => KeyStrength.Normal;
     public bool IsEmpty { get; private init; }
-
     public static TagPubKey Resolve(X509Certificate2 certificate) {
-        var RSA = certificate.GetRSAPublicKey() ?? throw new NotSupportedException("Not yet supporting other kinds of certificates!");
-        return new TagPubRSAKey(RSA.ExportParameters(false));
+        var RSA = certificate.GetRSAPublicKey();
+        var EcDSA = certificate.GetECDsaPublicKey();
+        return RSA is not null
+            ? new TagPubRSAKey(RSA.ExportParameters(false))
+            : EcDSA is not null
+            ? new TagPubEcDSAKey(EcDSA.ExportParameters(false))
+            : throw new NotSupportedException("Not yet supporting other kinds of certificates, than RSA and EcDSA!");
     }
-
     private static TagPubKey ResolveAs(Algorithm algorithm, byte[] data)
         => algorithm switch {
             Algorithm.RSA => new TagPubRSAKey(data),
+            Algorithm.EcDSA => new TagPubEcDSAKey(data),
             Algorithm.EdDSA => new TagPublicEdDSAKey(data),
-            _ => throw new NotSupportedException("Only support RSA/EdDSA for now!!!")
+            _ => throw new NotSupportedException("Only support RSA/EcDSA/EdDSA for now!!!")
         };
-
     public static TagPubKey InvalidBy(string cause) => throw new NotSupportedException(cause);
     public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out TagPubKey result) {
         result = Parse(s.Safe(), provider);
         return !result.IsInvalid();
     }
-
     public static TagPubKey Parse(string s, IFormatProvider? provider) {
         if (string.IsNullOrWhiteSpace(s))
             throw new ArgumentException("Can't have empty pubkey textual representation!!!", nameof(s));
@@ -74,37 +75,26 @@ public partial class TagPubKey : ILTagOfExplicitTextual<TagKeyParts>, ITextual<T
             ? throw new ArgumentException($"Bad format of pubkey textual representation: '{s}'!!!", nameof(s))
             : ResolveAs(algorithm, parts[1].FromSafeBase64());
     }
-
     public static TagPubKey Empty { get; } = new TagPubKey() { IsEmpty = true };
-    public static Regex Mask { get; } = AnythingRegex();
+    public static Regex Mask { get; } = PubKeyRegex();
     public ITextual<TagPubKey> Textual => this;
-
-    [GeneratedRegex(".+")]
-    private static partial Regex AnythingRegex();
-
+    [GeneratedRegex(@"PubKey!.+#\w+")]
+    private static partial Regex PubKeyRegex();
     public virtual byte[] Encrypt(byte[] bytes) => throw new NotImplementedException();
     protected override bool AreEquivalent(ILTagOf<TagKeyParts?> other) => other.Value is not null && other.Value.Algorithm == Algorithm && other.Value.Data.HasSameBytesAs(Data);
     public override string ToString() => Textual.FullRepresentation();
-
     public bool Equals(TagPubKey? other) => other is not null && (Algorithm == other.Algorithm) && Data.HasSameBytesAs(other.Data);
-
-//    public virtual bool Verify<T>(T data, TagSignature signature) where T : Signable<T>, new() => false;
-
     public virtual bool Verify(Stream dataStream, TagSignature signature) => false;
-
     internal static TagPubKey Resolve(Stream s) {
         var pubKey = new TagPubKey(s);
         return ResolveAs(pubKey.Algorithm, pubKey.Data);
     }
-
     protected TagPubKey(Algorithm algorithm, byte[] data) : base(ILTagId.PubKey, new TagKeyParts(algorithm, data)) { }
-
     private TagPubKey(Stream s) : base(ILTagId.PubKey, s) { }
     protected override string BuildTextualRepresentation() => $"PubKey!{Data.ToSafeBase64()}#{Algorithm}";
     protected override async Task<TagKeyParts?> ValueFromStreamAsync(WrappedReadonlyStream s) =>
         new((Algorithm)s.BigEndianReadUShort(), await s.ReadAllBytesAsync().ConfigureAwait(false));
     protected override Task<Stream> ValueToStreamAsync(Stream s) =>
         Task.FromResult(s.BigEndianWriteUShort((ushort)Value!.Algorithm).WriteBytes(Value.Data));
-
     private TagPubKey() : this(Algorithm.Invalid, []) { }
 }

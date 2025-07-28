@@ -30,28 +30,21 @@
 //
 // ******************************************************************************************************************************
 
+
+using System.Security.Cryptography;
+
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
+public class EcDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey<TagEcDSAParameters, ECParameters>
 {
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
-
-    public KeyStrength Strength => KeyStrength.Normal;
-
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
+ 
+    public EcDSAInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper)
+        : base(tag, timeStamper) {
+        using var s = new MemoryStream(decrypted);
+        KeyParameters = s.Decode<TagEcDSAParameters>().Validate();
     }
 
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
-    }
-
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
-
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
+    protected override byte[] HashAndSignStream(Stream dataStream) => EcDSAHelper.HashAndSignStream(dataStream, Parameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => EcDSAHelper.VerifyStream(dataStream, signature, Parameters);
+    protected override TagEcDSAParameters CreateNewParameters() => EcDSAHelper.CreateNewTagEcDSAParameters();
 }

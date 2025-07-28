@@ -33,49 +33,16 @@
 
 namespace InterlockLedger.Tags;
 
-public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey
+public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey<TagEdDSAParameters, EdDSAParameters>
 {
-    private bool _destroyKeysAfterSigning;
-
-    private TagEdDSAParameters? _keyParameters;
-
-    private TagEdDSAParameters? _nextKeyParameters;
-
-    public override TagPubKey? NextPublicKey => (_nextKeyParameters ?? _keyParameters)?.PublicKey;
-
+ 
     public EdDSAInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper)
         : base(tag, timeStamper) {
         using var s = new MemoryStream(decrypted);
-        _keyParameters = s.Decode<TagEdDSAParameters>().Validate();
+        KeyParameters = s.Decode<TagEdDSAParameters>().Validate();
     }
 
-    public override void DestroyKeys() => _destroyKeysAfterSigning = true;
-    public override void GenerateNextKeys() => _nextKeyParameters = EdDSAHelper.CreateNewTagEdDSAParameters();
-    public override TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignStream(data.OpenReadingStreamAsync().WaitResult(), _parameters));
-    public override TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, EdDSAHelper.HashAndSignStream(dataStream, _parameters));
-    private EdDSAParameters _parameters => _keyParameters.Required().Value.Required();
-
-    private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
-        _ = KeyData.Value.Required();
-        if (_destroyKeysAfterSigning) {
-            _keyParameters = null;
-            _nextKeyParameters = null;
-            KeyData.Value.Encrypted = null!;
-            KeyData.Value.PublicKey = null!;
-        } else {
-            var func = encrypt.Required("encrypt");
-            if (_nextKeyParameters is not null) {
-                _keyParameters = _nextKeyParameters;
-                KeyData.Value.Encrypted = func(_keyParameters!.EncodedBytes);
-                KeyData.Value.PublicKey = _keyParameters!.PublicKey;
-                _nextKeyParameters = null;
-                KeyData.SignaturesWithCurrentKey = 0uL;
-            } else {
-                KeyData.SignaturesWithCurrentKey++;
-            }
-            KeyData.LastSignatureTimeStamp = _timeStamper.Now;
-        }
-        return new TagSignature(Algorithm.EdDSA, signatureData);
-    }
-
+    protected override byte[] HashAndSignStream(Stream dataStream) => EdDSAHelper.HashAndSignStream(dataStream, Parameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => EdDSAHelper.VerifyStream(dataStream, signature, Parameters);
+    protected override TagEdDSAParameters CreateNewParameters() => EdDSAHelper.CreateNewTagEdDSAParameters();
 }

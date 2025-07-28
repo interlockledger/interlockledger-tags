@@ -29,43 +29,23 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace InterlockLedger.Tags;
 
 public class EdDSAInterlockSigningKey : InterlockSigningKey
 {
     public EdDSAInterlockSigningKey(InterlockSigningKeyData keyData, byte[] decrypted) : this(keyData, DecodeTagEdDSAParameters(decrypted)) {
     }
-    public override byte[] AsSessionState {
-        get {
-            using var ms = new MemoryStream();
-            return ms.EncodeTag(KeyData)
-                     .EncodeTag(_tagEdDSAParameters)
-                     .ToArray();
-        }
-    }
-
-    public static new EdDSAInterlockSigningKey FromSessionState(byte[] bytes) {
-        using var s = new MemoryStream(bytes);
-        return new EdDSAInterlockSigningKey(s.Decode<InterlockSigningKeyData>(), s.Decode<TagEdDSAParameters>());
-    }
-
-    public override TagSignature Sign<T>(T data) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSignStream(data.OpenReadingStreamAsync().WaitResult(), _keyParameters));
-    public override TagSignature Sign(Stream dataStream) => new(Algorithm.EdDSA, EdDSAHelper.HashAndSignStream(dataStream, _keyParameters));
-
     private readonly TagEdDSAParameters _tagEdDSAParameters;
     private readonly EdDSAParameters _keyParameters;
-
     public EdDSAInterlockSigningKey(InterlockSigningKeyData? keyData, TagEdDSAParameters? parameters) : base(keyData.ValidateIsEncryptedKey()) {
         _tagEdDSAParameters = parameters.Validate();
         _keyParameters = _tagEdDSAParameters.Value.Required();
     }
-
     private static TagEdDSAParameters? DecodeTagEdDSAParameters(byte[] decrypted) {
         using var s = new MemoryStream(decrypted);
         return s.Decode<TagEdDSAParameters>();
     }
 
+    protected override byte[] HashAndSignStream(Stream dataStream) => EdDSAHelper.HashAndSignStream(dataStream, _keyParameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => EdDSAHelper.VerifyStream(dataStream, signature, _keyParameters);
 }

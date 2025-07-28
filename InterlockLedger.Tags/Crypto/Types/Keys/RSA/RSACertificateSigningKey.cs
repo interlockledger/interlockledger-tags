@@ -35,58 +35,22 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
 
-public sealed class RSACertificateSigningKey : InterlockSigningKey, IDecryptingKey
+public sealed class RSACertificateSigningKey : BaseCertificateSigningKey, IDecryptingKey
 {
-    public RSACertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) :
-        this(data, new X509Certificate2(certificateBytes.Required(),
-                                        password.Required(),
-                                        X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet)) {
+    public RSACertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password)
+        : base(data, certificateBytes, password) { }
+    public RSACertificateSigningKey(InterlockSigningKeyData data, X509Certificate2 certificate)
+        : base(data, certificate) { }
+    protected override byte[] HashAndSignStream(Stream dataStream) {
+        using var rsa = _x509Certificate.GetRSAPrivateKey().Required();
+        return rsa.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
     }
-
-    public RSACertificateSigningKey(InterlockSigningKeyData data, X509Certificate2 x509Certificate) : base(data) {
-        _x509Certificate = x509Certificate;
-        if (data.Required().EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
-            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
-        if (!_x509Certificate.HasPrivateKey)
-            throw new InvalidOperationException("The private key is missing");
-        if (_x509Certificate.GetRSAPrivateKey() is null)
-            throw new InvalidOperationException($"The RSA private key is missing - certificate key type is {_x509Certificate.GetKeyAlgorithm}");
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) {
+        using var rsa = _x509Certificate.GetRSAPublicKey().Required();
+        return rsa.VerifyData(dataStream, signature.Data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
     }
-
-    public override byte[] AsSessionState {
-        get {
-            using var ms = new MemoryStream();
-            return ms.EncodeTag(KeyData)
-                     .EncodeByteArray(_x509Certificate.Export(X509ContentType.Pfx, KeyData.Name))
-                     .ToArray();
-        }
+    public byte[] Decrypt(byte[] bytes) {
+        using var rsa = _x509Certificate.GetRSAPrivateKey().Required();
+        return rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1);
     }
-
-    public static new RSACertificateSigningKey FromSessionState(byte[] bytes) {
-        using var ms = new MemoryStream(bytes);
-        var tag = ms.Decode<InterlockSigningKeyData>().Required();
-        var cert = new X509Certificate2(ms.DecodeByteArray().Required(), tag.Name);
-        return new RSACertificateSigningKey(tag, cert);
-    }
-
-    public byte[] Decrypt(byte[] bytes) =>
-        DoWithPrivateKey(rsa => rsa.Decrypt(bytes, RSAEncryptionPadding.Pkcs1));
-
-    protected override void DisposeManagedResources() => _x509Certificate?.Dispose();
-
-    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, HashAndSignStream(data.OpenReadingStreamAsync().WaitResult()));
-    public override TagSignature Sign(Stream dataStream) => new(Algorithm.RSA, HashAndSignStream(dataStream));
-
-    private readonly X509Certificate2 _x509Certificate;
-
-    private byte[] DoWithPrivateKey(Func<RSA, byte[]> action) {
-        if (!_x509Certificate.HasPrivateKey)
-            throw new InvalidOperationException("The private key is missing- Can't sign");
-        using var rsa = _x509Certificate.GetRSAPrivateKey();
-        return action(rsa.Required());
-    }
-    private byte[] HashAndSignStream(Stream dataStream) =>
-        DoWithPrivateKey(rsa =>
-            rsa.SignData(dataStream, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1));
-
 }

@@ -38,7 +38,7 @@ public enum EncryptedContentType
     EmbeddedCertificate = 1
 }
 
-public abstract class InterlockSigningKeyOf<T>(T data)  : AbstractDisposable, ISigningKey where T : class, IInterlockKeySecretData, IBaseKey
+public abstract class InterlockSigningKeyOf<T>(T data) : AbstractDisposable, ISigningKey where T : class, IInterlockKeySecretData, IBaseKey
 {
     public string? Description => KeyData.Description;
     public BaseKeyId Id => KeyData.Id;
@@ -49,12 +49,27 @@ public abstract class InterlockSigningKeyOf<T>(T data)  : AbstractDisposable, IS
     public KeyStrength Strength => KeyData.Strength;
     public EncryptedContentType EncryptedContentType => KeyData.EncryptedContentType;
 
-    public abstract TagSignature Sign<TD>(TD data) where TD : Signable<TD>, new();
-    public abstract TagSignature Sign(Stream dataStream);
-    public virtual string ToShortString() => $"SigningKey {Name} [{Purposes.ToStringAsList()}]";
+    public TagSignature Sign<TD>(TD data) where TD : Signable<TD>, new() =>
+        this is IUpdatableSigningKey
+        ? throw new InvalidOperationException("Can't sign without possibly updating the key")
+        : Sign(data.OpenReadingStreamAsync().WaitResult());
+    public TagSignature Sign(Stream dataStream) =>
+        this is IUpdatableSigningKey
+        ? throw new InvalidOperationException("Can't sign without possibly updating the key")
+        : new(PublicKey.Algorithm, HashAndSignStream(dataStream));
+    public bool Verify<TD>(TD dataToVerify, TagSignature signature) where TD : Signable<TD>, ICacheableTag, new() {
+        using var dataStream = dataToVerify.Required().OpenReadingStreamAsync().WaitResult();
+        return VerifyStream(dataStream, signature);
+    }
+    public bool VerifyStream(Stream dataStream, TagSignature signature) =>
+        signature.Required().Algorithm != KeyData.PublicKey.Algorithm
+            ? throw new InvalidDataException($"Signature uses different algorithm {signature.Algorithm} from this {KeyData.PublicKey.Algorithm} key!")
+            : VerifySignatureOnStream(dataStream, signature);
+    protected abstract byte[] HashAndSignStream(Stream dataStream);
+    protected abstract bool VerifySignatureOnStream(Stream dataStream, TagSignature signature);
+    public virtual string ToShortString() => $"SigningKey {Name} {PublicKey.Algorithm} [{Purposes.ToStringAsList()}]";
     public override string? ToString() => KeyData.ToString();
     protected override void DisposeManagedResources() { }
-
     protected readonly T KeyData = data.Required();
 }
 

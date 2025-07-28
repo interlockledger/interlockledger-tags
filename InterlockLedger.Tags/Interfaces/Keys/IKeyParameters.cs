@@ -33,7 +33,6 @@
 namespace InterlockLedger.Tags;
 public interface IKeyParameters
 {
-    byte[] EncodedBytes { get; }
     TagPubKey PublicKey { get; }
     KeyStrength Strength { get; }
 }

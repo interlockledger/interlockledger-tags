@@ -29,29 +29,25 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // ******************************************************************************************************************************
+using System.Security.Cryptography;
 
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
+public class EcDSAInterlockSigningKey : InterlockSigningKey
 {
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
-
-    public KeyStrength Strength => KeyStrength.Normal;
-
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
+    public EcDSAInterlockSigningKey(InterlockSigningKeyData keyData, byte[] decrypted) : this(keyData, DecodeTagEcDSAParameters(decrypted)) {
+    }
+    private readonly TagEcDSAParameters _tagEcDSAParameters;
+    private readonly ECParameters _keyParameters;
+    public EcDSAInterlockSigningKey(InterlockSigningKeyData? keyData, TagEcDSAParameters? parameters) : base(keyData.ValidateIsEncryptedKey()) {
+        _tagEcDSAParameters = parameters.Validate();
+        _keyParameters = _tagEcDSAParameters.Value;
+    }
+    private static TagEcDSAParameters? DecodeTagEcDSAParameters(byte[] decrypted) {
+        using var s = new MemoryStream(decrypted);
+        return s.Decode<TagEcDSAParameters>();
     }
 
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
-    }
-
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
-
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
+    protected override byte[] HashAndSignStream(Stream dataStream) => EcDSAHelper.HashAndSignStream(dataStream, _keyParameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => EcDSAHelper.VerifyStream(dataStream, signature, _keyParameters);
 }

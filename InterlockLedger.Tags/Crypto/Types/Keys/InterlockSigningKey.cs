@@ -34,16 +34,5 @@ namespace InterlockLedger.Tags;
 
 public abstract class InterlockSigningKey(InterlockSigningKeyData data) : InterlockSigningKeyOf<InterlockSigningKeyData>(data)
 {
-    public abstract byte[] AsSessionState { get; }
-    public static InterlockSigningKey? FromSessionState(byte[] bytes) {
-        return RISKFrom(bytes) ?? RCSKFrom(bytes);
-
-        static InterlockSigningKey? RCSKFrom(byte[] bytes) {
-            try { return RSACertificateSigningKey.FromSessionState(bytes); } catch { return null; }
-        }
-        static InterlockSigningKey? RISKFrom(byte[] bytes) {
-            try { return RSAInterlockSigningKey.FromSessionState(bytes); } catch { return null; }
-        }
-    }
 }
 

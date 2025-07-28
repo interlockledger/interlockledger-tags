@@ -30,28 +30,35 @@
 //
 // ******************************************************************************************************************************
 
+using System.Security.Cryptography;
+
+
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
+
+
+public class TagEcDSAPublicParameters : ILTagOfExplicit<ECParameters>
 {
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
-
-    public KeyStrength Strength => KeyStrength.Normal;
-
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TagEcDSAPublicParameters"/> class with the specified EC parameters.
+    /// </summary>
+    /// <param name="parameters">The EC parameters to be encapsulated in this tag.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="parameters"/> is null.</exception>
+    /// <remarks>
+    /// This constructor creates a tag with the ID <see cref="ILTagId.ECParametersPublic"/> and the provided EC parameters.
+    /// The parameters must not be null; otherwise, an <see cref="ArgumentNullException"/> is thrown.
+    /// </remarks>
+    /// <seealso cref="ILTagId.ECParametersPublic"/>
+    /// <seealso cref="ECParameters"/>
+    public TagEcDSAPublicParameters(ECParameters parameters) : base(ILTagId.ECParametersPublic, parameters) {
+    }
+    internal TagEcDSAPublicParameters(Stream s) : base(ILTagId.ECParametersPublic, s) {
     }
 
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
-    }
+    protected override Task<ECParameters> ValueFromStreamAsync(WrappedReadonlyStream s) =>
+        Task.FromResult(s.DecodeECParametersPublicParts());
 
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
+    protected override Task<Stream> ValueToStreamAsync(Stream s) =>
+        Task.FromResult(s.EncodeECParametersPublicParts(Value));
 
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
 }

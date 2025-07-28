@@ -30,28 +30,26 @@
 //
 // ******************************************************************************************************************************
 
+using System.Security.Cryptography;
+
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
+public class TagPubEcDSAKey : TagPubKey
 {
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
-
-    public KeyStrength Strength => KeyStrength.Normal;
-
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
+    public readonly ECParameters Parameters;
+    public TagPubEcDSAKey(ECParameters parameters) : this(EncodeParameters(parameters)) {
     }
-
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
+    public override KeyStrength Strength => KeyStrength.Normal;  
+    public override byte[] Encrypt(byte[] bytes) => throw new NotSupportedException("EcDSA keys cannot encrypt data");
+    public override bool Verify(Stream dataStream, TagSignature signature)
+        => EcDSAHelper.VerifyStream(dataStream, signature, Parameters);
+    internal TagPubEcDSAKey(byte[] data) : base(Algorithm.EcDSA, data) => Parameters = DecodeParameters(Data);
+    private static ECParameters DecodeParameters(byte[] bytes) {
+        if (bytes == null || bytes.Length == 0)
+            return default;
+        using var s = new MemoryStream(bytes);
+        return s.Decode<TagEcDSAPublicParameters>().Required().Value;
     }
-
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
-
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
+    private static byte[] EncodeParameters(ECParameters parameters)
+        => new TagEcDSAPublicParameters(parameters).EncodedBytes();
 }

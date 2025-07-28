@@ -35,11 +35,11 @@ namespace InterlockLedger.Tags;
 public class TagEdDSAPublicParameters : ILTagInBytesExplicit<EdDSAParameters>
 {
     public TagEdDSAPublicParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAPublicParameters, parameters) {
+        : base(ILTagId.EdDSAParametersPublic, parameters) {
     }
 
     internal TagEdDSAPublicParameters(Stream s)
-        : base(ILTagId.EdDSAPublicParameters, s) {
+        : base(ILTagId.EdDSAParametersPublic, s) {
     }
 
     protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);

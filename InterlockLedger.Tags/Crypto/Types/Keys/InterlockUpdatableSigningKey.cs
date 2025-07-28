@@ -32,30 +32,53 @@
 
 namespace InterlockLedger.Tags;
 
-public abstract class InterlockUpdatableSigningKey : InterlockSigningKeyOf<InterlockUpdatableSigningKeyData>, IUpdatableSigningKey
-{
+
+
+public abstract class InterlockUpdatableSigningKey<TP, TK> : InterlockSigningKeyOf<InterlockUpdatableSigningKeyData>, IUpdatableSigningKey where TP : ILTagOfExplicit<TK>, IKeyParameters  {
     public BaseKeyId Identity => KeyData.Identity;
     public DateTimeOffset LastSignatureTimeStamp => KeyData.LastSignatureTimeStamp;
-    public abstract TagPubKey? NextPublicKey { get; }
+    public TagPubKey? NextPublicKey => (NextKeyParameters ?? KeyParameters)?.PublicKey;
     public Algorithm SignAlgorithm => KeyData.PublicKey.Algorithm;
     public ulong SignaturesWithCurrentKey => KeyData.SignaturesWithCurrentKey;
-    public abstract void DestroyKeys();
-    public abstract void GenerateNextKeys();
-    public override TagSignature Sign<T>(T data) => throw new InvalidOperationException("Can't sign without possibly updating the key");
-    public override TagSignature Sign(Stream dataStream) => throw new InvalidOperationException("Can't sign without possibly updating the key");
-    public abstract TagSignature SignAndUpdate<T>(T data, Func<byte[], byte[]>? encrypt = null) where T : Signable<T>, new();
-    public abstract TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null);
-    public override string ToShortString() => $"UpdatableSigningKey '{Name}' [{Purposes.ToStringAsList()}]";
+    public override string ToShortString() => $"UpdatableSigningKey '{Name}' {SignAlgorithm} [{Purposes.ToStringAsList()}]";
     public async Task SaveToAsync(Stream store) {
         using var s = await KeyData.OpenReadingStreamAsync().ConfigureAwait(false);
         await s.CopyToAsync(store).ConfigureAwait(false);
         await store.FlushAsync().ConfigureAwait(false);
     }
-
-    protected readonly ITimeStamper _timeStamper;
-
+    private readonly ITimeStamper _timeStamper;
     protected InterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, ITimeStamper timeStamper) : base(tag) {
         _timeStamper = timeStamper.Required();
         KeyData.LastSignatureTimeStamp = _timeStamper.Now;
+    }
+    private bool _destroyKeysAfterSigning;
+    protected TP? KeyParameters;
+    protected TP? NextKeyParameters;
+    protected TK Parameters => KeyParameters.Required().Value!;
+    public void DestroyKeys() => _destroyKeysAfterSigning = true;
+    public void GenerateNextKeys() => NextKeyParameters = CreateNewParameters();
+    protected abstract TP CreateNewParameters();
+    public TagSignature SignAndUpdate<TD>(TD data, Func<byte[], byte[]>? encrypt = null) where TD : Signable<TD>, new()  => Update(encrypt, HashAndSignStream(data.OpenReadingStreamAsync().WaitResult()));
+    public TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, HashAndSignStream(dataStream));
+    private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
+        _ = KeyData.Value.Required();
+        if (_destroyKeysAfterSigning) {
+            KeyParameters = null;
+            NextKeyParameters = null;
+            KeyData.Value.Encrypted = null!;
+            KeyData.Value.PublicKey = null!;
+        } else {
+            if (NextKeyParameters is not null) {
+                KeyParameters = NextKeyParameters;
+                KeyData.Value.Encrypted = encrypt.Required()(KeyParameters!.EncodedBytes());
+                KeyData.Value.PublicKey = KeyParameters!.PublicKey;
+                NextKeyParameters = null;
+                KeyData.SignaturesWithCurrentKey = 0uL;
+            } else {
+                KeyData.SignaturesWithCurrentKey++;
+            }
+            KeyData.LastSignatureTimeStamp = _timeStamper.Now;
+        }
+        return new TagSignature(SignAlgorithm, signatureData);
     }
 }

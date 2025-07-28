@@ -32,26 +32,22 @@
 
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
-{
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
-
-    public KeyStrength Strength => KeyStrength.Normal;
-
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
+/// <summary>
+/// Provides extension methods for the <see cref="ILTagOfExplicit{T}"/> class.
+/// </summary>
+public static class ILTagOfExplicitExtensions {
+    /// <summary>
+    /// Encodes the specified tag into a byte array.
+    /// This method serializes the tag's value into a memory stream and returns the byte array
+    /// representation of the serialized data.  
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    public static byte[] EncodedBytes<T>(ILTagOfExplicit<T> tag) {
+        _ = tag.Required();
+        using var ms = new MemoryStream();
+        tag.SerializeIntoAsync(ms).WaitResult();
+        return ms.ToArray();
     }
-
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
-    }
-
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
-
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
 }

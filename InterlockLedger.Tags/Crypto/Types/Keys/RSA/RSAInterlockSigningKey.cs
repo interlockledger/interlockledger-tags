@@ -32,7 +32,6 @@
 
 using System.Security.Cryptography;
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace InterlockLedger.Tags;
 
@@ -41,26 +40,7 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
     public RSAInterlockSigningKey(InterlockSigningKeyData data, byte[] decrypted) : this(data, DecodeTagRSAParameters(decrypted)) {
     }
 
-    public override byte[] AsSessionState {
-        get {
-            using var ms = new MemoryStream();
-            ms.EncodeTag(KeyData);
-            ms.EncodeTag(_tagRSAParameters);
-            return ms.ToArray();
-        }
-    }
-
-    public static new RSAInterlockSigningKey FromSessionState(byte[] bytes) {
-        using var ms = new MemoryStream(bytes);
-        var tag = ms.Decode<InterlockSigningKeyData>().Required();
-        var parameters = ms.Decode<TagRSAParameters>().Required();
-        return new RSAInterlockSigningKey(tag, parameters);
-    }
-
     public byte[] Decrypt(byte[] bytes) => RSAHelper.Decrypt(bytes, _keyParameters);
-    public override TagSignature Sign<T>(T data) => new(Algorithm.RSA, RSAHelper.HashAndSignStream(data.OpenReadingStreamAsync().WaitResult(), _keyParameters));
-    public override TagSignature Sign(Stream dataStream) => new(Algorithm.RSA, RSAHelper.HashAndSignStream(dataStream, _keyParameters));
-
     private readonly TagRSAParameters _tagRSAParameters;
     private readonly RSAParameters _keyParameters;
     public RSAInterlockSigningKey(InterlockSigningKeyData data, TagRSAParameters tagRSAParameters) : base(data.ValidateIsEncryptedKey()) {
@@ -73,4 +53,6 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
         return ms.Decode<TagRSAParameters>().Required();
     }
 
+    protected override byte[] HashAndSignStream(Stream dataStream) => RSAHelper.HashAndSignStream(dataStream, _keyParameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => RSAHelper.VerifyStream(dataStream,signature,_keyParameters);
 }

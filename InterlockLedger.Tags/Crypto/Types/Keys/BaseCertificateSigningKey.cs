@@ -30,28 +30,36 @@
 //
 // ******************************************************************************************************************************
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace InterlockLedger.Tags;
 
-public class TagEdDSAParameters : ILTagInBytesExplicit<EdDSAParameters>, IKeyParameters
+public abstract class BaseCertificateSigningKey : InterlockSigningKey
 {
-    public TagPubKey PublicKey => new TagPublicEdDSAKey(Value!);
-
-    public KeyStrength Strength => KeyStrength.Normal;
-
-    public TagEdDSAParameters(EdDSAParameters parameters)
-        : base(ILTagId.EdDSAParameters, parameters) {
+    public BaseCertificateSigningKey(InterlockSigningKeyData data, byte[] certificateBytes, string password) :
+        this(data, BuildCert(certificateBytes, password)) {
     }
-
-    public static TagEdDSAParameters DecodeFromBytes(byte[] encodedBytes) {
-        using var s = new MemoryStream(encodedBytes);
-        return s.Decode<TagEdDSAParameters>().Required();
+    public BaseCertificateSigningKey(InterlockSigningKeyData data, X509Certificate2 x509Certificate) :
+        base(data) {
+        _x509Certificate = x509Certificate;
+        if (data.Required().EncryptedContentType != EncryptedContentType.EmbeddedCertificate)
+            throw new ArgumentException($"Wrong kind of EncryptedContentType {data.EncryptedContentType}", nameof(data));
+        if (!_x509Certificate.HasPrivateKey)
+            throw new InvalidOperationException("The private key is missing");
+        if (!_hasCorrectPrivateKey)
+            throw new InvalidOperationException($"The private key is of the incorrect type - certificate key type is {_x509Certificate.GetKeyAlgorithm}");
     }
-
-    internal TagEdDSAParameters(Stream s)
-        : base(ILTagId.EdDSAParameters, s) {
-    }
-
-    protected override EdDSAParameters FromBytes(byte[] bytes) => new(bytes);
-
-    protected override byte[] ToBytes(EdDSAParameters? Value) => Value?.AsBytes ?? [];
+    protected readonly X509Certificate2 _x509Certificate;
+    private bool _hasCorrectPrivateKey =>
+        KeyData.PublicKey.Algorithm switch {
+            Algorithm.RSA => _x509Certificate.GetRSAPrivateKey() is not null,
+            Algorithm.EcDSA => _x509Certificate.GetECDsaPrivateKey() is not null,
+            _ => throw new NotSupportedException($"Unsupported certificate key algorithm {KeyData.PublicKey.Algorithm}")
+        };
+    protected sealed override void DisposeManagedResources() =>
+        _x509Certificate?.Dispose();
+    private static X509Certificate2 BuildCert(byte[] certificateBytes, string password) =>
+        new(certificateBytes.Required(),
+            password.Required(),
+            X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet);
 }

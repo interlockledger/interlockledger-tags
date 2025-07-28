@@ -97,13 +97,14 @@ public struct ILTagId
     public const ulong ECParameters = 58;
     // EdDSA
     public const ulong EdDSAParameters = 59;
-    public const ulong EdDSAPublicParameters = 60;
+    public const ulong EdDSAParametersPublic = 60;
+    // ECDSA
+    public const ulong ECParametersPublic = 61;
 
-    // ********** Free range 61-126 **************
+    // ********** Free range 62-126 **************
 
     // Metadata
     public const ulong DataField = 225;         //  DataField for Published Apps Records
-
     public const ulong DataIndex = 226;         //  DataIndex for Published Apps Records
     public const ulong DataModel = 224;         //  DataModel for Published Apps Records
 }

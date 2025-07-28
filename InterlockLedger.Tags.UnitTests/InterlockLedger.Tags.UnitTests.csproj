@@ -40,4 +40,5 @@
     </ItemGroup>
     <Target Name="TagSources" />
     <Target Name="NugetOrg" />
+    <Target Name="PublishLocally" />
 </Project>
