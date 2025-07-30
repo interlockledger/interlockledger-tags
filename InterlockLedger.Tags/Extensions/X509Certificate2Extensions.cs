@@ -30,15 +30,35 @@
 //
 // ******************************************************************************************************************************
 
-
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
+
 public static class X509Certificate2Extensions
 {
-    public static KeyStrength KeyStrengthGuess(this X509Certificate2 certificate)
-        => certificate.Required().GetRSAPublicKey().KeyStrengthGuess();
+    public static (KeyStrength keyStrength, Algorithm algorithm) IdentifyAttributes(this X509Certificate2 certificate) =>
+        certificate.Selector(
+            (rsa) => (rsa.KeyStrengthGuess(), Algorithm.RSA),
+            (ec) => (KeyStrength.Strong, Algorithm.EcDSA),
+            () => (KeyStrength.Normal, Algorithm.Invalid));
 
-    public static TagPubKey PubKey(this X509Certificate2 certificate)
-        => TagPubKey.Resolve(certificate);
+    public static TagPubKey PubKey(this X509Certificate2 certificate) =>
+        certificate.Selector<TagPubKey>(
+            (rsa) => new TagPubRSAKey(rsa.ExportParameters(false)),
+            (ec) => new TagPubEcDSAKey(ec.ExportParameters(false)));
+
+    private static T Selector<T>(this X509Certificate2 certificate,
+                                 Func<RSA, T> rsaFunc,
+                                 Func<ECDsa, T> ecdsaFunc,
+                                 Func<T>? errorFunc = null) =>
+        certificate.GetRSAPublicKey() switch {
+            RSA rsa => rsaFunc(rsa),
+            _ => certificate.GetECDsaPublicKey() switch {
+                ECDsa ec => ecdsaFunc(ec),
+                _ => errorFunc is null
+                    ? throw new NotSupportedException("Not yet supporting other kinds of certificates, than RSA and EcDSA!")
+                    : errorFunc()
+            }
+        };
 }
