@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <Version>19.0.2</Version>
-        <PackageReleaseNotes>Just moving to Directory.Build.props versioning scheme</PackageReleaseNotes>
+        <Version>19.0.3</Version>
+        <PackageReleaseNotes>Update dependencies</PackageReleaseNotes>
     </PropertyGroup>
 </Project>

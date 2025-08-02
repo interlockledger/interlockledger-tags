@@ -62,9 +62,9 @@
 
 
     <ItemGroup>
-        <PackageReference Include="InterlockLedger.Commons" Version="19.0.0" />
-        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="14.0.1" />
-        <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
+        <PackageReference Include="InterlockLedger.Commons" Version="19.0.2" />
+        <PackageReference Include="InterlockLedger.Tags.ILInt" Version="14.0.2" />
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
     </ItemGroup>
 
 </Project>
