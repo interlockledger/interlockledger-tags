@@ -212,7 +212,7 @@ public class ILTagTests
     [Test]
     public void DeserializeBigArrays() {
         DeserializeFor(32);
-        DeserializeFor(1024*256);
+        DeserializeFor(1024 * 256);
 
         static void DeserializeFor(ulong size) {
             using var stream = new FakeLargeILTagByteArrayStream(size);

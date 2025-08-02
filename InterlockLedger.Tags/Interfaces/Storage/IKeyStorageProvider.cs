@@ -34,12 +34,14 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace InterlockLedger.Tags;
 
-public enum CertificateKeyUsage {
+public enum CertificateKeyUsage
+{
     ServerAuthentication,
     ClientAuthentication
 }
 
-public interface IKeyStorageProvider : IKeyFileExporter {
+public interface IKeyStorageProvider : IKeyFileExporter
+{
 
     string AppKeysFolderPath { get; }
     IEnumerable<InterlockSigningKeyData> Keys { get; }

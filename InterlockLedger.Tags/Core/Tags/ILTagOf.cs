@@ -77,4 +77,3 @@ public abstract class ILTagOf<T> : ILTag, IEquatable<ILTagOf<T>>, IEquatable<T>
     public static bool operator !=(T left, ILTagOf<T> right) =>
         !(left == right);
 }
-

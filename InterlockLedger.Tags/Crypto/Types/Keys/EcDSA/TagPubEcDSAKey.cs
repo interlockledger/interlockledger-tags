@@ -39,7 +39,7 @@ public class TagPubEcDSAKey : TagPubKey
     public readonly ECParameters Parameters;
     public TagPubEcDSAKey(ECParameters parameters) : this(EncodeParameters(parameters)) {
     }
-    public override KeyStrength Strength => KeyStrength.Normal;  
+    public override KeyStrength Strength => KeyStrength.Normal;
     public override byte[] Encrypt(byte[] bytes) => throw new NotSupportedException("EcDSA keys cannot encrypt data");
     public override bool Verify(Stream dataStream, TagSignature signature)
         => EcDSAHelper.VerifyStream(dataStream, signature, Parameters);

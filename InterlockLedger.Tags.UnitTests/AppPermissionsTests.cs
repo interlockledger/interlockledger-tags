@@ -45,8 +45,7 @@ namespace InterlockLedger.Tags;
 public class AppPermissionsTests
 {
     [Test]
-    public void Constructor_ShouldInitializeProperties()
-    {
+    public void Constructor_ShouldInitializeProperties() {
         // Arrange
         ulong appId = 123;
         ulong[] actionIds = { 1, 2, 3 };
@@ -55,8 +54,7 @@ public class AppPermissionsTests
         var permissions = new AppPermissions(appId, actionIds);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(permissions.AppId, Is.EqualTo(appId));
             Assert.That(permissions.ActionIds, Is.EquivalentTo(actionIds));
             Assert.That(permissions.TextualRepresentation, Is.EqualTo($"#{appId},{string.Join(",", actionIds)}"));
@@ -64,8 +62,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void InvalidBy_ShouldReturnInvalidAppPermissions()
-    {
+    public void InvalidBy_ShouldReturnInvalidAppPermissions() {
         // Arrange
         string cause = "Invalid cause";
 
@@ -73,8 +70,7 @@ public class AppPermissionsTests
         var permissions = AppPermissions.InvalidBy(cause);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(permissions.AppId, Is.EqualTo(ulong.MaxValue));
             Assert.That(permissions.ActionIds, Is.Empty);
             Assert.That(permissions.InvalidityCause, Is.EqualTo(cause));
@@ -83,8 +79,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void CanAct_ShouldReturnTrue_WhenAppIdAndActionIdMatch()
-    {
+    public void CanAct_ShouldReturnTrue_WhenAppIdAndActionIdMatch() {
         // Arrange
         ulong appId = 123;
         ulong actionId = 1;
@@ -98,8 +93,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void CanAct_ShouldReturnFalse_WhenAppIdDoesNotMatch()
-    {
+    public void CanAct_ShouldReturnFalse_WhenAppIdDoesNotMatch() {
         // Arrange
         ulong appId = 123;
         ulong actionId = 1;
@@ -113,8 +107,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void CanAct_ShouldReturnFalse_WhenActionIdDoesNotMatch()
-    {
+    public void CanAct_ShouldReturnFalse_WhenActionIdDoesNotMatch() {
         // Arrange
         ulong appId = 123;
         ulong actionId = 1;
@@ -128,8 +121,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void ToEnumerable_ShouldReturnSingleElementEnumerable()
-    {
+    public void ToEnumerable_ShouldReturnSingleElementEnumerable() {
         // Arrange
         var permissions = new AppPermissions(123, 1, 2, 3);
 
@@ -141,8 +133,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void AsTag_ShouldReturnTagWithAppPermissions()
-    {
+    public void AsTag_ShouldReturnTagWithAppPermissions() {
         // Arrange
         var permissions = new AppPermissions(123, 1, 2, 3);
 
@@ -154,8 +145,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void VerboseRepresentation_ShouldReturnCorrectString()
-    {
+    public void VerboseRepresentation_ShouldReturnCorrectString() {
         // Arrange
         var permissions = new AppPermissions(123, 1, 2, 3);
 
@@ -167,8 +157,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void IsEmpty_ShouldReturnTrue_WhenAppIdAndActionIdsAreZero()
-    {
+    public void IsEmpty_ShouldReturnTrue_WhenAppIdAndActionIdsAreZero() {
         // Arrange
         var permissions = new AppPermissions(0);
 
@@ -180,8 +169,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void IsEmpty_ShouldReturnFalse_WhenAppIdIsNotZero()
-    {
+    public void IsEmpty_ShouldReturnFalse_WhenAppIdIsNotZero() {
         // Arrange
         var permissions = new AppPermissions(123);
 
@@ -193,8 +181,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void Parse_ShouldReturnAppPermissions_WhenStringIsValid()
-    {
+    public void Parse_ShouldReturnAppPermissions_WhenStringIsValid() {
         // Arrange
         string s = "#123,1,2,3";
 
@@ -202,16 +189,14 @@ public class AppPermissionsTests
         var result = AppPermissions.Parse(s, null);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(result.AppId, Is.EqualTo(123));
             Assert.That(result.ActionIds, Is.EquivalentTo(new[] { 1, 2, 3 }));
         });
     }
 
     [Test]
-    public void Parse_ShouldReturnInvalidAppPermissions_WhenStringIsInvalid()
-    {
+    public void Parse_ShouldReturnInvalidAppPermissions_WhenStringIsInvalid() {
         // Arrange
         string s = "invalid";
 
@@ -223,8 +208,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void TryParse_ShouldReturnTrue_WhenStringIsValid()
-    {
+    public void TryParse_ShouldReturnTrue_WhenStringIsValid() {
         // Arrange
         string s = "#123,1,2,3";
 
@@ -232,8 +216,7 @@ public class AppPermissionsTests
         var success = AppPermissions.TryParse(s, null, out var result);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(success, Is.True);
             Assert.That(result, Is.Not.Null);
             Assert.That(result.AppId, Is.EqualTo(123));
@@ -242,8 +225,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void TryParse_ShouldReturnFalse_WhenStringIsInvalid()
-    {
+    public void TryParse_ShouldReturnFalse_WhenStringIsInvalid() {
         // Arrange
         string s = "invalid";
 
@@ -251,8 +233,7 @@ public class AppPermissionsTests
         var success = AppPermissions.TryParse(s, null, out var result);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(success, Is.False);
             Assert.That(result, Is.Not.Null);
             Assert.That(result.IsInvalid(), Is.True);
@@ -260,8 +241,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void Equals_ShouldReturnTrue_WhenAppPermissionsAreEqual()
-    {
+    public void Equals_ShouldReturnTrue_WhenAppPermissionsAreEqual() {
         // Arrange
         var permissions1 = new AppPermissions(123, 1, 2, 3);
         var permissions2 = new AppPermissions(123, 1, 2, 3);
@@ -274,8 +254,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void Equals_ShouldReturnFalse_WhenAppPermissionsAreNotEqual()
-    {
+    public void Equals_ShouldReturnFalse_WhenAppPermissionsAreNotEqual() {
         // Arrange
         var permissions1 = new AppPermissions(123, 1, 2, 3);
         var permissions2 = new AppPermissions(456, 4, 5, 6);
@@ -288,8 +267,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void GetHashCode_ShouldReturnSameHashCode_ForEqualAppPermissions()
-    {
+    public void GetHashCode_ShouldReturnSameHashCode_ForEqualAppPermissions() {
         // Arrange
         var permissions1 = new AppPermissions(123, 1, 2, 3);
         var permissions2 = new AppPermissions(123, 1, 2, 3);
@@ -317,8 +295,7 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void ToString_ShouldReturnTextualRepresentation()
-    {
+    public void ToString_ShouldReturnTextualRepresentation() {
         // Arrange
         var permissions = new AppPermissions(123, 1, 2, 3);
 
@@ -330,16 +307,14 @@ public class AppPermissionsTests
     }
 
     [Test]
-    public void Operators_ShouldWorkCorrectly()
-    {
+    public void Operators_ShouldWorkCorrectly() {
         // Arrange
         var permissions1 = new AppPermissions(123, 1, 2, 3);
         var permissions2 = new AppPermissions(123, 1, 2, 3);
         var permissions3 = new AppPermissions(456, 4, 5, 6);
 
         // Act & Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             Assert.That(permissions1 == permissions2, Is.True);
             Assert.That(permissions1 != permissions3, Is.True);
             Assert.That(permissions1 < permissions3, Is.True);

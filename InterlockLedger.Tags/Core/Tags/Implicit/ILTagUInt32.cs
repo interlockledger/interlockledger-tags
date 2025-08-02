@@ -40,8 +40,7 @@ public class ILTagUInt32 : ILTagOfImplicit<uint>
 
     protected override Task<uint> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(s.BigEndianReadUInt());
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
-    {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.BigEndianWriteUInt(Value);
         return Task.FromResult(s);
     }

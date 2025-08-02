@@ -81,4 +81,3 @@ public abstract class InterlockSigningKeyOf<T>(T data) : AbstractDisposable, ISi
     protected override void DisposeManagedResources() { }
     protected readonly T KeyData = data.Required();
 }
-

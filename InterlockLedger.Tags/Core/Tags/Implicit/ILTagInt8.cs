@@ -40,8 +40,7 @@ public class ILTagInt8 : ILTagOfImplicit<sbyte>
 
     protected override Task<sbyte> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult((sbyte)s.ReadSingleByte());
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
-    {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.WriteSingleByte((byte)Value);
         return Task.FromResult(s);
     }

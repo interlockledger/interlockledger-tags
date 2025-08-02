@@ -96,7 +96,7 @@ public class TagPubKeyTests
     }
     private static readonly AppPermissions _permission3 = new(3);
 
-    [TestCase(Algorithm.RSA, new byte[] { 1, 2, 3, 4, 5, 6 }, TestName ="TagPubKey.Equals() RSA, 6 bytes")]
+    [TestCase(Algorithm.RSA, new byte[] { 1, 2, 3, 4, 5, 6 }, TestName = "TagPubKey.Equals() RSA, 6 bytes")]
     [TestCase(Algorithm.Unknown, new byte[] { 0 }, TestName = "TagPubKey.Equals() Unknown, 1 byte")]
     public void TestEquals(Algorithm algo, byte[] data) {
         var pubKey1 = new TestTagPubKey(algo, data);

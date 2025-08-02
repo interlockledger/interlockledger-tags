@@ -38,7 +38,7 @@ public interface IUpdatableSigningKey : ISigningKey
     TagPubKey? NextPublicKey { get; }
     ulong SignaturesWithCurrentKey { get; }
     Algorithm SignAlgorithm { get; }
-    
+
     void GenerateNextKeys();
     void DestroyKeys();
 

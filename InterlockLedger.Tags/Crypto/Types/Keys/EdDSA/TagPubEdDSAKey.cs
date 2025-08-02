@@ -40,7 +40,7 @@ public class TagPublicEdDSAKey : TagPubKey
 
     public TagPublicEdDSAKey(EdDSAParameters parameters) : this(parameters.Required().AsPublicBytes) { }
 
-//    public override bool Verify<T>(T data, TagSignature signature) => EdDSAHelper.Verify(data, signature, _parameters);
+    //    public override bool Verify<T>(T data, TagSignature signature) => EdDSAHelper.Verify(data, signature, _parameters);
 
     public override bool Verify(Stream dataStream, TagSignature signature) => EdDSAHelper.VerifyStream(dataStream, signature, _parameters);
 

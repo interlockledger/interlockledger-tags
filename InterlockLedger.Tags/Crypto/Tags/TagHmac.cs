@@ -40,7 +40,7 @@ public sealed partial class TagHmac : ILTagOfExplicitTextual<TagHash.Parts>, ITe
 {
     private TagHmac() : this(HashAlgorithm.Invalid, []) { }
     public static TagHmac InvalidBy(string cause) =>
-        new( new TagHash.Parts() { InvalidityCause = cause });
+        new(new TagHash.Parts() { InvalidityCause = cause });
     public TagHmac(HashAlgorithm algorithm, byte[] data) : this(new TagHash.Parts { Algorithm = algorithm, Data = data }) { }
 
     public HashAlgorithm Algorithm => Value?.Algorithm ?? HashAlgorithm.Invalid;

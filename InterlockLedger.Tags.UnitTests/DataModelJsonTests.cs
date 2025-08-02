@@ -402,7 +402,7 @@ public partial class DataModelJsonTests
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         AllowTrailingCommas = true,
-        IgnoreReadOnlyProperties = true,        
+        IgnoreReadOnlyProperties = true,
     };
 
 

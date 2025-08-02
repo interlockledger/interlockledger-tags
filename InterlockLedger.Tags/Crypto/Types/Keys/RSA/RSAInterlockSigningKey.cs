@@ -54,5 +54,5 @@ public class RSAInterlockSigningKey : InterlockSigningKey, IDecryptingKey
     }
 
     protected override byte[] HashAndSignStream(Stream dataStream) => RSAHelper.HashAndSignStream(dataStream, _keyParameters);
-    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => RSAHelper.VerifyStream(dataStream,signature,_keyParameters);
+    protected override bool VerifySignatureOnStream(Stream dataStream, TagSignature signature) => RSAHelper.VerifyStream(dataStream, signature, _keyParameters);
 }

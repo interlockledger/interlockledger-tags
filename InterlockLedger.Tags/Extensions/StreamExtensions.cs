@@ -34,7 +34,7 @@ namespace InterlockLedger.Tags;
 
 public static partial class StreamExtensions
 {
-     public static BaseKeyId? DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
+    public static BaseKeyId? DecodeBaseKeyId(this Stream s) => s.Decode<BaseKeyId>();
 
     public static OwnerId? DecodeOwnerId(this Stream s) => s.Decode<OwnerId>();
 

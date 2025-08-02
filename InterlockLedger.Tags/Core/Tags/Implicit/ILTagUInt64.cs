@@ -40,8 +40,7 @@ public class ILTagUInt64 : ILTagOfImplicit<ulong>
 
     protected override Task<ulong> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult(s.BigEndianReadULong());
 
-    protected override Task<Stream> ValueToStreamAsync(Stream s)
-    {
+    protected override Task<Stream> ValueToStreamAsync(Stream s) {
         s.BigEndianWriteULong(Value);
         return Task.FromResult(s);
     }

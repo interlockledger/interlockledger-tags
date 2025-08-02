@@ -43,7 +43,7 @@ public static class EcDSAHelper
 
     public static TagEcDSAParameters CreateNewTagEcDSAParameters() {
         var keyPair = ECDsa.Create();
-        return new (keyPair.ExportParameters(includePrivateParameters: true));
+        return new(keyPair.ExportParameters(includePrivateParameters: true));
     }
 
     public static byte[] HashAndSignStream(Stream dataStream, ECParameters parameters) {

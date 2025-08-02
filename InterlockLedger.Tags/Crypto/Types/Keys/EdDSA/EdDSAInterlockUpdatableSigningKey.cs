@@ -35,7 +35,7 @@ namespace InterlockLedger.Tags;
 
 public class EdDSAInterlockUpdatableSigningKey : InterlockUpdatableSigningKey<TagEdDSAParameters, EdDSAParameters>
 {
- 
+
     public EdDSAInterlockUpdatableSigningKey(InterlockUpdatableSigningKeyData tag, byte[] decrypted, ITimeStamper timeStamper)
         : base(tag, timeStamper) {
         using var s = new MemoryStream(decrypted);

@@ -178,7 +178,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
         };
         if (version > 3)
             result.Permissions = s.DecodeTagArray<AppPermissions.Tag>().SelectSkippingNulls(t => t?.Value).Distinct().ToArray();
-        return Task.FromResult<Parts?>( result);
+        return Task.FromResult<Parts?>(result);
     }
     protected override Task<Stream> ValueToStreamAsync(Stream s) {
         if (Value is not null) {

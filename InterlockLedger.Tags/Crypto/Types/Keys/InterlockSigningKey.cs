@@ -35,4 +35,3 @@ namespace InterlockLedger.Tags;
 public abstract class InterlockSigningKey(InterlockSigningKeyData data) : InterlockSigningKeyOf<InterlockSigningKeyData>(data)
 {
 }
-

@@ -1,4 +1,4 @@
-﻿// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 //  
 // Copyright (c) 2018-2025 InterlockLedger Network
 // All rights reserved.
@@ -52,7 +52,7 @@ public partial class DataModelJsonTests
                 public string Name { get; set; } = name.Required();
             }
             protected override Task<Data?> ValueFromStreamAsync(WrappedReadonlyStream s) => Task.FromResult<Data?>(new(s.DecodeILInt(), s.DecodeString()!));
-            protected override Task<Stream> ValueToStreamAsync(Stream s) =>Task.FromResult(s.EncodeILInt(Value!.Id).EncodeString(Value.Name));
+            protected override Task<Stream> ValueToStreamAsync(Stream s) => Task.FromResult(s.EncodeILInt(Value!.Id).EncodeString(Value.Name));
         }
     }
 }

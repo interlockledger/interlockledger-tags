@@ -46,4 +46,3 @@ public class ILTagSequence : ILTagArrayOfILTag<ILTag>
          ? items.AsList<ILTag>().ToArray()
          : [];
 }
-

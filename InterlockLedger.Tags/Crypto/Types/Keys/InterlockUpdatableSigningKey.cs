@@ -34,7 +34,8 @@ namespace InterlockLedger.Tags;
 
 
 
-public abstract class InterlockUpdatableSigningKey<TP, TK> : InterlockSigningKeyOf<InterlockUpdatableSigningKeyData>, IUpdatableSigningKey where TP : ILTagOfExplicit<TK>, IKeyParameters  {
+public abstract class InterlockUpdatableSigningKey<TP, TK> : InterlockSigningKeyOf<InterlockUpdatableSigningKeyData>, IUpdatableSigningKey where TP : ILTagOfExplicit<TK>, IKeyParameters
+{
     public BaseKeyId Identity => KeyData.Identity;
     public DateTimeOffset LastSignatureTimeStamp => KeyData.LastSignatureTimeStamp;
     public TagPubKey? NextPublicKey => (NextKeyParameters ?? KeyParameters)?.PublicKey;
@@ -58,7 +59,7 @@ public abstract class InterlockUpdatableSigningKey<TP, TK> : InterlockSigningKey
     public void DestroyKeys() => _destroyKeysAfterSigning = true;
     public void GenerateNextKeys() => NextKeyParameters = CreateNewParameters();
     protected abstract TP CreateNewParameters();
-    public TagSignature SignAndUpdate<TD>(TD data, Func<byte[], byte[]>? encrypt = null) where TD : Signable<TD>, new()  => Update(encrypt, HashAndSignStream(data.OpenReadingStreamAsync().WaitResult()));
+    public TagSignature SignAndUpdate<TD>(TD data, Func<byte[], byte[]>? encrypt = null) where TD : Signable<TD>, new() => Update(encrypt, HashAndSignStream(data.OpenReadingStreamAsync().WaitResult()));
     public TagSignature SignAndUpdate(Stream dataStream, Func<byte[], byte[]>? encrypt = null) => Update(encrypt, HashAndSignStream(dataStream));
     private TagSignature Update(Func<byte[], byte[]>? encrypt, byte[] signatureData) {
         _ = KeyData.Value.Required();

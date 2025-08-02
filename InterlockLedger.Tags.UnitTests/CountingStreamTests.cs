@@ -40,8 +40,7 @@ namespace InterlockLedger.Tags;
 public class CountingStreamTests
 {
     [Test]
-    public void CanRead_ShouldReturnFalse()
-    {
+    public void CanRead_ShouldReturnFalse() {
         // Arrange
         var stream = new CountingStream();
 
@@ -53,8 +52,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void CanSeek_ShouldReturnFalse()
-    {
+    public void CanSeek_ShouldReturnFalse() {
         // Arrange
         var stream = new CountingStream();
 
@@ -66,8 +64,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void CanWrite_ShouldReturnTrue()
-    {
+    public void CanWrite_ShouldReturnTrue() {
         // Arrange
         var stream = new CountingStream();
 
@@ -79,8 +76,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void Length_ShouldReturnZeroInitially()
-    {
+    public void Length_ShouldReturnZeroInitially() {
         // Arrange
         var stream = new CountingStream();
 
@@ -92,8 +88,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void Position_ShouldBeSettable()
-    {
+    public void Position_ShouldBeSettable() {
         // Arrange
         var stream = new CountingStream();
         var newPosition = 10L;
@@ -106,8 +101,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void Flush_ShouldNotThrow()
-    {
+    public void Flush_ShouldNotThrow() {
         // Arrange
         var stream = new CountingStream();
 
@@ -116,8 +110,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void Read_ShouldThrowNotSupportedException()
-    {
+    public void Read_ShouldThrowNotSupportedException() {
         // Arrange
         var stream = new CountingStream();
         var buffer = new byte[10];
@@ -127,8 +120,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void Seek_ShouldThrowNotSupportedException()
-    {
+    public void Seek_ShouldThrowNotSupportedException() {
         // Arrange
         var stream = new CountingStream();
 
@@ -137,8 +129,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void SetLength_ShouldThrowNotSupportedException()
-    {
+    public void SetLength_ShouldThrowNotSupportedException() {
         // Arrange
         var stream = new CountingStream();
 
@@ -147,8 +138,7 @@ public class CountingStreamTests
     }
 
     [Test]
-    public void Write_ShouldIncreaseLength()
-    {
+    public void Write_ShouldIncreaseLength() {
         // Arrange
         var stream = new CountingStream();
         var buffer = new byte[10];
