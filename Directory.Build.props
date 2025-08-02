@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <Version>19.0.3</Version>
-        <PackageReleaseNotes>Update dependencies</PackageReleaseNotes>
+        <Version>61.4.3</Version>
+        <PackageReleaseNotes>Update dependencies and fix version number</PackageReleaseNotes>
     </PropertyGroup>
 </Project>
