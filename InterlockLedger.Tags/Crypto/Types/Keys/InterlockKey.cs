@@ -147,7 +147,7 @@ public class InterlockKey : ILTagOfExplicit<InterlockKey.Parts>, IEquatable<Inte
 
         private string _displayablePurposes => Purposes.ToStringAsList();
 
-        private byte[] _hashable => PublicKey.EncodedBytes().Append(GetPermissions().UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes());
+        private byte[] _hashable => PublicKey.Required().EncodedBytes().Append(GetPermissions().UTF8Bytes()).Append(PurposesAsILInts.EncodedBytes())!;
 
         private static ulong[] AsUlongs(IEnumerable<KeyPurpose> purposes) => purposes.Select(p => (ulong)p).ToArray();
 
